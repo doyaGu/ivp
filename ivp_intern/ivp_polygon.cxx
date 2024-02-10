@@ -13,7 +13,7 @@
 
 IVP_Polygon::IVP_Polygon(IVP_Cluster *cluster, IVP_SurfaceManager *surface_manager_, const IVP_Template_Real_Object *templ,
      const IVP_U_Quat *q_world_f_obj, const IVP_U_Point *position)
-    : hk_Entity(cluster, surface_manager_, templ, q_world_f_obj, position)
+    : IVP_Real_Object(cluster, surface_manager_, templ, q_world_f_obj, position)
 {
   this->set_type(IVP_POLYGON);
   this->extra_radius = templ->extra_radius;
