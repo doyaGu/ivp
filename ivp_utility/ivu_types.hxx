@@ -45,7 +45,7 @@
 					     
 // typedefs for our special types
 
-#if defined(NDEBUG) + defined(DEBUG) != 1
+#if defined(NDEBUG) && defined(DEBUG)
        Exactly DEBUG or NDEBUG has to be defined, check Makefile
 #endif
 
