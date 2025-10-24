@@ -16,14 +16,6 @@
 #include <ivp_surbuild_polyhdrn_cncv.hxx>
 #include <3dsimport_load.hxx>
 
-typedef struct
-{
-	dword ix,iy,iz;
-	float x,y,z;
-	dword iu,iv;
-	byte  marked;
-
-} H3dsMapVert;
 
 
 #include "3dsimport_load.cxx"

@@ -3,6 +3,9 @@
  *  Object output
  */
 
+#include "3dsimport_load.hxx"
+
+#include <stdio.h>
 
 /*
 

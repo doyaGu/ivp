@@ -38,6 +38,15 @@ typedef struct
 
 typedef struct
 {
+	dword ix,iy,iz;
+	float x,y,z;
+	dword iu,iv;
+	byte  marked;
+
+} H3dsMapVert;
+
+typedef struct
+{
 	int faces;              // number of faces in facelist
 	int verts;              // number of vertices in vertlist
 	int maps;               // number of mapping coordinates in maplist
