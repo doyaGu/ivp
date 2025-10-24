@@ -1,0 +1,35 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find dependencies
+find_dependency(hk_base)
+find_dependency(hk_math)
+find_dependency(hk_physics)
+
+# Include targets
+include("${CMAKE_CURRENT_LIST_DIR}/ivp_targets.cmake")
+
+# Set variables for compatibility
+set(IVP_LIBRARIES ivp::ivp_physics ivp::ivp_compact_builder)
+set(IVP_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
+
+# Check that all required components are found
+check_required_components(ivp)
+
+# Provide backward compatibility
+if(NOT TARGET ivp::ivp_physics)
+    add_library(ivp::ivp_physics INTERFACE IMPORTED)
+    set_target_properties(ivp::ivp_physics PROPERTIES
+        INTERFACE_LINK_LIBRARIES "ivp_physics"
+        INTERFACE_INCLUDE_DIRECTORIES "${IVP_INCLUDE_DIRS}"
+    )
+endif()
+
+if(NOT TARGET ivp::ivp_compact_builder)
+    add_library(ivp::ivp_compact_builder INTERFACE IMPORTED)
+    set_target_properties(ivp::ivp_compact_builder PROPERTIES
+        INTERFACE_LINK_LIBRARIES "ivp_compact_builder"
+        INTERFACE_INCLUDE_DIRECTORIES "${IVP_INCLUDE_DIRS}"
+    )
+endif()
