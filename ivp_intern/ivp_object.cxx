@@ -162,9 +162,9 @@ void IVP_Real_Object::force_grow_friction_system() {
     IVP_Movement_Type movement_state_temp2;
 
     movement_state_temp = flags.object_movement_state;
-    flags.object_movement_state = IVP_Movement_Type::IVP_MT_GET_MINDIST;
+    flags.object_movement_state = IVP_MT_GET_MINDIST;
     movement_state_temp2 = physical_core->movement_state;
-    physical_core->movement_state = IVP_Movement_Type::IVP_MT_GET_MINDIST;
+    physical_core->movement_state = IVP_MT_GET_MINDIST;
 
     physical_core->environment->mindist_manager->recheck_ov_element(this);
 
