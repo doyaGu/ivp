@@ -1,27 +1,30 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
 #include <string.h>
+#include <ivp_physics.hxx>
 #include <ivu_hash.hxx>
 #include <ivu_string_hash.hxx>
 
-class IVP_Hash_Elem {
-public:
+class IVP_Hash_Elem
+{
+  public:
     IVP_Hash_Elem *next;
     void *value;
     char key[1];
 };
 
-int IVP_Hash::hash_index(const char *key)const {
-	unsigned int c;		
-	unsigned int index = 0xffffffffL;
-	int i;
-	for (i=key_size-1;i>=0;i--){
-	    c = *((unsigned char *)(key++));
-	    index = IVP_Hash_crctab[((int) index ^ c) & 0xff] ^ (index >> 8);
-	}
-	index = index % size;
-	return index;
+int IVP_Hash::hash_index(const char *key) const
+{
+    unsigned int c;
+    unsigned int index = 0xffffffffL;
+    int i;
+    for (i = key_size - 1; i >= 0; i--)
+    {
+        c = *((unsigned char *)(key++));
+        index = IVP_Hash_crctab[((int)index ^ c) & 0xff] ^ (index >> 8);
+    }
+    index = index % size;
+    return index;
 };
 
 unsigned int IVP_Hash_crctab[] = {
@@ -131,148 +134,180 @@ unsigned int IVP_Hash_crctab[] = {
 };
 
 
-IVP_Hash::IVP_Hash(int sizei, int key_sizei,void *not_found_valuei){
+IVP_Hash::IVP_Hash(int sizei, int key_sizei, void *not_found_valuei)
+{
     size = sizei;
     key_size = key_sizei;
     not_found_value = not_found_valuei;
-    elems = (IVP_Hash_Elem **)p_calloc(sizeof(void *),size);
+    elems = (IVP_Hash_Elem **)p_calloc(sizeof(void *), size);
 }
 
-IVP_Hash::~IVP_Hash(){
+IVP_Hash::~IVP_Hash()
+{
     int i;
-    for (i=0;i<size;i++){
-	if (!elems[i]) continue;
-	IVP_Hash_Elem *next, *el;
-	for (el = elems[i]; el; el = next){
-	    next = el->next;
-	    P_FREE(el);
-	}
+    for (i = 0; i < size; i++)
+    {
+        if (!elems[i])
+            continue;
+        IVP_Hash_Elem *next, *el;
+        for (el = elems[i]; el; el = next)
+        {
+            next = el->next;
+            P_FREE(el);
+        }
     }
     P_FREE(elems);
 }
 
-void *IVP_Hash::find(const char *key)const{
+void *IVP_Hash::find(const char *key) const
+{
     int i = hash_index(key);
-    IVP_ASSERT(i>=0);
+    IVP_ASSERT(i >= 0);
     IVP_Hash_Elem *el;
-    for (el = elems[i];el;el=el->next){
-	if ( !memcmp(el->key,key,key_size))break;
+    for (el = elems[i]; el; el = el->next)
+    {
+        if (!memcmp(el->key, key, key_size))
+            break;
     }
-    if(el){
-	return el->value;
-    }else{
-	return not_found_value;
+    if (el)
+    {
+        return el->value;
     }
-    
+    else
+    {
+        return not_found_value;
+    }
 }
 
-void IVP_Hash::add(const char *key, void *val){
+void IVP_Hash::add(const char *key, void *val)
+{
     int i = hash_index(key);
 
-//    printf("hash index: '%d', key: %lx key_string: '%s'\n", i, key, key);
-    
-    IVP_Hash_Elem *el = (IVP_Hash_Elem *)p_malloc(sizeof(IVP_Hash_Elem) + key_size); //-1
-    memcpy(el->key,key,key_size);
+    //    printf("hash index: '%d', key: %lx key_string: '%s'\n", i, key, key);
+
+    IVP_Hash_Elem *el = (IVP_Hash_Elem *)p_malloc(sizeof(IVP_Hash_Elem) + key_size);  //-1
+    memcpy(el->key, key, key_size);
     el->next = elems[i];
     elems[i] = el;
     el->value = val;
 }
 
-
-void IVP_Hash::remove(const char *key){
+void IVP_Hash::remove(const char *key)
+{
     int i = hash_index(key);
-    IVP_Hash_Elem *el,*last_el;
+    IVP_Hash_Elem *el, *last_el;
     last_el = 0;
-    for (el = elems[i];el;el=el->next){
-	if ( !memcmp(el->key,key,key_size)){
-	    if (last_el){
-		last_el->next = el->next;
-	    }else{
-		elems[i] = el->next;
-	    }
-	    el->next = 0;
-	    P_FREE(el);
-	    return;
-	}
-	last_el = el;
+    for (el = elems[i]; el; el = el->next)
+    {
+        if (!memcmp(el->key, key, key_size))
+        {
+            if (last_el)
+            {
+                last_el->next = el->next;
+            }
+            else
+            {
+                elems[i] = el->next;
+            }
+            el->next = 0;
+            P_FREE(el);
+            return;
+        }
+        last_el = el;
     }
 }
 
-int IVP_U_String_Hash::hash_index(const char *key)const {
-	unsigned int c;		
-	unsigned int index = 0xffffffffL;
-	int i;
-	int key_size = strlen((char *)key);
-	for (i=key_size-1;i>=0;i--){
-	    c = *((unsigned char *)(key++));
-	    index = IVP_Hash_crctab[((int) index ^ c) & 0xff] ^ (index >> 8);
-	}
-	index = index % size;
-	return index;
+int IVP_U_String_Hash::hash_index(const char *key) const
+{
+    unsigned int c;
+    unsigned int index = 0xffffffffL;
+    int i;
+    int key_size = strlen((char *)key);
+    for (i = key_size - 1; i >= 0; i--)
+    {
+        c = *((unsigned char *)(key++));
+        index = IVP_Hash_crctab[((int)index ^ c) & 0xff] ^ (index >> 8);
+    }
+    index = index % size;
+    return index;
 };
 
-IVP_U_String_Hash::IVP_U_String_Hash(int sizei, void *not_found_valuei){
+IVP_U_String_Hash::IVP_U_String_Hash(int sizei, void *not_found_valuei)
+{
     size = sizei;
     not_found_value = not_found_valuei;
-    elems = (IVP_Hash_Elem **)p_calloc(sizeof(void *),size);
+    elems = (IVP_Hash_Elem **)p_calloc(sizeof(void *), size);
 }
 
-IVP_U_String_Hash::~IVP_U_String_Hash(){
+IVP_U_String_Hash::~IVP_U_String_Hash()
+{
     int i;
-    for (i=0;i<size;i++){
-	if (!elems[i]) continue;
-	IVP_Hash_Elem *next, *el;
-	for (el = elems[i]; el; el = next){
-	    next = el->next;
-	    P_FREE(el);
-	}
+    for (i = 0; i < size; i++)
+    {
+        if (!elems[i])
+            continue;
+        IVP_Hash_Elem *next, *el;
+        for (el = elems[i]; el; el = next)
+        {
+            next = el->next;
+            P_FREE(el);
+        }
     }
     P_FREE(elems);
 }
 
-void *IVP_U_String_Hash::find(const char *key)const{
+void *IVP_U_String_Hash::find(const char *key) const
+{
     int i = hash_index(key);
-    IVP_ASSERT(i>=0);
+    IVP_ASSERT(i >= 0);
     IVP_Hash_Elem *el;
-    for (el = elems[i];el;el=el->next){
-	if ( !strcmp(&el->key[0],key))break;
+    for (el = elems[i]; el; el = el->next)
+    {
+        if (!strcmp(&el->key[0], key))
+            break;
     }
-    if(el){
-	return el->value;
-    }else{
-	return not_found_value;
+    if (el)
+    {
+        return el->value;
     }
-    
+    else
+    {
+        return not_found_value;
+    }
 }
 
-void IVP_U_String_Hash::add(const char *key, void *val){
+void IVP_U_String_Hash::add(const char *key, void *val)
+{
     int i = hash_index(key);
     int keysize = strlen(key);
     IVP_Hash_Elem *el = (IVP_Hash_Elem *)p_malloc(sizeof(IVP_Hash_Elem) + keysize);
-    memcpy(el->key,key,keysize+1);
+    memcpy(el->key, key, keysize + 1);
     el->next = elems[i];
     elems[i] = el;
     el->value = val;
 }
 
-
-void IVP_U_String_Hash::remove(const char *key){
+void IVP_U_String_Hash::remove(const char *key)
+{
     int i = hash_index(key);
-    IVP_Hash_Elem *el,*last_el;
+    IVP_Hash_Elem *el, *last_el;
     last_el = 0;
-    for (el = elems[i];el;el=el->next){
-	if ( !strcmp(&el->key[0],key)){
-	    if (last_el){
-		last_el->next = el->next;
-	    }else{
-		elems[i] = el->next;
-	    }
-	    el->next = 0;
-	    P_FREE(el);
-	    return;
-	}
-	last_el = el;
+    for (el = elems[i]; el; el = el->next)
+    {
+        if (!strcmp(&el->key[0], key))
+        {
+            if (last_el)
+            {
+                last_el->next = el->next;
+            }
+            else
+            {
+                elems[i] = el->next;
+            }
+            el->next = 0;
+            P_FREE(el);
+            return;
+        }
+        last_el = el;
     }
 }
-
-

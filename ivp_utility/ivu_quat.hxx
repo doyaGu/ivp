@@ -1,22 +1,18 @@
 class IVP_U_Matrix3;
 
-
-
-
 #if 0
 #ifndef __gluquat__
-#define __gluquat__
+    #define __gluquat__
 
+    #if defined(WIN32)
+        #ifndef WIN32_LEAN_AND_MEAN
+            #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+    #endif
 
-#if defined (WIN32)
-#	ifndef WIN32_LEAN_AND_MEAN
-#		define	WIN32_LEAN_AND_MEAN
-#	endif
-#	include <windows.h>
-#endif
-
-#include <GL/gl.h>
-#include <GL/glu.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
 
 
 // Quaternion Structure
@@ -30,14 +26,14 @@ typedef struct tag_GL_QUAT {
 
 
 // define APIENTRY and CALLBACK to null string if we aren't on Win32
-#if !defined(WIN32)
-#define APIENTRY
-#define CALLBACK
-#endif
+    #if !defined(WIN32)
+        #define APIENTRY
+        #define CALLBACK
+    #endif
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
 extern "C" {
-#endif
+    #endif
 
 
 extern void APIENTRY gluQuatToMat_EXT(GL_QUAT *, GLIVP_FLOAT m[4][4]);		->set_matrix
@@ -72,26 +68,11 @@ extern void APIENTRY gluQuatExp_EXT(GL_QUAT*, GL_QUAT*);
 extern void APIENTRY gluQuatLog_EXT(GL_QUAT*, GL_QUAT*);
 extern void APIENTRY gluQuatLnDif_EXT(GL_QUAT*, GL_QUAT*, GL_QUAT*);
 
-
-
-
-
-
-
-#ifdef __cplusplus
+    #ifdef __cplusplus
 }
 
-#endif
-
+    #endif
 
 #endif  // __gluquat__
 
 #endif
-
-
-
-
-
-
-
-
