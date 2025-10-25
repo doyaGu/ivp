@@ -16,7 +16,6 @@
 class IVP_Compact_Grid;
 class IVP_Compact_Triangle;
 
-
 /********************************************************************************
  *  Class:	    IVP_SurfaceManager_Grid
  *  Description:    A subclass of the basic IVP_SurfaceManager class. Used for
@@ -26,15 +25,15 @@ class IVP_Compact_Triangle;
  *		    grid!
  *******************************************************************************/
 
-class IVP_SurfaceManager_Grid : public IVP_SurfaceManager {
-protected:
+class IVP_SurfaceManager_Grid : public IVP_SurfaceManager
+{
+  protected:
     // internal methods & data
     IVP_Compact_Grid *compact_grid;
     IVP_SurfaceManager_Grid();
     void traverse_grid(const IVP_U_Point &visitor_position_object_space, IVP_DOUBLE radius, IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges) const;
 
-public:
-
+  public:
     /******************************************************************************
      *  Description:    INTERNAL METHODS
      *****************************************************************************/
@@ -43,8 +42,6 @@ public:
     void insert_all_ledges_hitting_ray(IVP_Ray_Solver *, IVP_Real_Object *);
     void get_radius_and_radius_dev_to_given_center(const IVP_U_Float_Point *center, IVP_FLOAT *radius, IVP_FLOAT *radius_deviation) const;
     virtual IVP_SURMAN_TYPE get_type();
-
-
 
     /******************************************************************************
      *  Method:		get_single_convex
@@ -67,7 +64,7 @@ public:
      *	Description:	Returns the compact grid's rotation inertia
      *	Input:		<rotation_inertia_out> vector to be filled with inertia
      *****************************************************************************/
-    void get_rotation_inertia( IVP_U_Float_Point *rotation_inertia_out ) const;
+    void get_rotation_inertia(IVP_U_Float_Point *rotation_inertia_out) const;
 
     /******************************************************************************
      *  Method:		get_all_ledges_within_radius
@@ -79,9 +76,12 @@ public:
      *			<radius>           radius to check
      *			<resulting_ledges> vector to be filled with ledges
      *****************************************************************************/
-    void get_all_ledges_within_radius(const IVP_U_Point *observer_os, IVP_DOUBLE radius,
-				      const IVP_Compact_Ledge *root_ledge, IVP_Real_Object *other_object, const IVP_Compact_Ledge *other_reference_ledge,
-				      IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
+    void get_all_ledges_within_radius(const IVP_U_Point *observer_os,
+                                      IVP_DOUBLE radius,
+                                      const IVP_Compact_Ledge *root_ledge,
+                                      IVP_Real_Object *other_object,
+                                      const IVP_Compact_Ledge *other_reference_ledge,
+                                      IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
 
     void get_all_terminal_ledges(IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
 
@@ -89,7 +89,10 @@ public:
      *  Method:		get_compact_grid
      *	Output:		Returns a pointer to the surface manager's compact grid
      *****************************************************************************/
-    const IVP_Compact_Grid *get_compact_grid() const { return(this->compact_grid); }
+    const IVP_Compact_Grid *get_compact_grid() const
+    {
+        return (this->compact_grid);
+    }
 
     /******************************************************************************
      *  Method:		constructor
@@ -98,10 +101,12 @@ public:
      *	Input:		<compact_grid_in> compact grid to initilize the
      *			                  surface manager with
      *****************************************************************************/
-    IVP_SurfaceManager_Grid(IVP_Compact_Grid *compact_grid_in) { this->compact_grid = compact_grid_in; }
+    IVP_SurfaceManager_Grid(IVP_Compact_Grid *compact_grid_in)
+    {
+        this->compact_grid = compact_grid_in;
+    }
 
     virtual ~IVP_SurfaceManager_Grid();
-
 };
 
 #endif
