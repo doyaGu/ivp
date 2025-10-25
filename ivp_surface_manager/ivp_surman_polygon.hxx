@@ -5,7 +5,7 @@
 /********************************************************************************
  *  Filename:	    ivp_surman_polygon.hxx
  *  Description:    This file provides you with an interface class to the compact
- *		    surface of any polygonal object. This class is vital to 
+ *		    surface of any polygonal object. This class is vital to
  *		    generate physical objects.
  *  Classes:	    IVP_SurfaceManager_Polygon
  ********************************************************************************/
@@ -26,13 +26,13 @@ class IVP_Compact_Ledgetree_Node;
  *		    surface!
  *******************************************************************************/
 
-class IVP_SurfaceManager_Polygon : public IVP_SurfaceManager {    
-protected:
+class IVP_SurfaceManager_Polygon : public IVP_SurfaceManager
+{
+  protected:
     IVP_SurfaceManager_Polygon();
     // internal methods & data
-    const IVP_Compact_Surface *compact_surface;	// should be constructed using ivp_malloc_aligned
-public:
-
+    const IVP_Compact_Surface *compact_surface;  // should be constructed using ivp_malloc_aligned
+  public:
     /******************************************************************************
      *  Description:    INTERNAL METHODS
      *****************************************************************************/
@@ -41,7 +41,6 @@ public:
     void insert_all_ledges_hitting_ray(IVP_Ray_Solver *ray_solver, IVP_Real_Object *object);
     void get_radius_and_radius_dev_to_given_center(const IVP_U_Float_Point *center, IVP_FLOAT *radius, IVP_FLOAT *radius_deviation) const;
     virtual IVP_SURMAN_TYPE get_type();
-
 
     /******************************************************************************
      *  Method:		is_single_convex
@@ -78,16 +77,22 @@ public:
      *			<radius>           radius to check
      *			<resulting_ledges> vector to be filled with ledges
      *****************************************************************************/
-    void get_all_ledges_within_radius(const IVP_U_Point *observer_os, IVP_DOUBLE radius,
-				      const IVP_Compact_Ledge *root_ledge, IVP_Real_Object *other_object, const IVP_Compact_Ledge *other_reference_ledge,
-				      IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
+    void get_all_ledges_within_radius(const IVP_U_Point *observer_os,
+                                      IVP_DOUBLE radius,
+                                      const IVP_Compact_Ledge *root_ledge,
+                                      IVP_Real_Object *other_object,
+                                      const IVP_Compact_Ledge *other_reference_ledge,
+                                      IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
     void get_all_terminal_ledges(IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges);
 
     /******************************************************************************
      *  Method:		get_compact_surface
      *	Output:		Returns a pointer to the surface manager's compact surface
      *****************************************************************************/
-    const IVP_Compact_Surface *get_compact_surface() const { return(this->compact_surface); }
+    const IVP_Compact_Surface *get_compact_surface() const
+    {
+        return (this->compact_surface);
+    }
 
     /******************************************************************************
      *  Method:		constructor
@@ -96,10 +101,12 @@ public:
      *	Input:		<compact_surface_in> compact surface to initilize the
      *			                     surface manager with
      *****************************************************************************/
-    IVP_SurfaceManager_Polygon(const IVP_Compact_Surface *compact_surface_in) { this->compact_surface = compact_surface_in; }
+    IVP_SurfaceManager_Polygon(const IVP_Compact_Surface *compact_surface_in)
+    {
+        this->compact_surface = compact_surface_in;
+    }
 
     virtual ~IVP_SurfaceManager_Polygon();
-
 };
 
 #endif
