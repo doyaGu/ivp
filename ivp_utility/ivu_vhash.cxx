@@ -1,11 +1,10 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
-#include <ivu_hash.hxx>
 #include <ivu_vhash.hxx>
+#include <ivu_hash.hxx>
 
 #ifndef WIN32
-    #pragma implementation "ivu_set.hxx"
+#pragma implementation "ivu_set.hxx"
 #endif
 
 #include <ivu_set.hxx>
@@ -17,7 +16,7 @@ IVP_VHash::IVP_VHash(int size_i)
         int x = size_i;
         while (!(x & 1))
             x = x >> 1;
-        IVP_ASSERT(x == 1);  // size must be 2**x
+        IVP_ASSERT(x == 1); // size must be 2**x
     }
 
     size_mm = size_i - 1;
@@ -34,7 +33,7 @@ void IVP_VHash::activate(int size_i)
         int x = size_i;
         while (!(x & 1))
             x = x >> 1;
-        IVP_ASSERT(x == 1);  // size must be 2**x
+        IVP_ASSERT(x == 1); // size must be 2**x
     }
     size_mm = size_i - 1;
     nelems = 0;
@@ -73,7 +72,7 @@ IVP_VHash::IVP_VHash(IVP_VHash_Elem *static_elems, int size_i)
         {
             while (!(x & 1))
                 x = x >> 1;
-            IVP_ASSERT(x == 1);  // size must be 2**x
+            IVP_ASSERT(x == 1); // size must be 2**x
         }
     }
 
@@ -115,7 +114,7 @@ void IVP_VHash::rehash(int new_size)
     {
         if (e->elem)
         {
-            this->add_elem(e->elem, e->hash_index);  // keeps touch bit,
+            this->add_elem(e->elem, e->hash_index); // keeps touch bit,
         }
         e++;
     }
@@ -182,18 +181,18 @@ void *IVP_VHash::remove_elem(const void *elem, unsigned int hash_index)
     {
         e = &elems[pos];
         if (e->elem == 0)
-            CORE;  // return 0;
+            CORE; // return 0;
         if ((e->hash_index | IVP_VHASH_TOUCH_BIT) != hash_index)
             continue;
         if (compare((void *)e->elem, (void *)elem) == IVP_TRUE)
             break;
     }
     // now elem is found, remove and return it
-    elem = e->elem;  // remember elem
+    elem = e->elem; // remember elem
     nelems--;
     int last_pos = pos;
 
-    int ideal_pos_of_last_element = size_mm;  // find index position of rightest element
+    int ideal_pos_of_last_element = size_mm; // find index position of rightest element
     if (elems[size_mm].elem)
     {
         ideal_pos_of_last_element = elems[size_mm].hash_index & size_mm;
@@ -205,25 +204,25 @@ void *IVP_VHash::remove_elem(const void *elem, unsigned int hash_index)
         IVP_VHash_Elem *en = &elems[pos];
         if (!en->elem)
             break;
-        int ideal_pos = en->hash_index & size_mm;  // ideal position
+        int ideal_pos = en->hash_index & size_mm; // ideal position
 
-        if (pos > last_pos)
-        {  // not wrapped situation
-            if (ideal_pos < ideal_pos_of_last_element)
-            {  // shift wrapped elements also
+        if (pos > last_pos) // not wrapped situation
+        {
+            if (ideal_pos < ideal_pos_of_last_element) // shift wrapped elements also
+            {
                 if (ideal_pos > last_pos)
-                    continue;  // no way to shift elements left to their ideal position
+                    continue; // no way to shift elements left to their ideal position
             }
-            else if (ideal_pos == ideal_pos_of_last_element)
-            {  // further checks needed: are we at the
-               // start or at the end of the hash ??
+            else if (ideal_pos == ideal_pos_of_last_element) // further checks needed: are we at the
+            {
+              // start or at the end of the hash ??
                 if (ideal_pos <= pos)
-                {  // element is not wrapped -> we are at the end of the hash table
+                { // element is not wrapped -> we are at the end of the hash table
                     if (ideal_pos > last_pos)
-                        continue;  // no way to shift elements left to their ideal position
+                        continue; // no way to shift elements left to their ideal position
                 }
                 else
-                {  // at the wrapped start of the hashtable, shifts are allowed
+                { // at the wrapped start of the hashtable, shifts are allowed
                     ;
                 }
             }
@@ -231,16 +230,16 @@ void *IVP_VHash::remove_elem(const void *elem, unsigned int hash_index)
         else
         {
             if (last_pos != size_mm)
-                break;  // only wrap last elements
+                break; // only wrap last elements
             if (ideal_pos < ideal_pos_of_last_element)
-                continue;  // jump over not wrapped elements
+                continue; // jump over not wrapped elements
         }
 
-        elems[last_pos] = *en;  // shift elem
+        elems[last_pos] = *en; // shift elem
         last_pos = pos;
     }
-    elems[last_pos].elem = 0;        // remove elem
-    elems[last_pos].hash_index = 0;  // untouch elem
+    elems[last_pos].elem = 0;       // remove elem
+    elems[last_pos].hash_index = 0; // untouch elem
     IVP_IF(0)
     {
         check();
@@ -254,14 +253,14 @@ void IVP_VHash::check()
 {
     int pos;
     int last_index = 0;
-    int ideal_pos_of_last_element = size_mm;  // find index position of rightest element
+    int ideal_pos_of_last_element = size_mm; // find index position of rightest element
     if (elems[size_mm].elem)
     {
         ideal_pos_of_last_element = elems[size_mm].hash_index & size_mm;
     }
 
-    for (pos = 0; pos <= size_mm; pos++)
-    {  // search till first null or exact
+    for (pos = 0; pos <= size_mm; pos++) // search till first null or exact
+    {
         IVP_VHash_Elem *en = &elems[pos];
         if (!en->elem)
             continue;
@@ -269,11 +268,11 @@ void IVP_VHash::check()
         if (index >= ideal_pos_of_last_element)
         {
             if (pos <= (size_mm >> 1))
-                continue;  // skip wrapped elements
+                continue; // skip wrapped elements
         }
         IVP_ASSERT(index <= pos);
-        if (index != pos)
-        {  // shifted element
+        if (index != pos) // shifted element
+        {
             IVP_ASSERT(index >= last_index);
         }
         last_index = index;
@@ -313,7 +312,7 @@ void *IVP_VHash::find_elem(const void *elem, unsigned int hash_index) const
             CORE;
         }
     }
-    return 0;  // not found
+    return 0; // not found
 }
 
 void *IVP_VHash::touch_element(const void *elem, unsigned int hash_index)
@@ -333,7 +332,7 @@ void *IVP_VHash::touch_element(const void *elem, unsigned int hash_index)
         e->hash_index |= IVP_VHASH_TOUCH_BIT;
         return (void *)e->elem;
     }
-    return 0;  // not found
+    return 0; // not found
 }
 
 void IVP_VHash::print() const
@@ -363,7 +362,7 @@ IVP_VHash_Store::IVP_VHash_Store(int size_i)
         int x = size_i;
         while (!(x & 1))
             x = x >> 1;
-        IVP_ASSERT(x == 1);  // size must be 2**x
+        IVP_ASSERT(x == 1); // size must be 2**x
     }
 
     size = size_i;
@@ -380,7 +379,7 @@ IVP_VHash_Store::IVP_VHash_Store(IVP_VHash_Store_Elem *static_elems, int size_i)
         int x = size_i;
         while (!(x & 1))
             x = x >> 1;
-        IVP_ASSERT(x == 1);  // size must be 2**x
+        IVP_ASSERT(x == 1); // size must be 2**x
     }
 
     size = size_i;
@@ -423,7 +422,7 @@ void IVP_VHash_Store::rehash(int new_size)
     {
         if (e->elem)
         {
-            this->add_elem(e->key_elem, e->elem, e->hash_index);  // keeps touch bit,
+            this->add_elem(e->key_elem, e->elem, e->hash_index); // keeps touch bit,
         }
         e++;
     }
@@ -504,7 +503,7 @@ void *IVP_VHash_Store::remove_elem(void *key_elem, unsigned int hash_index)
     for (;; pos = (pos + 1) & size_mm)
     {
         e = &elems_store[pos];
-        IVP_ASSERT(e->elem);  // was e->key_elem
+        IVP_ASSERT(e->elem); // was e->key_elem
         if ((e->hash_index | IVP_VHASH_TOUCH_BIT) != hash_index)
             continue;
         if (compare_store_hash(e->key_elem, key_elem) == IVP_TRUE)
@@ -515,11 +514,11 @@ void *IVP_VHash_Store::remove_elem(void *key_elem, unsigned int hash_index)
     }
     // now elem is found, remove and return it
     void *elem;
-    elem = e->elem;  // remember elem
+    elem = e->elem; // remember elem
     nelems--;
     int last_pos = pos;
 
-    int ideal_pos_of_last_element = size_mm;  // find index position of rightest element
+    int ideal_pos_of_last_element = size_mm; // find index position of rightest element
     if (elems_store[size_mm].key_elem)
     {
         ideal_pos_of_last_element = elems_store[size_mm].hash_index & size_mm;
@@ -531,25 +530,25 @@ void *IVP_VHash_Store::remove_elem(void *key_elem, unsigned int hash_index)
         IVP_VHash_Store_Elem *en = &elems_store[pos];
         if (!en->key_elem)
             break;
-        int ideal_pos = en->hash_index & size_mm;  // ideal position
+        int ideal_pos = en->hash_index & size_mm; // ideal position
 
-        if (pos > last_pos)
-        {  // not wrapped situation
-            if (ideal_pos < ideal_pos_of_last_element)
-            {  // shift wrapped elements also
+        if (pos > last_pos) // not wrapped situation
+        {
+            if (ideal_pos < ideal_pos_of_last_element) // shift wrapped elements also
+            {
                 if (ideal_pos > last_pos)
-                    continue;  // no way to shift elements left to their ideal position
+                    continue; // no way to shift elements left to their ideal position
             }
-            else if (ideal_pos == ideal_pos_of_last_element)
-            {  // further checks needed: are we at the
-               // start or at the end of the hash ??
+            else if (ideal_pos == ideal_pos_of_last_element) // further checks needed: are we at the
+            {
+              // start or at the end of the hash ??
                 if (ideal_pos <= pos)
-                {  // element is not wrapped -> we are at the end of the hash table
+                { // element is not wrapped -> we are at the end of the hash table
                     if (ideal_pos > last_pos)
-                        continue;  // no way to shift elements left to their ideal position
+                        continue; // no way to shift elements left to their ideal position
                 }
                 else
-                {  // at the wrapped start of the hashtable, shifts are allowed
+                { // at the wrapped start of the hashtable, shifts are allowed
                     ;
                 }
             }
@@ -557,16 +556,16 @@ void *IVP_VHash_Store::remove_elem(void *key_elem, unsigned int hash_index)
         else
         {
             if (last_pos != size_mm)
-                break;  // only wrap last elements
+                break; // only wrap last elements
             if (ideal_pos < ideal_pos_of_last_element)
-                continue;  // jump over not wrapped elements
+                continue; // jump over not wrapped elements
         }
 
-        elems_store[last_pos] = *en;  // shift elem
+        elems_store[last_pos] = *en; // shift elem
         last_pos = pos;
     }
-    elems_store[last_pos].key_elem = 0;    // remove elem
-    elems_store[last_pos].hash_index = 0;  // untouch elem
+    elems_store[last_pos].key_elem = 0;   // remove elem
+    elems_store[last_pos].hash_index = 0; // untouch elem
     IVP_IF(0)
     {
         check();
@@ -580,14 +579,14 @@ void IVP_VHash_Store::check()
 {
     int pos;
     int last_index = 0;
-    int ideal_pos_of_last_element = size_mm;  // find index position of rightest element
+    int ideal_pos_of_last_element = size_mm; // find index position of rightest element
     if (elems_store[size_mm].key_elem)
     {
         ideal_pos_of_last_element = elems_store[size_mm].hash_index & size_mm;
     }
 
-    for (pos = 0; pos < size; pos++)
-    {  // search till first null or exact
+    for (pos = 0; pos < size; pos++) // search till first null or exact
+    {
         IVP_VHash_Store_Elem *en = &elems_store[pos];
         if (!en->key_elem)
             continue;
@@ -596,12 +595,12 @@ void IVP_VHash_Store::check()
         {
             if (pos < size / 2)
             {
-                continue;  // skip wrapped elements
+                continue; // skip wrapped elements
             }
         }
         IVP_ASSERT(index <= pos);
-        if (index != pos)
-        {  // shifted element
+        if (index != pos) // shifted element
+        {
             IVP_ASSERT(index >= last_index);
         }
         last_index = index;
@@ -627,7 +626,7 @@ void *IVP_VHash_Store::find_elem(void *key_elem, unsigned int hash_index)
         searched_so_far++;
         IVP_VHash_Store_Elem *e = &elems_store[pos];
         if (!e->elem)
-            break;  // was e->key_elem
+            break; // was e->key_elem
         if ((e->hash_index | IVP_VHASH_TOUCH_BIT) != hash_index)
             continue;
         if (compare_store_hash(e->key_elem, key_elem) == IVP_FALSE)
@@ -653,7 +652,7 @@ void *IVP_VHash_Store::find_elem(void *key_elem, unsigned int hash_index)
             CORE;
         }
     }
-    return 0;  // not found
+    return 0; // not found
 }
 
 void IVP_VHash_Store::change_elem(void *key_elem, void *new_value)
@@ -670,7 +669,7 @@ void IVP_VHash_Store::change_elem(void *key_elem, void *new_value)
         searched_so_far++;
         IVP_VHash_Store_Elem *e = &elems_store[pos];
         if (!e->elem)
-            break;  // was e->key_elem
+            break; // was e->key_elem
         if ((e->hash_index | IVP_VHASH_TOUCH_BIT) != hash_index)
             continue;
         if (compare_store_hash(e->key_elem, key_elem) == IVP_FALSE)
@@ -682,7 +681,7 @@ void IVP_VHash_Store::change_elem(void *key_elem, void *new_value)
         return;
     }
     IVP_ASSERT(0 == 1);
-    return;  // not found
+    return; // not found
 }
 
 void *IVP_VHash_Store::touch_element(void *key_elem, unsigned int hash_index)
@@ -700,9 +699,9 @@ void *IVP_VHash_Store::touch_element(void *key_elem, unsigned int hash_index)
             continue;
         // now elem is found, return it
         e->hash_index |= IVP_VHASH_TOUCH_BIT;
-        return e->elem;  // maybe it is e->key_elem ??
+        return e->elem; // maybe it is e->key_elem ??
     }
-    return 0;  // not found
+    return 0; // not found
 }
 
 void IVP_VHash_Store::print()

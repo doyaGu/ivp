@@ -2,11 +2,16 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_U_TYPES_INCLUDED
-#define _IVP_U_TYPES_INCLUDED
+#ifndef IVP_U_TYPES_INCLUDED
+#define IVP_U_TYPES_INCLUDED
+
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef _LINUX
-    #include <signal.h>
+#include <signal.h>
 #endif
 
 #ifdef WIN32
@@ -20,27 +25,27 @@
 #define IVP_VECTOR_UNIT_DOUBLE /* set if extra data should be insersted to utilize double vector units */
 
 #if defined(PSXII)
-    #define IVP_USE_PS2_VU0
+#define IVP_USE_PS2_VU0
 #endif
 
 #ifdef IVP_WILLAMETTE
-    #define IVP_IF_WILLAMETTE_OPT(cond) if (cond)
+#define IVP_IF_WILLAMETTE_OPT(cond) if (cond)
 #else
-    #define IVP_IF_WILLAMETTE_OPT(cond) if (0)
+#define IVP_IF_WILLAMETTE_OPT(cond) if (0)
 #endif
 
 #if defined(IVP_WILLAMETTE) || defined(IVP_PIII) || defined(IVP_WMT_ALIGN)
-    #define IVP_WINDOWS_ALIGN16
+#define IVP_WINDOWS_ALIGN16
 #endif
 
 // recheck the settings for various computers
 #if !defined(IVP_NO_DOUBLE) && (defined(PSXII) || defined(GEKKO) || defined(_XBOX))
-    #define IVP_NO_DOUBLE
+#define IVP_NO_DOUBLE
 #endif
 
 #if !defined(IVP_VECTOR_UNIT_DOUBLE) && defined(PSXII)
-    #define IVP_VECTOR_UNIT_FLOAT
-    #define IVP_VECTOR_UNIT_DOUBLE
+#define IVP_VECTOR_UNIT_FLOAT
+#define IVP_VECTOR_UNIT_DOUBLE
 #endif
 
 // typedefs for our special types
@@ -52,7 +57,7 @@ Exactly DEBUG or NDEBUG has to be defined, check Makefile
 #define CORE *(int *)0 = 0 /* send fatal signal */
 
 #if defined(PSXII)
-    #if defined(__MWERKS__)
+#if defined(__MWERKS__)
     inline void
     BREAKPOINT()
 {
@@ -61,7 +66,7 @@ Exactly DEBUG or NDEBUG has to be defined, check Makefile
 		nop \
 	");
 }
-    #else   // __MWERKS__
+#else  // __MWERKS__
     inline void
     BREAKPOINT()
 {
@@ -70,84 +75,84 @@ Exactly DEBUG or NDEBUG has to be defined, check Makefile
 		nop \
 	");
 }
-    #endif  // __MWERKS__
-#endif      // PSXII
+#endif // __MWERKS__
+#endif // PSXII
 
 #ifdef NDEBUG
-    #define IVP_ASSERT(cond)
-    #define IVP_USE(a)
-    #define IVP_IF(flag) if (0 == 1)
+#define IVP_ASSERT(cond)
+#define IVP_USE(a)
+#define IVP_IF(flag) if (0 == 1)
 #else
-    #if defined(PSXII)
-        #define IVP_ASSERT(cond)                                                 \
-            {                                                                    \
-                if (!(cond))                                                     \
-                {                                                                \
-                    ::fprintf(stderr,                                            \
-                              "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
-                              cond,                                              \
-                              __FILE__,                                          \
-                              __LINE__);                                         \
-                    BREAKPOINT();                                                \
-                }                                                                \
-            }
-    #elif defined(GEKKO)
-        #define IVP_ASSERT(cond)                                                 \
-            {                                                                    \
-                if (!(cond))                                                     \
-                {                                                                \
-                    ::fprintf(stderr,                                            \
-                              "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
-                              cond,                                              \
-                              __FILE__,                                          \
-                              __LINE__);                                         \
-                    CORE;                                                        \
-                }                                                                \
-            }
-    #elif defined(__MWERKS__) && defined(__POWERPC__)
-        #include <MacTypes.h>
-        #define IVP_ASSERT(cond)                                                  \
-            {                                                                     \
-                if (!(cond))                                                      \
-                {                                                                 \
-                    char error[128];                                              \
-                    sprintf(error,                                                \
-                            (char *)"\pASSERT FAILURE: \nFILE: %s\nLINE: %d\n\n", \
-                            __FILE__,                                             \
-                            __LINE__);                                            \
-                    DebugStr((unsigned char *)error);                             \
-                }                                                                 \
-            }
-    #elif defined(_LINUX)
-        #define IVP_ASSERT(cond)                                                 \
-            {                                                                    \
-                if (!(cond))                                                     \
-                {                                                                \
-                    ::fprintf(stderr,                                            \
-                              "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
-                              "" #cond,                                          \
-                              __FILE__,                                          \
-                              __LINE__);                                         \
-                    raise(SIGINT);                                               \
-                }                                                                \
-            }
-    #else
-        #define IVP_ASSERT(cond)                                                 \
-            {                                                                    \
-                if (!(cond))                                                     \
-                {                                                                \
-                    ::fprintf(stderr,                                            \
-                              "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
-                              "" #cond,                                          \
-                              __FILE__,                                          \
-                              __LINE__);                                         \
-                    CORE;                                                        \
-                }                                                                \
-            }
-    // #		define IVP_ASSERT(cond)	if (!(cond)) CORE
-    #endif  // PSXII, Mac, etc.  debug assert
-    #define IVP_USE(a) a = a
-    #define IVP_IF(flag) if (flag)
+#if defined(PSXII)
+#define IVP_ASSERT(cond)                                                 \
+    {                                                                    \
+        if (!(cond))                                                     \
+        {                                                                \
+            ::fprintf(stderr,                                            \
+                      "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
+                      cond,                                              \
+                      __FILE__,                                          \
+                      __LINE__);                                         \
+            BREAKPOINT();                                                \
+        }                                                                \
+    }
+#elif defined(GEKKO)
+#define IVP_ASSERT(cond)                                                 \
+    {                                                                    \
+        if (!(cond))                                                     \
+        {                                                                \
+            ::fprintf(stderr,                                            \
+                      "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
+                      cond,                                              \
+                      __FILE__,                                          \
+                      __LINE__);                                         \
+            CORE;                                                        \
+        }                                                                \
+    }
+#elif defined(__MWERKS__) && defined(__POWERPC__)
+#include <MacTypes.h>
+#define IVP_ASSERT(cond)                                                  \
+    {                                                                     \
+        if (!(cond))                                                      \
+        {                                                                 \
+            char error[128];                                              \
+            sprintf(error,                                                \
+                    (char *)"\pASSERT FAILURE: \nFILE: %s\nLINE: %d\n\n", \
+                    __FILE__,                                             \
+                    __LINE__);                                            \
+            DebugStr((unsigned char *)error);                             \
+        }                                                                 \
+    }
+#elif defined(_LINUX)
+#define IVP_ASSERT(cond)                                                 \
+    {                                                                    \
+        if (!(cond))                                                     \
+        {                                                                \
+            ::fprintf(stderr,                                            \
+                      "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
+                      "" #cond,                                          \
+                      __FILE__,                                          \
+                      __LINE__);                                         \
+            raise(SIGINT);                                               \
+        }                                                                \
+    }
+#else
+#define IVP_ASSERT(cond)                                                 \
+    {                                                                    \
+        if (!(cond))                                                     \
+        {                                                                \
+            ::fprintf(stderr,                                            \
+                      "\nASSERTION FAILURE: %s\nFILE: %s\nLINE: %d\n\n", \
+                      "" #cond,                                          \
+                      __FILE__,                                          \
+                      __LINE__);                                         \
+            CORE;                                                        \
+        }                                                                \
+    }
+// #		define IVP_ASSERT(cond)	if (!(cond)) CORE
+#endif // PSXII, Mac, etc.  debug assert
+#define IVP_USE(a) a = a
+#define IVP_IF(flag) if (flag)
 #endif
 
 typedef float IVP_FLOAT;
@@ -161,27 +166,12 @@ class IVP_Time
 {
     double seconds;
 
-  public:
-    void operator+=(double val)
-    {
-        seconds += val;
-    }
-    double get_seconds() const
-    {
-        return seconds;
-    };
-    double get_time() const
-    {
-        return seconds;
-    };  // for debugging
-    double operator-(const IVP_Time &b) const
-    {
-        return float(this->seconds - b.seconds);
-    }
-    void operator-=(const IVP_Time b)
-    {
-        this->seconds -= b.seconds;
-    }
+public:
+    void operator+=(double val) { seconds += val; }
+    double get_seconds() const { return seconds; }
+    double get_time() const { return seconds; } // for debugging
+    double operator-(const IVP_Time &b) const { return float(this->seconds - b.seconds); }
+    void operator-=(const IVP_Time b) { this->seconds -= b.seconds; }
     IVP_Time operator+(double val) const
     {
         IVP_Time result;
@@ -190,10 +180,7 @@ class IVP_Time
     }
 
     IVP_Time() = default;
-    IVP_Time(double time)
-    {
-        seconds = time;
-    };
+    IVP_Time(double time) { seconds = time; }
 };
 
 #else
@@ -204,7 +191,7 @@ class IVP_Time
     float seconds;
     float sub_seconds;
 
-  public:
+public:
     void operator+=(float val)
     {
         sub_seconds += val;
@@ -214,18 +201,9 @@ class IVP_Time
             sub_seconds -= 1.0f;
         }
     }
-    float get_seconds() const
-    {
-        return seconds;
-    };
-    float get_time() const
-    {
-        return seconds + sub_seconds;
-    };  // for debugging
-    float operator-(const IVP_Time &b) const
-    {
-        return (this->seconds - b.seconds) + this->sub_seconds - b.sub_seconds;
-    }
+    float get_seconds() const { return seconds; }
+    float get_time() const { return seconds + sub_seconds; } // for debugging
+    float operator-(const IVP_Time &b) const { return (this->seconds - b.seconds) + this->sub_seconds - b.sub_seconds; }
     void operator-=(const IVP_Time b)
     {
         this->seconds -= b.seconds;
@@ -253,21 +231,18 @@ class IVP_Time
         }
         return result;
     }
-    IVP_Time()
-    {
-        ;
-    };
+    IVP_Time() {}
     IVP_Time(float time)
     {
         seconds = float(int(time));
         sub_seconds = time - int(time);
-    };
+    }
 };
 #endif
 
 typedef IVP_FLOAT IVP_HTIME;
 
-typedef unsigned char uchar;  // feel free to remove these three typedefs
+typedef unsigned char uchar; // feel free to remove these three typedefs
 typedef unsigned short ushort;
 typedef unsigned int uint;
 
@@ -287,15 +262,15 @@ typedef const char *IVP_ERROR_STRING;
 #endif
 
 #if !defined(IVP_ALIGN_16)
-    #define IVP_ALIGN_16
+#define IVP_ALIGN_16
 #endif
 
 /********************************************************************************
  *		    			Simple Base Types
  ********************************************************************************/
 
-typedef int IVP_Time_CODE;  // Internal enumeration for time handles.
-typedef int ivp_u_bool;     // must be int!!
+typedef int IVP_Time_CODE; // Internal enumeration for time handles.
+typedef int ivp_u_bool;    // must be int!!
 
 // boolean enumeration, compatible to C++ bool, ivp_u_bool
 enum IVP_BOOL
@@ -313,11 +288,11 @@ enum IVP_RETURN_TYPE
 #define IVP_CDECL /* set this to whatever you need to satisfy your linker */
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
-    #ifdef OSX
-        #include <malloc/malloc.h>
-    #else
-        #include <malloc.h>
-    #endif
+#ifdef OSX
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
 #endif
 
 #include <string.h>
@@ -349,16 +324,16 @@ extern void ivp_memory_check(void *a);
     { /*ivp_memory_check((void*)a);*/ \
         delete (a);                   \
         a = NULL;                     \
-    };
+    }
 #define P_DELETE_THIS(a)              \
     { /*ivp_memory_check((void*)a);*/ \
         delete (a);                   \
-    };
+    }
 #define P_DELETE_ARRAY(a)             \
     { /*ivp_memory_check((void*)a);*/ \
         delete[] (a);                 \
         (a) = 0;                      \
-    };
+    }
 
 #define P_FREE_ALIGNED(a)                 \
     {                                     \
@@ -367,7 +342,7 @@ extern void ivp_memory_check(void *a);
             ivp_free_aligned((void *)a);  \
             a = NULL;                     \
         }                                 \
-    };
+    }
 #define P_FREE(a)                         \
     {                                     \
         if (a)                            \
@@ -375,106 +350,106 @@ extern void ivp_memory_check(void *a);
             p_free((char *)a);            \
             a = NULL;                     \
         }                                 \
-    };
+    }
 
 #define P_MEM_CLEAR(a) memset((char *)(a), 0, sizeof(*a));
 #define P_MEM_CLEAR_M4(a) memset((char *)(a) + sizeof(void *), 0, sizeof(*a) - sizeof(void *));
 #define P_MEM_CLEAR_ARRAY(clss, elems) memset((char *)(clss), 0, sizeof(*clss) * elems);
 
-#define P_FLOAT_EPS 1e-10f  // used for division checking
-#define P_FLOAT_RES 1e-6f   // float resolution for numbers < 1.0
+#define P_FLOAT_EPS 1e-10f // used for division checking
+#define P_FLOAT_RES 1e-6f  // float resolution for numbers < 1.0
 #define P_FLOAT_MAX 1e16f
 
 #ifdef IVP_NO_DOUBLE
-    #define IVP_PI 3.14159265358979323846f   /* pi */
-    #define IVP_PI_2 1.57079632679489661923f /* pi/2 */
-    #define P_DOUBLE_MAX P_FLOAT_MAX
-    #define P_DOUBLE_RES P_FLOAT_RES  // double resolution for numbers < 1.0
-    #define IVP_3D_SOLVER_NULLSTELLE_EPS 3e-3f
-    #define P_DOUBLE_EPS P_FLOAT_EPS    // used for division checking
-    #define P_MAX_WORLD_DOUBLE 3000.0f  // max world koords
+#define IVP_PI 3.14159265358979323846f   /* pi */
+#define IVP_PI_2 1.57079632679489661923f /* pi/2 */
+#define P_DOUBLE_MAX P_FLOAT_MAX
+#define P_DOUBLE_RES P_FLOAT_RES // double resolution for numbers < 1.0
+#define IVP_3D_SOLVER_NULLSTELLE_EPS 3e-3f
+#define P_DOUBLE_EPS P_FLOAT_EPS   // used for division checking
+#define P_MAX_WORLD_DOUBLE 3000.0f // max world koords
 #else
-    #define IVP_PI 3.14159265358979323846   /* pi */
-    #define IVP_PI_2 1.57079632679489661923 /* pi/2 */
-    #define P_DOUBLE_MAX 1e20
-    #define P_DOUBLE_RES 1E-12  // double resolution for numbers < 1.0
-    #define IVP_3D_SOLVER_NULLSTELLE_EPS 1e-8
-    #define P_DOUBLE_EPS 1e-10        // used for division checking
-    #define P_MAX_WORLD_DOUBLE 10000  // max world koords
+#define IVP_PI 3.14159265358979323846   /* pi */
+#define IVP_PI_2 1.57079632679489661923 /* pi/2 */
+#define P_DOUBLE_MAX 1e20
+#define P_DOUBLE_RES 1E-12 // double resolution for numbers < 1.0
+#define IVP_3D_SOLVER_NULLSTELLE_EPS 1e-8
+#define P_DOUBLE_EPS 1e-10       // used for division checking
+#define P_MAX_WORLD_DOUBLE 10000 // max world koords
 #endif
 
 #define P_MAX_OBJECT_SIZE 1000.0f
-#define P_MIN_EDGE_LEN 0.01f  // 10 mm min edge len of polygon objects
+#define P_MIN_EDGE_LEN 0.01f // 10 mm min edge len of polygon objects
 #define P_RES_EPS \
-    (P_MAX_WORLD_DOUBLE * P_DOUBLE_RES)  // effective IVP_DOUBLE resolution for world coords
+    (P_MAX_WORLD_DOUBLE * P_DOUBLE_RES) // effective IVP_DOUBLE resolution for world coords
 
 void ivp_srand(int seed);
-IVP_FLOAT ivp_rand();  // returns [0 .. 1]
+IVP_FLOAT ivp_rand(); // returns [0 .. 1]
 
 #if defined(PSXII)
-    #define IVP_NO_ALLOCA
+#define IVP_NO_ALLOCA
 #endif
 
 #if defined(WIN32)
-    #if defined(IVP_PIII) || defined(IVP_WILLAMETTE)
-        #if defined(IVP_PIII)
-            #define IVP_PREFETCH_CLINE_SIZE 0x20
-        #else
-            #define IVP_PREFETCH_CLINE_SIZE 0x40
-        #endif
-        #define IVP_IF_PREFETCH_ENABLED(x) if (x)
-        #include <xmmintrin.h>
-        #define IVP_PREFETCH(pntr, offset) _mm_prefetch(int(offset) + (char *)pntr, _MM_HINT_T1);
-    #endif
+#if defined(IVP_PIII) || defined(IVP_WILLAMETTE)
+#if defined(IVP_PIII)
+#define IVP_PREFETCH_CLINE_SIZE 0x20
+#else
+#define IVP_PREFETCH_CLINE_SIZE 0x40
+#endif
+#define IVP_IF_PREFETCH_ENABLED(x) if (x)
+#include <xmmintrin.h>
+#define IVP_PREFETCH(pntr, offset) _mm_prefetch(int(offset) + (char *)pntr, _MM_HINT_T1);
+#endif
 
 #elif defined(PSXII) && 0
-    #define IVP_PREFETCH_CLINE_SIZE 0x40
-    #define IVP_IF_PREFETCH_ENABLED(x) if (x)
-    #define IVP_PREFETCH(__addr, __offs) \
-        ({ asm volatile("pref 0,%1(%0)"  \
-                        :                \
-                        : "r"(__addr), "i"(__offs)); })
+#define IVP_PREFETCH_CLINE_SIZE 0x40
+#define IVP_IF_PREFETCH_ENABLED(x) if (x)
+#define IVP_PREFETCH(__addr, __offs) \
+    ({ asm volatile("pref 0,%1(%0)"  \
+                    :                \
+                    : "r"(__addr), "i"(__offs)); })
 #endif
 
 #if !defined(IVP_PREFETCH)
-    #define IVP_PREFETCH_CLINE_SIZE 0x100
-    #define IVP_PREFETCH(pntr, offset)
-    #ifdef DEBUG
-        #define IVP_IF_PREFETCH_ENABLED(x) if (1)
-    #else
-        #define IVP_IF_PREFETCH_ENABLED(x) if (0)
-    #endif
-    #define IVP_PREFETCH_BLOCK(a, b) /* IVP_ASSERT(b < 128);*/
+#define IVP_PREFETCH_CLINE_SIZE 0x100
+#define IVP_PREFETCH(pntr, offset)
+#ifdef DEBUG
+#define IVP_IF_PREFETCH_ENABLED(x) if (1)
+#else
+#define IVP_IF_PREFETCH_ENABLED(x) if (0)
+#endif
+#define IVP_PREFETCH_BLOCK(a, b) /* IVP_ASSERT(b < 128);*/
 #else
 
-    #define IVP_PREFETCH_BLOCK(pntr, size)                               \
-        {                                                                \
-            IVP_PREFETCH(pntr, 0);                                       \
-            if (size > IVP_PREFETCH_CLINE_SIZE)                          \
-                IVP_PREFETCH(pntr, IVP_PREFETCH_CLINE_SIZE);             \
-            if (size > 2 * IVP_PREFETCH_CLINE_SIZE)                      \
-                IVP_PREFETCH(pntr, 2 * IVP_PREFETCH_CLINE_SIZE);         \
-            if (size > 3 * IVP_PREFETCH_CLINE_SIZE)                      \
-                IVP_PREFETCH(pntr, 3 * IVP_PREFETCH_CLINE_SIZE);         \
-            /*if ( size > 4*IVP_PREFETCH_CLINE_SIZE) IVP_PREFETCH( pntr, \
-             * 4*IVP_PREFETCH_CLINE_SIZE);*/                             \
-            /*IVP_PREFETCH( pntr, (size - sizeof(void *))) */            \
-        }
+#define IVP_PREFETCH_BLOCK(pntr, size)                               \
+    {                                                                \
+        IVP_PREFETCH(pntr, 0);                                       \
+        if (size > IVP_PREFETCH_CLINE_SIZE)                          \
+            IVP_PREFETCH(pntr, IVP_PREFETCH_CLINE_SIZE);             \
+        if (size > 2 * IVP_PREFETCH_CLINE_SIZE)                      \
+            IVP_PREFETCH(pntr, 2 * IVP_PREFETCH_CLINE_SIZE);         \
+        if (size > 3 * IVP_PREFETCH_CLINE_SIZE)                      \
+            IVP_PREFETCH(pntr, 3 * IVP_PREFETCH_CLINE_SIZE);         \
+        /*if ( size > 4*IVP_PREFETCH_CLINE_SIZE) IVP_PREFETCH( pntr, \
+         * 4*IVP_PREFETCH_CLINE_SIZE);*/                             \
+        /*IVP_PREFETCH( pntr, (size - sizeof(void *))) */            \
+    }
 
 #endif
 
 #ifndef IVP_FAST_WHEELS_ENABLED
-    #define IVP_FAST_WHEELS_ENABLED
-#endif  // IVP_FAST_WHEELS_ENABLED
+#define IVP_FAST_WHEELS_ENABLED
+#endif // IVP_FAST_WHEELS_ENABLED
 
 // define this if you have the havana constraints module
 #ifndef HAVANA_CONSTRAINTS
 // #define HAVANA_CONSTRAINTS
-#endif  // HAVANA_CONSTRAINTS
+#endif // HAVANA_CONSTRAINTS
 
 // define this if you have the havok MOPP module
 #ifndef HAVOK_MOPP
 // #define HAVOK_MOPP
-#endif  // HAVOK_MOPP
+#endif // HAVOK_MOPP
 
 #endif

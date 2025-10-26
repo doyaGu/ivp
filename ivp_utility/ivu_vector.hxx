@@ -2,8 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_VECTOR_INCLUDED
-#define IVP_VECTOR_INCLUDED
+#ifndef IVP_U_VECTOR_INCLUDED
+#define IVP_U_VECTOR_INCLUDED
+
+#include <ivu_types.hxx>
 
 /********************************************************************************
  *	Class:	       	IVP_U_Vector_Base
@@ -48,8 +50,8 @@ class IVP_U_Vector : public IVP_U_Vector_Base
     {
         memsize = size;
         n_elems = 0;
-        if (size)
-        {  // will be optimized by most compilers
+        if (size) // will be optimized by most compilers
+        {
             elems = (void **)p_malloc(size * sizeof(void *));
         }
         else

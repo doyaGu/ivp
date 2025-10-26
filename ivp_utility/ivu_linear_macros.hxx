@@ -2,8 +2,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_U_LINEAR_MACROS_INCLUDED
-#define _IVP_U_LINEAR_MACROS_INCLUDED
+#ifndef IVP_U_LINEAR_MACROS_INCLUDED
+#define IVP_U_LINEAR_MACROS_INCLUDED
 
 #if defined(IVP_USE_PS2_VU0)
     #include "ivu_linear_ps2.hxx"
@@ -52,17 +52,20 @@ inline void IVP_U_Float_Point::set(const IVP_FLOAT p[3])
 }
 
 inline void IVP_U_Float_Point::subtract(const IVP_U_Float_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     this->subtract(this, v2);
 }
 
 inline void IVP_U_Float_Point::add(const IVP_U_Float_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     this->add(this, v2);
 }
 
 inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v2, IVP_DOUBLE f)
-{  // vector
+{
+    // vector multiple
     this->add_multiple(this, v2, f);
 }
 
@@ -229,11 +232,11 @@ inline void IVP_U_Matrix3::set_col(IVP_COORDINATE_INDEX col, const IVP_U_Float_P
 inline IVP_U_Point::IVP_U_Point(const IVP_U_Float_Point &p)
 {
     this->set(&p);
-};
+}
 
 inline IVP_U_Float_Point::IVP_U_Float_Point(const IVP_U_Float_Point *p)
 {
     this->set(p);
-};
+}
 
 #endif

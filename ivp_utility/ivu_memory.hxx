@@ -1,5 +1,7 @@
-#ifndef IVP_MEM_INCLUDED
-#define IVP_MEM_INCLUDED
+#ifndef IVP_U_MEM_INCLUDED
+#define IVP_U_MEM_INCLUDED
+
+#include <ivu_types.hxx>
 
 #ifdef PLATFORM_64BITS
     #define IVU_MEM_ALIGN 0x50  // align to chach line data 32Byte

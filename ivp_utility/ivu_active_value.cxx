@@ -10,8 +10,6 @@
 // add on for convenience. It is based on event-callbacks to update the
 // values when it is necessary. It is used e.g. for IVP_Actuator_Forces.
 
-#include <string.h>
-#include <ivp_physics.hxx>
 #ifndef WIN32
     #pragma implementation "ivu_active_value.hxx"
     #pragma implementation "ivu_active_value_hash.hxx"
@@ -19,6 +17,8 @@
 
 #include <ivu_active_value.hxx>
 #include <ivu_active_value_hash.hxx>
+#include <ivu_string.hxx>
+#include <ivu_linear.hxx>
 
 IVP_Active_Value_Hash::~IVP_Active_Value_Hash()
 {
@@ -173,11 +173,11 @@ void IVP_U_Active_Value_Manager::update_delayed_active_values()
     }
 }
 
-void IVP_U_Active_Value_Manager::refresh_psi_active_values(IVP_Environment *env)
+void IVP_U_Active_Value_Manager::refresh_psi_active_values(IVP_Time time)
 {
     if (mod_current_time)
     {
-        mod_current_time->set_double(env->get_current_time().get_time());
+        mod_current_time->set_double(time.get_time());
     }
     update_delayed_active_values();
 }
@@ -396,13 +396,10 @@ void IVP_U_Active_Int::remove_dependency(IVP_U_Active_Int_Listener *derived_acti
 }
 
 /**** BASIC VALUES ********************/
-/**** BASIC VALUES ********************/
-/**** BASIC VALUES ********************/
 
 /****** 'terminal' IVP_DOUBLE value ******/
 
-IVP_U_Active_Terminal_Double::IVP_U_Active_Terminal_Double(const char *i_name,
-                                                           IVP_DOUBLE new_value) : IVP_U_Active_Float(i_name)
+IVP_U_Active_Terminal_Double::IVP_U_Active_Terminal_Double(const char *i_name, IVP_DOUBLE new_value) : IVP_U_Active_Float(i_name)
 {
     this->double_value = new_value;
     this->old_value = new_value;

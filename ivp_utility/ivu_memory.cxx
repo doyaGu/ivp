@@ -1,7 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <stdlib.h>
-#include <ivp_physics.hxx>
+#include <ivu_memory.hxx>
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
     #ifdef OSX

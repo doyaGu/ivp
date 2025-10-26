@@ -2,8 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_VHASH_INCLUDED
-#define _IVP_VHASH_INCLUDED
+#ifndef IVP_U_VHASH_INCLUDED
+#define IVP_U_VHASH_INCLUDED
+
+#include "ivu_types.hxx"
 
 #define IVP_VHASH_TOUCH_BIT 0x80000000
 
@@ -18,8 +20,8 @@
 
 class IVP_VHash_Elem
 {
-  public:
-    unsigned int hash_index;  // unmasked index : highest bit is used to touch elements
+public:
+    unsigned int hash_index; // unmasked index : highest bit is used to touch elements
     const void *elem;
 };
 
@@ -27,23 +29,23 @@ extern unsigned int IVP_Hash_crctab[];
 
 class IVP_VHash
 {
-  private:
+private:
     void rehash(int new_size);
 
-  protected:
-    int size_mm;  // size -1, used for masking index
+protected:
+    int size_mm; // size -1, used for masking index
     unsigned int nelems : 24;
-    IVP_BOOL dont_free : 8;  // indicating external memory
+    IVP_BOOL dont_free : 8; // indicating external memory
 
     IVP_VHash_Elem *elems;
 
-    IVP_VHash(int size);                                           // assert(size = 2**x)
-    IVP_VHash(IVP_VHash_Elem *static_elems, int size);             // assert(size = 2**x)
-    virtual IVP_BOOL compare(void *elem0, void *elem1) const = 0;  // return TRUE if equal
-  public:
-    static inline int hash_index(const char *data, int size);  // useable index calculation, result is [0,0xfffffff]
+    IVP_VHash(int size);                                          // assert(size = 2**x)
+    IVP_VHash(IVP_VHash_Elem *static_elems, int size);            // assert(size = 2**x)
+    virtual IVP_BOOL compare(void *elem0, void *elem1) const = 0; // return TRUE if equal
+public:
+    static inline int hash_index(const char *data, int size); // useable index calculation, result is [0,0xfffffff]
     static inline int fast_hash_index(
-        int key);  // useable index calculation when size == 4 , result is [0,0xfffffff]
+        int key); // useable index calculation when size == 4 , result is [0,0xfffffff]
 
     // touches element
     void add_elem(const void *elem, int hash_index);
@@ -56,20 +58,20 @@ class IVP_VHash
     /* try to find an element equals to elem, *********/
     void *find_elem(const void *elem, unsigned int hash_index) const;
 
-    void *touch_element(const void *elem, unsigned int hash_index);  // finds and touches
+    void *touch_element(const void *elem, unsigned int hash_index); // finds and touches
 
     void garbage_collection(int estimated_hash_size);
 
-    void deactivate();                  // remove elems memory (assert no elems used)
-    void activate(int preferred_size);  // allocate memory
+    void deactivate();                 // remove elems memory (assert no elems used)
+    void activate(int preferred_size); // allocate memory
 
-    int len() const { return size_mm + 1; };  // size of hash array
-    int n_elems() { return nelems; };  // elems in hash
+    int len() const { return size_mm + 1; }; // size of hash array
+    int n_elems() { return nelems; };        // elems in hash
     void *element_at(int i) const { return (void *)elems[i].elem; };
-    IVP_BOOL is_element_touched(int i) const { return (IVP_BOOL)(elems[i].hash_index >= IVP_VHASH_TOUCH_BIT);}
+    IVP_BOOL is_element_touched(int i) const { return (IVP_BOOL)(elems[i].hash_index >= IVP_VHASH_TOUCH_BIT); }
     void untouch_all();
     void print() const;
-    void check();  // check internal consistency
+    void check(); // check internal consistency
     virtual ~IVP_VHash();
 };
 
@@ -87,20 +89,20 @@ inline int IVP_VHash::hash_index(const char *key, int key_size)
         c = *((unsigned char *)(key++));
         index = IVP_Hash_crctab[((int)index ^ c) & 0xff] ^ (index >> 8);
     }
-    return index | IVP_VHASH_TOUCH_BIT;  // set touch bit
-};
+    return index | IVP_VHASH_TOUCH_BIT; // set touch bit
+}
 
 // basic function for calculating the hash_index of key is a long
 inline int IVP_VHash::fast_hash_index(int key)
 {
     int index = ((key * 1001) >> 16) + key * 75;
-    return index | IVP_VHASH_TOUCH_BIT;  // set touch bit
+    return index | IVP_VHASH_TOUCH_BIT; // set touch bit
 }
 
 class IVP_VHash_Store_Elem
 {
-  public:
-    unsigned int hash_index;  // unmasked index : highest bit is used to touch elements
+public:
+    unsigned int hash_index; // unmasked index : highest bit is used to touch elements
     void *key_elem;
     void *elem;
 };
@@ -114,21 +116,21 @@ class IVP_VHash_Store_Elem
 
 class IVP_VHash_Store
 {
-  private:
+private:
     void rehash(int new_size);
 
-  protected:
+protected:
     int size;
-    int size_mm;  // size -1, used for masking index
+    int size_mm; // size -1, used for masking index
     int nelems;
     IVP_VHash_Store_Elem *elems_store;
-    void *dont_free;  // indicating external memory
+    void *dont_free; // indicating external memory
 
-    static inline IVP_BOOL compare_store_hash(void *pointer0, void *pointer1);  // return TRUE if equal
-    static inline int hash_index_store(const char *data, int size);  // useable index calculation, result is [0,0xfffffff]
+    static inline IVP_BOOL compare_store_hash(void *pointer0, void *pointer1); // return TRUE if equal
+    static inline int hash_index_store(const char *data, int size);            // useable index calculation, result is [0,0xfffffff]
     static inline int void_pointer_to_index(void *p);
 
-  public:
+public:
     // touches element
     void add_elem(void *key_elem, void *store_elem);
     void add_elem(void *key_elem, void *store_elem, int hash_index);
@@ -146,7 +148,7 @@ class IVP_VHash_Store
     void *find_elem(void *key_elem);
     void *find_elem(void *key_elem, unsigned int hash_index);
 
-    void *touch_element(void *key_elem, unsigned int hash_index);  // finds and touches
+    void *touch_element(void *key_elem, unsigned int hash_index); // finds and touches
 
     int len() { return size; };
     int n_elems() { return nelems; };
@@ -154,10 +156,10 @@ class IVP_VHash_Store
     IVP_BOOL is_element_touched(int i) { return (IVP_BOOL)(elems_store[i].hash_index >= IVP_VHASH_TOUCH_BIT); }
     void untouch_all();
     void print();
-    void check();  // check internal consistency
+    void check(); // check internal consistency
 
-    IVP_VHash_Store(int size);                                      // assert(size = 2**x)
-    IVP_VHash_Store(IVP_VHash_Store_Elem *static_elems, int size);  // assert(size = 2**x)
+    IVP_VHash_Store(int size);                                     // assert(size = 2**x)
+    IVP_VHash_Store(IVP_VHash_Store_Elem *static_elems, int size); // assert(size = 2**x)
     ~IVP_VHash_Store();
 };
 
@@ -175,7 +177,7 @@ inline int IVP_VHash_Store::hash_index_store(const char *key, int key_size)
         c = *((unsigned char *)(key++));
         index = IVP_Hash_crctab[((int)index ^ c) & 0xff] ^ (index >> 8);
     }
-    return index | IVP_VHASH_TOUCH_BIT;  // set touch bit
+    return index | IVP_VHASH_TOUCH_BIT; // set touch bit
 }
 
 inline int IVP_VHash_Store::void_pointer_to_index(void *p)
@@ -195,7 +197,7 @@ class IVP_VHash_Enumerator
 {
     int index;
 
-  public:
+public:
     IVP_VHash_Enumerator(IVP_VHash *vec)
     {
         index = vec->len() - 1;

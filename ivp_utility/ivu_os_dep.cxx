@@ -1,7 +1,5 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
-
 #if !defined(SUN) && !defined(SUN4)
     #include <string.h>
 #endif

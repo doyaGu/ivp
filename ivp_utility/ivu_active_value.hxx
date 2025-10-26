@@ -7,8 +7,11 @@
 // der eigentlichen Grundphysik.
 // z.B. fuer IVP_Actuator_Forces (oder Klaenge :-)
 
-#ifndef _IVP_ACTIVE_VALUES_INCLUDED
-#define _IVP_ACTIVE_VALUES_INCLUDED
+#ifndef IVP_U_ACTIVE_VALUES_INCLUDED
+#define IVP_U_ACTIVE_VALUES_INCLUDED
+
+#include <ivu_types.hxx>
+#include <ivu_vector.hxx>
 
 class IVP_U_Active_Value;
 class IVP_U_String_Hash;
@@ -32,8 +35,8 @@ class IVP_Environment;
  ********************************************************************************/
 class IVP_U_Active_Value_Manager
 {
-  private:
-    IVP_BOOL delete_on_env_delete;  // see deconstructor
+private:
+    IVP_BOOL delete_on_env_delete; // see deconstructor
 
     IVP_Active_Value_Hash *floats_name_hash;
     IVP_Active_Value_Hash *ints_name_hash;
@@ -43,7 +46,7 @@ class IVP_U_Active_Value_Manager
     IVP_U_Active_Terminal_Double *mod_current_time;
     IVP_U_Active_Value *search_active_value;
 
-  public:
+public:
     IVP_U_Active_Value_Manager(IVP_BOOL delete_on_env_delete);
     virtual ~IVP_U_Active_Value_Manager();
 
@@ -55,20 +58,20 @@ class IVP_U_Active_Value_Manager
         }
     };
 
-    virtual void insert_active_float(IVP_U_Active_Float *mod);  // add to name_hash
-    virtual void remove_active_float(IVP_U_Active_Float *mod);  // remove from name_hash
+    virtual void insert_active_float(IVP_U_Active_Float *mod); // add to name_hash
+    virtual void remove_active_float(IVP_U_Active_Float *mod); // remove from name_hash
 
-    virtual void insert_active_int(IVP_U_Active_Int *mod);  // add to name_hash
-    virtual void remove_active_int(IVP_U_Active_Int *mod);  // remove from name_hash
+    virtual void insert_active_int(IVP_U_Active_Int *mod); // add to name_hash
+    virtual void remove_active_int(IVP_U_Active_Int *mod); // remove from name_hash
 
-    virtual void delay_active_float(IVP_U_Active_Float_Delayed *mod);  // put into delay_active_IVP_FLOAT queue, so update can be executed later (next PSI)
-    virtual void delay_active_int(IVP_U_Active_Int_Delayed *mod);      // put into delay_active_IVP_FLOAT queue, so update can be executed later (next PSI)
+    virtual void delay_active_float(IVP_U_Active_Float_Delayed *mod); // put into delay_active_IVP_FLOAT queue, so update can be executed later (next PSI)
+    virtual void delay_active_int(IVP_U_Active_Int_Delayed *mod);     // put into delay_active_IVP_FLOAT queue, so update can be executed later (next PSI)
 
     virtual void update_delayed_active_values();
 
-    virtual void init_active_values_generic();  // current_time, double_null, ...
+    virtual void init_active_values_generic(); // current_time, double_null, ...
 
-    virtual void refresh_psi_active_values(IVP_Environment *env);
+    virtual void refresh_psi_active_values(IVP_Time time);
 
     /********************************************************************************
      *	Name:	       	install_active_float
@@ -96,7 +99,7 @@ class IVP_U_Active_Float_Listener
     // which active_IVP_FLOAT triggered the current event by comparing with the
     // 'calling_active_float' parameter.
 
-  public:
+public:
     virtual void active_float_changed(IVP_U_Active_Float *calling_active_IVP_FLOAT) = 0;
 };
 
@@ -112,33 +115,33 @@ class IVP_U_Active_Int_Listener
     // which active_IVP_FLOAT triggered the current event by comparing with the
     // 'calling_active_float' parameter.
 
-  public:
+public:
     virtual void active_int_changed(IVP_U_Active_Int *calling_active_int) = 0;
 };
 
 class IVP_U_Active_Int_Delayed
 {
-  public:
+public:
     virtual void update_int() = 0;
 };
 
 class IVP_U_Active_Float_Delayed
 {
-  public:
+public:
     virtual void update_float() = 0;
 };
 
 ///////////////
 class IVP_U_Active_Value
 {
-  private:
+private:
     friend class IVP_U_Active_Value_Manager;
     char *name;
 
-  protected:
+protected:
     int reference_count;
 
-  public:
+public:
     void add_reference()
     {
         reference_count++;
@@ -158,35 +161,29 @@ class IVP_U_Active_Value
     };
 };
 
-class IVP_U_Active_Float : public IVP_U_Active_Value  //
+class IVP_U_Active_Float : public IVP_U_Active_Value
 {
     friend class IVP_U_Active_Value_Manager;
 
-  private:
-    IVP_U_Vector<IVP_U_Active_Float_Listener> derived_mods;  // compiled dependant active_floats
+private:
+    IVP_U_Vector<IVP_U_Active_Float_Listener> derived_mods; // compiled dependant active_floats
 
     // dep could be removed when update_derived() doesn't find the entry in name_hash
-  protected:
-    IVP_U_Active_Value_Manager *l_mod_manager;  // backlink
-  public:
-    int last_update;          // contains value of change_meter at last update
-    IVP_DOUBLE double_value;  // for IVP_U_MOD_TYPE_DOUBLE active_floats
+protected:
+    IVP_U_Active_Value_Manager *l_mod_manager; // backlink
+public:
+    int last_update;         // contains value of change_meter at last update
+    IVP_DOUBLE double_value; // for IVP_U_MOD_TYPE_DOUBLE active_floats
     void update_derived();
 
-  public:
+public:
     IVP_U_Active_Float(const char *name);
     virtual ~IVP_U_Active_Float();
 
     static int change_meter;
 
-    IVP_DOUBLE give_double_value()
-    {
-        return double_value;
-    };
-    IVP_FLOAT get_float_value()
-    {
-        return (IVP_FLOAT)double_value;
-    };
+    IVP_DOUBLE give_double_value() { return double_value; }
+    IVP_FLOAT get_float_value() { return (IVP_FLOAT)double_value; }
 
     void add_dependency(IVP_U_Active_Float_Listener *derived_active_IVP_FLOAT);
     void remove_dependency(IVP_U_Active_Float_Listener *derived_active_IVP_FLOAT);
@@ -200,23 +197,20 @@ class IVP_U_Active_Int : public IVP_U_Active_Value
 {
     friend class IVP_U_Active_Value_Manager;
 
-  private:
-    IVP_U_Vector<IVP_U_Active_Int_Listener> derived_mods;  // compiled dependant active_ints
+private:
+    IVP_U_Vector<IVP_U_Active_Int_Listener> derived_mods; // compiled dependant active_ints
 
     // dep could be removed when update_derived() doesn't find the entry in name_hash
-  protected:
-    IVP_U_Active_Value_Manager *l_mod_manager;  // backlink
-  public:
-    int last_update;  // contains value of change_meter at last update
-    int int_value;    // for IVP_U_MOD_TYPE_INT active_ints
+protected:
+    IVP_U_Active_Value_Manager *l_mod_manager; // backlink
+public:
+    int last_update; // contains value of change_meter at last update
+    int int_value;   // for IVP_U_MOD_TYPE_INT active_ints
 
     void update_derived();
 
-  public:
-    int give_int_value()
-    {
-        return int_value;
-    };
+public:
+    int give_int_value() { return int_value; }
 
     void add_dependency(IVP_U_Active_Int_Listener *derived_active_int);
     void remove_dependency(IVP_U_Active_Int_Listener *derived_active_int);
@@ -228,53 +222,49 @@ class IVP_U_Active_Int : public IVP_U_Active_Value
 };
 
 /**** BASIC VALUES ********************/
-/**** BASIC VALUES ********************/
-/**** BASIC VALUES ********************/
 
 // basic values are the ONLY values which can be changed directly.
 // whenever they are changed, the change_meter is increased.
 
 class IVP_U_Active_Terminal_Double : public IVP_U_Active_Float, public IVP_U_Active_Float_Delayed
 {
-  private:
+private:
     IVP_DOUBLE old_value;
 
-  public:
+public:
     IVP_U_Active_Terminal_Double(const char *name, IVP_DOUBLE value);
 
-    virtual void update_float();  // tell dependent classes that something has changed
+    virtual void update_float(); // tell dependent classes that something has changed
     virtual void set_double(IVP_DOUBLE new_value, IVP_BOOL delayed = IVP_FALSE);
     int print();
 };
 
 class IVP_U_Active_Terminal_Int : public IVP_U_Active_Int, public IVP_U_Active_Int_Delayed
 {
-  private:
+private:
     int old_value;
 
-  public:
+public:
     IVP_U_Active_Terminal_Int(const char *name, int value);
 
-    virtual void update_int();  // Int::set_int
+    virtual void update_int(); // Int::set_int
 
     virtual void set_int(int new_value, IVP_BOOL delayed = IVP_FALSE);
     int print();
 };
 
 /*** OSCILLATORS  **************/
-/*** OSCILLATORS  **************/
-/*** OSCILLATORS  **************/
 
 class IVP_U_Active_Sine : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
-  private:
-    IVP_U_Active_Float *time_mod;  // depends on this
-    IVP_DOUBLE frequence;          // Hz
+private:
+    IVP_U_Active_Float *time_mod; // depends on this
+    IVP_DOUBLE frequence;         // Hz
     IVP_DOUBLE amplitude;
-    IVP_DOUBLE null_level;  // um diesen wert schwankt der sinus
+    IVP_DOUBLE null_level; // um diesen wert schwankt der sinus
     IVP_DOUBLE time_shift;
 
-  public:
+public:
     IVP_U_Active_Sine(const char *name,
                       IVP_U_Active_Float *time_mode,
                       IVP_DOUBLE freq,
@@ -289,13 +279,13 @@ class IVP_U_Active_Sine : public IVP_U_Active_Float, public IVP_U_Active_Float_L
 
 class IVP_U_Active_Square : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
-  private:
-    IVP_U_Active_Float *time_mod;  // depends on this
-    IVP_DOUBLE frequence;          // Hz
+private:
+    IVP_U_Active_Float *time_mod; // depends on this
+    IVP_DOUBLE frequence;         // Hz
     IVP_DOUBLE low_val;
     IVP_DOUBLE high_val;
 
-  public:
+public:
     IVP_U_Active_Square(const char *name,
                         IVP_U_Active_Float *time_mod,
                         IVP_DOUBLE freq,
@@ -309,19 +299,19 @@ class IVP_U_Active_Square : public IVP_U_Active_Float, public IVP_U_Active_Float
 
 class IVP_U_Active_Pulse : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
-  private:
-    IVP_U_Active_Float *time_mod;  // depends on this
-    IVP_DOUBLE frequence;          // Hz
+private:
+    IVP_U_Active_Float *time_mod; // depends on this
+    IVP_DOUBLE frequence;         // Hz
     IVP_DOUBLE low_val;
     IVP_DOUBLE high_val;
-    int m1;  // m1 out of m2 defines interval prop.
+    int m1; // m1 out of m2 defines interval prop.
     int m2;
 
-  public:
+public:
     IVP_U_Active_Pulse(const char *name,
                        IVP_U_Active_Float *time_mod,
                        IVP_DOUBLE freq,
-                       int m1,  // m1 out of m2 defines interval proportion
+                       int m1, // m1 out of m2 defines interval proportion
                        int m2,
                        IVP_DOUBLE low_val,
                        IVP_DOUBLE high_val);
@@ -332,17 +322,15 @@ class IVP_U_Active_Pulse : public IVP_U_Active_Float, public IVP_U_Active_Float_
 };
 
 /***** MIXER ***********************************/
-/***** MIXER ***********************************/
-/***** MIXER ***********************************/
 
 class IVP_U_Active_Add : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
     // adds two active_floats
-  private:
+private:
     IVP_U_Active_Float *mod0;
     IVP_U_Active_Float *mod1;
 
-  public:
+public:
     IVP_U_Active_Add(const char *name, IVP_U_Active_Float *mod0, IVP_U_Active_Float *mod1);
     ~IVP_U_Active_Add();
 
@@ -353,11 +341,11 @@ class IVP_U_Active_Add : public IVP_U_Active_Float, public IVP_U_Active_Float_Li
 class IVP_U_Active_Sub : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
     // subtracts two active_floats (mod0 - mod1)
-  private:
+private:
     IVP_U_Active_Float *mod0;
     IVP_U_Active_Float *mod1;
 
-  public:
+public:
     IVP_U_Active_Sub(const char *name, IVP_U_Active_Float *mod0, IVP_U_Active_Float *mod1);
     ~IVP_U_Active_Sub();
 
@@ -368,12 +356,12 @@ class IVP_U_Active_Sub : public IVP_U_Active_Float, public IVP_U_Active_Float_Li
 class IVP_U_Active_Add_Multiple : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
     // adds a synthesizer active_IVP_FLOAT to another, using a factor
-  private:
+private:
     IVP_U_Active_Float *mod0;
     IVP_U_Active_Float *mod1;
     IVP_DOUBLE factor;
 
-  public:
+public:
     IVP_U_Active_Add_Multiple(const char *name,
                               IVP_U_Active_Float *mod0,
                               IVP_U_Active_Float *mod1,
@@ -387,11 +375,11 @@ class IVP_U_Active_Add_Multiple : public IVP_U_Active_Float, public IVP_U_Active
 class IVP_U_Active_Mult : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
     // mults two synthesizer active_float
-  private:
+private:
     IVP_U_Active_Float *mod0;
     IVP_U_Active_Float *mod1;
 
-  public:
+public:
     IVP_U_Active_Mult(const char *name, IVP_U_Active_Float *mod0, IVP_U_Active_Float *mod1);
     ~IVP_U_Active_Mult();
 
@@ -400,18 +388,16 @@ class IVP_U_Active_Mult : public IVP_U_Active_Float, public IVP_U_Active_Float_L
 };
 
 /**** FILTER **************************/
-/**** FILTER **************************/
-/**** FILTER **************************/
 
 class IVP_U_Active_Limit : public IVP_U_Active_Float, public IVP_U_Active_Float_Listener
 {
     // limits value range of a synthesizer active_float
-  private:
+private:
     IVP_U_Active_Float *mod;
     IVP_DOUBLE low_val;
     IVP_DOUBLE high_val;
 
-  public:
+public:
     IVP_U_Active_Limit(const char *name,
                        IVP_U_Active_Float *mod,
                        IVP_DOUBLE low_val,
@@ -434,12 +420,12 @@ class IVP_U_Active_Test_Range : public IVP_U_Active_Int, public IVP_U_Active_Flo
 
     // returns INTEGER value
 
-  private:
+private:
     IVP_U_Active_Float *mod_test;
     IVP_U_Active_Float *mod_low_val;
     IVP_U_Active_Float *mod_high_val;
 
-  public:
+public:
     IVP_U_Active_Test_Range(const char *name,
                             IVP_U_Active_Float *mod_test,
                             IVP_U_Active_Float *mod_low_val,
@@ -457,12 +443,12 @@ class IVP_U_Active_Switch : public IVP_U_Active_Float, public IVP_U_Active_Float
     // returns DOUBLE value
     // depends on INT module!
 
-  private:
+private:
     IVP_U_Active_Int *mod_cond;
     IVP_U_Active_Float *mod_true;
     IVP_U_Active_Float *mod_false;
 
-  public:
+public:
     IVP_U_Active_Switch(const char *name,
                         IVP_U_Active_Int *mod_cond,
                         IVP_U_Active_Float *mod_true,

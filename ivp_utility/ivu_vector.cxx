@@ -1,6 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
+#include <ivu_vector.hxx>
 
 void IVP_U_Vector_Base::increment_mem()
 {

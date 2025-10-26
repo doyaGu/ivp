@@ -1,9 +1,7 @@
-#ifndef _IVP_ACTIVE_VALUE_HASH_INCLUDED
-#define _IVP_ACTIVE_VALUE_HASH_INCLUDED
+#ifndef IVP_U_ACTIVE_VALUE_HASH_INCLUDED
+#define IVP_U_ACTIVE_VALUE_HASH_INCLUDED
 
-#ifndef _IVP_VHASH_INCLUDED
-    #include "ivu_vhash.hxx"
-#endif
+#include "ivu_vhash.hxx"
 
 class IVP_U_Active_Value;
 

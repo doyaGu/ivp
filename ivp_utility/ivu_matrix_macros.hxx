@@ -1,5 +1,7 @@
-#ifndef IVU_MATRIX_MACROS_H
-#define IVU_MATRIX_MACROS_H
+#ifndef IVP_U_MATRIX_MACROS_INCLUDED
+#define IVP_U_MATRIX_MACROS_INCLUDED
+
+#include <ivu_linear.hxx>
 
 void IVP_U_Matrix3::inline_mimult3(const IVP_U_Matrix3 *mb, IVP_U_Matrix3 *m_out) const
 {

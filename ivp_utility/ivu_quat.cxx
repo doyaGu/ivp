@@ -1,6 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
+#include <ivu_linear.hxx>
 
 #define IVP_QUAT_DELTA 1e-6f  // error tolerance
 

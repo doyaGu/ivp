@@ -1,12 +1,14 @@
 // IVP_EXPORT_PUBLIC
 
+#include <ivu_types.hxx>
+
 #define IVP_WHITESPACE " \t,;\n"
 
 class P_String
 {
-  public:
+public:
     static const char *find_string(const char *str, const char *key, int upper_case_flag);
-    static void uppercase(char *string_to_change);  // in place
+    static void uppercase(char *string_to_change); // in place
     static int string_cmp(const char *str, const char *search, IVP_BOOL upper_case);
     /*	*	Wildcard in search string */
     /*	?	any	Charakter	*/
@@ -22,7 +24,7 @@ extern void ivp_message(const char *templat, ...);
 extern void p_error_message();
 extern void p_error_message(const char *templat, ...);
 extern char *p_make_string(const char *templat, ...);
-extern char *p_make_string_fast(const char *templat, ...);  // doesn't check overflow
+extern char *p_make_string_fast(const char *templat, ...); // doesn't check overflow
 
 int p_strcmp(const char *s1, const char *s2);
 int p_strlen(const char *s);
@@ -33,11 +35,11 @@ IVP_DOUBLE p_get_float();
 char *p_get_string();
 char *p_str_tok(char *str, const char *delimiter);
 
-int p_atoi(const char *value);  // converts ascii to int
+int p_atoi(const char *value); // converts ascii to int
 IVP_DOUBLE p_atof(const char *s);
 
 #ifdef WIN32
 int strcasecmp(const char *a, const char *b);
 void replace_slash(const char *in, char *out);
-long p_get_time();  // returns seconds since 1970
+long p_get_time(); // returns seconds since 1970
 #endif

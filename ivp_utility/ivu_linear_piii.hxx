@@ -2,6 +2,13 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_U_LINEAR_PIII_INCLUDED
+#define IVP_U_LINEAR_PIII_INCLUDED
+
+#ifdef IVP_PIII
+
+#include <ivu_linear.hxx>
+
 inline void IVP_U_Float_Point::set_negative(const IVP_U_Float_Point *p_source)
 {
     IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
@@ -55,7 +62,8 @@ inline void IVP_U_Float_Point::mult(IVP_DOUBLE factor)
 }
 
 inline void IVP_U_Float_Point::set_pairwise_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2)
-{  // pairwise multiple
+{
+    // pairwise multiple
     IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
     {
         IVP_DOUBLE a, b, c;
@@ -199,7 +207,8 @@ inline void IVP_U_Float_Point::set(const IVP_U_Float_Point *p_source)
 }
 
 inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{
+    // vector addition
     IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
     {
         IVP_DOUBLE a, b, c;
@@ -230,16 +239,17 @@ inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const I
     }
 }
 
-inline IVP_DOUBLE IVP_U_Float_Point::dot_product(const IVP_U_Float_Point *v2) const {
-    IVP_IF_PREFETCH_ENABLED(IVP_TRUE){
-        return (k[0] * v2 -> k[0] + k[1] * v2->k[1] + k[2] * v2->k[2]);
-}
-else
+inline IVP_DOUBLE IVP_U_Float_Point::dot_product(const IVP_U_Float_Point *v2) const
 {
-    return (k[0] * v2->k[0] + k[1] * v2->k[1] + k[2] * v2->k[2]);
+    IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+    {
+        return (k[0] * v2->k[0] + k[1] * v2->k[1] + k[2] * v2->k[2]);
+    }
+    else
+    {
+        return (k[0] * v2->k[0] + k[1] * v2->k[1] + k[2] * v2->k[2]);
+    }
 }
-}
-;
 
 inline void IVP_U_Float_Point::set_multiple(const IVP_U_Float_Point *v, IVP_DOUBLE f)
 {
@@ -264,7 +274,8 @@ inline void IVP_U_Float_Point::set_multiple(const IVP_U_Float_Point *v, IVP_DOUB
 }
 
 inline void IVP_U_Float_Point::inline_subtract_and_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{
+    // vector addition
     IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
     {
         IVP_DOUBLE a, b, c;
@@ -319,70 +330,73 @@ inline IVP_DOUBLE IVP_U_Float_Hesse::get_dist(const IVP_U_Float_Point *p) const
     }
 }
 
-void IVP_U_Matrix3::inline_vimult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const {
-    IVP_IF_PREFETCH_ENABLED(IVP_TRUE){
-        IVP_DOUBLE a = get_elem(0, 0) * p_in -> k[0] + get_elem(1, 0) * p_in->k[1] + get_elem(2, 0) * p_in->k[2];
-IVP_DOUBLE b = get_elem(0, 1) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(2, 1) * p_in->k[2];
-IVP_DOUBLE c = get_elem(0, 2) * p_in->k[0] + get_elem(1, 2) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
-p_out->k[0] = (IVP_FLOAT)a;
-p_out->k[1] = (IVP_FLOAT)b;
-p_out->k[2] = (IVP_FLOAT)c;
-}
-else
+void IVP_U_Matrix3::inline_vimult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
-    IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(1, 0) * p_in->k[1] + get_elem(2, 0) * p_in->k[2];
-    IVP_DOUBLE b = get_elem(0, 1) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(2, 1) * p_in->k[2];
-    IVP_DOUBLE c = get_elem(0, 2) * p_in->k[0] + get_elem(1, 2) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
-    p_out->k[0] = (IVP_FLOAT)a;
-    p_out->k[1] = (IVP_FLOAT)b;
-    p_out->k[2] = (IVP_FLOAT)c;
+    IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+    {
+        IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(1, 0) * p_in->k[1] + get_elem(2, 0) * p_in->k[2];
+        IVP_DOUBLE b = get_elem(0, 1) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(2, 1) * p_in->k[2];
+        IVP_DOUBLE c = get_elem(0, 2) * p_in->k[0] + get_elem(1, 2) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
+        p_out->k[0] = (IVP_FLOAT)a;
+        p_out->k[1] = (IVP_FLOAT)b;
+        p_out->k[2] = (IVP_FLOAT)c;
+    }
+    else
+    {
+        IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(1, 0) * p_in->k[1] + get_elem(2, 0) * p_in->k[2];
+        IVP_DOUBLE b = get_elem(0, 1) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(2, 1) * p_in->k[2];
+        IVP_DOUBLE c = get_elem(0, 2) * p_in->k[0] + get_elem(1, 2) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
+        p_out->k[0] = (IVP_FLOAT)a;
+        p_out->k[1] = (IVP_FLOAT)b;
+        p_out->k[2] = (IVP_FLOAT)c;
+    }
 }
-}
-;
 
-inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const {
-    IVP_IF_PREFETCH_ENABLED(IVP_TRUE){
-        IVP_DOUBLE a = p_in -> k[0] - vv.k[0];
-IVP_DOUBLE b = p_in->k[1] - vv.k[1];
-IVP_DOUBLE c = p_in->k[2] - vv.k[2];
-
-p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
-p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
-p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
-}
-else
+inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
-    IVP_DOUBLE a = p_in->k[0] - vv.k[0];
-    IVP_DOUBLE b = p_in->k[1] - vv.k[1];
-    IVP_DOUBLE c = p_in->k[2] - vv.k[2];
+    IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+    {
+        IVP_DOUBLE a = p_in->k[0] - vv.k[0];
+        IVP_DOUBLE b = p_in->k[1] - vv.k[1];
+        IVP_DOUBLE c = p_in->k[2] - vv.k[2];
 
-    p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
-    p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
-    p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
-}
-}
-;
+        p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
+        p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
+        p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
+    }
+    else
+    {
+        IVP_DOUBLE a = p_in->k[0] - vv.k[0];
+        IVP_DOUBLE b = p_in->k[1] - vv.k[1];
+        IVP_DOUBLE c = p_in->k[2] - vv.k[2];
 
-void IVP_U_Matrix3::inline_vmult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const {
-    IVP_IF_PREFETCH_ENABLED(IVP_TRUE){
-        IVP_DOUBLE a = get_elem(0, 0) * p_in -> k[0] + get_elem(0, 1) * p_in->k[1] + get_elem(0, 2) * p_in->k[2];
-IVP_DOUBLE b = get_elem(1, 0) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(1, 2) * p_in->k[2];
-IVP_DOUBLE c = get_elem(2, 0) * p_in->k[0] + get_elem(2, 1) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
-p_out->k[0] = (IVP_FLOAT)a;
-p_out->k[1] = (IVP_FLOAT)b;
-p_out->k[2] = (IVP_FLOAT)c;
+        p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
+        p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
+        p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
+    }
 }
-else
+
+void IVP_U_Matrix3::inline_vmult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
-    IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(0, 1) * p_in->k[1] + get_elem(0, 2) * p_in->k[2];
-    IVP_DOUBLE b = get_elem(1, 0) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(1, 2) * p_in->k[2];
-    IVP_DOUBLE c = get_elem(2, 0) * p_in->k[0] + get_elem(2, 1) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
-    p_out->k[0] = (IVP_FLOAT)a;
-    p_out->k[1] = (IVP_FLOAT)b;
-    p_out->k[2] = (IVP_FLOAT)c;
+    IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+    {
+        IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(0, 1) * p_in->k[1] + get_elem(0, 2) * p_in->k[2];
+        IVP_DOUBLE b = get_elem(1, 0) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(1, 2) * p_in->k[2];
+        IVP_DOUBLE c = get_elem(2, 0) * p_in->k[0] + get_elem(2, 1) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
+        p_out->k[0] = (IVP_FLOAT)a;
+        p_out->k[1] = (IVP_FLOAT)b;
+        p_out->k[2] = (IVP_FLOAT)c;
+    }
+    else
+    {
+        IVP_DOUBLE a = get_elem(0, 0) * p_in->k[0] + get_elem(0, 1) * p_in->k[1] + get_elem(0, 2) * p_in->k[2];
+        IVP_DOUBLE b = get_elem(1, 0) * p_in->k[0] + get_elem(1, 1) * p_in->k[1] + get_elem(1, 2) * p_in->k[2];
+        IVP_DOUBLE c = get_elem(2, 0) * p_in->k[0] + get_elem(2, 1) * p_in->k[1] + get_elem(2, 2) * p_in->k[2];
+        p_out->k[0] = (IVP_FLOAT)a;
+        p_out->k[1] = (IVP_FLOAT)b;
+        p_out->k[2] = (IVP_FLOAT)c;
+    }
 }
-}
-;
 
 inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
@@ -573,7 +587,8 @@ inline void IVP_U_Quat::init()
 }
 
 inline IVP_DOUBLE IVP_U_Quat::acos_quat(const IVP_U_Quat *q) const
-{  // acosinus between two quats
+{
+    // acosinus between two quats
     return x * q->x + y * q->y + z * q->z + w * q->w;
 }
 
@@ -614,17 +629,17 @@ inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Q
 	 	vmul.xyzw vf12, vf4,vf5	    #vf12 x1x2 y1y2 z1z2 w1w2
 		vmulw.xyz vf8,vf4,vf5	    #vf8  x1w2 y1w2 z1w2 w1w2
 		vmulw.xyz vf9,vf5,vf4	    #vf9  w1x2 w1y2 w1z2 w1w2
-    #nop 
+        #nop 
 		vsubx.w vf12,vf12,vf12	    # vf12.w = ww - xx
 		vopmula.xyz	ACC,vf4,vf5
 		vopmsub.xyz	vf6,vf5,vf4
 
 		vadd.xyz vf8, vf8, vf9
 		vsuby.w vf12,vf12,vf12	    # vf12.w = ww - xx - yy
-    #nop nop 
+        #nop nop 
 		vadd.xyz vf8, vf8,vf6
 		vsubz.w vf8,vf12,vf12	     # vf8.w = ww - xx - yy - zz
-    #nop nop nop
+        #nop nop nop
 		sqc2    vf8,0x0(%0)
 	"
 	: /*no output */
@@ -691,3 +706,6 @@ void IVP_U_Float_Quat::set(const IVP_U_Quat *source)
     z = (IVP_FLOAT)source->z;
     w = (IVP_FLOAT)source->w;
 }
+
+#endif // IVP_PIII
+#endif

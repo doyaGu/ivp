@@ -1,38 +1,36 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
+#include <ivu_string.hxx>
 
 #include <stdarg.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <ctype.h>
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
-    #ifdef OSX
-        #include <malloc/malloc.h>
-    #else
-        #include <malloc.h>
-    #endif
+#ifdef OSX
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
 #endif
 #ifdef WIN32
-    #ifndef _XBOX
-        #ifndef WIN32_LEAN_AND_MEAN
-            #define WIN32_LEAN_AND_MEAN
-        #endif
-        #include <windows.h>
-    #else
-        #ifndef WINVER
-            #define WINVER 0x0500
-        #endif
-        #ifndef _X86_
-            #define _X86_
-        #endif /* _X86_ */
-        #include <excpt.h>
-        #include <stdarg.h>
-        #include <winbase.h>
-        #include <windef.h>
-    #endif
+#ifndef _XBOX
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#ifndef WINVER
+#define WINVER 0x0500
+#endif
+#ifndef _X86_
+#define _X86_
+#endif /* _X86_ */
+#include <excpt.h>
+#include <winbase.h>
+#include <windef.h>
+#endif
 #endif
 
 void P_String::uppercase(char *str)
@@ -66,102 +64,102 @@ const char *P_String::find_string(const char *str, const char *key, int upper_ca
     register char b;
     switch (upper_case)
     {
-        case 1:
-            for (p1 = str, p2 = key; *p1;)
+    case 1:
+        for (p1 = str, p2 = key; *p1;)
+        {
+            if (!(b = *p2))
             {
-                if (!(b = *p2))
+                return (char *)str;
+            }
+            else
+            {
+                if (toupper(*p1) == toupper(b))
                 {
-                    return (char *)str;
+                    p1++;
+                    p2++;
                 }
                 else
                 {
-                    if (toupper(*p1) == toupper(b))
-                    {
-                        p1++;
-                        p2++;
-                    }
-                    else
-                    {
-                        p2 = key;
-                        p1 = (++str);
-                    }
+                    p2 = key;
+                    p1 = (++str);
                 }
             }
-            if (!*p2)
-                return (char *)str;
-            break;
-        case 0:
-            for (p1 = str, p2 = key; *p1;)
+        }
+        if (!*p2)
+            return (char *)str;
+        break;
+    case 0:
+        for (p1 = str, p2 = key; *p1;)
+        {
+            if (!(b = *p2))
             {
-                if (!(b = *p2))
+                return (char *)str;
+            }
+            else
+            {
+                if (b == *p1)
                 {
-                    return (char *)str;
+                    p1++;
+                    p2++;
                 }
                 else
                 {
-                    if (b == *p1)
-                    {
-                        p1++;
-                        p2++;
-                    }
-                    else
-                    {
-                        p2 = key;
-                        p1 = (++str);
-                    }
+                    p2 = key;
+                    p1 = (++str);
                 }
             }
-            if (!*p2)
-                return (char *)str;
-            break;
-        case 2:
-            for (p1 = str, p2 = key; *p1;)
+        }
+        if (!*p2)
+            return (char *)str;
+        break;
+    case 2:
+        for (p1 = str, p2 = key; *p1;)
+        {
+            if (!(b = *p2))
             {
-                if (!(b = *p2))
+                return (char *)str;
+            }
+            else
+            {
+                if (b == *p1 || (b == '?'))
                 {
-                    return (char *)str;
+                    p1++;
+                    p2++;
                 }
                 else
                 {
-                    if (b == *p1 || (b == '?'))
-                    {
-                        p1++;
-                        p2++;
-                    }
-                    else
-                    {
-                        p2 = key;
-                        p1 = (++str);
-                    }
+                    p2 = key;
+                    p1 = (++str);
                 }
             }
-            if (!*p2)
-                return (char *)str;
-            break;
-        default:
-            for (p1 = str, p2 = key; *p1;)
+        }
+        if (!*p2)
+            return (char *)str;
+        break;
+    default:
+        for (p1 = str, p2 = key; *p1;)
+        {
+            if (!(b = *p2))
             {
-                if (!(b = *p2))
+                return (char *)str;
+            }
+            else
+            {
+                if (toupper(*p1) == toupper(b) || (b == '?'))
                 {
-                    return (char *)str;
+                    p1++;
+                    p2++;
                 }
                 else
                 {
-                    if (toupper(*p1) == toupper(b) || (b == '?'))
-                    {
-                        p1++;
-                        p2++;
-                    }
-                    else
-                    {
-                        p2 = key;
-                        p1 = (++str);
-                    }
+                    p2 = key;
+                    p1 = (++str);
                 }
             }
-            if (!*p2)
-                return (char *)str;
-            break;
+        }
+        if (!*p2)
+            return (char *)str;
+        break;
     }
     return 0;
 }
@@ -279,8 +277,7 @@ char *gbs_add_path(char *path, char *name)
                     String Replace
 ********************************************************************************************/
 
-char *GBS_remove_escape(char *com) /* \ is the escape charakter
-                                    */
+char *GBS_remove_escape(char *com) /* \ is the escape charakter */
 {
     register char *result, *s, *d;
     int ch;
@@ -290,31 +287,31 @@ char *GBS_remove_escape(char *com) /* \ is the escape charakter
     {
         switch (ch)
         {
-            case '\\':
-                ch = *(s++);
-                if (!ch)
-                {
-                    s--;
-                    break;
-                };
-                switch (ch)
-                {
-                    case 'n':
-                        *(d++) = '\n';
-                        break;
-                    case 't':
-                        *(d++) = '\t';
-                        break;
-                    case '0':
-                        *(d++) = '\0';
-                        break;
-                    default:
-                        *(d++) = ch;
-                        break;
-                }
+        case '\\':
+            ch = *(s++);
+            if (!ch)
+            {
+                s--;
+                break;
+            };
+            switch (ch)
+            {
+            case 'n':
+                *(d++) = '\n';
+                break;
+            case 't':
+                *(d++) = '\t';
+                break;
+            case '0':
+                *(d++) = '\0';
                 break;
             default:
                 *(d++) = ch;
+                break;
+            }
+            break;
+        default:
+            *(d++) = ch;
         }
     }
     *d = 0;
@@ -350,7 +347,7 @@ char *p_make_string_fast(const char *templat, ...)
 
     char buffer[MAX_MAKE_STRING_LEN];
     va_list parg;
-    memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN));  // nur bei sparc-debugging
+    memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN)); // nur bei sparc-debugging
     va_start(parg, templat);
     vsprintf(buffer, templat, parg);
     va_end(parg);
@@ -368,7 +365,7 @@ char *p_make_string(const char *templat, ...)
 
     char buffer[MAX_MAKE_STRING_LEN];
     va_list parg;
-    memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN));  // only for sparc-debugging
+    memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN)); // only for sparc-debugging
     va_start(parg, templat);
 #ifdef LINUX
     vsnprintf(buffer, MAX_MAKE_STRING_LEN, templat, parg);
@@ -388,7 +385,7 @@ IVP_ERROR_STRING p_export_error(const char *templat, ...)
     char buffer[MAX_ERROR_BUFFER_LEN];
     char *p = buffer;
     va_list parg;
-    memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN));  // only for sparc-debugging
+    memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN)); // only for sparc-debugging
     sprintf(buffer, "ERROR: ");
     p += strlen(p);
 
@@ -411,7 +408,7 @@ void ivp_message(const char *templat, ...)
     char buffer[MAX_ERROR_BUFFER_LEN];
     char *p = buffer;
     va_list parg;
-    memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN));  // only for sparc-debugging
+    memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN)); // only for sparc-debugging
     sprintf(buffer, "ERROR: ");
     p += strlen(p);
 
@@ -443,7 +440,7 @@ void p_print_error()
 #endif
 
     // char *buf = p_error_buffer;
-    //     fprintf(stdout,"ERROR: %s\n",buf); // @#@ OS linker problems on playstation
+    // fprintf(stdout,"ERROR: %s\n",buf); // @#@ OS linker problems on playstation
 }
 
 char *p_read_first_token(FILE *fp)
@@ -452,7 +449,7 @@ char *p_read_first_token(FILE *fp)
     while (fgets(buffer, 1000, fp))
     {
         if (buffer[0] == '#')
-            continue;  // Comment
+            continue; // Comment
         char *tok = p_str_tok(buffer, IVP_WHITESPACE);
         if (!tok)
             continue;
@@ -538,10 +535,10 @@ int p_atoi(const char *s)
 }
 
 #ifdef WIN32
-    #include <time.h>
+#include <time.h>
 
 long p_get_time()
-{  // returns seconds since 1970
+{ // returns seconds since 1970
     time_t t;
     time_t now = time(&t);
     return t;

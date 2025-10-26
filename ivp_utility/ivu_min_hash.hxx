@@ -2,8 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_U_MINHASH_INCLUDED
-#define _IVP_U_MINHASH_INCLUDED
+#ifndef IVP_U_MINHASH_INCLUDED
+#define IVP_U_MINHASH_INCLUDED
+
+#include <ivu_types.hxx>
 
 // #ifdef DEBUG
 #define SORT_MINDIST_ELEMENTS

@@ -1,4 +1,3 @@
-#include <ivp_physics.hxx>
 #include <ivu_mapping.hxx>
 
 void IVP_U_Mapping::vapply(IVP_U_Point *point_as_f_cs, IVP_U_Point *point_bs_f_cs)

@@ -1,8 +1,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_FVECTOR_INCLUDED
-#define IVP_FVECTOR_INCLUDED
+#ifndef IVP_U_FVECTOR_INCLUDED
+#define IVP_U_FVECTOR_INCLUDED
+
+#include <ivu_types.hxx>
 
 /********************************************************************************
  *	Class:	       	IVP_U_FVector
@@ -22,9 +24,9 @@ class IVP_U_FVector : public IVP_U_Vector_Base
         {
             this->increment_mem();
         }
-    };
+    }
 
-  protected:
+protected:
     //  special vector with preallocated elems
     IVP_U_FVector(void **ielems, int size)
     {
@@ -34,20 +36,20 @@ class IVP_U_FVector : public IVP_U_Vector_Base
         n_elems = 0;
     }
 
-  public:
+public:
     IVP_U_FVector(int size = 0)
     {
         memsize = size;
         n_elems = 0;
-        if (size)
-        {  // will be optimized by most compilers
+        if (size) // will be optimized by most compilers
+        {
             elems = (void **)p_malloc(size * sizeof(void *));
         }
         else
         {
             elems = NULL;
         }
-    };
+    }
 
     void clear()
     {
@@ -57,22 +59,22 @@ class IVP_U_FVector : public IVP_U_Vector_Base
             memsize = 0;
         }
         n_elems = 0;
-    };
+    }
 
     void remove_all()
     {
         n_elems = 0;
-    };
+    }
 
     ~IVP_U_FVector()
     {
         this->clear();
-    };
+    }
 
     int len() const
     {
         return n_elems;
-    };
+    }
 
     int index_of(T *elem)
     {
@@ -81,7 +83,7 @@ class IVP_U_FVector : public IVP_U_Vector_Base
             return i0;
         IVP_ASSERT(elem->get_fvector_index(1) < 0 || elem->get_fvector_index(1) >= n_elems || element_at(elem->get_fvector_index(1)) == elem);
         return elem->get_fvector_index(1);
-    };
+    }
 
     int add(T *elem)
     {
@@ -90,7 +92,7 @@ class IVP_U_FVector : public IVP_U_Vector_Base
         elems[n_elems] = (void *)elem;
         elem->set_fvector_index(-1, n_elems);
         return n_elems++;
-    };
+    }
 
     void swap_elems(int index1, int index2)
     {
@@ -117,13 +119,13 @@ class IVP_U_FVector : public IVP_U_Vector_Base
             e->set_fvector_index(n_elems, index);
         }
         elem->set_fvector_index(index, -1);
-    };
+    }
 
     T *element_at(int index) const
     {
         IVP_ASSERT(index >= 0 && index < n_elems);
         return (T *)elems[index];
-    };
+    }
 };
 
 #endif
