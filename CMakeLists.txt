@@ -238,8 +238,6 @@ add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_mana
 
 # ivp_physics - Main physics API, depends on core modules
 set(IVP_PHYSICS_SOURCES
-    ${IVP_DIR}/ivp_physics/ive_graphics.cxx
-    ${IVP_DIR}/ivp_physics/ive_graphics.hxx
     ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.cxx
     ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.hxx
     ${IVP_DIR}/ivp_physics/ivp_authenticity.hxx
