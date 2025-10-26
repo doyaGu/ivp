@@ -11,6 +11,8 @@
 #ifndef _IVP_ENVIRONMENT_INCLUDED
 #define _IVP_ENVIRONMENT_INCLUDED
 
+#include <ivp_physics.hxx>
+
 #define IVP_Environment_Magic_Number 123456
 #define IVP_MOVEMENT_CHECK_COUNT 10 // do not always check movement state
 
