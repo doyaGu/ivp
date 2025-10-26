@@ -1,6 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-//IVP_EXPORT_PUBLIC
+// IVP_EXPORT_PUBLIC
 
 // used for graphical output only
 
@@ -9,10 +9,9 @@ class IVP_Compact_Surface;
 class P_Texture_Server;
 class IVP_Example_Base;
 
-
 // GRAPHICS SUPPORT
 
-extern char debugstring[1024]; //for text output
+extern char debugstring[1024]; // for text output
 
 // register your own demo texture server
 extern void p_demo_register_texture_server(P_Hardware *hw, P_Texture_Server *server);
@@ -40,7 +39,7 @@ extern void p_demo_dont_render_next_object();
 #if !defined(_XBOX) && (!defined(__MWERKS__) || !defined(__POWERPC__)) && !defined(GEKKO)
 extern void p_demo_replace_graphical_surface(const IVP_Compact_Surface *graphical_surface);
 #else // Xbox or Mac or GameCube
-extern void p_demo_replace_graphical_surface(IVP_Real_Object* obj, const IVP_Compact_Surface *graphical_surface);
+extern void p_demo_replace_graphical_surface(IVP_Real_Object *obj, const IVP_Compact_Surface *graphical_surface);
 #endif
 //
 extern void p_graphlib_render_scene_splitscreen(P_Hardware *hw);
@@ -72,14 +71,10 @@ extern void p_demo_make_motor_sound_loud();
 extern void p_demo_refresh_sound();
 extern void p_demo_refresh_vehicle_sound(IVP_FLOAT rot_speed);
 
-
-
 // *** STATISTICAL OUTPUT
 class IVP_BetterStatisticsmanager_Callback_Interface;
 IVP_BetterStatisticsmanager_Callback_Interface *p_demo_get_statisticsmanager_callback(P_Hardware *hardware);
 
-
-    
 extern IVP_BOOL p_demo_get_shift_key_state(P_Hardware *hw);
 
 // return the key pressed
@@ -96,8 +91,8 @@ class IVP_Concave_Polyhedron;
 extern int p_graphlib_convert_directx_object_to_concave_data(P_Hardware *hw, const char *filename, IVP_Concave_Polyhedron *concave_polyhedron);
 extern int p_graphlib_robust_convert_directx_object_to_compact_ledges(P_Hardware *hw, const char *filename, IVP_U_BigVector<IVP_Compact_Ledge> *ledges);
 
-
-enum IVP_EXAMPLE_MENU_CLASS {
+enum IVP_EXAMPLE_MENU_CLASS
+{
     IVP_EMC_COMPLEX,
     IVP_EMC_BASIC,
     IVP_EMC_QUICKSTART,
@@ -108,24 +103,25 @@ enum IVP_EXAMPLE_MENU_CLASS {
 };
 
 // basic class used as an interface between the main() function and the example codes
-class IVP_Example_Base {
+class IVP_Example_Base
+{
 public:
     // garbage collection
-    IVP_U_Vector<IVP_Compact_Surface>   gc_compactsurface;
-    IVP_U_Vector<IVP_SurfaceManager>    gc_surfacemanager;
-    IVP_U_Vector<IVP_Material>		gc_material;
+    IVP_U_Vector<IVP_Compact_Surface> gc_compactsurface;
+    IVP_U_Vector<IVP_SurfaceManager> gc_surfacemanager;
+    IVP_U_Vector<IVP_Material> gc_material;
 
     // garbage collection
     void gc_cleanup();
 
-    const char *my_name;    // the name (on the command line of the example)
-    const char *my_level_name;  // the predifened world to load (see directory IVP_Sample_Data/LEVELS/
-    const char *my_helptext; // optional help text when hitting SPACE (NULL: no helptext);
-    const char *my_introtext; // optional intro text before simulation (NULL: no introtext)
+    const char *my_name;       // the name (on the command line of the example)
+    const char *my_level_name; // the predifened world to load (see directory IVP_Sample_Data/LEVELS/
+    const char *my_helptext;   // optional help text when hitting SPACE (NULL: no helptext);
+    const char *my_introtext;  // optional intro text before simulation (NULL: no introtext)
     IVP_EXAMPLE_MENU_CLASS my_class;
 
     IVP_BOOL import_external_environment; // should the demo_level environment be physicalized
-    IVP_Environment *environment;		// set only if import_external_environment==TRUE
+    IVP_Environment *environment;         // set only if import_external_environment==TRUE
     P_Hardware *hardware;
 
     // register_to_main should be called by the constructor to register
@@ -136,20 +132,20 @@ public:
 
     virtual ~IVP_Example_Base();
 
-	// main is called by any program that wants to give up controll untill end of example
-	// but if you want to have more interactive controll of the example, eg us GLUT which
-	// has its own render loop, call setup(), step() multiple times ,and then cleanup()  
+    // main is called by any program that wants to give up controll untill end of example
+    // but if you want to have more interactive controll of the example, eg us GLUT which
+    // has its own render loop, call setup(), step() multiple times ,and then cleanup()
     // CALL ONE SET OF FUNCTIONS, BUT NOT BOTH..
 
-    virtual int main();    //old technique, used in hull_editor
-    
-    virtual void setup()=0; // the examples setup function
-    virtual void cleanup()=0; // the examples cleanup mem / end function
-    virtual int  step()=0; // the examples step function; return -2 for restart!
+    virtual int main(); // old technique, used in hull_editor
+
+    virtual void setup() = 0;   // the examples setup function
+    virtual void cleanup() = 0; // the examples cleanup mem / end function
+    virtual int step() = 0;     // the examples step function; return -2 for restart!
 };
 
-
-class P_Texture_Server {
+class P_Texture_Server
+{
 public:
     IVP_BOOL return_absolute_positions; // set this flag to IVP_TRUE if your texture callback will return absolute texture positions
 
@@ -160,37 +156,38 @@ public:
     virtual void texture_server_exit(const IVP_Real_Object * /*real_object*/) = 0;
 
     virtual void texture_callback_detail(const IVP_Real_Object * /*real_object_in*/,
-				  const IVP_U_Point * /*p1_os_in*/,
-				  const IVP_U_Point * /*p2_os_in*/,
-				  const IVP_U_Point * /*p3_os_in*/,
-				  const IVP_U_Point * /*normal_os_in*/,
-				  const char ** /*texture_name_out*/,
-				  IVP_FLOAT * /*u1_out*/,
-				  IVP_FLOAT * /*v1_out*/,
-				  IVP_FLOAT * /*u2_out*/,
-				  IVP_FLOAT * /*v2_out*/,
-				  IVP_FLOAT * /*u3_out*/,
-				  IVP_FLOAT * /*v3_out*/
-				  ) {;};
+                                         const IVP_U_Point * /*p1_os_in*/,
+                                         const IVP_U_Point * /*p2_os_in*/,
+                                         const IVP_U_Point * /*p3_os_in*/,
+                                         const IVP_U_Point * /*normal_os_in*/,
+                                         const char ** /*texture_name_out*/,
+                                         IVP_FLOAT * /*u1_out*/,
+                                         IVP_FLOAT * /*v1_out*/,
+                                         IVP_FLOAT * /*u2_out*/,
+                                         IVP_FLOAT * /*v2_out*/,
+                                         IVP_FLOAT * /*u3_out*/,
+                                         IVP_FLOAT * /*v3_out*/
+    ) {}
 
     virtual void texture_callback(const IVP_Real_Object * /*real_object_in*/,
-				  const char ** /*texture_name_out*/,
-				  IVP_FLOAT * /*scale_factor_out*/
-				  ) {;};
+                                  const char ** /*texture_name_out*/,
+                                  IVP_FLOAT * /*scale_factor_out*/
+    ) {}
 
-    P_Texture_Server() {
-	this->return_absolute_positions = IVP_FALSE;
+    P_Texture_Server()
+    {
+        this->return_absolute_positions = IVP_FALSE;
     }
 };
 
-
-enum IVP_EXAMPLE_MOVING_CAMERA_MODE {
+enum IVP_EXAMPLE_MOVING_CAMERA_MODE
+{
     IVP_EMCM_ROTATION,
     IVP_EMCM_SPACEFLIGHT
 };
 
-
-class Example_Moving_Camera {	// 
+class Example_Moving_Camera
+{
 private:
     void cameramatrix_workaround();
     void convert_position_and_focus_to_angles_and_distance(const IVP_U_Point &center);
@@ -201,20 +198,21 @@ private:
     // camera.
     // -----------------------------------------------------------------------------------
 public:
-    class Camera_Offset_Modifier {
+    class Camera_Offset_Modifier
+    {
     public:
-	virtual IVP_U_Point *calc_offset_ws(IVP_Time current_time) = 0;
-	// -----------------------------------------
-	// get the relative matrix for offset_center
-	// overload it for enhanced functionality
-	// -----------------------------------------
+        virtual IVP_U_Point *calc_offset_ws(IVP_Time current_time) = 0;
+        // -----------------------------------------
+        // get the relative matrix for offset_center
+        // overload it for enhanced functionality
+        // -----------------------------------------
     };
+
 protected:
     Camera_Offset_Modifier *offset_modifier;
-    int      current_mode;
+    int current_mode;
 
 public:
-
     void init();
 
     // ------------------------------------
@@ -242,7 +240,7 @@ public:
 
     // position camera after you have set m_world_f_camera manually
     void show_picture();
-    
+
     void set_offset_modifier(Camera_Offset_Modifier *);
 
     // position camera, given camera position and viewing angles
@@ -263,7 +261,6 @@ public:
     void space_flight_original(IVP_DOUBLE d_time, IVP_BOOL recalc_values = IVP_TRUE);
     void space_flight_old(IVP_DOUBLE d_time);
 
-
     IVP_U_Point get_position();
     IVP_U_Point get_direction();
     IVP_U_Point get_upvec();
@@ -272,6 +269,3 @@ public:
     Example_Moving_Camera(IVP_Environment &env);
     Example_Moving_Camera(IVP_Environment &env, const IVP_U_Point &position); // init where the camera is.
 };
-
-
-

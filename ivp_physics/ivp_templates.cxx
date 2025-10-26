@@ -35,27 +35,23 @@ IVP_Template_Real_Object::IVP_Template_Real_Object()
     this->rot_inertia.set(1.0f, 1.0f, 1.0f);
     this->auto_check_rot_inertia = 0.03f;
     this->speed_damp_factor = 0.01f;
-    this->rot_speed_damp_factor.set( 0.01f, 0.01f, 0.01f);
-	this->pinned = IVP_FALSE;
+    this->rot_speed_damp_factor.set(0.01f, 0.01f, 0.01f);
+    this->pinned = IVP_FALSE;
     return;
 }
 
-IVP_Template_Real_Object::~IVP_Template_Real_Object()
+IVP_Template_Real_Object::~IVP_Template_Real_Object() {}
+
+void IVP_Template_Real_Object::set_nocoll_group_ident(const char *id)
 {
-    return;
-}
-
-
-void IVP_Template_Real_Object::set_nocoll_group_ident(const char *id){
-    if (!id){
-	nocoll_group_ident[0] = 0;
-	return;
+    if (!id)
+    {
+        nocoll_group_ident[0] = 0;
+        return;
     }
-    if (strlen(id) > IVP_NO_COLL_GROUP_STRING_LEN){
-	CORE;
+    if (strlen(id) > IVP_NO_COLL_GROUP_STRING_LEN)
+    {
+        CORE;
     }
-    strncpy( nocoll_group_ident, id, IVP_NO_COLL_GROUP_STRING_LEN);
+    strncpy(nocoll_group_ident, id, IVP_NO_COLL_GROUP_STRING_LEN);
 }
-
-
-
