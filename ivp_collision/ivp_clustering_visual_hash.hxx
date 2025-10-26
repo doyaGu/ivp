@@ -8,17 +8,17 @@
  *		Nothing fancy.
  ********************************************************************************/
 
-class IVP_Clustering_Visualizer_Object_Hash : protected IVP_VHash {
-protected:
-    IVP_BOOL          compare     (void *elem0, void *elem1) const;
-    int               obj_to_index(IVP_Real_Object *obj);
+class IVP_Clustering_Visualizer_Object_Hash : protected IVP_VHash
+{
+  protected:
+    IVP_BOOL compare(void *elem0, void *elem1) const;
+    int obj_to_index(IVP_Real_Object *obj);
 
-public:
-    void              add         (IVP_Real_Object *obj);
-    IVP_Real_Object * remove      (IVP_Real_Object *obj);
-    IVP_Real_Object * find        (IVP_Real_Object *obj);
+  public:
+    void add(IVP_Real_Object *obj);
+    IVP_Real_Object *remove(IVP_Real_Object *obj);
+    IVP_Real_Object *find(IVP_Real_Object *obj);
 
     IVP_Clustering_Visualizer_Object_Hash(int create_size);
     ~IVP_Clustering_Visualizer_Object_Hash();
 };
-

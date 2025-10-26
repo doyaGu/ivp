@@ -18,7 +18,6 @@
 #ifndef IVP_COLLISION_FILTER_INCLUDED
 #define IVP_COLLISION_FILTER_INCLUDED
 
-
 /********************************************************************************
  *  Class:	    IVP_Collision_Filter
  *  Description:    This is the base class for all collision filters. Simply
@@ -30,9 +29,9 @@
  *		    to collide (e.g. the wheels of a car)
  *******************************************************************************/
 
-class IVP_Collision_Filter {
-public:
-
+class IVP_Collision_Filter
+{
+  public:
     /******************************************************************************
      *  Method:		check_objects_for_collision_detection
      *  Description:    This method gets called for every pair of objects that
@@ -60,7 +59,6 @@ public:
     virtual ~IVP_Collision_Filter();
 };
 
-
 /********************************************************************************
  *  Class:	    IVP_Collision_Filter_Coll_Group_Ident
  *  Description:    This is a subclass of the base collision filter class
@@ -71,13 +69,13 @@ public:
  *		    object.
  *******************************************************************************/
 
-class IVP_Collision_Filter_Coll_Group_Ident : public IVP_Collision_Filter {
-private:
+class IVP_Collision_Filter_Coll_Group_Ident : public IVP_Collision_Filter
+{
+  private:
     // internal data
     IVP_BOOL delete_on_env_delete;
 
-public:
-
+  public:
     /******************************************************************************
      *  Method:		check_objects_for_collision_detection
      *  Description:    This method checks the coll_group_ident string of both
@@ -112,7 +110,6 @@ public:
     ~IVP_Collision_Filter_Coll_Group_Ident();
 };
 
-
 class IVP_CFEP_Objectpair;
 class IVP_CFEP_Hash;
 
@@ -125,15 +122,15 @@ class IVP_CFEP_Hash;
  *		    hash.
  *******************************************************************************/
 
-class IVP_Collision_Filter_Exclusive_Pair : public IVP_Collision_Filter {
-private:
+class IVP_Collision_Filter_Exclusive_Pair : public IVP_Collision_Filter
+{
+  private:
     // internal methods & data
-    IVP_CFEP_Hash *hash_table; // the "no-collision" hash list
+    IVP_CFEP_Hash *hash_table;  // the "no-collision" hash list
 
     void generate_hash_entry(IVP_Real_Object *object0, IVP_Real_Object *object1, IVP_CFEP_Objectpair *entry);
 
-public:
-
+  public:
     /******************************************************************************
      *  Method:		disable_collision_between_objects
      *  Description:    Use this method to disable the collision detection for a
@@ -176,20 +173,20 @@ public:
     ~IVP_Collision_Filter_Exclusive_Pair();
 };
 
-
 /********************************************************************************
  *  Class:          IVP_Meta_Collision_Filter
  *  Description:    This is a subclass of the base collision filter class
- *                  IVP_Collision_Filter (see above). You can add multiple 
+ *                  IVP_Collision_Filter (see above). You can add multiple
  *                  Collision_Filters and the meta collision filter will
  *                  filter out collisions that are filtered by any of them
  *******************************************************************************/
-class IVP_Meta_Collision_Filter : public IVP_Collision_Filter {
-private:
+class IVP_Meta_Collision_Filter : public IVP_Collision_Filter
+{
+  private:
     IVP_BOOL delete_on_env_delete;
     IVP_U_Vector<IVP_Collision_Filter> filter_set;
 
-public:
+  public:
     void add_collision_filter(IVP_Collision_Filter *filter);
     void remove_collision_filter(IVP_Collision_Filter *filter);
 
@@ -226,6 +223,5 @@ public:
 
     ~IVP_Meta_Collision_Filter();
 };
-
 
 #endif
