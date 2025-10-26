@@ -991,7 +991,7 @@ void IVP_Environment::simulate_psi(IVP_Time /*psi_time*/)
         cm->check_for_unused_objects(um);
     }
 
-    l_active_value_manager->refresh_psi_active_values(this); // lots of side effects, bombs ....
+    l_active_value_manager->refresh_psi_active_values(this->get_current_time()); // lots of side effects, bombs ....
     fire_event_PSI();                                        // inform psi listeners //???
 
     get_mindist_manager()->recalc_all_exact_wheel_mindist();
