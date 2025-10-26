@@ -12,94 +12,94 @@
 #ifndef IVP_BETTERSTATISTICSMANAGER_INCLUDED
 #define IVP_BETTERSTATISTICSMANAGER_INCLUDED
 
-
 /********************************************************************************
- * Name:	IVP_BetterStatisticsmanager_Callback_Interface   	
+ * Name:	IVP_BetterStatisticsmanager_Callback_Interface
  * Description:	...
  ********************************************************************************/
 
-enum IVP_BETTERSTATISTICSMANAGER_DATA_ENTITY_TYPE {
-    INT_VALUE    = 1,	// one single 'int' value
-    DOUBLE_VALUE = 2,	// one single 'double' value
-    INT_ARRAY    = 3,	// an array of 'int' values
-    DOUBLE_ARRAY = 4,	// an array of 'double' values
-    STRING       = 5
+enum IVP_BETTERSTATISTICSMANAGER_DATA_ENTITY_TYPE
+{
+    INT_VALUE = 1,    // one single 'int' value
+    DOUBLE_VALUE = 2, // one single 'double' value
+    INT_ARRAY = 3,    // an array of 'int' values
+    DOUBLE_ARRAY = 4, // an array of 'double' values
+    STRING = 5
 };
 
-
-class IVP_BetterStatisticsmanager_Data_Int_Array {
+class IVP_BetterStatisticsmanager_Data_Int_Array
+{
 public:
-    int		size;
-    int *	array;
-    int		max_value;
-    int		xpos, ypos; // upper, left corner
-    int		width, height; // graphical size of array
-    int         bg_color, border_color, graph_color;
+    int size;
+    int *array;
+    int max_value;
+    int xpos, ypos;    // upper, left corner
+    int width, height; // graphical size of array
+    int bg_color, border_color, graph_color;
 };
 
-
-class IVP_BetterStatisticsmanager_Data_Double_Array {
+class IVP_BetterStatisticsmanager_Data_Double_Array
+{
 public:
-    int		size;
+    int size;
     IVP_DOUBLE *array;
-    IVP_DOUBLE	max_value;
-    int		xpos, ypos; // upper, left corner
-    int		width, height; // graphical size of array
-    int         bg_color, border_color, graph_color;
+    IVP_DOUBLE max_value;
+    int xpos, ypos;    // upper, left corner
+    int width, height; // graphical size of array
+    int bg_color, border_color, graph_color;
 };
 
-
-class IVP_BetterStatisticsmanager_Data_Entity {
+class IVP_BetterStatisticsmanager_Data_Entity
+{
 private:
-    IVP_BOOL   enabled;
-    
+    IVP_BOOL enabled;
+
 public:
     IVP_BETTERSTATISTICSMANAGER_DATA_ENTITY_TYPE type;
-    union {
-	int         int_value;
-	IVP_DOUBLE  double_value;
-	IVP_BetterStatisticsmanager_Data_Int_Array    int_array;
-	IVP_BetterStatisticsmanager_Data_Double_Array double_array;
+    union
+    {
+        int int_value;
+        IVP_DOUBLE double_value;
+        IVP_BetterStatisticsmanager_Data_Int_Array int_array;
+        IVP_BetterStatisticsmanager_Data_Double_Array double_array;
     } data;
-    char *     text;
-    int        text_color;
-    int        xpos, ypos;
-    
-    void       enable();
-    void       disable();
-    IVP_BOOL   get_state();
+    char *text;
+    int text_color;
+    int xpos, ypos;
 
-    void       set_int_value(int value);
-    void       set_double_value(IVP_DOUBLE value);
-    void       set_array_size(int size); // changing the array size will clear all values!
-    void       set_int_array_latest_value(int value);
-    void       set_double_array_latest_value(IVP_DOUBLE value);
+    void enable();
+    void disable();
+    IVP_BOOL get_state();
 
-    //int        get_int_value();
-    //IVP_DOUBLE get_double_value();
-    //int *      get_int_array();
-    //int        get_int_array_latest_value();
+    void set_int_value(int value);
+    void set_double_value(IVP_DOUBLE value);
+    void set_array_size(int size); // changing the array size will clear all values!
+    void set_int_array_latest_value(int value);
+    void set_double_array_latest_value(IVP_DOUBLE value);
 
-    void       set_text(const char *text);
-    void       set_position(int x, int y);
+    // int        get_int_value();
+    // IVP_DOUBLE get_double_value();
+    // int *      get_int_array();
+    // int        get_int_array_latest_value();
+
+    void set_text(const char *text);
+    void set_position(int x, int y);
 
     IVP_BetterStatisticsmanager_Data_Entity(IVP_BETTERSTATISTICSMANAGER_DATA_ENTITY_TYPE type);
     ~IVP_BetterStatisticsmanager_Data_Entity();
 };
 
-
 /********************************************************************************
- * Name:	IVP_BetterStatisticsmanager_Callback_Interface   	
+ * Name:	IVP_BetterStatisticsmanager_Callback_Interface
  * Description:	A callback called whenever the clustering visualizer needs to
  *		update a certain box in the clustering hierarchy.
  ********************************************************************************/
-class IVP_BetterStatisticsmanager_Callback_Interface {
+class IVP_BetterStatisticsmanager_Callback_Interface
+{
 public:
     virtual void output_request(IVP_BetterStatisticsmanager_Data_Entity *entity) = 0;
     virtual void enable() = 0;
     virtual void disable() = 0;
 };
-
 
 /********************************************************************************
  * Class:	IVP_Clustering_Shortrange_Visualizer
@@ -120,13 +120,14 @@ public:
  *		    hierarchy 'by hand' using the supplied navigation-methods.
  *******************************************************************************/
 
-class IVP_BetterStatisticsmanager {
+class IVP_BetterStatisticsmanager
+{
 private:
     // global data
-    IVP_BOOL                                                     enabled;
+    IVP_BOOL enabled;
     IVP_U_Vector<IVP_BetterStatisticsmanager_Callback_Interface> output_callbacks; // list of user-definable callbacks
-    IVP_U_Vector<IVP_BetterStatisticsmanager_Data_Entity>        data_entities;    // list of all statistical data
-    IVP_DOUBLE                                                   simulation_time;
+    IVP_U_Vector<IVP_BetterStatisticsmanager_Data_Entity> data_entities;           // list of all statistical data
+    IVP_DOUBLE simulation_time;
 
     // temporary data
 
@@ -187,4 +188,3 @@ public:
 };
 
 #endif
-
