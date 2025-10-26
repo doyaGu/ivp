@@ -4,29 +4,26 @@
 
 class IVP_ov_tree_hash : protected IVP_VHash
 {
-protected:
+  protected:
     IVP_BOOL compare(void *elem0, void *elem1) const;
-    int      node_to_index(IVP_OV_Node *node);
+    int node_to_index(IVP_OV_Node *node);
 
-public:
+  public:
     void add_node(IVP_OV_Node *node)
     {
-	add_elem(node, node_to_index(node));
+        add_elem(node, node_to_index(node));
     };
 
     IVP_OV_Node *remove_node(IVP_OV_Node *node)
     {
-	return (IVP_OV_Node *)remove_elem(node, node_to_index(node));
+        return (IVP_OV_Node *)remove_elem(node, node_to_index(node));
     };
 
     IVP_OV_Node *find_node(IVP_OV_Node *node)
     {
-	return (IVP_OV_Node *)find_elem(node, node_to_index(node));
+        return (IVP_OV_Node *)find_elem(node, node_to_index(node));
     };
-  
 
     ~IVP_ov_tree_hash();
-    IVP_ov_tree_hash(int create_size) : IVP_VHash(create_size) {;};
+    IVP_ov_tree_hash(int create_size) : IVP_VHash(create_size) {}
 };
-
-
