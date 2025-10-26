@@ -1,11 +1,15 @@
+#ifndef IVP_U_FLOAT_INCLUDED
+#define IVP_U_FLOAT_INCLUDED
+
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
+
 #ifdef WIN32
-    #include <float.h>
+#include <float.h>
 #endif
 
 #if defined(IVP_NO_DOUBLE) && !defined(SUN)
-    #include <math.h>
-
-    #if defined(WIN32) || defined(PSXII) || defined(LINUX)
+#if defined(WIN32) || defined(PSXII) || defined(LINUX)
 union p_float_ieee
 {
     IVP_FLOAT val;
@@ -16,7 +20,7 @@ union p_float_ieee
         unsigned int signum : 1;
     } ln;
 };
-    #else
+#else
 union p_float_ieee
 {
     IVP_FLOAT val;
@@ -24,18 +28,17 @@ union p_float_ieee
     {
         unsigned int signum : 1;
         unsigned int exp : 8;
-        ;
         unsigned int valh : 23;
     } ln;
 };
-    #endif
-    #define IVP_EXP_FOR_ONE 0x7f
+#endif
+#define IVP_EXP_FOR_ONE 0x7f
 inline int PFM_LD(float a)
 {
     return ((p_float_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
-};
+}
 #else
-    #if defined(POSIX) || defined(WIN32)
+#if defined(POSIX) || defined(WIN32)
 
 union p_double_ieee
 {
@@ -53,14 +56,14 @@ union p_double_ieee
         int h;
     } ln2;
 };
-        #define IVP_EXP_FOR_ONE 0x3ff
+#define IVP_EXP_FOR_ONE 0x3ff
 inline int PFM_LD(double a)
 {
     return ((p_double_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
 };
-    #endif
+#endif
 
-    #if defined(SUN) || defined(SUN4) || defined(__POWERPC__) || defined(GEKKO)
+#if defined(SUN) || defined(SUN4) || defined(__POWERPC__) || defined(GEKKO)
 union p_double_ieee
 {
     double val;
@@ -78,17 +81,17 @@ union p_double_ieee
     } ln2;
 };
 
-        #define P_EXP_FOR_ONE 0x3ff
+#define P_EXP_FOR_ONE 0x3ff
 inline int PFM_LD(double a)
 {
     return ((p_double_ieee *)&(a))->ln.exp - P_EXP_FOR_ONE;
 };
-    #endif
+#endif
 #endif
 
 class IVP_Fast_Math
 {
-  public:
+public:
 #if defined(PSXII)
     /// Calculates the dot product of the calling vector with v.
     /// \param v
@@ -125,7 +128,6 @@ class IVP_Fast_Math
     {
         return IVP_Inline_Math::ivp_sqrtf(x);
     }
-
 #else
     // fast 1/sqrt(x),
     // resolution for resolution_steps
@@ -161,3 +163,5 @@ class IVP_Fast_Math
     }
 #endif
 };
+
+#endif

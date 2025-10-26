@@ -1,9 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-/**** INCLUDES *****/
-#include <ivp_physics.hxx>
-
+#include <ivu_types.hxx>
 #include <ivu_float.hxx>
+#include <ivu_linear.hxx>
 #include <ivu_geometry.hxx>
 
 void IVP_U_Straight::calc_orthogonal_vec_from_point(const IVP_U_Point *point, IVP_U_Point *vec_out) const
@@ -179,7 +178,9 @@ IVP_U_INTERSECT_TYPE IVP_U_Straight::calc_intersect_with(const IVP_U_Straight *s
     IVP_RETURN_TYPE flag =
 #endif
     hesse.calc_intersect_with(this, p_out);
+#ifdef DEBUG
     IVP_ASSERT(flag == IVP_OK);
+#endif
 
     straight2->calc_orthogonal_vec_from_point(p_out, &hp);
     *dist_out = hp.quad_length();

@@ -10,7 +10,8 @@
 #endif
 
 /**** INCLUDES *****/
-#include <ivp_physics.hxx>
+#include <ivu_types.hxx>
+#include <ivu_string.hxx>
 #include <ivu_matrix_macros.hxx>
 
 #if defined(PSXII) || defined(GEKKO)
@@ -493,7 +494,8 @@ int IVP_U_Matrix3::calc_eigen_vector(IVP_DOUBLE eigen_value, IVP_U_Point *eigen_
     matrix.rows[1].k[1] -= eigen_value;
     matrix.rows[2].k[2] -= eigen_value;
 
-    {                            // find maximum value in all values
+    // find maximum value in all values
+    {
         IVP_DOUBLE max = -1.0f;  // real maximum is always positiv
         int max_row = 0;
         int max_col = 0;

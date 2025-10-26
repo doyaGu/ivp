@@ -2,9 +2,14 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_U_LINEAR_WILLAMETTE_INCLUDED
+#define IVP_U_LINEAR_WILLAMETTE_INCLUDED
+
 #ifdef IVP_WILLAMETTE
-    #include <emmintrin.h>
-#endif
+
+#include <ivu_linear.hxx>
+
+#include <emmintrin.h>
 
 inline void IVP_U_Float_Point::set(const IVP_U_Point *p_source)
 {
@@ -39,7 +44,7 @@ inline void IVP_U_Float_Point::set_multiple(const IVP_U_Point *v, IVP_DOUBLE f)
 }
 
 inline void IVP_U_Float_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{ // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -163,7 +168,8 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Float_Point *v, IVP_DOUBLE fac
 }
 
 inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
 
     a = v2->k[0] * factor2;
@@ -178,7 +184,7 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Point *
 }
 
 inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{ // vector addition
     IVP_DOUBLE a, b, c;
 
     a = v2->k[0] * factor2;
@@ -193,7 +199,8 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Float_P
 }
 
 inline void IVP_U_Point::set_pairwise_mult(const IVP_U_Point *v1, const IVP_U_Point *v2)
-{  // pairwise multiple
+{
+    // pairwise multiple
     IVP_DOUBLE a, b, c;
     a = v1->k[0] * v2->k[0];
     b = v1->k[1] * v2->k[1];
@@ -205,7 +212,8 @@ inline void IVP_U_Point::set_pairwise_mult(const IVP_U_Point *v1, const IVP_U_Po
 }
 
 inline void IVP_U_Point::add(const IVP_U_Point *v2)
-{  // vector addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = k[0] + v2->k[0];
     b = k[1] + v2->k[1];
@@ -217,7 +225,8 @@ inline void IVP_U_Point::add(const IVP_U_Point *v2)
 }
 
 inline void IVP_U_Point::add(const IVP_U_Float_Point *v2)
-{  // vector addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = k[0] + v2->k[0];
     b = k[1] + v2->k[1];
@@ -269,7 +278,8 @@ void IVP_U_Point::set_multiple(const IVP_U_Float_Point *p, IVP_DOUBLE f)
 }
 
 inline void IVP_U_Point::subtract(const IVP_U_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     IVP_DOUBLE a, b, c;
     a = k[0] - v2->k[0];
     b = k[1] - v2->k[1];
@@ -281,7 +291,8 @@ inline void IVP_U_Point::subtract(const IVP_U_Point *v2)
 }
 
 inline void IVP_U_Point::subtract(const IVP_U_Float_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     IVP_DOUBLE a, b, c;
     a = k[0] - v2->k[0];
     b = k[1] - v2->k[1];
@@ -344,7 +355,8 @@ inline void IVP_U_Point::subtract(const IVP_U_Float_Point *v1, const IVP_U_Point
 }
 
 inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -358,7 +370,8 @@ inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const I
 }
 
 inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -398,51 +411,52 @@ inline IVP_DOUBLE IVP_U_Point::quad_distance_to(const IVP_U_Float_Point *p) cons
     return a + b + c;
 }
 
-inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const {
-    IVP_IF_WILLAMETTE_OPT(0){
-        IVP_DOUBLE a = p_in -> k[0] - vv.k[0];
-IVP_DOUBLE b = p_in->k[1] - vv.k[1];
-IVP_DOUBLE c = p_in->k[2] - vv.k[2];
-
+inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
-    __m128d v0 = _mm_set1_pd(a);
-    __m128d row00 = _mm_load_pd(&rows[0].k[0]);
-    __m128d row01 = _mm_load_pd(&rows[0].k[2]);
-    __m128d res0 = _mm_mul_pd(v0, row00);
-    __m128d res1 = _mm_mul_pd(v0, row01);
+    IVP_IF_WILLAMETTE_OPT(0)
+    {
+        IVP_DOUBLE a = p_in->k[0] - vv.k[0];
+        IVP_DOUBLE b = p_in->k[1] - vv.k[1];
+        IVP_DOUBLE c = p_in->k[2] - vv.k[2];
 
-    __m128d v1 = _mm_set1_pd(b);
-    __m128d row10 = _mm_load_pd(&rows[1].k[0]);
-    __m128d row11 = _mm_load_pd(&rows[1].k[2]);
-    __m128d p10 = _mm_mul_pd(v1, row10);
-    __m128d p11 = _mm_mul_pd(v1, row11);
-    res0 = _mm_add_pd(res0, p10);
-    res1 = _mm_add_pd(res1, p11);
+        {
+            __m128d v0 = _mm_set1_pd(a);
+            __m128d row00 = _mm_load_pd(&rows[0].k[0]);
+            __m128d row01 = _mm_load_pd(&rows[0].k[2]);
+            __m128d res0 = _mm_mul_pd(v0, row00);
+            __m128d res1 = _mm_mul_pd(v0, row01);
 
-    __m128d v2 = _mm_set1_pd(c);
-    __m128d row20 = _mm_load_pd(&rows[2].k[0]);
-    __m128d row21 = _mm_load_pd(&rows[2].k[2]);
-    __m128d p20 = _mm_mul_pd(v2, row20);
-    __m128d p21 = _mm_mul_pd(v2, row21);
-    res0 = _mm_add_pd(res0, p20);
-    res1 = _mm_add_pd(res1, p21);
+            __m128d v1 = _mm_set1_pd(b);
+            __m128d row10 = _mm_load_pd(&rows[1].k[0]);
+            __m128d row11 = _mm_load_pd(&rows[1].k[2]);
+            __m128d p10 = _mm_mul_pd(v1, row10);
+            __m128d p11 = _mm_mul_pd(v1, row11);
+            res0 = _mm_add_pd(res0, p10);
+            res1 = _mm_add_pd(res1, p11);
 
-    _mm_store_pd(&p_out->k[0], res0);
-    _mm_store_pd(&p_out->k[2], res1);
-}
-}
-else
-{
-    IVP_DOUBLE a = p_in->k[0] - vv.k[0];
-    IVP_DOUBLE b = p_in->k[1] - vv.k[1];
-    IVP_DOUBLE c = p_in->k[2] - vv.k[2];
+            __m128d v2 = _mm_set1_pd(c);
+            __m128d row20 = _mm_load_pd(&rows[2].k[0]);
+            __m128d row21 = _mm_load_pd(&rows[2].k[2]);
+            __m128d p20 = _mm_mul_pd(v2, row20);
+            __m128d p21 = _mm_mul_pd(v2, row21);
+            res0 = _mm_add_pd(res0, p20);
+            res1 = _mm_add_pd(res1, p21);
 
-    p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
-    p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
-    p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
+            _mm_store_pd(&p_out->k[0], res0);
+            _mm_store_pd(&p_out->k[2], res1);
+        }
+    }
+    else
+    {
+        IVP_DOUBLE a = p_in->k[0] - vv.k[0];
+        IVP_DOUBLE b = p_in->k[1] - vv.k[1];
+        IVP_DOUBLE c = p_in->k[2] - vv.k[2];
+
+        p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
+        p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
+        p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
+    }
 }
-}
-;
 
 inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Float_Point *p_out) const
 {
@@ -453,7 +467,7 @@ inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Float_Po
     p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
     p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
     p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
-};
+}
 
 inline void IVP_U_Matrix3::inline_vmult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -463,7 +477,7 @@ inline void IVP_U_Matrix3::inline_vmult3(const IVP_U_Point *p_in, IVP_U_Point *p
     p_out->k[0] = a;
     p_out->k[1] = b;
     p_out->k[2] = c;
-};
+}
 
 inline void IVP_U_Matrix3::inline_vimult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -473,11 +487,10 @@ inline void IVP_U_Matrix3::inline_vimult3(const IVP_U_Point *p_in, IVP_U_Point *
     p_out->k[0] = a;
     p_out->k[1] = b;
     p_out->k[2] = c;
-};  // eigentlich transformation
+} // eigentlich transformation
 
 inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
-
     IVP_DOUBLE h = p_in->k[0];
     IVP_DOUBLE a = h * get_elem(0, 0);
     IVP_DOUBLE b = h * get_elem(1, 0);
@@ -505,7 +518,6 @@ inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Point *p_in, IVP_U_Point *p_
 
 inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Float_Point *p_in, IVP_U_Point *p_out) const
 {
-
     IVP_DOUBLE h = p_in->k[0];
     IVP_DOUBLE a = h * get_elem(0, 0);
     IVP_DOUBLE b = h * get_elem(1, 0);
@@ -644,4 +656,7 @@ inline IVP_DOUBLE IVP_U_Hesse::get_dist(const IVP_U_Point *p) const
 inline IVP_U_Float_Point::IVP_U_Float_Point(const IVP_U_Point *p)
 {
     this->set(p);
-};
+}
+
+#endif // IVP_WILLAMETTE
+#endif

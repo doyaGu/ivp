@@ -2,6 +2,11 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_U_LINEAR_DOUBLE_INCLUDED
+#define IVP_U_LINEAR_DOUBLE_INCLUDED
+
+#include <ivu_linear.hxx>
+
 inline void IVP_U_Float_Point::set(const IVP_U_Point *p_source)
 {
     IVP_DOUBLE a = p_source->k[0];
@@ -35,7 +40,7 @@ inline void IVP_U_Float_Point::set_multiple(const IVP_U_Point *v, IVP_DOUBLE f)
 }
 
 inline void IVP_U_Float_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{ // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -159,7 +164,8 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Float_Point *v, IVP_DOUBLE fac
 }
 
 inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
 
     a = v2->k[0] * factor2;
@@ -174,7 +180,8 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Point *
 }
 
 inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
 
     a = v2->k[0] * factor2;
@@ -189,7 +196,8 @@ inline void IVP_U_Point::add_multiple(const IVP_U_Point *v1, const IVP_U_Float_P
 }
 
 inline void IVP_U_Point::set_pairwise_mult(const IVP_U_Point *v1, const IVP_U_Point *v2)
-{  // pairwise multiple
+{
+    // pairwise multiple
     IVP_DOUBLE a, b, c;
     a = v1->k[0] * v2->k[0];
     b = v1->k[1] * v2->k[1];
@@ -201,7 +209,8 @@ inline void IVP_U_Point::set_pairwise_mult(const IVP_U_Point *v1, const IVP_U_Po
 }
 
 inline void IVP_U_Point::add(const IVP_U_Point *v2)
-{  // vector addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = k[0] + v2->k[0];
     b = k[1] + v2->k[1];
@@ -213,7 +222,8 @@ inline void IVP_U_Point::add(const IVP_U_Point *v2)
 }
 
 inline void IVP_U_Point::add(const IVP_U_Float_Point *v2)
-{  // vector addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = k[0] + v2->k[0];
     b = k[1] + v2->k[1];
@@ -265,7 +275,8 @@ void IVP_U_Point::set_multiple(const IVP_U_Float_Point *p, IVP_DOUBLE f)
 }
 
 inline void IVP_U_Point::subtract(const IVP_U_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     IVP_DOUBLE a, b, c;
     a = k[0] - v2->k[0];
     b = k[1] - v2->k[1];
@@ -277,7 +288,8 @@ inline void IVP_U_Point::subtract(const IVP_U_Point *v2)
 }
 
 inline void IVP_U_Point::subtract(const IVP_U_Float_Point *v2)
-{  // vector subtraction
+{
+    // vector subtraction
     IVP_DOUBLE a, b, c;
     a = k[0] - v2->k[0];
     b = k[1] - v2->k[1];
@@ -340,7 +352,8 @@ inline void IVP_U_Point::subtract(const IVP_U_Float_Point *v1, const IVP_U_Point
 }
 
 inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const IVP_U_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -354,7 +367,8 @@ inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Point *v1, const I
 }
 
 inline void IVP_U_Point::inline_subtract_and_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{
+    // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -403,7 +417,7 @@ inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Point *p
     p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
     p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
     p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
-};
+}
 
 inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Float_Point *p_out) const
 {
@@ -414,7 +428,7 @@ inline void IVP_U_Matrix::inline_vimult4(const IVP_U_Point *p_in, IVP_U_Float_Po
     p_out->k[0] = get_elem(0, 0) * a + get_elem(1, 0) * b + get_elem(2, 0) * c;
     p_out->k[1] = get_elem(0, 1) * a + get_elem(1, 1) * b + get_elem(2, 1) * c;
     p_out->k[2] = get_elem(0, 2) * a + get_elem(1, 2) * b + get_elem(2, 2) * c;
-};
+}
 
 inline void IVP_U_Matrix3::inline_vmult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -424,7 +438,7 @@ inline void IVP_U_Matrix3::inline_vmult3(const IVP_U_Point *p_in, IVP_U_Point *p
     p_out->k[0] = a;
     p_out->k[1] = b;
     p_out->k[2] = c;
-};
+}
 
 inline void IVP_U_Matrix3::inline_vimult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -434,7 +448,7 @@ inline void IVP_U_Matrix3::inline_vimult3(const IVP_U_Point *p_in, IVP_U_Point *
     p_out->k[0] = a;
     p_out->k[1] = b;
     p_out->k[2] = c;
-};  // eigentlich transformation
+} // eigentlich transformation
 
 inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -605,4 +619,6 @@ inline IVP_DOUBLE IVP_U_Hesse::get_dist(const IVP_U_Point *p) const
 inline IVP_U_Float_Point::IVP_U_Float_Point(const IVP_U_Point *p)
 {
     this->set(p);
-};
+}
+
+#endif

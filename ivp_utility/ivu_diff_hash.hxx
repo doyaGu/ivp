@@ -2,8 +2,10 @@
 
 // IVP_EXPORT_PROTECTED
 
-#ifndef IVP_DIFF_HASH_INCLUDED
-#define IVP_DIFF_HASH_INCLUDED
+#ifndef IVP_U_DIFF_HASH_INCLUDED
+#define IVP_U_DIFF_HASH_INCLUDED
+
+#include <ivu_types.hxx>
 
 /****************************************************************
  * Description:	    resorts input base vector according to the
@@ -63,7 +65,8 @@ class IVP_Diff_Hash
                 {
                     index &= buffersize_minus_one;
                     if (hash_to_vector_index[index] == -1)
-                    {  // free place found
+                    {
+                        // free place found
                         hash_to_vector_index[index] = i;
                         break;
                     }

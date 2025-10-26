@@ -2,8 +2,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _P_LIST_INCLUDED
-#define _P_LIST_INCLUDED
+#ifndef IVP_U_LIST_INCLUDED
+#define IVP_U_LIST_INCLUDED
 
 /* list header, list elements should have:
    next, prev
@@ -12,7 +12,7 @@
 template <class T>
 class P_List
 {
-  public:
+public:
     T *first;
     int len;
 
@@ -27,7 +27,7 @@ class P_List
         elem->prev = 0;
         first = elem;
         len++;
-    };
+    }
 
     void remove(T *elem)
     {
@@ -46,10 +46,10 @@ class P_List
         {
             h->prev = e->prev;
         }
-        e->next = (T *)-1;  // invalid flag !!
+        e->next = (T *)-1; // invalid flag !!
         len--;
         // elem->next = 0;
-    };
+    }
 
     P_List()
     {

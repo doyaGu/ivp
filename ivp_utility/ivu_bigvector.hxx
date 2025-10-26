@@ -5,6 +5,8 @@
 #ifndef _IVP_BIGVECTOR_INCLUDED
 #define _IVP_BIGVECTOR_INCLUDED
 
+#include <ivu_types.hxx>
+
 /********************************************************************************
  *	File:	       	ivu_physics.hxx
  *	Description:	A vector is an array of pointers

@@ -2,6 +2,11 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_U_LINEAR_SOFTWARE_INCLUDED
+#define IVP_U_LINEAR_SOFTWARE_INCLUDED
+
+#include <ivu_linear.hxx>
+
 inline void IVP_U_Float_Point::set_to_zero()
 {
     k[0] = 0.0f;
@@ -59,7 +64,7 @@ inline IVP_DOUBLE IVP_U_Float_Point::dot_product(const IVP_U_Float_Point *v2) co
 };
 
 inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{ // vector addition
     IVP_DOUBLE a, b, c;
 
     a = v2->k[0] * factor2;
@@ -74,7 +79,8 @@ inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const I
 }
 
 inline void IVP_U_Float_Point::set_pairwise_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2)
-{  // pairwise multiple
+{
+    // pairwise multiple
     IVP_DOUBLE a, b, c;
     a = v1->k[0] * v2->k[0];
     b = v1->k[1] * v2->k[1];
@@ -108,7 +114,7 @@ inline void IVP_U_Float_Point::subtract(const IVP_U_Float_Point *v1, const IVP_U
 }
 
 inline void IVP_U_Float_Point::inline_subtract_and_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{ // vector addition
     IVP_DOUBLE a, b, c;
     a = (v1->k[0] - v2->k[0]);
     b = (v1->k[1] - v2->k[1]);
@@ -178,7 +184,7 @@ inline void IVP_U_Matrix3::inline_vimult3(const IVP_U_Float_Point *p_in, IVP_U_F
     p_out->k[0] = (IVP_FLOAT)a;
     p_out->k[1] = (IVP_FLOAT)b;
     p_out->k[2] = (IVP_FLOAT)c;
-};  // eigentlich transformation
+}; // eigentlich transformation
 
 inline void IVP_U_Matrix::inline_vmult4(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
@@ -289,7 +295,8 @@ inline void IVP_U_Quat::init()
 }
 
 inline IVP_DOUBLE IVP_U_Quat::acos_quat(const IVP_U_Quat *q) const
-{  // acosinus between two quats
+{
+    // acosinus between two quats
     return x * q->x + y * q->y + z * q->z + w * q->w;
 }
 
@@ -350,3 +357,5 @@ void IVP_U_Float_Quat::set(const IVP_U_Quat *source)
     z = (IVP_FLOAT)source->z;
     w = (IVP_FLOAT)source->w;
 }
+
+#endif

@@ -1,5 +1,5 @@
-#ifndef IVP_HASH_INCLUDED
-#define IVP_HASH_INCLUDED
+#ifndef IVP_U_HASH_INCLUDED
+#define IVP_U_HASH_INCLUDED
 
 class IVP_Hash_Elem;
 
@@ -38,7 +38,7 @@ class IVP_Hash_Enumerator
         my_hash = hash;
         index_pos = -1;
         el = 0;
-    };
+    }
     void *next_element();
 };
 

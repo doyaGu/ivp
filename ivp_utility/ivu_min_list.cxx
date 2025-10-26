@@ -4,7 +4,7 @@
     #pragma implementation "ivu_min_list.hxx"
 #endif
 #include "ivu_min_list.hxx"
-#include <ivp_physics.hxx>
+#include "ivu_string.hxx"
 
 IVP_U_Min_List::IVP_U_Min_List(int start_size)
 {

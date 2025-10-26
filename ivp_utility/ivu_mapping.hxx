@@ -1,5 +1,7 @@
-#ifndef _IVP_U_MAPPING_INCLUDED
-#define _IVP_U_MAPPING_INCLUDED
+#ifndef IVP_U_MAPPING_INCLUDED
+#define IVP_U_MAPPING_INCLUDED
+
+#include <ivu_linear.hxx>
 
 enum IVP_MATRIX_CATEGORY
 {

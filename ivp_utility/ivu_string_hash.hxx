@@ -2,11 +2,14 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_U_STRING_HASH_INCLUDED
+#define IVP_U_STRING_HASH_INCLUDED
+
 class IVP_Hash_Elem;
 
 class IVP_U_String_Hash
 {
-  public:
+public:
     int size;
     void *not_found_value;
     IVP_Hash_Elem **elems;
@@ -19,3 +22,5 @@ class IVP_U_String_Hash
     void remove(const char *key);
     void *find(const char *key) const;
 };
+
+#endif

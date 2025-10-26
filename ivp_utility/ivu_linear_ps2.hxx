@@ -2,6 +2,13 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_U_LINEAR_PS2_INCLUDED
+#define IVP_U_LINEAR_PS2_INCLUDED
+
+#ifdef IVP_PS2
+
+#include <ivu_linear.hxx>
+
 #if 1
 
 inline void IVP_U_Float_Point::set_negative(const IVP_U_Float_Point *p_source)
@@ -210,7 +217,7 @@ inline void IVP_U_Float_Point::set(const IVP_U_Float_Point *p_source)
 }
 
 inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
-{  // vektor addition
+{  // vector addition
 #if 0
     IVP_DOUBLE a,b,c;
 
@@ -291,7 +298,7 @@ inline void IVP_U_Float_Point::set_multiple(const IVP_U_Float_Point *v, IVP_DOUB
 }
 
 inline void IVP_U_Float_Point::inline_subtract_and_mult(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor)
-{  // vektor addition
+{  // vector addition
 #if 0
     IVP_DOUBLE a,b,c;
     a = (v1->k[0] - v2->k[0]);
@@ -794,3 +801,6 @@ void IVP_U_Float_Quat::set(const IVP_U_Quat *source)
     z = (IVP_FLOAT)source->z;
     w = (IVP_FLOAT)source->w;
 }
+
+#endif // IVP_PS2
+#endif

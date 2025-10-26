@@ -4,6 +4,8 @@
 #define IVP_U_MINLIST_INCLUDED
 // IVP_EXPORT_PUBLIC
 
+#include <ivu_types.hxx>
+
 typedef float IVP_U_MINLIST_FIXED_POINT;
 #define IVP_U_MINLIST_MAXVALUE 1e10f
 

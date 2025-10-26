@@ -3,8 +3,8 @@
 #ifndef WIN32
     #pragma implementation "ivu_min_hash.hxx"
 #endif
+
 #include "ivu_min_hash.hxx"
-#include <ivp_physics.hxx>
 
 inline int IVP_U_Min_Hash::hash_index(const int *key) const
 {
