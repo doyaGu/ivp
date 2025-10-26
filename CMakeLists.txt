@@ -32,326 +32,315 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 endif()
 
-set(IVP_COLLISION_DIR ${IVP_DIR}/ivp_collision)
+# ============================================================================
+# Common Library Function
+# ============================================================================
 
-set(IVP_COLLISION_SOURCES
-        ${IVP_COLLISION_DIR}/ivp_3d_solver.cxx
-        ${IVP_COLLISION_DIR}/ivp_3d_solver.hxx
-        ${IVP_COLLISION_DIR}/ivp_cache_ledge_point.hxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_longrange.cxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_longrange.hxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_lrange_hash.cxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_lrange_hash.hxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_visual_hash.cxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_visual_hash.hxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_visualizer.cxx
-        ${IVP_COLLISION_DIR}/ivp_clustering_visualizer.hxx
-        ${IVP_COLLISION_DIR}/ivp_coll_del_root_mindist.cxx
-        ${IVP_COLLISION_DIR}/ivp_collision.hxx
-        ${IVP_COLLISION_DIR}/ivp_collision_filter.cxx
-        ${IVP_COLLISION_DIR}/ivp_collision_filter.hxx
-        ${IVP_COLLISION_DIR}/ivp_compact_ledge.cxx
-        ${IVP_COLLISION_DIR}/ivp_compact_ledge.hxx
-        ${IVP_COLLISION_DIR}/ivp_compact_ledge_solver.cxx
-        ${IVP_COLLISION_DIR}/ivp_compact_ledge_solver.hxx
-        ${IVP_COLLISION_DIR}/ivp_i_collision_vhash.cxx
-        ${IVP_COLLISION_DIR}/ivp_i_collision_vhash.hxx
-        ${IVP_COLLISION_DIR}/ivp_listener_collision.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist.cxx
-        ${IVP_COLLISION_DIR}/ivp_mindist.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_debug.cxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_event.cxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_event.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_intern.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_macros.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_mcases.cxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_minimize.cxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_minimize.hxx
-        ${IVP_COLLISION_DIR}/ivp_mindist_recursive.cxx
-        ${IVP_COLLISION_DIR}/ivp_oo_watcher.cxx
-        ${IVP_COLLISION_DIR}/ivp_range_manager.cxx
-        ${IVP_COLLISION_DIR}/ivp_range_manager.hxx
-        ${IVP_COLLISION_DIR}/ivp_ray_solver.cxx
-        ${IVP_COLLISION_DIR}/ivp_ray_solver.hxx
-        ${IVP_COLLISION_DIR}/ivp_sphere_solver.cxx
-        ${IVP_COLLISION_DIR}/ivp_universe_manager.hxx
-)
-
-set(IVP_CONTROLLER_DIR ${IVP_DIR}/ivp_controller)
-
-set(IVP_CONTROLLER_SOURCES
-        ${IVP_CONTROLLER_DIR}/ivp_actuator.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_actuator.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_actuator_info.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_actuator_spring.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_actuator_spring.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_attacher_to_cores.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_buoyancy_solver.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_buoyancy_solver.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_car_system.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_car_system.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_car.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_car.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_fixed_keyed.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_fixed_keyed.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_local.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_local.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_constraint_types.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_airboat.cpp
-        ${IVP_CONTROLLER_DIR}/ivp_controller_airboat.h
-        ${IVP_CONTROLLER_DIR}/ivp_controller_buoyancy.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_buoyancy.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_floating.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_floating.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_golem.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_motion.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_motion.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_raycast_car.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_raycast_car.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_stiff_spring.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_stiff_spring.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_world_frict.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_controller_world_frict.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_forcefield.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_forcefield.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_multidimensional_interp.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_multidimensional_interp.hxx
-        ${IVP_CONTROLLER_DIR}/ivp_template_constraint.cxx
-        ${IVP_CONTROLLER_DIR}/ivp_template_constraint.hxx
-)
-
-set(IVP_INTERN_DIR ${IVP_DIR}/ivp_intern)
-
-set(IVP_INTERN_SOURCES
-        ${IVP_INTERN_DIR}/ivp_ball.cxx
-        ${IVP_INTERN_DIR}/ivp_calc_next_psi_solver.cxx
-        ${IVP_INTERN_DIR}/ivp_calc_next_psi_solver.hxx
-        ${IVP_INTERN_DIR}/ivp_controller_phantom.cxx
-        ${IVP_INTERN_DIR}/ivp_core.cxx
-        ${IVP_INTERN_DIR}/ivp_environment.cxx
-        ${IVP_INTERN_DIR}/ivp_friction.cxx
-        ${IVP_INTERN_DIR}/ivp_friction.hxx
-        ${IVP_INTERN_DIR}/ivp_friction_gaps.cxx
-        ${IVP_INTERN_DIR}/ivp_friction_solver.hxx
-        ${IVP_INTERN_DIR}/ivp_great_matrix.cxx
-        ${IVP_INTERN_DIR}/ivp_hull_manager.cxx
-        ${IVP_INTERN_DIR}/ivp_hull_manager_macros.hxx
-        ${IVP_INTERN_DIR}/ivp_i_controller_vhash.hxx
-        ${IVP_INTERN_DIR}/ivp_i_friction_hash.cxx
-        ${IVP_INTERN_DIR}/ivp_i_friction_hash.hxx
-        ${IVP_INTERN_DIR}/ivp_i_object_vhash.cxx
-        ${IVP_INTERN_DIR}/ivp_i_object_vhash.hxx
-        ${IVP_INTERN_DIR}/ivp_impact.cxx
-        ${IVP_INTERN_DIR}/ivp_impact.hxx
-        ${IVP_INTERN_DIR}/ivp_merge_core.cxx
-        ${IVP_INTERN_DIR}/ivp_merge_core.hxx
-        ${IVP_INTERN_DIR}/ivp_mindist_friction.cxx
-        ${IVP_INTERN_DIR}/ivp_object.cxx
-        ${IVP_INTERN_DIR}/ivp_object_attach.cxx
-        ${IVP_INTERN_DIR}/ivp_physic.cxx
-        ${IVP_INTERN_DIR}/ivp_physic_private.cxx
-        ${IVP_INTERN_DIR}/ivp_physic_private.hxx
-        ${IVP_INTERN_DIR}/ivp_polygon.cxx
-        ${IVP_INTERN_DIR}/ivp_sim_unit.cxx
-        ${IVP_INTERN_DIR}/ivp_sim_unit.hxx
-        ${IVP_INTERN_DIR}/ivp_solver_core_reaction.cxx
-        ${IVP_INTERN_DIR}/ivp_time.cxx
-)
-
-set(IVP_PHYSICS_DIR ${IVP_DIR}/ivp_physics)
-
-set(IVP_PHYSICS_SOURCES
-        ${IVP_PHYSICS_DIR}/ive_graphics.cxx
-        ${IVP_PHYSICS_DIR}/ive_graphics.hxx
-        ${IVP_PHYSICS_DIR}/ivp_anomaly_manager.cxx
-        ${IVP_PHYSICS_DIR}/ivp_anomaly_manager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_authenticity.hxx
-        ${IVP_PHYSICS_DIR}/ivp_ball.hxx
-        ${IVP_PHYSICS_DIR}/ivp_betterdebugmanager.cxx
-        ${IVP_PHYSICS_DIR}/ivp_betterdebugmanager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_betterstatisticsmanager.cxx
-        ${IVP_PHYSICS_DIR}/ivp_betterstatisticsmanager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_cache_object.cxx
-        ${IVP_PHYSICS_DIR}/ivp_cache_object.hxx
-        ${IVP_PHYSICS_DIR}/ivp_contact_situation.hxx
-        ${IVP_PHYSICS_DIR}/ivp_core.hxx
-        ${IVP_PHYSICS_DIR}/ivp_core_macros.hxx
-        ${IVP_PHYSICS_DIR}/ivp_debug.hxx
-        ${IVP_PHYSICS_DIR}/ivp_debug_manager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_environment.hxx
-        ${IVP_PHYSICS_DIR}/ivp_great_matrix.hxx
-        ${IVP_PHYSICS_DIR}/ivp_hull_manager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_liquid_surface_descript.cxx
-        ${IVP_PHYSICS_DIR}/ivp_liquid_surface_descript.hxx
-        ${IVP_PHYSICS_DIR}/ivp_listener_hull.hxx
-        ${IVP_PHYSICS_DIR}/ivp_listener_object.hxx
-        ${IVP_PHYSICS_DIR}/ivp_listener_psi.hxx
-        ${IVP_PHYSICS_DIR}/ivp_material.cxx
-        ${IVP_PHYSICS_DIR}/ivp_material.hxx
-        ${IVP_PHYSICS_DIR}/ivp_object.hxx
-        ${IVP_PHYSICS_DIR}/ivp_object_attach.hxx
-        ${IVP_PHYSICS_DIR}/ivp_performancecounter.cxx
-        ${IVP_PHYSICS_DIR}/ivp_performancecounter.hxx
-        ${IVP_PHYSICS_DIR}/ivp_phantom.hxx
-        ${IVP_PHYSICS_DIR}/ivp_physics.hxx
-        ${IVP_PHYSICS_DIR}/ivp_polygon.hxx
-        ${IVP_PHYSICS_DIR}/ivp_radar.hxx
-        ${IVP_PHYSICS_DIR}/ivp_radar_appl.hxx
-        ${IVP_PHYSICS_DIR}/ivp_real_object.hxx
-        ${IVP_PHYSICS_DIR}/ivp_solver_core_reaction.hxx
-        ${IVP_PHYSICS_DIR}/ivp_stat_manager_cback_con.cxx
-        ${IVP_PHYSICS_DIR}/ivp_stat_manager_cback_con.hxx
-        ${IVP_PHYSICS_DIR}/ivp_surface_manager.cxx
-        ${IVP_PHYSICS_DIR}/ivp_surface_manager.hxx
-        ${IVP_PHYSICS_DIR}/ivp_templates.cxx
-        ${IVP_PHYSICS_DIR}/ivp_templates.hxx
-        ${IVP_PHYSICS_DIR}/ivp_time.hxx
-        ${IVP_PHYSICS_DIR}/ivp_time_event.hxx
-)
-
-set(IVP_SURFACEMANAGER_DIR ${IVP_DIR}/ivp_surface_manager)
-
-set(IVP_SURFACEMANAGER_SOURCES
-        ${IVP_SURFACEMANAGER_DIR}/ivp_compact_grid.hxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_compact_surface.cxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_compact_surface.hxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_gridbuild_array.cxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_gridbuild_array.hxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_surman_grid.cxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_surman_grid.hxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_surman_polygon.cxx
-        ${IVP_SURFACEMANAGER_DIR}/ivp_surman_polygon.hxx
-)
-
-set(IVP_UTILITY_DIR ${IVP_DIR}/ivp_utility)
-
-set(IVP_UTILITY_SOURCES
-        ${IVP_UTILITY_DIR}/ivu_active_value.cxx
-        ${IVP_UTILITY_DIR}/ivu_active_value.hxx
-        ${IVP_UTILITY_DIR}/ivu_active_value_hash.hxx
-        ${IVP_UTILITY_DIR}/ivu_bigvector.cxx
-        ${IVP_UTILITY_DIR}/ivu_bigvector.hxx
-        ${IVP_UTILITY_DIR}/ivu_diff_hash.hxx
-        ${IVP_UTILITY_DIR}/ivu_float.hxx
-        ${IVP_UTILITY_DIR}/ivu_fvector.hxx
-        ${IVP_UTILITY_DIR}/ivu_geometry.cxx
-        ${IVP_UTILITY_DIR}/ivu_geometry.hxx
-        ${IVP_UTILITY_DIR}/ivu_hash.cxx
-        ${IVP_UTILITY_DIR}/ivu_hash.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear.cxx
-        ${IVP_UTILITY_DIR}/ivu_linear.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_double.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_macros.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_PIII.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_ps2.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_software.hxx
-        ${IVP_UTILITY_DIR}/ivu_linear_willamette.hxx
-        ${IVP_UTILITY_DIR}/ivu_list.hxx
-        ${IVP_UTILITY_DIR}/ivu_mapping.hxx
-        ${IVP_UTILITY_DIR}/ivu_matrix_macros.hxx
-        ${IVP_UTILITY_DIR}/ivu_memory.cxx
-        ${IVP_UTILITY_DIR}/ivu_memory.hxx
-        ${IVP_UTILITY_DIR}/ivu_min_hash.cxx
-        ${IVP_UTILITY_DIR}/ivu_min_hash.hxx
-        ${IVP_UTILITY_DIR}/ivu_min_list.cxx
-        ${IVP_UTILITY_DIR}/ivu_min_list.hxx
-        ${IVP_UTILITY_DIR}/ivu_os_dep.cxx
-        ${IVP_UTILITY_DIR}/ivu_ps2.hxx
-        ${IVP_UTILITY_DIR}/ivu_quat.cxx
-        ${IVP_UTILITY_DIR}/ivu_quat.hxx
-        ${IVP_UTILITY_DIR}/ivu_set.hxx
-        ${IVP_UTILITY_DIR}/ivu_string.cxx
-        ${IVP_UTILITY_DIR}/ivu_string.hxx
-        ${IVP_UTILITY_DIR}/ivu_string_hash.hxx
-        ${IVP_UTILITY_DIR}/ivu_types.cxx
-        ${IVP_UTILITY_DIR}/ivu_types.hxx
-        ${IVP_UTILITY_DIR}/ivu_vector.cxx
-        ${IVP_UTILITY_DIR}/ivu_vector.hxx
-        ${IVP_UTILITY_DIR}/ivu_vhash.cxx
-        ${IVP_UTILITY_DIR}/ivu_vhash.hxx
-)
-
-add_library(ivp_physics STATIC)
-target_sources(ivp_physics PRIVATE
-        ${IVP_COLLISION_SOURCES}
-        ${IVP_CONTROLLER_SOURCES}
-        ${IVP_INTERN_SOURCES}
-        ${IVP_PHYSICS_SOURCES}
-        ${IVP_SURFACEMANAGER_SOURCES}
-        ${IVP_UTILITY_SOURCES}
-)
-target_include_directories(ivp_physics PUBLIC
-        $<BUILD_INTERFACE:${IVP_COLLISION_DIR}>
-        $<BUILD_INTERFACE:${IVP_CONTROLLER_DIR}>
-        $<BUILD_INTERFACE:${IVP_INTERN_DIR}>
-        $<BUILD_INTERFACE:${IVP_PHYSICS_DIR}>
-        $<BUILD_INTERFACE:${IVP_SURFACEMANAGER_DIR}>
-        $<BUILD_INTERFACE:${IVP_UTILITY_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/havana>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/havana/havok>
+function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
+    # Create the library
+    add_library(${LIBRARY_NAME} STATIC ${SOURCES})
+    
+    # Set include directories
+    target_include_directories(${LIBRARY_NAME} PUBLIC
+        $<BUILD_INTERFACE:${SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
-)
-target_compile_definitions(ivp_physics PRIVATE IVP_VERSION_SDK)
+    )
+    
+    # Set compile definitions
+    target_compile_definitions(${LIBRARY_NAME} PRIVATE IVP_VERSION_SDK)
+    
+    # Link with dependencies
+    if(DEPENDENCIES)
+        target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
+    endif()
+    
+    # Set target properties
+    set_target_properties(${LIBRARY_NAME} PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+    )
+    
+    # Platform-specific configurations
+    if(WIN32)
+        target_compile_definitions(${LIBRARY_NAME} PRIVATE
+            WIN32
+            _WINDOWS
+            _CRT_SECURE_NO_WARNINGS
+        )
+        if(MSVC)
+            target_compile_options(${LIBRARY_NAME} PRIVATE /W3)
+            target_compile_options(${LIBRARY_NAME} PRIVATE
+                /wd4996  # deprecated function warnings
+                /wd4244  # conversion warnings
+                /wd4267  # size_t to int warnings
+            )
+        endif()
+    endif()
+    
+    if(UNIX)
+        target_compile_definitions(${LIBRARY_NAME} PRIVATE UNIX)
+        if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+            target_compile_definitions(${LIBRARY_NAME} PRIVATE LINUX)
+        endif()
+    endif()
+    
+    if(APPLE)
+        target_compile_definitions(${LIBRARY_NAME} PRIVATE APPLE)
+        target_compile_options(${LIBRARY_NAME} PRIVATE -Wno-deprecated-declarations)
+    endif()
+endfunction()
 
-# Set target properties for better compilation
-set_target_properties(ivp_physics PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-)
+# ============================================================================
+# Library Definitions - One Library Per Directory
+# ============================================================================
 
+# ivp_utility - Foundation layer (no dependencies)
+set(IVP_UTILITY_SOURCES
+    ${IVP_DIR}/ivp_utility/ivu_active_value.cxx
+    ${IVP_DIR}/ivp_utility/ivu_active_value.hxx
+    ${IVP_DIR}/ivp_utility/ivu_active_value_hash.hxx
+    ${IVP_DIR}/ivp_utility/ivu_bigvector.cxx
+    ${IVP_DIR}/ivp_utility/ivu_bigvector.hxx
+    ${IVP_DIR}/ivp_utility/ivu_diff_hash.hxx
+    ${IVP_DIR}/ivp_utility/ivu_float.hxx
+    ${IVP_DIR}/ivp_utility/ivu_fvector.hxx
+    ${IVP_DIR}/ivp_utility/ivu_geometry.cxx
+    ${IVP_DIR}/ivp_utility/ivu_geometry.hxx
+    ${IVP_DIR}/ivp_utility/ivu_hash.cxx
+    ${IVP_DIR}/ivp_utility/ivu_hash.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear.cxx
+    ${IVP_DIR}/ivp_utility/ivu_linear.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_double.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_macros.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_PIII.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_ps2.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_software.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_willamette.hxx
+    ${IVP_DIR}/ivp_utility/ivu_list.hxx
+    ${IVP_DIR}/ivp_utility/ivu_mapping.cxx
+    ${IVP_DIR}/ivp_utility/ivu_mapping.hxx
+    ${IVP_DIR}/ivp_utility/ivu_matrix_macros.hxx
+    ${IVP_DIR}/ivp_utility/ivu_memory.cxx
+    ${IVP_DIR}/ivp_utility/ivu_memory.hxx
+    ${IVP_DIR}/ivp_utility/ivu_min_hash.cxx
+    ${IVP_DIR}/ivp_utility/ivu_min_hash.hxx
+    ${IVP_DIR}/ivp_utility/ivu_min_list.cxx
+    ${IVP_DIR}/ivp_utility/ivu_min_list.hxx
+    ${IVP_DIR}/ivp_utility/ivu_os_dep.cxx
+    ${IVP_DIR}/ivp_utility/ivu_quat.cxx
+    ${IVP_DIR}/ivp_utility/ivu_quat.hxx
+    ${IVP_DIR}/ivp_utility/ivu_set.hxx
+    ${IVP_DIR}/ivp_utility/ivu_string.cxx
+    ${IVP_DIR}/ivp_utility/ivu_string.hxx
+    ${IVP_DIR}/ivp_utility/ivu_string_hash.hxx
+    ${IVP_DIR}/ivp_utility/ivu_types.hxx
+    ${IVP_DIR}/ivp_utility/ivu_vector.cxx
+    ${IVP_DIR}/ivp_utility/ivu_vector.hxx
+    ${IVP_DIR}/ivp_utility/ivu_vhash.cxx
+)
+add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
+
+# ivp_surface_manager - Depends on utility
+set(IVP_SURFACEMANAGER_SOURCES
+    ${IVP_DIR}/ivp_surface_manager/ivp_compact_grid.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_compact_surface.cxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_compact_surface.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_gridbuild_array.cxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_gridbuild_array.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_surman_grid.cxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_surman_grid.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.cxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.hxx
+)
+add_ivp_library(ivp_surface_manager "${IVP_DIR}/ivp_surface_manager" "ivp_utility" "${IVP_SURFACEMANAGER_SOURCES}")
+
+# ivp_collision - Depends on utility and surface manager
+set(IVP_COLLISION_SOURCES
+    ${IVP_DIR}/ivp_collision/ivp_3d_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_3d_solver.hxx
+    ${IVP_DIR}/ivp_collision/ivp_cache_ledge_point.hxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_longrange.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_longrange.hxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.hxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_visual_hash.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_visual_hash.hxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_visualizer.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_visualizer.hxx
+    ${IVP_DIR}/ivp_collision/ivp_coll_del_root_mindist.cxx
+    ${IVP_DIR}/ivp_collision/ivp_collision.hxx
+    ${IVP_DIR}/ivp_collision/ivp_collision_filter.cxx
+    ${IVP_DIR}/ivp_collision/ivp_collision_filter.hxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge.cxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge.hxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge_solver.hxx
+    ${IVP_DIR}/ivp_collision/ivp_i_collision_vhash.cxx
+    ${IVP_DIR}/ivp_collision/ivp_i_collision_vhash.hxx
+    ${IVP_DIR}/ivp_collision/ivp_listener_collision.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist.cxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_debug.cxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_event.cxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_event.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_intern.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_macros.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_mcases.cxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_minimize.cxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_minimize.hxx
+    ${IVP_DIR}/ivp_collision/ivp_mindist_recursive.cxx
+    ${IVP_DIR}/ivp_collision/ivp_oo_watcher.cxx
+    ${IVP_DIR}/ivp_collision/ivp_range_manager.cxx
+    ${IVP_DIR}/ivp_collision/ivp_range_manager.hxx
+    ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_ray_solver.hxx
+    ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_universe_manager.hxx
+)
+add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_utility;ivp_surface_manager" "${IVP_COLLISION_SOURCES}")
+
+# ivp_intern - Depends on utility, surface manager, and collision
+set(IVP_INTERN_SOURCES
+    ${IVP_DIR}/ivp_intern/ivp_ball.cxx
+    ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.cxx
+    ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.hxx
+    ${IVP_DIR}/ivp_intern/ivp_controller_phantom.cxx
+    ${IVP_DIR}/ivp_intern/ivp_core.cxx
+    ${IVP_DIR}/ivp_intern/ivp_environment.cxx
+    ${IVP_DIR}/ivp_intern/ivp_friction.cxx
+    ${IVP_DIR}/ivp_intern/ivp_friction.hxx
+    ${IVP_DIR}/ivp_intern/ivp_friction_gaps.cxx
+    ${IVP_DIR}/ivp_intern/ivp_friction_solver.hxx
+    ${IVP_DIR}/ivp_intern/ivp_great_matrix.cxx
+    ${IVP_DIR}/ivp_intern/ivp_hull_manager.cxx
+    ${IVP_DIR}/ivp_intern/ivp_hull_manager_macros.hxx
+    ${IVP_DIR}/ivp_intern/ivp_i_controller_vhash.hxx
+    ${IVP_DIR}/ivp_intern/ivp_i_friction_hash.cxx
+    ${IVP_DIR}/ivp_intern/ivp_i_friction_hash.hxx
+    ${IVP_DIR}/ivp_intern/ivp_i_object_vhash.cxx
+    ${IVP_DIR}/ivp_intern/ivp_i_object_vhash.hxx
+    ${IVP_DIR}/ivp_intern/ivp_impact.cxx
+    ${IVP_DIR}/ivp_intern/ivp_impact.hxx
+    ${IVP_DIR}/ivp_intern/ivp_merge_core.cxx
+    ${IVP_DIR}/ivp_intern/ivp_merge_core.hxx
+    ${IVP_DIR}/ivp_intern/ivp_mindist_friction.cxx
+    ${IVP_DIR}/ivp_intern/ivp_object.cxx
+    ${IVP_DIR}/ivp_intern/ivp_object_attach.cxx
+    ${IVP_DIR}/ivp_intern/ivp_physic.cxx
+    ${IVP_DIR}/ivp_intern/ivp_physic_private.cxx
+    ${IVP_DIR}/ivp_intern/ivp_physic_private.hxx
+    ${IVP_DIR}/ivp_intern/ivp_polygon.cxx
+    ${IVP_DIR}/ivp_intern/ivp_sim_unit.cxx
+    ${IVP_DIR}/ivp_intern/ivp_sim_unit.hxx
+    ${IVP_DIR}/ivp_intern/ivp_solver_core_reaction.cxx
+    ${IVP_DIR}/ivp_intern/ivp_time.cxx
+)
+add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_manager;ivp_collision" "${IVP_INTERN_SOURCES}")
+
+# ivp_physics - Main physics API, depends on core modules
+set(IVP_PHYSICS_SOURCES
+    ${IVP_DIR}/ivp_physics/ive_graphics.cxx
+    ${IVP_DIR}/ivp_physics/ive_graphics.hxx
+    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_authenticity.hxx
+    ${IVP_DIR}/ivp_physics/ivp_ball.hxx
+    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_cache_object.cxx
+    ${IVP_DIR}/ivp_physics/ivp_cache_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_contact_situation.hxx
+    ${IVP_DIR}/ivp_physics/ivp_core.hxx
+    ${IVP_DIR}/ivp_physics/ivp_core_macros.hxx
+    ${IVP_DIR}/ivp_physics/ivp_debug.hxx
+    ${IVP_DIR}/ivp_physics/ivp_debug_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_environment.hxx
+    ${IVP_DIR}/ivp_physics/ivp_great_matrix.hxx
+    ${IVP_DIR}/ivp_physics/ivp_hull_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.cxx
+    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_hull.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_psi.hxx
+    ${IVP_DIR}/ivp_physics/ivp_material.cxx
+    ${IVP_DIR}/ivp_physics/ivp_material.hxx
+    ${IVP_DIR}/ivp_physics/ivp_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_object_attach.hxx
+    ${IVP_DIR}/ivp_physics/ivp_performancecounter.cxx
+    ${IVP_DIR}/ivp_physics/ivp_performancecounter.hxx
+    ${IVP_DIR}/ivp_physics/ivp_phantom.hxx
+    ${IVP_DIR}/ivp_physics/ivp_physics.hxx
+    ${IVP_DIR}/ivp_physics/ivp_polygon.hxx
+    ${IVP_DIR}/ivp_physics/ivp_radar.hxx
+    ${IVP_DIR}/ivp_physics/ivp_radar_appl.hxx
+    ${IVP_DIR}/ivp_physics/ivp_real_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_solver_core_reaction.hxx
+    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.cxx
+    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.hxx
+    ${IVP_DIR}/ivp_physics/ivp_surface_manager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_surface_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_templates.cxx
+    ${IVP_DIR}/ivp_physics/ivp_templates.hxx
+    ${IVP_DIR}/ivp_physics/ivp_time.hxx
+    ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
+)
+add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern" "${IVP_PHYSICS_SOURCES}")
+
+# ivp_controller - Physics controllers, depends on physics core
+set(IVP_CONTROLLER_SOURCES
+    ${IVP_DIR}/ivp_controller/ivp_actuator.cxx
+    ${IVP_DIR}/ivp_controller/ivp_actuator.hxx
+    ${IVP_DIR}/ivp_controller/ivp_actuator_info.hxx
+    ${IVP_DIR}/ivp_controller/ivp_actuator_spring.cxx
+    ${IVP_DIR}/ivp_controller/ivp_actuator_spring.hxx
+    ${IVP_DIR}/ivp_controller/ivp_attacher_to_cores.hxx
+    ${IVP_DIR}/ivp_controller/ivp_buoyancy_solver.cxx
+    ${IVP_DIR}/ivp_controller/ivp_buoyancy_solver.hxx
+    ${IVP_DIR}/ivp_controller/ivp_car_system.cxx
+    ${IVP_DIR}/ivp_controller/ivp_car_system.hxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint.cxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint.hxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_car.cxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_car.hxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_fixed_keyed.cxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_fixed_keyed.hxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_local.cxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_local.hxx
+    ${IVP_DIR}/ivp_controller/ivp_constraint_types.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_airboat.cpp
+    ${IVP_DIR}/ivp_controller/ivp_controller_airboat.h
+    ${IVP_DIR}/ivp_controller/ivp_controller_buoyancy.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_buoyancy.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_floating.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_floating.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_golem.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_motion.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_motion.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_raycast_car.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_raycast_car.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_stiff_spring.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_stiff_spring.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_world_frict.cxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_world_frict.hxx
+    ${IVP_DIR}/ivp_controller/ivp_forcefield.cxx
+    ${IVP_DIR}/ivp_controller/ivp_forcefield.hxx
+    ${IVP_DIR}/ivp_controller/ivp_multidimensional_interp.cxx
+    ${IVP_DIR}/ivp_controller/ivp_multidimensional_interp.hxx
+    ${IVP_DIR}/ivp_controller/ivp_template_constraint.cxx
+    ${IVP_DIR}/ivp_controller/ivp_template_constraint.hxx
+)
+add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_utility;ivp_physics" "${IVP_CONTROLLER_SOURCES}")
+
+# ivp_compact_builder - Geometry building tools, depends on core modules
 set(IVP_COMPACT_BUILDER_DIR ${IVP_DIR}/ivp_compact_builder)
 
-set(IVP_COMPACT_BUILDER_SOURCES
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_ledge_gen.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_ledge_gen.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_modify.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_modify.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_recursive.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_recursive.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_convex_decompositor.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_convex_decompositor.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_halfspacesoup.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_halfspacesoup.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_i_fpoint_vhash.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_i_fpoint_vhash.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_i_point_vhash.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_i_point_vhash.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_object_polygon_tetra.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_object_polygon_tetra.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_rot_inertia_solver.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_rot_inertia_solver.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_3ds.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_halfspacesoup.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_halfspacesoup.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_ledge_soup.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_ledge_soup.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_pointsoup.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_pointsoup.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polygon_convex.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polygon_convex.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polyhdrn_cncv.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polyhdrn_cncv.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_q12.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_q12.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_templates_intern.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_templates_intern.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_tetra_intrude.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_tetra_intrude.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivp_triangle_gen.hxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivv_cluster_min_hash.cxx
-        ${IVP_COMPACT_BUILDER_DIR}/ivv_cluster_min_hash.hxx
-)
+# Collect external library sources
+set(EXTERNAL_SOURCES)
 
-# External library source collections
-set(IVP_GEOMPACK_SOURCES)
-set(IVP_3D_STUDIO_OBJECT_READER_SOURCES)
-set(IVP_QHULL_SOURCES)
-
-# Include external dependencies based on options
 if(IVP_INCLUDE_GEOMPACK)
-    set(IVP_GEOMPACK_SOURCES
+    list(APPEND EXTERNAL_SOURCES
         ${IVP_COMPACT_BUILDER_DIR}/geompack.hxx
         ${IVP_COMPACT_BUILDER_DIR}/geompack_cutfac.cxx
         ${IVP_COMPACT_BUILDER_DIR}/geompack_cvdec3.cxx
@@ -369,7 +358,7 @@ if(IVP_INCLUDE_GEOMPACK)
 endif()
 
 if(IVP_INCLUDE_3DSIMPORT)
-    set(IVP_3D_STUDIO_OBJECT_READER_SOURCES
+    list(APPEND EXTERNAL_SOURCES
         ${IVP_COMPACT_BUILDER_DIR}/3dsimport_co.cxx
         ${IVP_COMPACT_BUILDER_DIR}/3dsimport_load.cxx
         ${IVP_COMPACT_BUILDER_DIR}/3dsimport_load.hxx
@@ -378,7 +367,7 @@ if(IVP_INCLUDE_3DSIMPORT)
 endif()
 
 if(IVP_INCLUDE_QHULL)
-    set(IVP_QHULL_SOURCES
+    list(APPEND EXTERNAL_SOURCES
         ${IVP_COMPACT_BUILDER_DIR}/qhull.cxx
         ${IVP_COMPACT_BUILDER_DIR}/qhull_geom.cxx
         ${IVP_COMPACT_BUILDER_DIR}/qhull_geom2.cxx
@@ -404,36 +393,105 @@ if(IVP_INCLUDE_QHULL)
     )
 endif()
 
-add_library(ivp_compact_builder STATIC)
-target_sources(ivp_compact_builder PRIVATE
-        ${IVP_COMPACT_BUILDER_SOURCES}
-        ${IVP_QHULL_SOURCES}
-        ${IVP_GEOMPACK_SOURCES}
-        ${IVP_3D_STUDIO_OBJECT_READER_SOURCES}
+# Main compact builder sources
+set(COMPACT_BUILDER_MAIN_SOURCES
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_ledge_gen.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_ledge_gen.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_modify.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_modify.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_recursive.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_compact_recursive.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_convex_decompositor.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_convex_decompositor.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_halfspacesoup.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_halfspacesoup.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_i_fpoint_vhash.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_i_fpoint_vhash.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_i_point_vhash.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_i_point_vhash.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_object_polygon_tetra.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_object_polygon_tetra.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_rot_inertia_solver.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_rot_inertia_solver.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_3ds.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_halfspacesoup.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_halfspacesoup.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_ledge_soup.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_ledge_soup.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_pointsoup.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_pointsoup.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polygon_convex.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polygon_convex.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polyhdrn_cncv.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_polyhdrn_cncv.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_q12.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_surbuild_q12.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_templates_intern.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_templates_intern.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_tetra_intrude.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_tetra_intrude.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivp_triangle_gen.hxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivv_cluster_min_hash.cxx
+    ${IVP_COMPACT_BUILDER_DIR}/ivv_cluster_min_hash.hxx
 )
+
+# Combine all sources
+set(ALL_COMPACT_BUILDER_SOURCES ${COMPACT_BUILDER_MAIN_SOURCES} ${EXTERNAL_SOURCES})
+
+# Create the compact builder library
+add_library(ivp_compact_builder STATIC ${ALL_COMPACT_BUILDER_SOURCES})
+
+# Set include directories
 target_include_directories(ivp_compact_builder PUBLIC
-        $<BUILD_INTERFACE:${IVP_COMPACT_BUILDER_DIR}>
-        $<BUILD_INTERFACE:${IVP_COLLISION_DIR}>
-        $<BUILD_INTERFACE:${IVP_CONTROLLER_DIR}>
-        $<BUILD_INTERFACE:${IVP_INTERN_DIR}>
-        $<BUILD_INTERFACE:${IVP_PHYSICS_DIR}>
-        $<BUILD_INTERFACE:${IVP_SURFACEMANAGER_DIR}>
-        $<BUILD_INTERFACE:${IVP_UTILITY_DIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/havana>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/havana/havok>
-        $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${IVP_COMPACT_BUILDER_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
+
+# Set compile definitions
 target_compile_definitions(ivp_compact_builder PRIVATE IVP_VERSION_SDK)
 
-# Set target properties for better compilation
+# Link with dependencies
+target_link_libraries(ivp_compact_builder PUBLIC 
+    ivp_utility
+    ivp_surface_manager
+    ivp_collision
+    ivp_intern
+    ivp_physics
+)
+
+# Set target properties
 set_target_properties(ivp_compact_builder PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 
-# Add dependency between targets
-target_link_libraries(ivp_compact_builder PUBLIC ivp_physics)
+# Platform-specific configurations for compact builder
+if(WIN32)
+    target_compile_definitions(ivp_compact_builder PRIVATE
+        WIN32
+        _WINDOWS
+        _CRT_SECURE_NO_WARNINGS
+    )
+    if(MSVC)
+        target_compile_options(ivp_compact_builder PRIVATE /W3)
+        target_compile_options(ivp_compact_builder PRIVATE
+            /wd4996  # deprecated function warnings
+            /wd4244  # conversion warnings
+            /wd4267  # size_t to int warnings
+        )
+    endif()
+endif()
 
-# External dependencies are now included directly in the compact_builder target
+if(UNIX)
+    target_compile_definitions(ivp_compact_builder PRIVATE UNIX)
+    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        target_compile_definitions(ivp_compact_builder PRIVATE LINUX)
+    endif()
+endif()
+
+if(APPLE)
+    target_compile_definitions(ivp_compact_builder PRIVATE APPLE)
+    target_compile_options(ivp_compact_builder PRIVATE -Wno-deprecated-declarations)
+endif()
 
 # ============================================================================
 # Havana Library Integration
@@ -486,7 +544,7 @@ endif()
 include(GNUInstallDirs)
 
 # Install libraries
-install(TARGETS ivp_physics ivp_compact_builder
+install(TARGETS ivp_utility ivp_surface_manager ivp_collision ivp_intern ivp_physics ivp_controller ivp_compact_builder
     EXPORT ivp_targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -496,13 +554,13 @@ install(TARGETS ivp_physics ivp_compact_builder
 
 # Install header files
 install(DIRECTORY
-    ${IVP_COLLISION_DIR}/
-    ${IVP_CONTROLLER_DIR}/
-    ${IVP_INTERN_DIR}/
-    ${IVP_PHYSICS_DIR}/
-    ${IVP_SURFACEMANAGER_DIR}/
-    ${IVP_UTILITY_DIR}/
-    ${IVP_COMPACT_BUILDER_DIR}/
+    ${IVP_DIR}/ivp_collision/
+    ${IVP_DIR}/ivp_controller/
+    ${IVP_DIR}/ivp_intern/
+    ${IVP_DIR}/ivp_physics/
+    ${IVP_DIR}/ivp_surface_manager/
+    ${IVP_DIR}/ivp_utility/
+    ${IVP_DIR}/ivp_compact_builder/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ivp
     FILES_MATCHING PATTERN "*.hxx" PATTERN "*.h"
 )
@@ -554,66 +612,6 @@ configure_file(
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ivp.pc"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
-
-# ============================================================================
-# Platform-Specific Configurations
-# ============================================================================
-
-# Windows-specific configurations
-if(WIN32)
-    # Add Windows-specific definitions
-    target_compile_definitions(ivp_physics PRIVATE
-        WIN32
-        _WINDOWS
-        _CRT_SECURE_NO_WARNINGS
-    )
-    target_compile_definitions(ivp_compact_builder PRIVATE
-        WIN32
-        _WINDOWS
-        _CRT_SECURE_NO_WARNINGS
-    )
-
-    # Windows-specific compiler options
-    if(MSVC)
-        target_compile_options(ivp_physics PRIVATE /W3)
-        target_compile_options(ivp_compact_builder PRIVATE /W3)
-
-        # Disable specific warnings for legacy code
-        target_compile_options(ivp_physics PRIVATE
-            /wd4996  # deprecated function warnings
-            /wd4244  # conversion warnings
-            /wd4267  # size_t to int warnings
-        )
-        target_compile_options(ivp_compact_builder PRIVATE
-            /wd4996
-            /wd4244
-            /wd4267
-        )
-    endif()
-endif()
-
-# Unix/Linux specific configurations
-if(UNIX)
-    # Add Unix-specific definitions
-    target_compile_definitions(ivp_physics PRIVATE UNIX)
-    target_compile_definitions(ivp_compact_builder PRIVATE UNIX)
-
-    # Check for specific platforms
-    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-        target_compile_definitions(ivp_physics PRIVATE LINUX)
-        target_compile_definitions(ivp_compact_builder PRIVATE LINUX)
-    endif()
-endif()
-
-# Apple macOS specific configurations
-if(APPLE)
-    target_compile_definitions(ivp_physics PRIVATE APPLE)
-    target_compile_definitions(ivp_compact_builder PRIVATE APPLE)
-
-    # macOS-specific options
-    target_compile_options(ivp_physics PRIVATE -Wno-deprecated-declarations)
-    target_compile_options(ivp_compact_builder PRIVATE -Wno-deprecated-declarations)
-endif()
 
 # ============================================================================
 # Configuration Summary
