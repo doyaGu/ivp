@@ -23,30 +23,33 @@
  ********************************************************************************/
 
 class IVP_Template_Surface;
-class P_Surface;		// debugging only
-
+class P_Surface; // debugging only
 
 /********************************************************************************
- *	Name:	      	IVP_Template_Point 	
+ *	Name:	      	IVP_Template_Point
  *	Description:	a vertex in object space
  ********************************************************************************/
-class IVP_Template_Point:public IVP_U_Point {
+class IVP_Template_Point : public IVP_U_Point
+{
 public:
 };
 
-
 /********************************************************************************
- *	Name:	      	IVP_Template_Line 	
- *	Description:	An edge of an polygonal object. 
+ *	Name:	      	IVP_Template_Line
+ *	Description:	An edge of an polygonal object.
  *	Attention:	Two surfaces have to reference a line.
  *			Line should be longer than 10 mm.
  ********************************************************************************/
-class IVP_Template_Line {
+class IVP_Template_Line
+{
 public:
-    ushort p[2];	// end points of a line stored as a point index (see point array)
-    void set(ushort a, ushort b){ p[0] = a; p[1] = b;};
+    ushort p[2]; // end points of a line stored as a point index (see point array)
+    void set(ushort a, ushort b)
+    {
+        p[0] = a;
+        p[1] = b;
+    };
 };
-
 
 /********************************************************************************
  *	Name:	       	IVP_Template_Polygon
@@ -54,54 +57,54 @@ public:
  *	Attention:	there is no plausible check for filled templates
  *			after usage the template is not needed any more
  ********************************************************************************/
-class IVP_Template_Polygon {
+class IVP_Template_Polygon
+{
 public:
-    int n_points;		 	// number of points
-    IVP_Template_Point *points;	 	// array of all points
-    
-    int n_lines;			// number of lines
-    IVP_Template_Line *lines;		// an array of all lines
-    
-    int n_surfaces;			// number of surfaces
-    IVP_Template_Surface *surfaces;	// an array of all surfaces
+    int n_points;               // number of points
+    IVP_Template_Point *points; // array of all points
+
+    int n_lines;              // number of lines
+    IVP_Template_Line *lines; // an array of all lines
+
+    int n_surfaces;                 // number of surfaces
+    IVP_Template_Surface *surfaces; // an array of all surfaces
 
     /** methods **/
     void scale(int scaling_factor);
-    
-    IVP_Template_Polygon();		// empty polygon
+
+    IVP_Template_Polygon(); // empty polygon
     IVP_Template_Polygon(int point_count,
-			 int line_count,
-			 int surface_count);	// polygon with n_points, n_lines, n_surfaces
+                         int line_count,
+                         int surface_count); // polygon with n_points, n_lines, n_surfaces
     ~IVP_Template_Polygon();
 };
 
-
 /********************************************************************************
  *	Name:	       	IVP_Template_Triangle
- *	Description:	
+ *	Description:
  ********************************************************************************/
-class IVP_Template_Triangle {
+class IVP_Template_Triangle
+{
 public:
-    IVP_Template_Point tri_points[3]; // array of all 3 points of triangle
+    IVP_Template_Point tri_points[3];  // array of all 3 points of triangle
     IVP_Template_Triangle() = default; // used by graph_lib
 };
 
-
 /********************************************************************************
  *	Name:	       	IVP_Template_Ledge_Polygon_Soup
- *	Description:	
+ *	Description:
  ********************************************************************************/
-class IVP_Template_Ledge_Polygon_Soup {
+class IVP_Template_Ledge_Polygon_Soup
+{
 public:
     IVP_BOOL ledge_is_open; // IVP_FALSE means: ledge is already closed (and convex!)
-    
-    int n_templ_triangles;
-    IVP_Template_Triangle *templ_triangles_array;    
-           // ATTENTION: right now,
-           // n_templ_triangles must be 2
-           // and ledge_is_open must be IVP_FALSE
-};
 
+    int n_templ_triangles;
+    IVP_Template_Triangle *templ_triangles_array;
+    // ATTENTION: right now,
+    // n_templ_triangles must be 2
+    // and ledge_is_open must be IVP_FALSE
+};
 
 /********************************************************************************
  *	Name:	      	IVP_Template_Surface
@@ -111,50 +114,40 @@ public:
  *			Each surface uses a line index array which stores the line indices
  *			(see IVP_Template_Object::lines) and a revert_line array which
  *			stores flags about the direction of the lines.
- *		        The order of the lines is not important. 
+ *		        The order of the lines is not important.
  *
  *	Attention:	When walking from the start_point of a line to the end_point,
  *			the surface has to be on the left side (in a right hand
  *			coordinate system).
  *			Technically: for surface line number i (0<i<n_lines):
  *			walking from point nr
- *			templ_poly->lines[lines[i]].p[revert_line[i]] to 
+ *			templ_poly->lines[lines[i]].p[revert_line[i]] to
  *			templ_poly->lines[lines[i]].p[1-revert_line[i]] the
  *			surface has to be on the left side
  ********************************************************************************/
-class IVP_Template_Surface {
+class IVP_Template_Surface
+{
 public:
-    IVP_U_Point normal; 		// normal
+    IVP_U_Point normal; // normal
 
-    IVP_Template_Polygon *templ_poly;    
-    
-    int n_lines;	/* number of lines for this surface */
-    ushort *lines;	// all lines of this surfaces: Stored in an array of indices which refer to elements in the templ_poly->lines array
-    char *revert_line;	/* an array of flags, indicating whether a line referred to by the line index array
-			 * should be reversed */
-    
-    void calc_surface_normal_template(int point_index0,int point_index1,int point_index2); // points have to be counter clockwise
-    
+    IVP_Template_Polygon *templ_poly;
+
+    int n_lines;       /* number of lines for this surface */
+    ushort *lines;     // all lines of this surfaces: Stored in an array of indices which refer to elements in the templ_poly->lines array
+    char *revert_line; /* an array of flags, indicating whether a line referred to by the line index array
+                        * should be reversed */
+
+    void calc_surface_normal_template(int point_index0, int point_index1, int point_index2); // points have to be counter clockwise
+
     /** methods **/
-    void set_line(int sur_l_i, int line_index, char revert){
-	lines[sur_l_i] = line_index; revert_line[sur_l_i] = revert;
+    void set_line(int sur_l_i, int line_index, char revert)
+    {
+        lines[sur_l_i] = line_index;
+        revert_line[sur_l_i] = revert;
     }
-    void init_surface(int line_count);	// malloc line_count lines
-    void close_surface();		// free all values: 'lines' array and 'revert_line' array
+    void init_surface(int line_count); // malloc line_count lines
+    void close_surface();              // free all values: 'lines' array and 'revert_line' array
     IVP_Template_Surface();
-    ~IVP_Template_Surface();		// note: calls close_surface
+    ~IVP_Template_Surface(); // note: calls close_surface
     int get_surface_index();
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
