@@ -15,15 +15,12 @@ class IVP_Template_Two_Point;
 class IVP_Template_Four_Point;
 class IVP_Template_Anchor;
 
-class IVP_Actuator_Check_Dist
+class IVP_Actuator_Check_Dist;
 
 #include "ivp_actuator_info.hxx"
-
 #include "ivp_controller.hxx"
-
 #include "ivu_active_value.hxx"
-
-#include <ivp_listener_hull.hxx>
+#include "ivp_listener_hull.hxx"
 
 /********************************************************************************
  *	Name:	       	IVP_Template_Anchor
