@@ -10,8 +10,8 @@
  *  Classes:	    IVP_Compact_Surface
  ********************************************************************************/
 
-#ifndef _IVP_COMPACT_SURFACE_INCLUDED
-#define _IVP_COMPACT_SURFACE_INCLUDED
+#ifndef IVP_COMPACT_SURFACE_INCLUDED
+#define IVP_COMPACT_SURFACE_INCLUDED
 
 #include <ivu_linear.hxx>
 
@@ -69,4 +69,4 @@ class IVP_Compact_Surface
     void byte_swap();  // just do this data, do not recurse to nodes
 };
 
-#endif
+#endif // IVP_COMPACT_SURFACE_INCLUDED
