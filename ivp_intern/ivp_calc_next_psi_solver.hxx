@@ -1,5 +1,7 @@
-
 // IVP_EXPORT_PROTECTED
+
+#ifndef IVP_IVP_CALC_NEXT_PSI_SOLVER_INCLUDED
+#define IVP_IVP_CALC_NEXT_PSI_SOLVER_INCLUDED
 
 class IVP_Vector_of_Hull_Managers_1 : public IVP_U_Vector<IVP_Hull_Manager_Base>
 {
@@ -47,3 +49,5 @@ public:
 
     IVP_Calc_Next_PSI_Solver(IVP_Core *core_in) { core = core_in; }
 };
+
+#endif // IVP_IVP_CALC_NEXT_PSI_SOLVER_INCLUDED

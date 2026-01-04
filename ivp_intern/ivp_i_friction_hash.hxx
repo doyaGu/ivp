@@ -1,11 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef _IVP_FRICTION_HASH_INCLUDED
-#define _IVP_FRICTION_HASH_INCLUDED
+#ifndef IVP_FRICTION_HASH_INCLUDED
+#define IVP_FRICTION_HASH_INCLUDED
 
-#ifndef _IVP_VHASH_INCLUDED
 #include "ivu_vhash.hxx"
-#endif
 
 class IVP_Friction_Hash : protected IVP_VHash_Store
 {
@@ -44,4 +42,4 @@ public:
     void print() { IVP_VHash_Store::print(); };
 };
 
-#endif
+#endif // IVP_FRICTION_HASH_INCLUDED

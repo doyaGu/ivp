@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_HULL_MANAGER_MACROS_INCLUDED
+#define IVP_HULL_MANAGER_MACROS_INCLUDED
+
 IVP_BOOL IVP_Hull_Manager::are_events_in_hull()
 {
     if (sorted_synapses.find_min_value() - hull_value_next_psi < 0.0f)
@@ -42,3 +45,5 @@ void IVP_Hull_Manager::increase_hull_by_x(IVP_Time t_now, IVP_FLOAT delta_time, 
     hull_value_next_psi = hull_value_last_vpsi + delta;
     IVP_ASSERT(hull_value_next_psi >= 0.0f);
 }
+
+#endif // IVP_HULL_MANAGER_MACROS_INCLUDED

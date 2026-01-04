@@ -11,6 +11,13 @@
 //         IVP_Contact_Point are numbered (but counted oppositely the way they occur in the list)
 //     function test_hole_fr_system_data checks consistency of most of this infos
 
+#ifndef IVP_FRICTION_SYSTEM_INCLUDED
+#define IVP_FRICTION_SYSTEM_INCLUDED
+
+#include "ivp_mindist.hxx"
+#include <ivp_controller.hxx>
+#include <ivp_contact_situation.hxx>
+
 class IVP_Contact_Point;
 class IVP_Friction_Solver_Long_Term;
 class IVP_Mindist_Manager;
@@ -37,14 +44,6 @@ class IVP_Compact_Edge;
 
 // #define IVP_DISTANCE_KEEPERS
 // #define IVP_PANELTY_SOLVER
-
-#ifndef IVP_CONTROLLER_INCLUDED
-#include <ivp_controller.hxx>
-#endif
-
-#ifndef _IVP_CONTACT_SITUATION_INCLUDED
-#include <ivp_contact_situation.hxx>
-#endif
 
 // set completely (except union) by recalc friction s_vals
 class IVP_Impact_Solver_Long_Term : public IVP_Contact_Situation
@@ -514,3 +513,5 @@ IVP_DOUBLE IVP_Impact_Solver_Long_Term::get_closing_speed() const
     }
     return result;
 }
+
+#endif // IVP_FRICTION_SYSTEM_INCLUDED

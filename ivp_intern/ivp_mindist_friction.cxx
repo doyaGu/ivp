@@ -591,7 +591,7 @@ IVP_Contact_Point *IVP_Friction_Manager::generate_contact_point(IVP_Mindist *min
     // make new friction mindist
     IVP_Contact_Point *friction = new IVP_Contact_Point(mindist);
     // insert_contact_point(friction);
-    // printf("insert_nmd %lx\n",(long)friction&0x0000ffff);
+    // printf("insert_nmd %lx\n",(intp)friction&0x0000ffff);
 
     *successful = IVP_TRUE;
     return friction;

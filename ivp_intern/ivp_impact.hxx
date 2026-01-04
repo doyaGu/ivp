@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_IVP_IMPACT_INCLUDED
+#define IVP_IVP_IMPACT_INCLUDED
+
 class IVP_Core;
 class IVP_Friction_Core_Pair;
 class IVP_Friction_System;
@@ -117,3 +120,5 @@ public:
     void do_impact(IVP_Core *pushed_cores[2], IVP_BOOL allow_delaying, int pushes_while_system, IVP_FLOAT rescue_speed_val); // comunicates what cores where pushed
     void do_single_impact(IVP_Core *pushed_cores[2], IVP_BOOL allow_delaying);
 };
+
+#endif // IVP_IVP_IMPACT_INCLUDED

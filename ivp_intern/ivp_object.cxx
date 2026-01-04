@@ -121,7 +121,7 @@ void IVP_Real_Object::change_unmovable_flag(IVP_BOOL flag)
         IVP_Real_Object *r_obj = my_core->objects.element_at(d);
         r_obj->unlink_contact_points(IVP_FALSE);
     }
-    // printf("for_umove_info %lx\n",(long)my_core->core_friction_info.for_unmoveables.l_friction_info_hash);
+    // printf("for_umove_info %lx\n",(intp)my_core->core_friction_info.for_unmoveables.l_friction_info_hash);
     if (my_core->physical_unmoveable)
     {
         P_DELETE(my_core->core_friction_info.for_unmoveables.l_friction_info_hash);
@@ -702,8 +702,8 @@ void IVP_Real_Object::unlink_contact_points(IVP_BOOL silent)
             printf("still_left_fd ");
             while (debug_syn)
             {
-                printf("fd %lx sys %lx  ", (long)debug_syn->get_contact_point(),
-                       (long)debug_syn->get_contact_point()->l_friction_system);
+                printf("fd %lx sys %lx  ", (intp)debug_syn->get_contact_point(),
+                       (intp)debug_syn->get_contact_point()->l_friction_system);
                 debug_syn = debug_syn->get_next();
             }
             printf("\n");
