@@ -3,6 +3,8 @@
  *  3D Studio object reader
  */
 
+#include "3dsimport_load.hxx"
+
 #define FILELOAD
 #define MEMLOAD
 
@@ -11,8 +13,6 @@
 #include <string.h>
 
 #include <ivu_types.hxx>
-
-#include "3dsimport_load.hxx"
 
 static void (*dread)(void *dest, int len);
 static void (*dsetpos)(dword pos);
