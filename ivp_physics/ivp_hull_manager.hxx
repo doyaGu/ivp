@@ -1,14 +1,13 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_HULL_MANAGER_INCLUDED
+#define IVP_HULL_MANAGER_INCLUDED
+
 class IVP_Real_Object;
 class IVP_Listener_Hull;
 
-#ifndef IVP_U_MINLIST_INCLUDED
 #include <ivu_min_list.hxx>
-#endif
-#ifndef _IVP_LISTENER_HULL_INCLUDED
 #include <ivp_listener_hull.hxx>
-#endif
 
 #define IVP_MAX_TIME_WITHOUT_RESET 10.0f          /* seconds */
 #define IVP_HULL_MANAGER_GRADIENT_FACTOR 1.00001f /* high enough that till MAX_TIME no bits are lost */
@@ -135,3 +134,5 @@ void IVP_Hull_Manager::update_lazy_synapse(IVP_Listener_Hull *syn, IVP_Time /*t_
     IVP_FLOAT val = hull_value_next_psi;
     syn->minlist_index = sorted_synapses.add((void *)syn, val + delta_valid_hull_time);
 }
+
+#endif // IVP_HULL_MANAGER_INCLUDED

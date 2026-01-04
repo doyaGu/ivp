@@ -5,11 +5,10 @@
 #ifndef IVP_MATERIAL_INCLUDED
 #define IVP_MATERIAL_INCLUDED
 
-class IVP_Real_Object;
-
-#ifndef _IVP_CONTACT_SITUATION_INCLUDED
 #include <ivp_contact_situation.hxx>
-#endif
+
+class IVP_Real_Object;
+class IVP_Environment;
 
 /********************************************************************************
  *	Name:	       	P_MATERIAL_TYPE

@@ -8,8 +8,8 @@
  *	Attention:	stdio.h must be included before.
  ********************************************************************************/
 
-#ifndef _IVP_ENVIRONMENT_INCLUDED
-#define _IVP_ENVIRONMENT_INCLUDED
+#ifndef IVP_ENVIRONMENT_INCLUDED
+#define IVP_ENVIRONMENT_INCLUDED
 
 #include <ivu_types.hxx>
 #include <ivu_linear.hxx>
@@ -58,6 +58,7 @@ class IVP_Actuator_Check_Dist;
 class IVP_Template_Constraint;
 class IVP_Constraint;
 class IVP_Collision_Delegator_Root;
+class IVP_SurfaceManager;
 class IVP_PerformanceCounter;
 class IVP_Anomaly_Manager;
 class IVP_Anomaly_Limits;
@@ -504,4 +505,4 @@ public:
     static IVP_Environment_Manager *IVP_CDECL get_environment_manager();
 };
 
-#endif
+#endif // IVP_ENVIRONMENT_INCLUDED

@@ -1,8 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 // IVP_EXPORT_PUBLIC
-#ifndef _IVP_CORE_INCLUDED
-#define _IVP_CORE_INCLUDED
+#ifndef IVP_CORE_INCLUDED
+#define IVP_CORE_INCLUDED
 
 #include <ivp_environment.hxx>
 
@@ -533,4 +533,4 @@ public:
     void apply_velocity_limit();
 };
 
-#endif /* _IVP_CORE_INCLUDED */
+#endif /* IVP_CORE_INCLUDED */

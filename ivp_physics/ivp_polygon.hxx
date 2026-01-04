@@ -7,8 +7,8 @@
  *	Description:	???
  ********************************************************************************/
 
-#ifndef _IVP_POLYGON_INCLUDED
-#define _IVP_POLYGON_INCLUDED
+#ifndef IVP_POLYGON_INCLUDED
+#define IVP_POLYGON_INCLUDED
 
 #ifndef WIN32
 #pragma interface
@@ -33,4 +33,4 @@ protected:
 public:
 };
 
-#endif
+#endif // IVP_POLYGON_INCLUDED

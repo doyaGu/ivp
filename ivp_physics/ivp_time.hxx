@@ -2,16 +2,14 @@
 
 // IVP_EXPORT_PROTECTED
 
-#ifndef _IVP_TIME_INCLUDED
-#define _IVP_TIME_INCLUDED
+#ifndef IVP_TIME_INCLUDED
+#define IVP_TIME_INCLUDED
+
+#include <ivp_time_event.hxx>
 
 class IVP_U_Min_List;
 class IVP_Environment;
 class IVP_Mindist;
-
-#ifndef IVP_TIME_EVENT_INCLUDED
-    #include <ivp_time_event.hxx>
-#endif
 
 // spezielle Auspraegungen von IVP_Time_Event
 
@@ -93,4 +91,4 @@ class IVP_Time_Manager
     ~IVP_Time_Manager();
 };
 
-#endif
+#endif // IVP_TIME_INCLUDED

@@ -12,6 +12,8 @@
 #ifndef IVP_BETTERSTATISTICSMANAGER_INCLUDED
 #define IVP_BETTERSTATISTICSMANAGER_INCLUDED
 
+#include <ivu_vector.hxx>
+
 /********************************************************************************
  * Name:	IVP_BetterStatisticsmanager_Callback_Interface
  * Description:	...

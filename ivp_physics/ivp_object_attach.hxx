@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_OBJECT_ATTACH_INCLUDED
+#define IVP_OBJECT_ATTACH_INCLUDED
+
 /********************************************************************************
  *	Name:	       	ivp_object_attach.hxx
  *	Description:	simple functions that allow to attach an object to another
@@ -43,3 +46,5 @@ public:
                                                  const IVP_U_Point *shift_Ros_f_Aos,
                                                  IVP_BOOL check_before_moving);
 };
+
+#endif // IVP_OBJECT_ATTACH_INCLUDED

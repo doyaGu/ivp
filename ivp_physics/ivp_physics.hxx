@@ -8,8 +8,8 @@
  *	Attention:	This file should be included prior to other 'ivp*.hxx' files.
  ********************************************************************************/
 
-#ifndef _IVP_PHYSICS_INCLUDED
-#define _IVP_PHYSICS_INCLUDED
+#ifndef IVP_PHYSICS_INCLUDED
+#define IVP_PHYSICS_INCLUDED
 
 #define IVP_MAX_DELTA_PSI_TIME (1.0f / 10.0f)
 #define IVP_MIN_DELTA_PSI_TIME (1.0f / 200.0f)
@@ -40,4 +40,4 @@
 
 #define IVP_NO_MD_INTERPOLATION
 
-#endif
+#endif // IVP_PHYSICS_INCLUDED

@@ -7,8 +7,8 @@
  *	Description:	???
  ********************************************************************************/
 
-#ifndef _IVP_LISTENER_HULL_INCLUDED
-#define _IVP_LISTENER_HULL_INCLUDED
+#ifndef IVP_LISTENER_HULL_INCLUDED
+#define IVP_LISTENER_HULL_INCLUDED
 
 class IVP_Hull_Manager;
 
@@ -38,4 +38,4 @@ private:
     unsigned int minlist_index;
 };
 
-#endif
+#endif // IVP_LISTENER_HULL_INCLUDED

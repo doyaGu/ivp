@@ -8,6 +8,7 @@
 #include <ivp_cache_ledge_point.hxx>
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
+#include <ivp_core.hxx>
 #include <ivp_core_macros.hxx>
 #include <ivp_physics.hxx>
 #include <ivu_matrix_macros.hxx>

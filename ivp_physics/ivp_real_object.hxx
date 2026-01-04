@@ -7,8 +7,8 @@
  *	Description:	???
  ********************************************************************************/
 
-#ifndef _IVP_REAL_OBJECT_INCLUDED
-#define _IVP_REAL_OBJECT_INCLUDED
+#ifndef IVP_REAL_OBJECT_INCLUDED
+#define IVP_REAL_OBJECT_INCLUDED
 
 #include <ivu_min_list.hxx>
 #include <ivp_actuator.hxx>
@@ -377,4 +377,4 @@ public:
     void force_grow_friction_system();
 };
 
-#endif
+#endif // IVP_REAL_OBJECT_INCLUDED

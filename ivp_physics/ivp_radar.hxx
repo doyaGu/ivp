@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_RADAR_INCLUDED
+#define IVP_RADAR_INCLUDED
+
 /********************************************************************************
  *	Name:	       	IVP_Radar_Hit
  *	Description:	Information about a hit
@@ -31,3 +34,5 @@ public:
 
     virtual void radar_hit(IVP_Radar_Hit *) = 0;
 };
+
+#endif // IVP_RADAR_INCLUDED
