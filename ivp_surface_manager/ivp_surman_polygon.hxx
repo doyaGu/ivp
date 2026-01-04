@@ -10,8 +10,8 @@
  *  Classes:	    IVP_SurfaceManager_Polygon
  ********************************************************************************/
 
-#ifndef _IVP_SURMAN_POLYGON_INCLUDED
-#define _IVP_SURMAN_POLYGON_INCLUDED
+#ifndef IVP_SURMAN_POLYGON_INCLUDED
+#define IVP_SURMAN_POLYGON_INCLUDED
 
 class IVP_Compact_Surface;
 class IVP_Compact_Ledgetree_Node;
@@ -109,4 +109,4 @@ class IVP_SurfaceManager_Polygon : public IVP_SurfaceManager
     virtual ~IVP_SurfaceManager_Polygon();
 };
 
-#endif
+#endif // IVP_SURMAN_POLYGON_INCLUDED

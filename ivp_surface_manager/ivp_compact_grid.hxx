@@ -11,8 +11,8 @@
  *		    IVP_Compact_Grid_Element
  ********************************************************************************/
 
-#ifndef _IVP_COMPACT_GRID_INCLUDED
-#define _IVP_COMPACT_GRID_INCLUDED
+#ifndef IVP_COMPACT_GRID_INCLUDED
+#define IVP_COMPACT_GRID_INCLUDED
 
 /********************************************************************************
  *  Class:	    IVP_Compact_Grid_Element
@@ -83,4 +83,4 @@ class IVP_Compact_Grid
     }
 };
 
-#endif
+#endif // IVP_COMPACT_GRID_INCLUDED

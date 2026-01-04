@@ -10,8 +10,8 @@
  *  Classes:	    IVP_SurfaceManager_Grid
  ********************************************************************************/
 
-#ifndef _IVP_SURMAN_GRID_INCLUDED
-#define _IVP_SURMAN_GRID_INCLUDED
+#ifndef IVP_SURMAN_GRID_INCLUDED
+#define IVP_SURMAN_GRID_INCLUDED
 
 class IVP_Compact_Grid;
 class IVP_Compact_Triangle;
@@ -109,4 +109,4 @@ class IVP_SurfaceManager_Grid : public IVP_SurfaceManager
     virtual ~IVP_SurfaceManager_Grid();
 };
 
-#endif
+#endif // IVP_SURMAN_GRID_INCLUDED

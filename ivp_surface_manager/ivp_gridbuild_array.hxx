@@ -11,8 +11,8 @@
  *		    IVP_Template_Grid_Axle_Descript
  ********************************************************************************/
 
-#ifndef _IVP_GRIDBUILD_ARRAY_INCLUDED
-#define _IVP_GRIDBUILD_ARRAY_INCLUDED
+#ifndef IVP_GRIDBUILD_ARRAY_INCLUDED
+#define IVP_GRIDBUILD_ARRAY_INCLUDED
 
 #define IVP_GRID_MAX_ROWS 257
 #define IVP_GRID_MAX_COLUMNS IVP_GRID_MAX_ROWS
@@ -133,4 +133,4 @@ class IVP_GridBuilder_Array
     ~IVP_GridBuilder_Array();
 };
 
-#endif
+#endif // IVP_GRIDBUILD_ARRAY_INCLUDED
