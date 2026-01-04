@@ -1,15 +1,13 @@
 #ifndef IVP_COLLISION_SPHERE_SOLVER_INCLUDED
 #define IVP_COLLISION_SPHERE_SOLVER_INCLUDED
 
+#include <ivu_linear.hxx>
+#include <ivu_set.hxx>
+
 class IVP_Environment;
 class IVP_Real_Object;
 class IVP_OV_Node;
 class IVP_OV_Tree_Manager;
-
-#ifndef IVP_SET_INCLUDED
-#include <ivu_set.hxx>
-#endif // IVP_SET_INCLUDED
-
 struct IVP_Sphere_Solver_Template
 {
     IVP_U_Point center;

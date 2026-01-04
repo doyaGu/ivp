@@ -1336,3 +1336,12 @@ void IVP_Mindist_Event_Solver::init_mim_function_table()
     mim_function_table[IVP_ST_BALL][IVP_ST_TRIANGLE] = next_event_B_POLY;
     mim_function_table[IVP_ST_BALL][IVP_ST_BALL] = next_event_BB;
 }
+
+void IVP_Mindist_Event_Solver::calc_time_of_next_event()
+{
+    IVP_SYNAPSE_POLYGON_STATUS s0 = mindist->get_sorted_synapse(0)->get_status();
+    IVP_SYNAPSE_POLYGON_STATUS s1 = mindist->get_sorted_synapse(1)->get_status();
+    IVP_ASSERT(s0 < IVP_ST_MAX_LEGAL);
+    IVP_ASSERT(s1 < IVP_ST_MAX_LEGAL);
+    mim_function_table[s0][s1](this);
+}

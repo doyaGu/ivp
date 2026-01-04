@@ -1,11 +1,11 @@
+#include <ivp_sphere_solver.hxx>
+
 #include <ivp_cache_object.hxx>
 #include <ivp_clustering_longrange.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_surface.hxx>
 #include <ivp_physics.hxx>
 #include <ivp_surman_polygon.hxx>
-
-#include <ivp_sphere_solver.hxx>
 
 /////////////////////////////////////////////////////////////////////
 // start of file local helpers

@@ -3,7 +3,7 @@
 #ifndef IVP_COLLISION_MINDIST_EVENT_INCLUDED
 #define IVP_COLLISION_MINDIST_EVENT_INCLUDED
 
-#include "ivp_mindist.hxx"
+#include "ivp_mindist_intern.hxx"
 
 class IVP_Cache_Ledge_Point;
 
@@ -67,14 +67,7 @@ public:
     static void init_mim_function_table();
 
     // get the next interesting event e.g. collision ....
-    void calc_time_of_next_event()
-    {
-        IVP_SYNAPSE_POLYGON_STATUS s0 = mindist->get_sorted_synapse(0)->get_status();
-        IVP_SYNAPSE_POLYGON_STATUS s1 = mindist->get_sorted_synapse(1)->get_status();
-        IVP_ASSERT(s0 < IVP_ST_MAX_LEGAL);
-        IVP_ASSERT(s1 < IVP_ST_MAX_LEGAL);
-        mim_function_table[s0][s1](this);
-    }
+    void calc_time_of_next_event();
 };
 
 #endif // IVP_COLLISION_MINDIST_EVENT_INCLUDED

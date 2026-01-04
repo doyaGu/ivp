@@ -7,13 +7,8 @@
 
 class IVP_Compact_Edge;
 
-#ifndef IVP_FVECTOR_INCLUDED
-    #include "ivu_fvector.hxx"
-#endif
-
-#ifndef _IVP_MINDIST_INCLUDED
-    #include <ivp_mindist.hxx>
-#endif
+#include "ivu_fvector.hxx"
+#include "ivp_mindist.hxx"
 
 // #define IVP_MINDIST_BEHAVIOUR_DEBUG	// do core as soon as possible
 
@@ -39,6 +34,7 @@ class IVP_Actuator;
 class IVP_Compact_Ledge;
 class IVP_Mindist_OO_Watcher;
 class IVP_Mindist;
+class IVP_Friction_System;
 
 #define IVP_MAX_STEPS_FOR_COLLDIST_DECREASE 64
 

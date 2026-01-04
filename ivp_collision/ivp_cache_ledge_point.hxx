@@ -4,6 +4,7 @@
 #define IVP_COLLISION_CACHE_LEDGE_POINT_INCLUDED
 
 #include <ivp_cache_object.hxx>
+#include <ivp_compact_ledge.hxx>
 
 class IVP_Compact_Poly_Point;
 class IVP_Synapse_Ball;
@@ -70,7 +71,7 @@ class IVP_Cache_Ledge_Point
     {
         this->init_cache_ledge_point(obj, ledge);
     }
-    IVP_Cache_Ledge_Point() = default;
+    IVP_Cache_Ledge_Point() {}
 };
 
 #endif // IVP_COLLISION_CACHE_LEDGE_POINT_INCLUDED
