@@ -11,11 +11,15 @@
 #ifndef IVP_PERFORMANCECOUNTER_INCLUDED
 #define IVP_PERFORMANCECOUNTER_INCLUDED
 
+#include <ivu_types.hxx>
+
+class IVP_Environment;
+
 #define IVP_ENABLE_PERFORMANCE_COUNTER
 
 enum IVP_PERFORMANCE_ELEMENT
 {
-    IVP_PE_PSI_START = 0,  // not used by pcount
+    IVP_PE_PSI_START = 0, // not used by pcount
 
     IVP_PE_PSI_UNIVERSE,
     IVP_PE_PSI_CONTROLLERS,
@@ -41,35 +45,33 @@ enum IVP_PERFORMANCE_ELEMENT
 
 class IVP_PerformanceCounter
 {
-  public:
+public:
     virtual void start_pcount() = 0;
     virtual void pcount(IVP_PERFORMANCE_ELEMENT) = 0;
     virtual void stop_pcount() = 0;
 
     virtual void environment_is_going_to_be_deleted(IVP_Environment *) = 0;
     virtual void reset_and_print_performance_counters(IVP_Time current_time) = 0;
-    IVP_PerformanceCounter(){};
-    virtual ~IVP_PerformanceCounter(){};
+    IVP_PerformanceCounter() {};
+    virtual ~IVP_PerformanceCounter() {};
 };
 
 /********************************************************************************
- *	Name:	       	a simple implementation
+ *	Name: a simple implementation
  ********************************************************************************/
 class IVP_PerformanceCounter_Simple : public IVP_PerformanceCounter
 {
-  public:
+public:
     union
     {
         int ref_counter[2];
-#ifdef WIN32
-        __int64 ref_counter64;
-#endif
+        intp ref_counter64;
     };
 
     IVP_PERFORMANCE_ELEMENT counting;
     int count_PSIs;
 
-    int counter[IVP_PE_MAX][2];  // counting seconds
+    int counter[IVP_PE_MAX][2]; // counting seconds
     IVP_Time time_of_last_reset;
 
     void reset_and_print_performance_counters(IVP_Time current_time);

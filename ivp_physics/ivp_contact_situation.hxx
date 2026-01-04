@@ -7,8 +7,11 @@
  *	Description:	???
  ********************************************************************************/
 
-#ifndef _IVP_CONTACT_SITUATION_INCLUDED
-#define _IVP_CONTACT_SITUATION_INCLUDED
+#ifndef IVP_CONTACT_SITUATION_INCLUDED
+#define IVP_CONTACT_SITUATION_INCLUDED
+
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
 
 class IVP_Real_Object;
 class IVP_Material;
@@ -27,7 +30,7 @@ struct IVP_Contact_Situation
     IVP_Real_Object *objects[2];                    // 8bytes: link to involved objects
     const class IVP_Compact_Edge *compact_edges[2]; // 8bytes: link to involved Edges (needs source code license for more info
     IVP_Material *materials[2];                     // 8bytes: materials (might be virtual materials for point and edge cases)
-    IVP_Contact_Situation() = default;
+    IVP_Contact_Situation() {}
 };
 
-#endif
+#endif // IVP_CONTACT_SITUATION_INCLUDED

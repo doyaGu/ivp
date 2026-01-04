@@ -7,8 +7,12 @@
  *	Description:
  ********************************************************************************/
 
-#ifndef _IVP_SURFACE_MANAGER_INCLUDED
-#define _IVP_SURFACE_MANAGER_INCLUDED
+#ifndef IVP_SURFACE_MANAGER_INCLUDED
+#define IVP_SURFACE_MANAGER_INCLUDED
+
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
+#include <ivu_bigvector.hxx>
 
 class IVP_Compact_Ledge;
 class IVP_Ray_Solver;
@@ -40,7 +44,8 @@ public:
     IVP_Vector_of_Ledges_256() : IVP_U_BigVector<IVP_Compact_Ledge>((void **)&elem_buffer[0], 256) {}
 };
 
-#define IVP_SURMAN_POLYGON_MAX_VALUE_CLIENTDATA (1 << 32)
+// Max value fits in 32 bits; use 64-bit literal so the shift is well-defined.
+#define IVP_SURMAN_POLYGON_MAX_VALUE_CLIENTDATA (1ULL << 32)
 
 /********************************************************************************
  *	Name:	      	IVP_SurfaceManager
@@ -111,4 +116,4 @@ public:
     virtual IVP_SURMAN_TYPE get_type() = 0;
 };
 
-#endif
+#endif // IVP_SURFACE_MANAGER_INCLUDED

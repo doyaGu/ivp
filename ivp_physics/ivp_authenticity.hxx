@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_AUTHENTICITY_INCLUDED
+#define IVP_AUTHENTICITY_INCLUDED
+
 /********************************************************
  * Please enter your company name
  * together with your individual access code
@@ -11,3 +14,5 @@
 #define IVP_AUTHENTICITY_CODE hex_code  // 0x12345678
 
 #define IVP_VERSION "1k10"
+
+#endif // IVP_AUTHENTICITY_INCLUDED

@@ -2,12 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_PHANTOM_INCLUDED
-#define _IVP_PHANTOM_INCLUDED
+#ifndef IVP_PHANTOM_INCLUDED
+#define IVP_PHANTOM_INCLUDED
 
-#ifndef IVP_SET_INCLUDED
 #include <ivu_set.hxx>
-#endif
 
 class IVP_Mindist_Base;
 
@@ -135,4 +133,4 @@ public:
     void *client_data; // for use by game code
 };
 
-#endif
+#endif // IVP_PHANTOM_INCLUDED

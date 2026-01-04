@@ -2,14 +2,15 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_CORE_MACROS_INCLUDED
+#define IVP_CORE_MACROS_INCLUDED
+
 /********************************************************************************
  *	Name:		ivp_core_macros
  *	Description:	inline functions for object core
  ********************************************************************************/
 
-#ifndef IVP_ANOMALY_MANAGER_INCLUDED
 #include <ivp_anomaly_manager.hxx>
-#endif
 
 void IVP_Core::inline_calc_at_quaternion(IVP_Time current_time, IVP_U_Quat *quat) const
 {
@@ -85,3 +86,5 @@ void IVP_Core::clip_velocity(IVP_U_Float_Point *velocity, IVP_U_Float_Point *rot
         am->max_velocity_exceeded(al, this, velocity);
     }
 }
+
+#endif // IVP_CORE_MACROS_INCLUDED

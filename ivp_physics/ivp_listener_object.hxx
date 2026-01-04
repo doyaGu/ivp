@@ -2,8 +2,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_LISTENER_OBJECT_INCLUDED
-#define _IVP_LISTENER_OBJECT_INCLUDED
+#ifndef IVP_LISTENER_OBJECT_INCLUDED
+#define IVP_LISTENER_OBJECT_INCLUDED
 
 class IVP_Environment;
 class IVP_Real_Object;
@@ -26,4 +26,4 @@ public:
     virtual ~IVP_Listener_Object() {};
 };
 
-#endif
+#endif // IVP_LISTENER_OBJECT_INCLUDED

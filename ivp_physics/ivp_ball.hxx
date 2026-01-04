@@ -9,8 +9,8 @@
  *  Classes:	    IVP_Ball
  ********************************************************************************/
 
-#ifndef _IVP_BALL_INCLUDED
-#define _IVP_BALL_INCLUDED
+#ifndef IVP_BALL_INCLUDED
+#define IVP_BALL_INCLUDED
 
 #include <ivp_real_object.hxx>
 
@@ -46,4 +46,4 @@ public:
     };
 };
 
-#endif
+#endif // IVP_BALL_INCLUDED

@@ -1,6 +1,13 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 // IVP_EXPORT_PUBLIC
+#ifndef IVP_LIQUID_SURFACE_DESCRIPTOR_INCLUDED
+#define IVP_LIQUID_SURFACE_DESCRIPTOR_INCLUDED
+
+#include <ivu_linear.hxx>
+
+class IVP_Environment;
+class IVP_Core;
 
 class IVP_Liquid_Surface_Descriptor
 {
@@ -26,3 +33,5 @@ public:
     IVP_Liquid_Surface_Descriptor_Simple(const IVP_U_Float_Hesse *surface_in,
                                          const IVP_U_Float_Point *abs_speed_of_current_in);
 };
+
+#endif // IVP_LIQUID_SURFACE_DESCRIPTOR_INCLUDED

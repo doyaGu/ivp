@@ -6,8 +6,8 @@
 // freeze object must update    update_cache_object + set cache_ledge_point->valid_until_time_code
 // delete object: must call invalid_cache_object
 
-#ifndef _IVP_CACHE_OBJECT_INCLUDED
-#define _IVP_CACHE_OBJECT_INCLUDED
+#ifndef IVP_CACHE_OBJECT_INCLUDED
+#define IVP_CACHE_OBJECT_INCLUDED
 
 #include <ivp_environment.hxx>
 
@@ -106,4 +106,4 @@ IVP_Cache_Object *IVP_Real_Object::get_cache_object_no_lock()
     return cache_object;
 }
 
-#endif
+#endif // IVP_CACHE_OBJECT_INCLUDED

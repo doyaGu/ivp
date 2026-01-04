@@ -2,8 +2,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_BETTERDEBUGMANAGER_INCLUDED
-#define _IVP_BETTERDEBUGMANAGER_INCLUDED
+#ifndef IVP_BETTERDEBUGMANAGER_INCLUDED
+#define IVP_BETTERDEBUGMANAGER_INCLUDED
 
 #define IVP_IFDEBUG(dci) if (ivp_debugmanager.is_debug_enabled(dci))
 
@@ -53,4 +53,4 @@ public:
 // use global variable only in emergency
 extern IVP_BetterDebugmanager ivp_debugmanager;
 
-#endif
+#endif // IVP_BETTERDEBUGMANAGER_INCLUDED

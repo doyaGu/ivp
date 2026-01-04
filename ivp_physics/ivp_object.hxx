@@ -7,8 +7,8 @@
  *	Description:	???
  ********************************************************************************/
 
-#ifndef _IVP_OBJECT_INCLUDED
-#define _IVP_OBJECT_INCLUDED
+#ifndef IVP_OBJECT_INCLUDED
+#define IVP_OBJECT_INCLUDED
 
 class IVP_Environment;
 class IVP_Template_Object;
@@ -122,4 +122,4 @@ public:
     ~IVP_Cluster();
 };
 
-#endif
+#endif // IVP_OBJECT_INCLUDED
