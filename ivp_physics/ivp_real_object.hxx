@@ -10,13 +10,8 @@
 #ifndef _IVP_REAL_OBJECT_INCLUDED
 #define _IVP_REAL_OBJECT_INCLUDED
 
-#ifndef IVP_U_MINLIST_INCLUDED
 #include <ivu_min_list.hxx>
-#endif
-
-#ifndef IVP_ACTUATOR_INCLUDED
 #include <ivp_actuator.hxx>
-#endif
 
 // resolve forward references
 class IVP_Template_Phantom;
@@ -97,10 +92,10 @@ protected:
     IVP_Synapse_Friction *friction_synapses; // Linked list of contact points.
     IVP_U_Quat *q_core_f_object;             // in object !!!!
     IVP_U_Float_Point shift_core_f_object;
-    IVP_Real_Object_Fast_Static(IVP_Cluster *father, const IVP_Template_Object *templ) : IVP_Object(father, templ) { ; };
+    IVP_Real_Object_Fast_Static(IVP_Cluster* father, const IVP_Template_Object* templ) : IVP_Object(father, templ) {}
 
 public:
-    const IVP_U_Float_Point *get_shift_core_f_object() const { return &shift_core_f_object; };
+    const IVP_U_Float_Point *get_shift_core_f_object() const { return &shift_core_f_object; }
 };
 
 // add dynamics

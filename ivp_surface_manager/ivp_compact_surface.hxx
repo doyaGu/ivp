@@ -13,6 +13,8 @@
 #ifndef _IVP_COMPACT_SURFACE_INCLUDED
 #define _IVP_COMPACT_SURFACE_INCLUDED
 
+#include <ivu_linear.hxx>
+
 class IVP_Compact_Ledgetree_Node;
 
 #define IVP_COMPACT_SURFACE_DEVIATION_STEP_SIZE (1.0f / 250.0f)
