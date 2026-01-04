@@ -683,7 +683,7 @@ void IVP_Friction_System::test_hole_fr_system_data()
 {
     IVP_IF(1)
     {
-        // printf("hole_fr_test %lx \n",(long)this);
+        // printf("hole_fr_test %lx \n",(intp)this);
         IVP_Friction_System *fs = this;
         IVP_Contact_Point *mindist = fs->get_first_friction_dist();
         if (!mindist)
@@ -727,7 +727,7 @@ void IVP_Friction_System::test_hole_fr_system_data()
 
                 if (fr_info->l_friction_system != this)
                 {
-                    printf("test_fr l_friction_system %f %lx\n", time.get_time(), (long)obj_obj);
+                    printf("test_fr l_friction_system %f %lx\n", time.get_time(), (intp)obj_obj);
                     CORE;
                 }
 
@@ -754,14 +754,14 @@ void IVP_Friction_System::test_hole_fr_system_data()
                         if (!is_in_collection)
                         {
                             printf("test_fr there was mindist %lx in obj which is not in system\n",
-                                   (long)all_dists & 0x0000ffff);
+                                   (intp)all_dists & 0x0000ffff);
                             CORE;
                         }
                     }
                 }
                 if (!found_mine)
                 {
-                    printf("test_fr mindist %lx missing in obj\n", (long)mindist);
+                    printf("test_fr mindist %lx missing in obj\n", (intp)mindist);
                     CORE;
                 }
             }
@@ -783,7 +783,7 @@ void IVP_Friction_System::test_hole_fr_system_data()
                 }
                 if (!found_mine)
                 {
-                    printf("test_fr dist %lx not found in pairs\n", (long)mindist);
+                    printf("test_fr dist %lx not found in pairs\n", (intp)mindist);
                     CORE;
                 }
             }
@@ -812,8 +812,8 @@ void IVP_Friction_System::test_hole_fr_system_data()
                     if (!found_mine)
                     {
                         printf("test_fr pair %lx containing dist %lx not in system\n",
-                               (long)fr_pair,
-                               (long)fr_dist);
+                               (intp)fr_pair,
+                               (intp)fr_dist);
                         CORE;
                     }
                 }
@@ -833,13 +833,13 @@ void check_fr_info_mindist(IVP_Friction_Solver *fsolv,IVP_Contact_Point *my_dist
     fr_i=obj0->get_first_friction_info_of_obj();
     if(fr_i!=fsolv->friction_infos[dist_counter_two])
     {
-	printf("fr_info_damaged obj %lx\n",(long)obj0&0x0000ffff);
+	printf("fr_info_damaged obj %lx\n",(intp)obj0&0x0000ffff);
 	CORE;
     }
     fr_i=obj1->get_first_friction_info_of_obj();
     if(fr_i!=fsolv->friction_infos[dist_counter_two+1])
     {
-	printf("fr_info_damaged obj %lx\n",(long)obj1&0x0000ffff);
+	printf("fr_info_damaged obj %lx\n",(intp)obj1&0x0000ffff);
 	CORE;
     }
 }
@@ -934,14 +934,14 @@ void out_friction_info_obj(IVP_Core *obj)
         while (fr_info)
         {
             printf("obj %lx fs %lx obj_ma %d",
-                   (long)obj & 0x0000ffff,
-                   (long)fr_info->l_friction_system & 0x0000ffff,
+                   (intp)obj & 0x0000ffff,
+                   (intp)fr_info->l_friction_system & 0x0000ffff,
                    obj->physical_unmoveable);
 
             for (int i = fr_info->friction_springs.len() - 1; i >= 0; i--)
             {
                 IVP_Contact_Point *mindist = fr_info->friction_springs.element_at(i);
-                printf("  md %lx", (long)mindist & 0x0000ffff);
+                printf("  md %lx", (intp)mindist & 0x0000ffff);
             }
             fr_info = NULL;
             printf("\n");
@@ -1159,7 +1159,7 @@ void IVP_Friction_System::reorder_mindists_for_complex()
             if (((allow0) & (allow1)) | 0)
             {
                 // not_in_complex++;
-                // printf("want_to_remove %lx\n",(long)my_frdist);
+                // printf("want_to_remove %lx\n",(intp)my_frdist);
                 this->remove_dist_from_system(my_frdist);
                 this->add_dist_to_system(my_frdist);
             }
@@ -1202,15 +1202,15 @@ void IVP_Friction_System::ivp_debug_fs_pointers()
 {
     IVP_IF(1)
     {
-        printf("%lx  ", (long)first_friction_dist & 0x0000ffff);
+        printf("%lx  ", (intp)first_friction_dist & 0x0000ffff);
         for (IVP_Contact_Point *fr_d = get_first_friction_dist(); fr_d;
              fr_d = get_next_friction_dist(fr_d))
         {
             printf("%lx %lx %d %lx  ",
-                   (long)fr_d->prev_dist_in_friction & 0x0000ffff,
-                   (long)fr_d & 0x0000ffff,
+                   (intp)fr_d->prev_dist_in_friction & 0x0000ffff,
+                   (intp)fr_d & 0x0000ffff,
                    fr_d->has_negative_pull_since,
-                   (long)fr_d->next_dist_in_friction & 0x0000ffff);
+                   (intp)fr_d->next_dist_in_friction & 0x0000ffff);
         }
         printf("\n");
     }
@@ -1272,13 +1272,13 @@ void IVP_Friction_System::bubble_sort_dists_importance()
 	    return; //degenerated system (without any mindist)
 	}
 	IVP_Contact_Point *test_dist;
-	//printf("tlp_for %lx  ",(long)moving_dist&0x0000ffff);
+	//printf("tlp_for %lx  ",(intp)moving_dist&0x0000ffff);
 	//ivp_debug_fs_pointers();
 	while((test_dist=this->get_next_friction_dist(moving_dist))!=NULL) {
 	    if(moving_dist->has_negative_pull_since<test_dist->has_negative_pull_since) {
 		this->exchange_friction_dists(moving_dist,test_dist);
 		did_exchange=1;
-		//printf("exchgg %lx %lx  ",(long)moving_dist&0x0000ffff,(long)test_dist&0x0000ffff);
+		//printf("exchgg %lx %lx  ",(intp)moving_dist&0x0000ffff,(intp)test_dist&0x0000ffff);
 		//ivp_debug_fs_pointers();
 	    } else {
 		moving_dist=test_dist;
@@ -1329,7 +1329,7 @@ IVP_BOOL IVP_Friction_System::core_is_terminal_in_fs(IVP_Core *test_core)
     }
     if (total_number_of_partners > 1)
         return IVP_FALSE;
-    // printf("found_terminal %lx\n",(long)test_core&0x0000ffff);
+    // printf("found_terminal %lx\n",(intp)test_core&0x0000ffff);
     return IVP_TRUE;
 }
 

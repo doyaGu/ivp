@@ -82,11 +82,11 @@ IVP_Contact_Point::IVP_Contact_Point(IVP_Mindist *md)
 	{
 		IVP_IF(env->get_debug_manager()->check_fs)
 		{
-			fprintf(env->get_debug_manager()->out_deb_file, "create_mindist %f %lx cores %lx %lx\n",
+			fprintf(env->get_debug_manager()->out_deb_file, "create_mindist %f %p cores %p %p\n",
 					env->get_current_time().get_time(),
-					(long)this,
-					(long)syn0->l_obj->physical_core,
-					(long)syn0->l_obj->physical_core);
+					(void *)this,
+					(void *)syn0->l_obj->physical_core,
+					(void *)syn1->l_obj->physical_core);
 		}
 	}
 	if (syn1->get_status() == IVP_ST_TRIANGLE)
@@ -101,7 +101,7 @@ IVP_Contact_Point::IVP_Contact_Point(IVP_Mindist *md)
 	this->now_friction_pressure = 0.0f;
 	this->integrated_destroyed_energy = 0.0f;
 	this->cp_status = IVP_CPBS_NEEDS_RECHECK;
-	// printf("initing_mindist_fr %lx\n",(long)this);
+	// printf("initing_mindist_fr %lx\n",(intp)this);
 
 	this->span_friction_s[0] = 0.0f;
 	this->span_friction_s[1] = 0.0f;
@@ -768,8 +768,8 @@ void IVP_Friction_Solver::ease_test_two_mindists(IVP_Contact_Point *dist0, IVP_C
 	core01=dist0->synapse[1]->l_obj->to_real()->physical_core;
 	core10=dist0->synapse[0]->l_obj->to_real()->physical_core;
 	core11=dist1->synapse[1]->l_obj->to_real()->physical_core;
-	//printf("tcores %lx %lx %lx %lx ",(long)core00,(long)core01,(long)core10,(long)core11);
-	printf("test_ease %lx %lx  ",(long)dist0,(long)dist1);
+	//printf("tcores %lx %lx %lx %lx ",(intp)core00,(intp)core01,(intp)core10,(intp)core11);
+	printf("test_ease %p %p  ", static_cast<void *>(dist0), static_cast<void *>(dist1));
 	if(ty0==IVP_ST_EDGE) {
 	  printf("edge-edge ");
 	} else {
@@ -1049,7 +1049,7 @@ void IVP_Friction_System::ease_friction_forces()
 		my_pairs->next_ease_nr_psi--;
 		if (my_pairs->next_ease_nr_psi == 0)
 		{
-			// printf("easefr_pair %lx %lx\n",(long)my_pairs->objs[0]&0x0000ffff,(long)my_pairs->objs[1]&0x0000ffff);
+			// printf("easefr_pair %lx %lx\n",(intp)my_pairs->objs[0]&0x0000ffff,(intp)my_pairs->objs[1]&0x0000ffff);
 			IVP_Friction_Solver::ease_friction_pair(my_pairs, fs->l_environment->get_memory_manager());
 			my_pairs->next_ease_nr_psi = IVP_EASE_EVERY_NTH_PSI; // do only 5 times a second
 		}
@@ -1223,7 +1223,7 @@ void IVP_Friction_System::delete_friction_distance(IVP_Contact_Point *old_dist)
 		}
 	}
 
-	// printf("deleting_frdist %lx o %lx c %lx  o %lx c %lx\n",(long)old_dist,(long)old_dist->synapse[0]->l_obj,(long)old_dist->synapse[0]->l_obj->to_real()->physical_core,(long)old_dist->synapse[1]->l_obj,(long)old_dist->synapse[1]->l_obj->to_real()->physical_core);
+	// printf("deleting_frdist %lx o %lx c %lx  o %lx c %lx\n",(intp)old_dist,(intp)old_dist->synapse[0]->l_obj,(intp)old_dist->synapse[0]->l_obj->to_real()->physical_core,(intp)old_dist->synapse[1]->l_obj,(intp)old_dist->synapse[1]->l_obj->to_real()->physical_core);
 	P_DELETE(old_dist);
 }
 
@@ -1251,17 +1251,17 @@ void IVP_Friction_System::fusion_friction_systems(IVP_Friction_System *second_sy
 		IVP_Environment *env = first_sys->l_environment;
 		IVP_IF(env->get_debug_manager()->check_fs)
 		{
-			printf("fusion_fs %f %lx %lx  cores ", env->get_current_time().get_time(), (long)first_sys, (long)second_sys);
+			printf("fusion_fs %f %p %p  cores ", env->get_current_time().get_time(), (void *)first_sys, (void *)second_sys);
 			for (int k = first_sys->cores_of_friction_system.len() - 1; k >= 0; k--)
 			{
 				IVP_Core *my_core = first_sys->cores_of_friction_system.element_at(k);
-				printf("%lx ", (long)my_core);
+				printf("%p ", (void *)my_core);
 			}
 			printf(" ");
 			for (int l = second_sys->cores_of_friction_system.len() - 1; l >= 0; l--)
 			{
 				IVP_Core *my_core = second_sys->cores_of_friction_system.element_at(l);
-				printf("%lx ", (long)my_core);
+				printf("%p ", (void *)my_core);
 			}
 			printf("\n");
 		}
@@ -1433,14 +1433,14 @@ IVP_Core *IVP_Friction_System::union_find_fr_sys()
 		{
 			continue; // ignore fixed objs. they cannot connect objects (fixed objs can have more than one friction system)
 		}
-		// printf("doinguf %lx %lx   ",(long)obj0&0x0000ffff,(long)obj1&0x0000ffff); UFTEST
+		// printf("doinguf %lx %lx   ",(intp)obj0&0x0000ffff,(intp)obj1&0x0000ffff); UFTEST
 		obj0 = obj0->union_find_get_father();
 		obj1 = obj1->union_find_get_father();
-		// printf("fathers are %lx %lx   ",(long)obj0&0x0000ffff,(long)obj1&0x0000ffff); UFTEST
+		// printf("fathers are %lx %lx   ",(intp)obj0&0x0000ffff,(intp)obj1&0x0000ffff); UFTEST
 		if (obj0 != obj1)
 		{
 			obj1->tmp.union_find_father = obj0;
-			// printf("newfather %lx : %lx\n",(long)obj1&0x0000ffff,(long)obj0&0x0000ffff); UFTEST
+			// printf("newfather %lx : %lx\n",(intp)obj1&0x0000ffff,(intp)obj0&0x0000ffff); UFTEST
 		}
 	}
 
@@ -1450,7 +1450,7 @@ IVP_Core *IVP_Friction_System::union_find_fr_sys()
 		{
 			IVP_Core *objj = fr_sys->cores_of_friction_system.element_at(k);
 			IVP_Core *of = objj->union_find_get_father();
-			printf("uff of %lx : %lx\n", (long)objj & 0x0000ffff, (long)of & 0x0000ffff);
+			printf("uff of %Ix : %Ix\n", static_cast<size_t>((intp)objj & 0x0000ffff), static_cast<size_t>((intp)of & 0x0000ffff));
 		}
 	}
 
@@ -1493,23 +1493,23 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 
 	IVP_IF(fr_sys->l_environment->get_debug_manager()->check_fs)
 	{
-		printf("split_fs %f %lx %lx  cores ", fr_sys->l_environment->get_current_time().get_time(), (long)fr_sys, (long)new_fr_sys);
+		printf("split_fs %f %p %p  cores ", fr_sys->l_environment->get_current_time().get_time(), static_cast<void *>(fr_sys), static_cast<void *>(new_fr_sys));
 		for (int i = fr_sys->cores_of_friction_system.len() - 1; i >= 0; i--)
 		{
 			IVP_Core *my_core = fr_sys->cores_of_friction_system.element_at(i);
-			printf("%lx ", (long)my_core);
+			printf("%p ", static_cast<void *>(my_core));
 		}
 		printf("\n");
 	}
 
-	// printf("splitting_now father %lx\n",(long)split_father&0x0000ffff);
+	// printf("splitting_now father %lx\n",(intp)split_father&0x0000ffff);
 	// fr_sys->debug_fs_out_ascii();
 	{
 		// first transfer objs
 		for (int j = fr_sys->cores_of_friction_system.len() - 1; j >= 0; j--)
 		{
 			IVP_Core *obj = fr_sys->cores_of_friction_system.element_at(j);
-			// printf("   %lx hasfather %lx ",(long)obj&0x0000ffff,(long)union_find_get_father(obj)&0x0000ffff);
+			// printf("   %lx hasfather %lx ",(intp)obj&0x0000ffff,(intp)union_find_get_father(obj)&0x0000ffff);
 			if (obj->physical_unmoveable)
 			{
 				// printf("isumv");
@@ -1559,7 +1559,7 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 				}
 			}
 
-			// printf("reassignpair %lx infoc %lx",(long)fr_pair&0x0000ffff,(long)robj&0x0000ffff);
+			// printf("reassignpair %lx infoc %lx",(intp)fr_pair&0x0000ffff,(intp)robj&0x0000ffff);
 			if (robj->union_find_get_father() == split_father)
 			{
 				// printf(" to_new");
@@ -1584,7 +1584,7 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 					}
 					fr_sys->remove_dist_from_system(fr_dist);
 					new_fr_sys->add_dist_to_system(fr_dist);
-					// printf("add_to_new %lx fs_num_now %ld\n",(long)fr_dist,new_fr_sys->friction_dist_number); UFTEST
+					// printf("add_to_new %lx fs_num_now %ld\n",(intp)fr_dist,new_fr_sys->friction_dist_number); UFTEST
 					if (fr_i_old)
 					{
 						// a fixed obj is involved. fixed objs have friction_info in BOTH systems
@@ -1612,13 +1612,13 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 				IVP_Friction_Info_For_Core *fr_i_old = obj->get_friction_info(fr_sys);
 				if (fr_i_new->dist_number() == 0)
 				{
-					// printf("uf_rem %lx from new %lx\n",(long)obj&0x0000ffff,(long)new_fr_sys&0x0000ffff);
+					// printf("uf_rem %lx from new %lx\n",(intp)obj&0x0000ffff,(intp)new_fr_sys&0x0000ffff);
 					obj->delete_friction_info(fr_i_new);
 					new_fr_sys->remove_core_from_system(obj);
 				}
 				if (fr_i_old->dist_number() == 0)
 				{
-					// printf("uf_rem %lx from old %lx\n",(long)obj&0x0000ffff,(long)fr_sys&0x0000ffff);
+					// printf("uf_rem %lx from old %lx\n",(intp)obj&0x0000ffff,(intp)fr_sys&0x0000ffff);
 					obj->delete_friction_info(fr_i_old);
 					fr_sys->remove_core_from_system(obj);
 				}
@@ -1646,7 +1646,7 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 		P_DELETE(fr_sys);
 		return;
 	}
-	// printf("splitted_frs %lx\n",(long)fr_sys); //UFTEST
+	// printf("splitted_frs %lx\n",(intp)fr_sys); //UFTEST
 	// new_fr_sys->fr_solver.calc_calc_solver(new_fr_sys);
 	// fr_sys->fr_solver.calc_calc_solver(fr_sys);
 	// this->add_friction_system(new_fr_sys);
@@ -1673,21 +1673,21 @@ void IVP_Friction_System::print_all_dists()
 {
 	IVP_IF(1)
 	{
-		printf("fs %lx  ", (long)this & 0x0000ffff);
+		printf("fs %Ix  ", static_cast<size_t>((intp)this & 0x0000ffff));
 		for (IVP_Contact_Point *mindist = this->get_first_friction_dist(); mindist; mindist = this->get_next_friction_dist(mindist))
 		{
-			printf("%lx ", (long)mindist & 0x0000ffff);
+			printf("%Ix ", static_cast<size_t>((intp)mindist & 0x0000ffff));
 		}
 		printf("\n");
 		printf("      ");
 		for (int i = fr_pairs_of_objs.len() - 1; i >= 0; i--)
 		{
 			IVP_Friction_Core_Pair *fr_pair = fr_pairs_of_objs.element_at(i);
-			printf("p %lx %lx  ", (long)fr_pair->objs[0] & 0x0000ffff, (long)fr_pair->objs[1] & 0x0000ffff);
+			printf("p %Ix %Ix  ", static_cast<size_t>((intp)fr_pair->objs[0] & 0x0000ffff), static_cast<size_t>((intp)fr_pair->objs[1] & 0x0000ffff));
 			for (int c = fr_pair->fr_dists.len() - 1; c >= 0; c--)
 			{
 				IVP_Contact_Point *fr_dist = fr_pair->fr_dists.element_at(c);
-				printf("%lx ", (long)fr_dist & 0x0000ffff);
+				printf("%Ix ", static_cast<size_t>((intp)fr_dist & 0x0000ffff));
 			}
 		}
 		printf("\n");
@@ -1718,7 +1718,7 @@ int IVP_Friction_Core_Pair::check_all_fr_mindists_to_be_valid(IVP_Friction_Syste
 		IVP_Impact_Solver_Long_Term *info = my_dist->tmp_contact_info;
 		my_dist->read_materials_for_contact_situation(info);
 
-		// printf("impact_sys_update_contact_vals %lx\n",(long)my_dist);
+		// printf("impact_sys_update_contact_vals %lx\n",(intp)my_dist);
 		if (info->friction_is_broken == IVP_TRUE)
 		{
 			total_number_remaining--;
@@ -1934,7 +1934,7 @@ IVP_DOUBLE IVP_Friction_Core_Pair::destroy_mutual_energy(IVP_DOUBLE d_e)
 
 IVP_Friction_Core_Pair::~IVP_Friction_Core_Pair()
 {
-	// printf("deleteing_core_pair %lx\n",0x0000ffff&(long)this);
+	// printf("deleteing_core_pair %lx\n",0x0000ffff&(intp)this);
 }
 
 IVP_Friction_Core_Pair::IVP_Friction_Core_Pair()
@@ -2047,34 +2047,34 @@ void IVP_Friction_System::debug_fs_out_ascii()
 {
 	IVP_IF(1)
 	{
-		printf("fs %lx  ", (long)this & 0x0000ffff);
+		printf("fs %Ix  ", static_cast<size_t>((intp)this & 0x0000ffff));
 		for (IVP_Contact_Point *mindist = this->get_first_friction_dist(); mindist; mindist = this->get_next_friction_dist(mindist))
 		{
-			printf("%lx ", (long)mindist & 0x0000ffff);
+			printf("%Ix ", static_cast<size_t>((intp)mindist & 0x0000ffff));
 		}
 		printf("\n");
 		for (int k = cores_of_friction_system.len() - 1; k >= 0; k--)
 		{
 			IVP_Core *my_core = cores_of_friction_system.element_at(k);
-			printf("    core %lx  ", (long)my_core & 0x0000ffff);
+			printf("    core %Ix  ", static_cast<size_t>((intp)my_core & 0x0000ffff));
 			IVP_Friction_Info_For_Core *inf = my_core->get_friction_info(this);
-			printf("lfs %lx  ", (long)inf->l_friction_system & 0x0000ffff);
+			printf("lfs %Ix  ", static_cast<size_t>((intp)inf->l_friction_system & 0x0000ffff));
 
 			for (int i = inf->friction_springs.len() - 1; i >= 0; i--)
 			{
 				IVP_Contact_Point *mindist = inf->friction_springs.element_at(i);
-				printf("%lx  ", (long)mindist & 0x0000ffff);
+				printf("%Ix  ", static_cast<size_t>((intp)mindist & 0x0000ffff));
 			}
 		}
 		printf("\n");
 		for (int m = fr_pairs_of_objs.len() - 1; m >= 0; m--)
 		{
 			IVP_Friction_Core_Pair *fr_pair = fr_pairs_of_objs.element_at(m);
-			printf("    p %lx %lx  ", (long)fr_pair->objs[0] & 0x0000ffff, (long)fr_pair->objs[1] & 0x0000ffff);
+			printf("    p %Ix %Ix  ", static_cast<size_t>((intp)fr_pair->objs[0] & 0x0000ffff), static_cast<size_t>((intp)fr_pair->objs[1] & 0x0000ffff));
 			for (int c = fr_pair->fr_dists.len() - 1; c >= 0; c--)
 			{
 				IVP_Contact_Point *fr_dist = fr_pair->fr_dists.element_at(c);
-				printf("%lx ", (long)fr_dist & 0x0000ffff);
+				printf("%Ix ", static_cast<size_t>((intp)fr_dist & 0x0000ffff));
 			}
 		}
 		printf("\n");
@@ -2175,7 +2175,7 @@ IVP_BOOL IVP_Core::grow_friction_system()
 
 	IVP_IF(environment->get_debug_manager()->check_fs)
 	{
-		printf("growing_fs %f core %lx\n", environment->get_current_time().get_time(), (long)this);
+		printf("growing_fs %f core %p\n", environment->get_current_time().get_time(), static_cast<void *>(this));
 	}
 
 	IVP_BOOL grew_new_contact_point = IVP_FALSE;
@@ -2244,7 +2244,7 @@ IVP_BOOL IVP_Core::grow_friction_system()
 					other_core->reset_freeze_check_values();
 				}
 			}
-			// printf("\n\n\nnot_grow_with_core %lx\n\n\n",(long)other_core);
+			// printf("\n\n\nnot_grow_with_core %lx\n\n\n",(intp)other_core);
 		next_in_loop:;
 		}
 	}

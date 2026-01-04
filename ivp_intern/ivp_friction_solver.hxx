@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_FRICTION_SOLVER_INCLUDED
+#define IVP_FRICTION_SOLVER_INCLUDED
+
 #define IVP_DESCENDING_SPEEDUP 20.0f
 
 class IVP_U_Memory;
@@ -142,3 +145,5 @@ IVP_DOUBLE IVP_Friction_Solver::calc_desired_gap_speed(IVP_DOUBLE closing_speed,
     }
     return gap_diff * use_delay + closing_speed;
 };
+
+#endif // IVP_FRICTION_SOLVER_INCLUDED

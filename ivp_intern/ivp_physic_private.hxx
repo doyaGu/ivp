@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_IVP_PHYSIC_PRIVATE_INCLUDED
+#define IVP_IVP_PHYSIC_PRIVATE_INCLUDED
+
 class IVP_Cluster;
 class IVP_Environment;
 class IVP_Core;
@@ -52,3 +55,5 @@ public:
     void add_object(IVP_Real_Object *real_object);
     void remove_object(IVP_Real_Object *real_object); // tells the Cluster Manager that an object is going to be deleted
 };
+
+#endif // IVP_IVP_PHYSIC_PRIVATE_INCLUDED

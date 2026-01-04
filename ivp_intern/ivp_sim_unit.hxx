@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_IVP_SIM_UNIT_INCLUDED
+#define IVP_IVP_SIM_UNIT_INCLUDED
+
 #define IVP_SIM_SLOTS_NUM 100
 
 // #define IVP_DISABLE_FREEZING /* disable freezing of objects */
@@ -123,3 +126,5 @@ inline void IVP_Simulation_Unit::prefetch0_init_moving_core_for_psi(IVP_Core *co
         IVP_PREFETCH_BLOCK((char *)core + sizeof(IVP_Core_Fast_Static), sizeof(IVP_Core_Fast_PSI) - sizeof(IVP_Core_Fast_Static));
     }
 }
+
+#endif // IVP_IVP_SIM_UNIT_INCLUDED

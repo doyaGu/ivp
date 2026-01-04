@@ -3,9 +3,7 @@
 #ifndef IVP_OBJECT_HASH_INCLUDED
 #define IVP_OBJECT_HASH_INCLUDED
 
-#ifndef _IVP_VHASH_INCLUDED
 #include "ivu_vhash.hxx"
-#endif
 
 class IVP_Object_Callback_Table
 {

@@ -225,7 +225,7 @@ IVP_Contact_Point *IVP_Mindist::try_to_generate_managed_friction(IVP_Friction_Sy
 	fr_info1->set_all_dists_of_obj_neutral();
 #endif
 
-	// printf("add_fri_dist %lx to sys %lx\n",(long)friction_dist,(long)affected_fs); UFTEST
+	// printf("add_fri_dist %lx to sys %lx\n",(intp)friction_dist,(intp)affected_fs); UFTEST
 
 	*associated_fs = affected_fs;
 	// friction_dist->l_friction_system=affected_fs;
@@ -252,9 +252,9 @@ IVP_Contact_Point *IVP_Mindist::try_to_generate_managed_friction(IVP_Friction_Sy
 			}
 		}
 		printf("\nmaking_new_frdist for cores %lx %d  %lx %d  fss %lx %lx  with sim_units: %lx %lx\n",
-			   (long)core0, core0->physical_unmoveable,
-			   (long)core1, core1->physical_unmoveable,
-			   (long)fs0, (long)fs1, (long)core0->sim_unit_of_core, (long)core1->sim_unit_of_core);
+			   (intp)core0, core0->physical_unmoveable,
+			   (intp)core1, core1->physical_unmoveable,
+			   (intp)fs0, (intp)fs1, (intp)core0->sim_unit_of_core, (intp)core1->sim_unit_of_core);
 		core0->sim_unit_of_core->sim_unit_debug_out();
 		core1->sim_unit_of_core->sim_unit_debug_out();
 	}
@@ -884,7 +884,7 @@ delaying_test:
 	{
 		IVP_IF(0)
 		{
-			printf("switched_to_temporarily_unmov %lx %lx %f\n", (long)core[0], (long)core[1], core[0]->environment->get_current_time().get_time());
+			printf("switched_to_temporarily_unmov %lx %lx %f\n", (intp)core[0], (intp)core[1], core[0]->environment->get_current_time().get_time());
 		}
 		core[0]->environment->get_statistic_manager()->impact_unmov++;
 
@@ -1499,7 +1499,7 @@ void IVP_Impact_System::impact_system_check_start_pair(IVP_Friction_Core_Pair *s
 			my_dist->recalc_friction_s_vals();
 			IVP_Impact_Solver_Long_Term *info = my_dist->tmp_contact_info;
 			my_dist->read_materials_for_contact_situation(info);
-			// printf("impact_sys_update_contact_vals %lx\n",(long)my_dist);
+			// printf("impact_sys_update_contact_vals %lx\n",(intp)my_dist);
 			if (info->friction_is_broken == IVP_TRUE)
 			{
 				associated_fs_system->delete_friction_distance(my_dist);
@@ -1608,10 +1608,10 @@ void IVP_Impact_System::init_and_solve_impact_system(IVP_Mindist *mindist, IVP_F
 #if 0
 	for(IVP_Friction_Core_Pair *my_pair=get_first_impact_pair();my_pair;my_pair=get_next_impact_pair())
 	{
-	    printf(" paair %lx ",(long)my_pair&0x0000ffff);
+	    printf(" paair %lx ",(intp)my_pair&0x0000ffff);
 	    for(IVP_Contact_Point *my_fr=my_pair->get_first_fr_dist_obj_pairs();my_fr;my_fr=my_pair->get_next_fr_dist_obj_pairs())
 	    {
-		printf("md %lx ",(long)my_fr&0x0000ffff);
+		printf("md %lx ",(intp)my_fr&0x0000ffff);
 	    }
 	}
 	printf("\n");
@@ -1763,7 +1763,7 @@ IVP_BOOL IVP_Impact_System::test_loop_all_pairs()
 			{
 				IVP_IF(l_environment->get_debug_manager()->debug_imp_sys)
 				{
-					printf("did_not_test %lx\n", 0x0000ffff & (long)my_fr);
+					printf("did_not_test %lx\n", 0x0000ffff & (intp)my_fr);
 				}
 			}
 			else
@@ -1808,7 +1808,7 @@ IVP_BOOL IVP_Impact_System::test_loop_all_pairs()
 
 		worst_impact_dist->tmp_contact_info->do_impact_long_term(impacting_cores, worst_impact_dist->tmp_contact_info->impact.rescue_speed_addon, worst_impact_dist);
 
-		// printf("did_sys_imp %lx\n",(long)(&worst_impact_dist->long_term_impact_info)&0x0000ffff);
+		// printf("did_sys_imp %lx\n",(intp)(&worst_impact_dist->long_term_impact_info)&0x0000ffff);
 
 		{
 			for (int i = 1; i >= 0; i--)
@@ -2011,7 +2011,7 @@ void IVP_Contact_Point::calc_coll_distance()
 			IVP_Core *core0, *core1;
 			core0 = get_synapse(0)->l_obj->friction_core;
 			core1 = get_synapse(1)->l_obj->friction_core;
-			fprintf(fp, "  %lx %lx-%lx: ", 0x0000ffff & (long)this, 0x0000ffff & (long)core0, 0x0000ffff & (long)core1);
+			fprintf(fp, "  %lx %lx-%lx: ", 0x0000ffff & (intp)this, 0x0000ffff & (intp)core0, 0x0000ffff & (intp)core1);
 			fprintf(fp, "di %.4f  ", get_gap_length());
 			IVP_DOUBLE debug_cs = closing_speed + info->impact.rescue_speed_addon * 0.5f;
 			fprintf(fp, "cs %.4f  ", debug_cs);
@@ -2020,7 +2020,7 @@ void IVP_Contact_Point::calc_coll_distance()
 		IVP_IF(env->get_debug_manager()->debug_imp_sys)
 		{
 			printf("tested_frdist %lx di %.4f cs %.4f dr %.4f\n",
-				   0x0000ffff & (long)this,
+				   0x0000ffff & (intp)this,
 				   get_gap_length(),
 				   closing_speed + info->impact.rescue_speed_addon * 0.5f,
 				   info->impact.distance_reached_in_time);
@@ -2079,7 +2079,7 @@ void IVP_Impact_System::recalc_all_affected_cores()
 			IVP_ASSERT(!my_core->physical_unmoveable); // core merge?
 			if (!my_core->physical_unmoveable)
 			{
-				// printf("calcing_next_psi_matrix %lx %f\n",(long)my_core&0x0000ffff,l_environment->get_current_time());
+				// printf("calcing_next_psi_matrix %lx %f\n",(intp)my_core&0x0000ffff,l_environment->get_current_time());
 				// my_core->commit_all_async_pushes();
 				IVP_Event_Sim es(l_environment, delta_time_till_next_PSI);
 				IVP_Calc_Next_PSI_Solver nps(my_core);
@@ -2096,7 +2096,7 @@ void IVP_Impact_System::recalc_all_affected_cores()
 			IVP_Core *my_core = i_s_pushed_cores.element_at(k);
 			if (!my_core->physical_unmoveable)
 			{
-				// printf("calcing_exactmindists %lx\n",(long)my_core&0x0000ffff);
+				// printf("calcing_exactmindists %lx\n",(intp)my_core&0x0000ffff);
 				my_core->update_exact_mindist_events_of_core();
 			}
 		}

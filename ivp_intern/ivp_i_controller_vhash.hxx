@@ -1,11 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef _IVP_CONTROLLER_VHASH_INCLUDED
-#define _IVP_CONTROLLER_VHASH_INCLUDED
+#ifndef IVP_CONTROLLER_VHASH_INCLUDED
+#define IVP_CONTROLLER_VHASH_INCLUDED
 
-#ifndef _IVP_VHASH_INCLUDED
 #include "ivu_vhash.hxx"
-#endif
 
 class IVP_Real_Object;
 
@@ -36,4 +34,4 @@ public:
     IVP_Controller_VHash(IVP_Real_Object *object, int init_size) : IVP_VHash(init_size) { real_object = object; };
 };
 
-#endif
+#endif // IVP_CONTROLLER_VHASH_INCLUDED

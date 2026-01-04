@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_MERGE_CORE_INCLUDED
+#define IVP_MERGE_CORE_INCLUDED
+
 #define IVP_MAX_CORE_STACK 6
 
 class IVP_Environment;
@@ -65,3 +68,5 @@ public:
     IVP_Merge_Core(IVP_Core_Merged *mcore, IVP_Core *first_core, IVP_Core *second_core);
     ~IVP_Merge_Core();
 };
+
+#endif // IVP_MERGE_CORE_INCLUDED
