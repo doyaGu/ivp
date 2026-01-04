@@ -2,12 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_CONTROLLER_MOTION_INCLUDED
-#include <ivp_controller_motion.hxx>
-#endif
-
 #ifndef IVP_CONTROLLER_GOLEM_INCLUDED
 #define IVP_CONTROLLER_GOLEM_INCLUDED
+
+#include <ivp_controller_motion.hxx>
 
 enum IVP_GOLEM_PROBLEM
 {

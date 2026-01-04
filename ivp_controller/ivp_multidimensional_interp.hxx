@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_MULTIDIMENSIONAL_INTERP_INCLUDED
+#define IVP_MULTIDIMENSIONAL_INTERP_INCLUDED
+
 /**********************************************************************************
  * Name:        IVP_MI_VECTOR_ALLOCA
  * Description: Makro used to allocate memory on the stack a IVP_MI_Vector object
@@ -262,3 +265,5 @@ public:
     // end debug variables !!!!!!!!
 #endif
 };
+
+#endif // IVP_MULTIDIMENSIONAL_INTERP_INCLUDED

@@ -2,7 +2,7 @@
 
 // IVP_EXPORT_PUBLIC
 
-#if !defined(IVP_ACTUATOR_INCLUDED)
+#ifndef IVP_ACTUATOR_INCLUDED
 #define IVP_ACTUATOR_INCLUDED
 
 class IVP_Template_Check_Dist;
@@ -580,8 +580,6 @@ public:
     virtual ~IVP_Actuator_Stabilizer();
 };
 
-#if !defined(IVP_ACTUATOR_SPRING_INCLUDED)
 #include <ivp_actuator_spring.hxx>
-#endif
 
 #endif /* ifndef IVP_ACTUATOR_INCLUDED */

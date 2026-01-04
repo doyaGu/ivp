@@ -2,9 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_CONTROLLER_INCLUDED
+#ifndef IVP_CONTROLLER_WORLD_FRICTION_INCLUDED
+#define IVP_CONTROLLER_WORLD_FRICTION_INCLUDED
+
 #include <ivp_controller.hxx>
-#endif
 
 class IVP_Template_Controller_World_Friction
 {
@@ -61,3 +62,5 @@ public:
     IVP_Controller_World_Friction(IVP_Real_Object *obj, const IVP_Template_Controller_World_Friction *templ);
     virtual ~IVP_Controller_World_Friction();
 };
+
+#endif // IVP_CONTROLLER_WORLD_FRICTION_INCLUDED

@@ -4,8 +4,8 @@
 
 /** Common Info types for ivp_physic and ivp_template */
 
-#ifndef _IVP_ACTUATOR_INFO_INCLUDED
-#define _IVP_ACTUATOR_INFO_INCLUDED
+#ifndef IVP_ACTUATOR_INFO_INCLUDED
+#define IVP_ACTUATOR_INFO_INCLUDED
 
 #include <ivu_active_value.hxx>
 
@@ -48,4 +48,4 @@ public:
 
 // INTERN_END
 
-#endif
+#endif // IVP_ACTUATOR_INFO_INCLUDED

@@ -2,15 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_CONSTRAINT_LOCAL_INCLUDED
-// #	include <ivp_constraint_local.hxx>
-#endif
-#ifndef IVP_CONTROLLER_MOTION_INCLUDED
-#include <ivp_controller_motion.hxx>
-#endif
+#ifndef IVP_CONSTRAINT_FIXED_KEYFRAMED_INCLUDED
+#define IVP_CONSTRAINT_FIXED_KEYFRAMED_INCLUDED
 
-#ifndef IVP_CONSTRAINED_FIXED_KEYFRAMED_INCLUDED
-#define IVP_CONSTRAINED_FIXED_KEYFRAMED_INCLUDED
+#include <ivp_controller_motion.hxx>
 
 class IVP_Template_Constraint_Fixed_Keyframed : public IVP_Template_Controller_Motion
 {
@@ -66,4 +61,4 @@ public:
 	virtual ~IVP_Constraint_Fixed_Keyframed();
 };
 
-#endif
+#endif // IVP_CONSTRAINT_FIXED_KEYFRAMED_INCLUDED

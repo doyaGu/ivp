@@ -13,7 +13,6 @@
 #include <ivp_hull_manager.hxx>
 
 #include <ivp_radar.hxx>
-#include <ivp_radar_appl.hxx>
 
 IVP_Template_Rot_Mot::IVP_Template_Rot_Mot()
 {

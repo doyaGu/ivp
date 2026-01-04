@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_BUOYANCY_SOLVER_INCLUDED
+#define IVP_BUOYANCY_SOLVER_INCLUDED
+
 class IVP_Controller_Buoyancy;
 class IVP_Compact_Triangle;
 
@@ -128,3 +131,5 @@ public:
     // constructor
     IVP_Buoyancy_Solver(IVP_Core *core_, IVP_Controller_Buoyancy *cntrl, const class IVP_Template_Buoyancy *input, const IVP_U_Float_Point *resulting_speed_of_current_ws);
 };
+
+#endif // IVP_BUOYANCY_SOLVER_INCLUDED

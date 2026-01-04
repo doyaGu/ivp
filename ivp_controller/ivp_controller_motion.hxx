@@ -2,12 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_CONTROLLER_INCLUDED
-#include <ivp_controller.hxx>
-#endif
-
 #ifndef IVP_CONTROLLER_MOTION_INCLUDED
 #define IVP_CONTROLLER_MOTION_INCLUDED
+
+#include <ivp_controller.hxx>
 
 class IVP_Template_Controller_Motion
 {

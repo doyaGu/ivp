@@ -2,9 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef IVP_CONTROLLER_INCLUDED
+#ifndef IVP_CONTROLLER_FLOATING_INCLUDED
+#define IVP_CONTROLLER_FLOATING_INCLUDED
+
 #include <ivp_controller.hxx>
-#endif
 
 class IVP_Template_Controller_Floating
 {
@@ -64,3 +65,5 @@ protected:
     IVP_DOUBLE target_distance;         // distance to reach in next PSI
     IVP_DOUBLE current_distance;        // to be fed from outside (e.g. from ray caster)
 };
+
+#endif // IVP_CONTROLLER_FLOATING_INCLUDED

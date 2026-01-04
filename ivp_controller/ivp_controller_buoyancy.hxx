@@ -2,22 +2,12 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_CONTROLLER_BUOYANCY_INCLUDED
-#define _IVP_CONTROLLER_BUOYANCY_INCLUDED
+#ifndef IVP_CONTROLLER_BUOYANCY_INCLUDED
+#define IVP_CONTROLLER_BUOYANCY_INCLUDED
 
-#ifndef _IVP_ATTACHER_TO_CORES_INCLUDED
-#include <ivp_attacher_to_cores.hxx>
-#endif
-
-#ifndef IVP_CONTROLLER_INCLUDED
-#include <ivp_controller.hxx>
-#endif
-
-#ifndef IVP_SET_INCLUDED
 #include <ivu_set.hxx>
-#endif
-
-// class IVP_Multidimensional_Interpolator;
+#include <ivp_controller.hxx>
+#include <ivp_attacher_to_cores.hxx>
 #include "ivp_multidimensional_interp.hxx"
 
 /********************************************************************************
@@ -308,4 +298,4 @@ public:
     IVP_Attacher_To_Cores_Buoyancy(IVP_Template_Buoyancy &templ, IVP_U_Set_Active<IVP_Core> *set_of_cores_, IVP_Liquid_Surface_Descriptor *liquid_surface_descriptor_);
 };
 
-#endif
+#endif // IVP_CONTROLLER_BUOYANCY_INCLUDED

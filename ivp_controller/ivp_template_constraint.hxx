@@ -4,8 +4,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_CONSTRAINT_TEMPLATE_INCLUDED
-#define _IVP_CONSTRAINT_TEMPLATE_INCLUDED
+#ifndef IVP_CONSTRAINT_TEMPLATE_INCLUDED
+#define IVP_CONSTRAINT_TEMPLATE_INCLUDED
 
 #include "ivp_constraint_types.hxx"
 
@@ -410,4 +410,4 @@ public: // other functions
  * Note: if any of the two objects of the constraints are deleted, the constraints deletes itself
  *******************************************************************************/
 
-#endif
+#endif // IVP_CONSTRAINT_TEMPLATE_INCLUDED

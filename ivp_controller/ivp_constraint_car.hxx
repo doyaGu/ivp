@@ -2,14 +2,14 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_CONSTRAINT_CAR_INCLUDED
+#define IVP_CONSTRAINT_CAR_INCLUDED
+
 class IVP_Real_Object;
 class IVP_Core;
 
 #include <ivp_great_matrix.hxx>
-
-#ifndef IVP_CONSTRAINT_INCLUDED
 #include <ivp_constraint.hxx>
-#endif
 
 #define IVP_CONSTRAINT_CAR_MAX_WHEELS 12
 
@@ -125,3 +125,5 @@ private:
 private:
     IVP_Great_Matrix_Many_Zero tmp_matrix; // temp, non-inverted matrix
 };
+
+#endif // IVP_CONSTRAINT_CAR_INCLUDED
