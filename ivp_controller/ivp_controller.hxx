@@ -5,9 +5,8 @@
 #ifndef IVP_CONTROLLER_INCLUDED
 #define IVP_CONTROLLER_INCLUDED
 
-#ifndef _IVP_ENVIRONMENT_INCLUDED
-#   include <ivp_environment.hxx>
-#endif
+#include <ivu_vector.hxx>
+#include <ivp_environment.hxx>
 
 /**********************************************************************************************
  *	Name:	  	IVP_CONTROLLER_PRIORITY   	
@@ -67,7 +66,7 @@ public:
     }
 
     IVP_Event_Sim(IVP_Environment *env){
-	environment = env; delta_time = env->get_delta_PSI_time(); i_delta_time = env->get_inv_delta_PSI_time();
+	    environment = env; delta_time = env->get_delta_PSI_time(); i_delta_time = env->get_inv_delta_PSI_time();
     }
 };
 
