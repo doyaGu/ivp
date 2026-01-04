@@ -9,8 +9,8 @@
  *  Classes:	    IVP_Compact_Modify
  ********************************************************************************/
 
-#ifndef _IVP_COMPACT_MODIFY_INCLUDED
-#define _IVP_COMPACT_MODIFY_INCLUDED
+#ifndef IVP_COMPACT_BUILDER_COMPACT_MODIFY_INCLUDED
+#define IVP_COMPACT_BUILDER_COMPACT_MODIFY_INCLUDED
 
 /********************************************************************************
  *  Name:	    IVP_Compact_Modify	
@@ -83,4 +83,4 @@ public:
 				       IVP_DOUBLE pointmerge_threshold);
 };
 
-#endif
+#endif // IVP_COMPACT_BUILDER_COMPACT_MODIFY_INCLUDED

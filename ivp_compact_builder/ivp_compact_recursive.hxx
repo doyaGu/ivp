@@ -1,7 +1,10 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COMPACT_BUILDER_COMPACT_RECURSIVE_INCLUDED
+#define IVP_COMPACT_BUILDER_COMPACT_RECURSIVE_INCLUDED
+
 /********************************************************************************
- *	File:	       	ivp_compact_rekursive.hxx	
+ *	File:	       	ivp_compact_rekursive.hxx
  *	Description:	create rekursive compact ledges
  ********************************************************************************/
 
@@ -23,3 +26,5 @@ public:
 
   IVP_Compact_Ledge *compile();
 };
+
+#endif // IVP_COMPACT_BUILDER_COMPACT_RECURSIVE_INCLUDED

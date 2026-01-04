@@ -10,8 +10,8 @@
  *  Classes:	    IVP_SurfaceBuilder_Polyhedron_Concave
  ********************************************************************************/
 
-#ifndef IVP_SURBUILD_3DS_INCLUDED
-#define IVP_SURBUILD_3DS_INCLUDED
+#ifndef IVP_COMPACT_BUILDER_SURBUILD_3DS_INCLUDED
+#define IVP_COMPACT_BUILDER_SURBUILD_3DS_INCLUDED
 
 class IVP_Compact_Surface;
 class IVP_Compact_Ledge;
@@ -29,4 +29,4 @@ public:
 };
 
 
-#endif
+#endif // IVP_COMPACT_BUILDER_SURBUILD_3DS_INCLUDED

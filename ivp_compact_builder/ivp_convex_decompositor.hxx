@@ -24,8 +24,8 @@
 //
 // -------------------------------------------------------------
 
-#ifndef _IVP_CONVEX_DECOMPOSITOR_INCLUDED
-#define _IVP_CONVEX_DECOMPOSITOR_INCLUDED
+#ifndef IVP_COMPACT_BUILDER_CONVEX_DECOMPOSITOR_INCLUDED
+#define IVP_COMPACT_BUILDER_CONVEX_DECOMPOSITOR_INCLUDED
 
 
 /********************************************************************************
@@ -139,4 +139,4 @@ public:
 
 };
 
-#endif
+#endif // IVP_COMPACT_BUILDER_CONVEX_DECOMPOSITOR_INCLUDED

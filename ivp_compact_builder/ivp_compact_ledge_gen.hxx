@@ -34,4 +34,6 @@ public:
     ~IVP_Compact_Ledge_Generator();
 };
 
+#endif // IVP_COMPACT_BUILDER_COMPACT_LEDGE_GEN_INCLUDED
+
 

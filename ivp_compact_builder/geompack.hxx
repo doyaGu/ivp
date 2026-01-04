@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COMPACT_BUILDER_GEOMPACK_INCLUDED
+#define IVP_COMPACT_BUILDER_GEOMPACK_INCLUDED
+
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
@@ -12,11 +15,10 @@ private:
     double angacc;
     double rdacc;
 
-
-    int		size_intworkarray; // orig: maxiw [5000]. Should be divisible by 3 & 4!;
+    int		size_intworkarray; // orig: maxiw [5000]. Should be divisible by 3 & 4!
     int		*g_intworkarray;
 
-    int		size_doubleworkarray; // orig: maxwk [5000]. Should be divisible by 3 & 4!;
+    int		size_doubleworkarray; // orig: maxwk [5000]. Should be divisible by 3 & 4!
     double	*g_doubleworkarray;
 
     int		size_vcl; // number of vertices (NOT bytesize of array!)
@@ -25,7 +27,7 @@ private:
     int		size_polyhedronfirstfaceoffset; // Leave this to "2" if there will never be more than one polyhedron to decompose. <orig. maxhf [200]>
     int		*g_polyhedronfirstfaceoffset; // 1 int for each polyhedron <orig. hfl>
 
-    int		size_polyhedronfaceindices; // number of entries (NOT bytesize of array!) <orig: maxpf [2000]>
+    int		size_polyhedronfaceindices; // number of entries (NOT bytesize of array!) <orig. maxpf [2000]>
     int		*g_polyhedronfaceindices; // 2 ints for each face. <orig. pfl>
 
     int		size_facearrays; // <orig. maxfp [800]>
@@ -43,7 +45,6 @@ private:
     int		hashtable_maxsize;
     int		hashtable_size;
     int		*g_hashtable;
-
 
     int		n_original_vertices; // orig. nvc
     int		n_polyhedronfaces; // orig. npf
@@ -69,7 +70,6 @@ public:
 		 double		*cdang,
 		 long int	*rflag
 		);
-
 
     void dsphdc_();
 
@@ -121,8 +121,12 @@ public:
     double d_sign(double a, double b);
 
     int increase_memory(void **mem_block, int *mem_size, int size_of_element);
-
 };
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 struct geompack_parameters {
 
@@ -146,3 +150,4 @@ struct geompack_parameters {
     int **	fvl_out;
 };
 
+#endif // IVP_COMPACT_BUILDER_GEOMPACK_INCLUDED

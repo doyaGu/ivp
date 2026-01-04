@@ -1,5 +1,8 @@
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_COMPACT_BUILDER_ROT_INERTIA_SOLVER_INCLUDED
+#define IVP_COMPACT_BUILDER_ROT_INERTIA_SOLVER_INCLUDED
+
 class IVP_Compact_Ledge_Mass_Center_Solver {
     const IVP_U_Matrix *transform;
 public:
@@ -53,3 +56,4 @@ public:
 #endif // HAVOK_MOPP
 };
 
+#endif // IVP_COMPACT_BUILDER_ROT_INERTIA_SOLVER_INCLUDED
