@@ -239,4 +239,4 @@ inline IVP_U_Float_Point::IVP_U_Float_Point(const IVP_U_Float_Point *p)
     this->set(p);
 }
 
-#endif
+#endif // IVP_U_LINEAR_MACROS_INCLUDED

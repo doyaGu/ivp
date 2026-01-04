@@ -796,4 +796,6 @@ public:
 #pragma pack(pop)
 #endif
 
+#include "ivu_linear_macros.hxx"
+
 #endif
