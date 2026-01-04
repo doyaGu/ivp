@@ -2,8 +2,8 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_BIGVECTOR_INCLUDED
-#define _IVP_BIGVECTOR_INCLUDED
+#ifndef IVP_BIGVECTOR_INCLUDED
+#define IVP_BIGVECTOR_INCLUDED
 
 #include <ivu_types.hxx>
 
@@ -175,4 +175,4 @@ class IVP_U_BigVector_Enumerator
     }
 };
 
-#endif
+#endif // IVP_BIGVECTOR_INCLUDED
