@@ -1,5 +1,10 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_DEBUG_MANAGER_INCLUDED
+#define IVP_DEBUG_MANAGER_INCLUDED
+
+#include <ivu_types.hxx>
+
 class IVP_Contact_Point;
 
 class IVP_Debug_Manager
@@ -37,3 +42,5 @@ public:
     ~IVP_Debug_Manager();
     IVP_Debug_Manager();
 };
+
+#endif // IVP_DEBUG_MANAGER_INCLUDED

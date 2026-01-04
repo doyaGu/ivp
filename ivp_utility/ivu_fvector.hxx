@@ -5,6 +5,7 @@
 #define IVP_U_FVECTOR_INCLUDED
 
 #include <ivu_types.hxx>
+#include <ivu_vector.hxx>
 
 /********************************************************************************
  *	Class:	       	IVP_U_FVector

@@ -12,6 +12,8 @@
 #ifndef _IVP_BALL_INCLUDED
 #define _IVP_BALL_INCLUDED
 
+#include <ivp_real_object.hxx>
+
 class IVP_Template_Ball;
 
 /********************************************************************************

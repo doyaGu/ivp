@@ -1,9 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 // [ CK 2001 ]
 
+#include <ivp_physics.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_surface.hxx>
-#include <ivp_physics.hxx>
 
 void IVP_Compact_Surface::byte_swap()
 {
@@ -17,10 +17,10 @@ void IVP_Compact_Surface::byte_swap()
       int			offset_ledgetree_root;	// offset to root node of internal ledgetree
       int			dummy[3];		// 16byte memory align
     */
-    mass_center.byte_swap();                        // 3 floats
-    rotation_inertia.byte_swap();                   // 3 floats
-    ivp_byte_swap4((uint &)upper_limit_radius);     // 1 float
-    ivp_byte_swap4((uint &)offset_ledgetree_root);  // 1 float
+    mass_center.byte_swap();                       // 3 floats
+    rotation_inertia.byte_swap();                  // 3 floats
+    ivp_byte_swap4((uint &)upper_limit_radius);    // 1 float
+    ivp_byte_swap4((uint &)offset_ledgetree_root); // 1 float
 
     uint bitfields = *(uint *)(&upper_limit_radius + 1);
 
@@ -59,7 +59,7 @@ void IVP_Compact_Surface::byte_swap_all(IVP_BOOL swap_points, int point_estimate
             // IVP_U_BigVector is a pointer array
             IVP_U_BigVector<IVP_Compact_Poly_Point> swapped_points(point_estimate);
 
-            const IVP_Compact_Ledge *ledge = ltn->get_compact_hull();  // returns const only?!
+            const IVP_Compact_Ledge *ledge = ltn->get_compact_hull(); // returns const only?!
 
             if (ledge != NULL)
             {
