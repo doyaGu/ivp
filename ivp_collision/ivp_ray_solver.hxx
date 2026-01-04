@@ -4,6 +4,8 @@
 #ifndef IVP_COLLISION_RAY_SOLVER_INCLUDED
 #define IVP_COLLISION_RAY_SOLVER_INCLUDED
 
+#include <ivu_min_hash.hxx>
+
 class IVP_Environment;
 class IVP_Real_Object;
 class IVP_Ball;
@@ -15,10 +17,6 @@ class IVP_Compact_Triangle;
 class IVP_OV_Node;
 class IVP_OV_Tree_Manager;
 class IVP_Compact_Ledgetree_Node;
-
-#if !defined(_IVP_U_MINHASH_INCLUDED)
-#include <ivu_min_hash.hxx>
-#endif
 
 /********************************************************************************
  *	Name:	     	IVP_Ray_Solver

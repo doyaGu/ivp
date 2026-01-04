@@ -5,6 +5,10 @@
 #ifndef IVP_COLLISION_CLUSTERING_VISUAL_HASH_INCLUDED
 #define IVP_COLLISION_CLUSTERING_VISUAL_HASH_INCLUDED
 
+#include <ivu_vhash.hxx>
+
+class IVP_Real_Object;
+
 /********************************************************************************
  * Class:	IVP_Clustering_Visualizer_Object_Hash
  * Description:	hash table to store simple IVP_Real_Object pointers.

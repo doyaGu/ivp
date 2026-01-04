@@ -321,10 +321,10 @@ class IVP_Compact_Ledgetree_Node
 const IVP_Compact_Triangle *IVP_Compact_Edge::get_triangle() const
 {
     // mask 4 lowest adress bits to receive triangle
-#if PLATFORM_64BITS
+#ifdef PLATFORM_64BITS
     return (IVP_Compact_Triangle *)(((uintp)this) & 0xfffffffffffffff0);
 #else
-    return (IVP_Compact_Triangle *)(((unsigned int)this) & 0xfffffff0);
+    return (IVP_Compact_Triangle *)(((uintp)this) & 0xfffffff0);
 #endif
 }
 

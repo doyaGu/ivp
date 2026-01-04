@@ -13,13 +13,8 @@
 
 #define IVP_MAGIC_INERTIA_RADIUS 100.0f  // for ill calculated inertias use this default radius
 
-#ifndef _IVP_CACHE_OBJECT_INCLUDED
-    #include <ivp_cache_object.hxx>
-#endif
-
-#ifndef _IVP_CACHE_LEDGE_POINT_INCLUDED
-    #include <ivp_cache_ledge_point.hxx>
-#endif
+#include <ivp_cache_object.hxx>
+#include <ivp_cache_ledge_point.hxx>
 
 class IVP_Cache_Ball;
 

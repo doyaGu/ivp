@@ -5,9 +5,7 @@
 #ifndef IVP_COLLISION_LISTENER_COLLISION_INCLUDED
 #define IVP_COLLISION_LISTENER_COLLISION_INCLUDED
 
-#ifndef _IVP_CONTACT_SITUATION_INCLUDED
 #include <ivp_contact_situation.hxx>
-#endif
 
 class IVP_Environment;
 

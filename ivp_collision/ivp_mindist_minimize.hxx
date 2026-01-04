@@ -3,9 +3,7 @@
 #ifndef IVP_COLLISION_MINDIST_MINIMIZE_INCLUDED
 #define IVP_COLLISION_MINDIST_MINIMIZE_INCLUDED
 
-#ifndef IVP_HASH_INCLUDED
-    #include <ivu_hash.hxx>
-#endif
+#include <ivu_hash.hxx>
 
 class IVP_Cache_Ball;
 class IVP_Cache_Ledge_Point;

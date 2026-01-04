@@ -8,16 +8,9 @@
 class IVP_Mindist_Base;
 class IVP_Compact_Edge;
 
-#ifndef IVP_TIME_EVENT_INCLUDED
 #include <ivp_time_event.hxx>
-#endif
-
-#ifndef _IVP_LISTENER_HULL_INCLUDED
 #include <ivp_listener_hull.hxx>
-#endif
-#ifndef _IVP_COLLISION
 #include <ivp_collision.hxx>
-#endif
 
 // #include "ivp_mindist_intern.hxx"
 
