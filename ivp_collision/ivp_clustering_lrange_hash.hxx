@@ -2,6 +2,12 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_COLLISION_CLUSTERING_LRANGE_HASH_INCLUDED
+#define IVP_COLLISION_CLUSTERING_LRANGE_HASH_INCLUDED
+
+#include <ivu_vhash.hxx>
+#include <ivp_clustering_longrange.hxx>
+
 class IVP_ov_tree_hash : protected IVP_VHash
 {
   protected:
@@ -27,3 +33,5 @@ class IVP_ov_tree_hash : protected IVP_VHash
     ~IVP_ov_tree_hash();
     IVP_ov_tree_hash(int create_size) : IVP_VHash(create_size) {}
 };
+
+#endif // IVP_COLLISION_CLUSTERING_LRANGE_HASH_INCLUDED

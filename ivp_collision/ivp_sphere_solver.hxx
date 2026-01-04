@@ -1,5 +1,5 @@
-#ifndef IVP_SPHERE_SOLVER_INCLUDED
-#define IVP_SPHERE_SOLVER_INCLUDED
+#ifndef IVP_COLLISION_SPHERE_SOLVER_INCLUDED
+#define IVP_COLLISION_SPHERE_SOLVER_INCLUDED
 
 class IVP_Environment;
 class IVP_Real_Object;
@@ -7,8 +7,8 @@ class IVP_OV_Node;
 class IVP_OV_Tree_Manager;
 
 #ifndef IVP_SET_INCLUDED
-    #include <ivu_set.hxx>
-#endif  // IVP_SET_INCLUDED
+#include <ivu_set.hxx>
+#endif // IVP_SET_INCLUDED
 
 struct IVP_Sphere_Solver_Template
 {
@@ -19,7 +19,7 @@ struct IVP_Sphere_Solver_Template
 
 class IVP_Vector_of_Objects_128 : public IVP_U_Vector<IVP_Real_Object>
 {
-  public:
+public:
     IVP_Vector_of_Objects_128() : IVP_U_Vector<IVP_Real_Object>((void **)&elem_buffer[0], 128) {}
 
     void reset()
@@ -28,7 +28,7 @@ class IVP_Vector_of_Objects_128 : public IVP_U_Vector<IVP_Real_Object>
         memsize = 128;
     }
 
-  private:
+private:
     IVP_Real_Object *elem_buffer[128];
 };
 
@@ -53,7 +53,7 @@ class IVP_Vector_of_Objects_128 : public IVP_U_Vector<IVP_Real_Object>
  */
 class IVP_Sphere_Solver
 {
-  public:
+public:
     /**
      * Constructor.
      * Does nothing, inline.
@@ -93,10 +93,10 @@ class IVP_Sphere_Solver
     IVP_DOUBLE m_radius;
     int m_max_traversal_depth;
 
-  private:
+private:
     IVP_OV_Tree_Manager *m_tree_manager;
 
     void recursively_collect_intruding_objects(IVP_OV_Node *node, IVP_U_Float_Point *query_rlb, IVP_U_Float_Point *query_pos);
 };
 
-#endif  // IVP_SPHERE_SOLVER_INCLUDED
+#endif // IVP_COLLISION_SPHERE_SOLVER_INCLUDED

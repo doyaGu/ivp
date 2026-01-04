@@ -1,10 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
-
-#include <ivp_clustering_longrange.hxx>
 #include <ivp_clustering_lrange_hash.hxx>
-#include <ivu_vhash.hxx>
 
 IVP_ov_tree_hash::~IVP_ov_tree_hash() {}
 

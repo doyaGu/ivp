@@ -17,8 +17,8 @@
  *		IVP_Clustering_Visualizer_Longrange
  ********************************************************************************/
 
-#ifndef IVP_CLUSTERING_VISUALIZER_INCLUDED
-#define IVP_CLUSTERING_VISUALIZER_INCLUDED
+#ifndef IVP_COLLISION_CLUSTERING_VISUALIZER_INCLUDED
+#define IVP_COLLISION_CLUSTERING_VISUALIZER_INCLUDED
 
 class IVP_Clustering_Visualizer_Longrange_Data;
 class IVP_Clustering_Visualizer_Longrange_Hash;
@@ -270,4 +270,4 @@ class IVP_Clustering_Visualizer
 extern IVP_Clustering_Visualizer ivp_global_clustering_visualizer;
     #endif
 
-#endif
+#endif // IVP_COLLISION_CLUSTERING_VISUALIZER_INCLUDED

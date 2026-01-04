@@ -14,11 +14,6 @@
 // IVP_EXPORT_PRIVATE
 
 /***************************** PF ******************************************/
-/***************************** PF ******************************************/
-/***************************** PF ******************************************/
-/***************************** PF ******************************************/
-/***************************** PF ******************************************/
-/***************************** PF ******************************************/
 
 // Vertex to Surface
 
@@ -68,7 +63,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_PF(const IVP_Compact_Edge *
         }
     }
     IVP_ASSERT(min_edge);
-    return p_minimize_PK(P, min_edge, m_cache_P, m_cache_F);  // s val in range
+    return p_minimize_PK(P, min_edge, m_cache_P, m_cache_F); // s val in range
 }
 
 IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_B, const IVP_Compact_Edge *F, IVP_Cache_Ledge_Point *m_cache_F)
@@ -93,7 +88,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_
         const IVP_U_Float_Point *F_O_os = IVP_CLS.give_object_coords(F, m_cache_F);
 
         IVP_U_Point wHesse_vecF_os;
-        IVP_CLS.calc_hesse_vec_object_not_normized(F, m_cache_F->get_compact_ledge(), &wHesse_vecF_os);  // should be normized: see below
+        IVP_CLS.calc_hesse_vec_object_not_normized(F, m_cache_F->get_compact_ledge(), &wHesse_vecF_os); // should be normized: see below
         wHesse_vecF_os.normize();
         IVP_U_Point contact_plane;
         m_cache_F->get_object_cache()->transform_vector_to_world_coords(&wHesse_vecF_os, &contact_plane);
@@ -102,7 +97,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_
         IVP_DOUBLE dist_plus_radius = p_Fos.dot_product(&wHesse_vecF_os) - wHesse_vecF_os.dot_product(F_O_os);
         m_cache_F->tmp.synapse->update_synapse(F, IVP_ST_TRIANGLE);
         if (dist_plus_radius < 0.0f)
-        {  // check for backside
+        { // check for backside
             m_cache_F->tmp.synapse->update_synapse(F, IVP_ST_BACKSIDE);
             this->pos_opposite_BacksideOs.set(&p_Fos);
             return IVP_MRC_BACKSIDE;
@@ -152,10 +147,10 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
 
     IVP_U_Point hesse_vec_Pos;
 
-    IVP_DOUBLE back_side_check_distance = 0.0f;  //-0.5f * ivp_mindist_settings.coll_dist;	// when should we treat surface as backside
+    IVP_DOUBLE back_side_check_distance = 0.0f; //-0.5f * ivp_mindist_settings.coll_dist;	// when should we treat surface as backside
     {
         IVP_U_Point wHesse_vecF_Fos;
-        IVP_CLS.calc_hesse_vec_object_not_normized(F, m_cache_F->get_compact_ledge(), &wHesse_vecF_Fos);  // should be normized: see below
+        IVP_CLS.calc_hesse_vec_object_not_normized(F, m_cache_F->get_compact_ledge(), &wHesse_vecF_Fos); // should be normized: see below
         wHesse_vecF_Fos.fast_normize();
         IVP_U_Point hesse_vec_ws;
         m_cache_F->get_object_cache()->transform_vector_to_world_coords(&wHesse_vecF_Fos, &hesse_vec_ws);
@@ -181,7 +176,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
     }
 
 #ifdef DEBUG_CHECK_LEN
-    check_len_PF(P, F, m_cache_P, m_cache_F);  // check wether world_pos_hash is afflicted
+    check_len_PF(P, F, m_cache_P, m_cache_F); // check wether world_pos_hash is afflicted
 #endif
 
     IVP_DOUBLE min_d_pos = 0.0f;
@@ -216,14 +211,14 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         }
     }
     if (min_edge == NULL)
-    {  // no nearer point found
+    { // no nearer point found
         // END: vertex - surface
 
         m_cache_P->tmp.synapse->update_synapse(P, IVP_ST_POINT);
         m_cache_F->tmp.synapse->update_synapse(F, IVP_ST_TRIANGLE);
 
         if (mindist->len_numerator + mindist->sum_extra_radius < back_side_check_distance)
-        {  // check for backside
+        { // check for backside
             this->pos_opposite_BacksideOs.set(P_Fos);
             m_cache_F->tmp.synapse->update_synapse(F, IVP_ST_BACKSIDE);
             return IVP_MRC_BACKSIDE;
@@ -254,7 +249,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
     //		2. shortest distance between e and P_NP is on e ( 0 < s_val < 1);
 
     int violated_q_rs = 0;
-    {  // count number of violated q+rs
+    { // count number of violated q+rs
         for (int j = 0; j < 3; j++)
         {
             if (qr.checks[j] >= 0)
@@ -270,7 +265,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         for (e = F, j = 0; j < 3; e = e->get_next(), j++)
         {
             if (qr.checks[j] >= 0)
-                continue;  // inside triangle
+                continue; // inside triangle
             // check all sides of old area for crossing of new edge and area side
             return p_minimize_KK(min_edge, e, m_cache_P, m_cache_F);
         }
@@ -285,7 +280,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         for (e = F, j = 0; j < 3; e = e->get_next(), j++)
         {
             if (qr.checks[j] > 0)
-                continue;  // on correct side of triangle, no check needed
+                continue; // on correct side of triangle, no check needed
             IVP_DOUBLE len = IVP_CLS.calc_qlen_KK(min_edge, e, m_cache_P, m_cache_F);
             if (len < best_len)
             {
@@ -295,7 +290,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         }
     }
     return p_minimize_KK(min_edge, best_edge, m_cache_P, m_cache_F);
-}  // p_minimize_Leave_PF
+} // p_minimize_Leave_PF
 
 // OKOKOK
 
@@ -341,7 +336,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_KK(const IVP_Compact_Edge *
         sort_synapses(m_cache_L->tmp.synapse, m_cache_K->tmp.synapse);
 
         if (kkr.checks_L[0] < 0.0f)
-        {  // sl is already checked for interval [0 .. 1], now check side only
+        { // sl is already checked for interval [0 .. 1], now check side only
             return p_minimize_PK(L, K, m_cache_L, m_cache_K);
         }
         else
@@ -414,7 +409,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_KK(const IVP_Compact_Edge *
 
 class IVP_Leave_KK_Case
 {
-  public:
+public:
     const IVP_Compact_Edge *F;
     const IVP_Compact_Edge *P;
     const IVP_U_Point *P_Fos;
@@ -443,7 +438,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
     IVP_U_Point H_Los;
     IVP_U_Point H_ws;
 
-    int side;  // OSR
+    int side; // OSR
     {
         IVP_U_Point diff_l_k;
         diff_l_k.subtract(kkin.L_Los[0], &kkin.K_Los[0]);
@@ -460,7 +455,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
         m_cache_L->get_object_cache()->transform_vector_to_world_coords(&H_Los, &H_ws);
         m_cache_K->get_object_cache()->transform_vector_to_object_coords(&H_ws, &H_Kos);
 
-        mindist->len_numerator = IVP_Inline_Math::fabsd(val * iHQ);  // no direction of KK
+        mindist->len_numerator = IVP_Inline_Math::fabsd(val * iHQ); // no direction of KK
         mindist->len_numerator -= mindist->sum_extra_radius;
         mindist->contact_plane.set_multiple(&H_ws, (side - 0.5f) * 2.0f * iHQ);
 
@@ -471,7 +466,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
 #endif
     }
 
-    IVP_BOOL reverse_side_check[4];  // IVP_TRUE when point sees side from wrong direction
+    IVP_BOOL reverse_side_check[4]; // IVP_TRUE when point sees side from wrong direction
     IVP_Leave_KK_Case cases[4];
     IVP_U_Point L_Kos[2];
     IVP_CLS.transform_pos_other_space(kkin.L_Los[0], m_cache_L, m_cache_K, &L_Kos[0]);
@@ -518,7 +513,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
         }
     }
 
-    IVP_DOUBLE min_grad_pos = -P_DOUBLE_RES * 4;  // max_double
+    IVP_DOUBLE min_grad_pos = -P_DOUBLE_RES * 4; // max_double
     const IVP_Compact_Edge *min_edge = NULL;
     const IVP_Compact_Edge *min_plane = NULL;
     IVP_Cache_Ledge_Point *min_edge_m_cache = NULL;
@@ -606,20 +601,20 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
 
     {
         if (!min_qr.is_outside())
-        {  // nearer point is inside new area->PF
+        { // nearer point is inside new area->PF
             IVP_U_Point edge_Fos;
             IVP_CLS.calc_pos_other_space(min_edge, min_edge_m_cache, min_plane_m_cache, &edge_Fos);
             return p_minimize_Leave_PF(min_edge, &edge_Fos, min_plane, min_edge_m_cache, min_plane_m_cache);
         }
 
         if (min_qr.checks[2] >= 0.0f)
-        {                                                                                                // other side is inside
-            return p_minimize_KK(min_edge, min_plane->get_next(), min_edge_m_cache, min_plane_m_cache);  // no ideas about backsides !!!
+        {                                                                                               // other side is inside
+            return p_minimize_KK(min_edge, min_plane->get_next(), min_edge_m_cache, min_plane_m_cache); // no ideas about backsides !!!
         }
 
         if (min_qr.checks[1] >= 0.0f)
         {
-            return p_minimize_KK(min_edge, min_plane->get_prev(), min_edge_m_cache, min_plane_m_cache);  // no ideas about backsides !!!
+            return p_minimize_KK(min_edge, min_plane->get_prev(), min_edge_m_cache, min_plane_m_cache); // no ideas about backsides !!!
         }
     }
     // now we are outside, find new KK s vales of other edges of new area
@@ -644,14 +639,14 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
 #endif
         if (dist_next > dist_prev)
         {
-            return p_minimize_KK(min_edge, min_plane->get_prev(), min_edge_m_cache, min_plane_m_cache);  // no ideas about backsides !!!
+            return p_minimize_KK(min_edge, min_plane->get_prev(), min_edge_m_cache, min_plane_m_cache); // no ideas about backsides !!!
         }
         else
         {
-            return p_minimize_KK(min_edge, min_plane->get_next(), min_edge_m_cache, min_plane_m_cache);  // no ideas about backsides !!!
+            return p_minimize_KK(min_edge, min_plane->get_next(), min_edge_m_cache, min_plane_m_cache); // no ideas about backsides !!!
         }
     }
-}  // p_minimize_Leave_KK
+} // p_minimize_Leave_KK
 
 /***************************** BP ******************************************/
 /***************************** BP ******************************************/
@@ -697,7 +692,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BP(IVP_Cache_Ball *m_cache_
 
     // each vertex P is position, all neighbouring edges of Pm checked
     {
-        const IVP_Compact_Edge *Pm = P;  // alias
+        const IVP_Compact_Edge *Pm = P; // alias
         const IVP_U_Float_Point *Pm_Pmos = IVP_CLS.give_object_coords(Pm, m_cache_P);
 
         IVP_U_Point Pm_P_Pmos;
@@ -718,7 +713,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BP(IVP_Cache_Ball *m_cache_
                 IVP_DOUBLE i_len = IVP_Inline_Math::isqrt_float(tp_next_os->quad_distance_to(Pm_Pmos));
                 grad *= i_len;
                 if (grad > s_grad_max)
-                {  // search for greatest step to walk
+                { // search for greatest step to walk
                     // now we found a new smax _value, check for reverse areas
                     // check whether new point on edge still could see me
                     s_grad_max = grad;
@@ -738,7 +733,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BP(IVP_Cache_Ball *m_cache_
         return IVP_MRC_OK;
     }
     IVP_Unscaled_S_Result sr;
-    IVP_CLS.calc_unscaled_s_val_K_space(m_cache_P->get_compact_ledge(), Kmax, &center_ball_Pmos, &sr);  //
+    IVP_CLS.calc_unscaled_s_val_K_space(m_cache_P->get_compact_ledge(), Kmax, &center_ball_Pmos, &sr); //
     if (sr.checks[1] <= 0)
     {
         IVP_IF(1)
@@ -850,7 +845,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_PP(const IVP_Compact_Edge *
                 IVP_DOUBLE i_len = IVP_Inline_Math::isqrt_float(tp_next_os->quad_distance_to(Pm_Pmos));
                 grad *= i_len;
                 if (grad > s_grad_max)
-                {   // search for greatest step to walk
+                { // search for greatest step to walk
                     // now we found a new smax _value, check for espilon
                     P_Pmos_max = P_Pmos;
                     s_grad_max = grad;
@@ -876,7 +871,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_PP(const IVP_Compact_Edge *
     }
 
     IVP_Unscaled_S_Result sr;
-    IVP_CLS.calc_unscaled_s_val_K_space(m_cache_K_max->get_compact_ledge(), Kmax, P_Pmos_max, &sr);  //
+    IVP_CLS.calc_unscaled_s_val_K_space(m_cache_K_max->get_compact_ledge(), Kmax, P_Pmos_max, &sr); //
     if (sr.checks[1] <= 0)
     {
         IVP_IF(1)
@@ -939,20 +934,20 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     }
 
     // ********** first step, check for PF cases
-    IVP_U_Point p_ks;  // point p in K space
+    IVP_U_Point p_ks; // point p in K space
     {
         IVP_U_Point *p_ws = m_cache_ball->cache_object->m_world_f_object.get_position();
         m_cache_K->get_object_cache()->transform_position_to_object_coords(p_ws, &p_ks);
     }
 
     // get direction of edge K
-    const IVP_U_Float_Point *k_start_os = IVP_CLS.give_object_coords(K, m_cache_K);                                 // a point on an edge
-    const IVP_U_Float_Point *k_next_os = IVP_CLS.give_object_coords(K->get_next(), m_cache_K);                      // next point
-    const IVP_U_Float_Point *k_tri_os = IVP_CLS.give_object_coords(K->get_prev(), m_cache_K);                       // prev point == other point of this triange
-    const IVP_U_Float_Point *k_oppo_tri_os = IVP_CLS.give_object_coords(K->get_opposite()->get_prev(), m_cache_K);  // point of opposite triangle
+    const IVP_U_Float_Point *k_start_os = IVP_CLS.give_object_coords(K, m_cache_K);                                // a point on an edge
+    const IVP_U_Float_Point *k_next_os = IVP_CLS.give_object_coords(K->get_next(), m_cache_K);                     // next point
+    const IVP_U_Float_Point *k_tri_os = IVP_CLS.give_object_coords(K->get_prev(), m_cache_K);                      // prev point == other point of this triange
+    const IVP_U_Float_Point *k_oppo_tri_os = IVP_CLS.give_object_coords(K->get_opposite()->get_prev(), m_cache_K); // point of opposite triangle
 
     IVP_U_Point vec_K_ks;
-    vec_K_ks.subtract(k_next_os, k_start_os);  // not normized direction yet
+    vec_K_ks.subtract(k_next_os, k_start_os); // not normized direction yet
 
     IVP_U_Point vec_K_P;
     vec_K_P.subtract(&p_ks, k_start_os);
@@ -963,11 +958,11 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     vec_K_oppo_tri.subtract(k_oppo_tri_os, k_start_os);
 
     IVP_U_Point hesse_tri_os;
-    hesse_tri_os.calc_cross_product(&vec_K_ks, &vec_K_tri);  // vertical to triangle
+    hesse_tri_os.calc_cross_product(&vec_K_ks, &vec_K_tri); // vertical to triangle
     IVP_U_Point hesse_oppo_tri_os;
-    hesse_oppo_tri_os.calc_cross_product(&vec_K_oppo_tri, &vec_K_ks);  // v. to oppo tri
+    hesse_oppo_tri_os.calc_cross_product(&vec_K_oppo_tri, &vec_K_ks); // v. to oppo tri
 
-    IVP_DOUBLE vert[2];  // dist between point and triangle, oppo tri
+    IVP_DOUBLE vert[2]; // dist between point and triangle, oppo tri
     vert[0] = vec_K_P.dot_product(&hesse_tri_os);
     vert[1] = vec_K_P.dot_product(&hesse_oppo_tri_os);
 
@@ -977,11 +972,11 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     IVP_CLS.calc_unscaled_qr_vals_F_space(m_cache_K->get_compact_ledge(), K->get_opposite(), &p_ks, &qr1);
 
     if (qr0.checks[0] > 0.0f)
-    {  // check projected distance
+    { // check projected distance
         if (qr1.checks[0] > 0.0f)
-        {  // both planes better,
+        { // both planes better,
             if (vert[1] > 0)
-            {  // plane visible, if true than it has priority
+            { // plane visible, if true than it has priority
                 return p_minimize_BF(m_cache_ball, K->get_opposite(), m_cache_K);
             }
         }
@@ -995,13 +990,13 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
 
     // check for backside !!
     if (vert[0] < -P_DOUBLE_EPS && vert[1] < -P_DOUBLE_EPS)
-    {  // both from behind
+    { // both from behind
         this->pos_opposite_BacksideOs.set(&p_ks);
         m_cache_K->tmp.synapse->update_synapse(K, IVP_ST_BACKSIDE);
         return IVP_MRC_BACKSIDE;
     }
 
-    IVP_U_Point Lot2;  // unnormized Lot
+    IVP_U_Point Lot2; // unnormized Lot
     Lot2.calc_cross_product(&vec_K_ks, &vec_K_P);
 
     IVP_DOUBLE iqK_len = 1.0f / vec_K_ks.quad_length();
@@ -1009,7 +1004,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     IVP_DOUBLE inv_len = IVP_Inline_Math::isqrt_double(qdist);
     mindist->len_numerator = qdist * inv_len - mindist->sum_extra_radius;
 
-    Lot2.calc_cross_product(&vec_K_ks, &Lot2);  // does change the length !!!
+    Lot2.calc_cross_product(&vec_K_ks, &Lot2); // does change the length !!!
 
     m_cache_K->get_object_cache()->transform_vector_to_world_coords(&Lot2, &Lot2);
 
@@ -1072,17 +1067,17 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
     check_len_PK(P, K, m_cache_P, m_cache_K);
 #endif
     // ********** first step, check for PF cases
-    IVP_U_Point p_ks;  // point p in K space
+    IVP_U_Point p_ks; // point p in K space
     IVP_CLS.calc_pos_other_space(P, m_cache_P, m_cache_K, &p_ks);
 
     // get direction of edge K
-    const IVP_U_Float_Point *k_start_os = IVP_CLS.give_object_coords(K, m_cache_K);                                 // a point on an edge
-    const IVP_U_Float_Point *k_next_os = IVP_CLS.give_object_coords(K->get_next(), m_cache_K);                      // next point
-    const IVP_U_Float_Point *k_tri_os = IVP_CLS.give_object_coords(K->get_prev(), m_cache_K);                       // prev point == other point of this triange
-    const IVP_U_Float_Point *k_oppo_tri_os = IVP_CLS.give_object_coords(K->get_opposite()->get_prev(), m_cache_K);  // point of opposite triangle
+    const IVP_U_Float_Point *k_start_os = IVP_CLS.give_object_coords(K, m_cache_K);                                // a point on an edge
+    const IVP_U_Float_Point *k_next_os = IVP_CLS.give_object_coords(K->get_next(), m_cache_K);                     // next point
+    const IVP_U_Float_Point *k_tri_os = IVP_CLS.give_object_coords(K->get_prev(), m_cache_K);                      // prev point == other point of this triange
+    const IVP_U_Float_Point *k_oppo_tri_os = IVP_CLS.give_object_coords(K->get_opposite()->get_prev(), m_cache_K); // point of opposite triangle
 
     IVP_U_Point vec_K_ks;
-    vec_K_ks.subtract(k_next_os, k_start_os);  // unnormized direction
+    vec_K_ks.subtract(k_next_os, k_start_os); // unnormized direction
 
     IVP_U_Point vec_K_P;
     vec_K_P.subtract(&p_ks, k_start_os);
@@ -1100,11 +1095,11 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
     // vec_K_ks.fast_normize();
 
     IVP_U_Point hesse_tri_os;
-    hesse_tri_os.calc_cross_product(&vec_K_ks, &vec_K_tri);  // vertical to triangle
+    hesse_tri_os.calc_cross_product(&vec_K_ks, &vec_K_tri); // vertical to triangle
     IVP_U_Point hesse_oppo_tri_os;
-    hesse_oppo_tri_os.calc_cross_product(&vec_K_oppo_tri, &vec_K_ks);  // v. to oppo tri
+    hesse_oppo_tri_os.calc_cross_product(&vec_K_oppo_tri, &vec_K_ks); // v. to oppo tri
 
-    IVP_DOUBLE vert[2];  // dist between point and triangle, oppo tri
+    IVP_DOUBLE vert[2]; // dist between point and triangle, oppo tri
     vert[0] = vec_K_P.dot_product(&hesse_tri_os);
     vert[1] = vec_K_P.dot_product(&hesse_oppo_tri_os);
 
@@ -1117,9 +1112,9 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
     {
         // check projected distance
         if (qr1.checks[0] > 0.0f)
-        {  // both planes better,
+        { // both planes better,
             if (vert[1] > 0)
-            {  // plane visible, if true than it has priority
+            { // plane visible, if true than it has priority
                 return p_minimize_PF(P, K->get_opposite(), m_cache_P, m_cache_K);
             }
         }
@@ -1145,9 +1140,9 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
 
     // each edge: find minimal angle between P and Lot( P, K)
 
-    IVP_U_Point Lot2;  // unnormized Lot
+    IVP_U_Point Lot2; // unnormized Lot
     IVP_DOUBLE qlen;
-    {  // Lot _ws
+    { // Lot _ws
 
         Lot2.calc_cross_product(&vec_K_ks, &vec_K_P);
 
@@ -1157,7 +1152,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
         {
             IVP_DOUBLE inv_len = IVP_Inline_Math::isqrt_double(qlen);
             mindist->len_numerator = qlen * inv_len - mindist->sum_extra_radius;
-            Lot2.calc_cross_product(&vec_K_ks, &Lot2);  // does not change the length !!!
+            Lot2.calc_cross_product(&vec_K_ks, &Lot2); // does not change the length !!!
             m_cache_K->get_object_cache()->transform_vector_to_world_coords(&Lot2, &Lot2);
             mindist->contact_plane.set_multiple(&Lot2, -inv_len * iqK_len);
         }
@@ -1232,4 +1227,4 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
     m_cache_K->tmp.synapse->update_synapse(K, IVP_ST_EDGE);
 
     return IVP_MRC_OK;
-}  // p_minimize_Leave_PK
+} // p_minimize_Leave_PK

@@ -43,7 +43,7 @@ void IVP_Synapse_OO::init_synapse_oo(IVP_OO_Watcher *w, IVP_Real_Object *obj)
 {
     IVP_Hull_Manager *hull_manager = obj->get_hull_manager();
     object = obj;
-    hull_manager->insert_synapse(this, obj->get_environment()->get_current_time(), P_FLOAT_MAX);  // dummy time
+    hull_manager->insert_synapse(this, obj->get_environment()->get_current_time(), P_FLOAT_MAX); // dummy time
     watcher = w;
 }
 

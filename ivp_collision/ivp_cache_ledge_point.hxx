@@ -1,7 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef _IVP_CACHE_LEDGE_POINT_INCLUDED
-#define _IVP_CACHE_LEDGE_POINT_INCLUDED
+#ifndef IVP_COLLISION_CACHE_LEDGE_POINT_INCLUDED
+#define IVP_COLLISION_CACHE_LEDGE_POINT_INCLUDED
+
+#include <ivp_cache_object.hxx>
 
 class IVP_Compact_Poly_Point;
 class IVP_Synapse_Ball;
@@ -71,4 +73,4 @@ class IVP_Cache_Ledge_Point
     IVP_Cache_Ledge_Point() = default;
 };
 
-#endif
+#endif // IVP_COLLISION_CACHE_LEDGE_POINT_INCLUDED

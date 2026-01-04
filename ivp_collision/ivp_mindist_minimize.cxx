@@ -3,7 +3,7 @@
 #include <ivp_physics.hxx>
 
 #if defined(LINUX) || defined(SUN) || (__MWERKS__ && __POWERPC__)
-    #include <alloca.h>
+#include <alloca.h>
 #endif
 
 // IVP_EXPORT_PRIVATE
@@ -50,9 +50,9 @@ IVP_BOOL IVP_Mindist_Minimize_Solver::check_loop_hash(IVP_SYNAPSE_POLYGON_STATUS
 {
     if (!loop_hash)
     {
-    #ifdef IVP_MINDIST_BEHAVIOUR_DEBUG
+#ifdef IVP_MINDIST_BEHAVIOUR_DEBUG
         printf("start loop check (max passes exceeded).\n");
-    #endif
+#endif
         this->init_loop_hash();
     }
     IVP_Loop_Key_Struct key_struct;
@@ -153,7 +153,7 @@ void IVP_Mindist_Minimize_Solver::pierce_mindist()
         syn_pierce = mindist->get_sorted_synapse(1);
     }
     else
-    {  //@@@ This actually should not happen
+    { //@@@ This actually should not happen
         // CORE;
         syn_pierce = syn_other;
         syn_other = mindist->get_sorted_synapse(1);
@@ -188,13 +188,13 @@ IVP_MRC_TYPE IVP_Mindist::recalc_invalid_mindist()
     recalc_time_stamp = tc;
 
     IVP_Mindist_Minimize_Solver mms(this);
-    mms.P_Finish_Counter = 0;  // create hash instantly
+    mms.P_Finish_Counter = 0; // create hash instantly
 
     while (1)
     {
         IVP_MRC_TYPE res = mms.recalc_mindist_sub();
         if (res == IVP_MRC_OK)
-        {  // fast return if ok
+        { // fast return if ok
             recalc_result = IVP_MDRR_OK;
             return res;
         }
@@ -202,28 +202,28 @@ IVP_MRC_TYPE IVP_Mindist::recalc_invalid_mindist()
 
         switch (res)
         {
-            case IVP_MRC_BACKSIDE:
+        case IVP_MRC_BACKSIDE:
+        {
+            // find best triangle on opposite of convex object
+            mms.pierce_mindist();
+            // case ENDLESS must follow!
+        }
+        case IVP_MRC_ENDLESS_LOOP:
+        {
+            if (this->mindist_function == IVP_MF_PHANTOM || this->mindist_status == IVP_MD_HULL_RECURSIVE)
             {
-                // find best triangle on opposite of convex object
-                mms.pierce_mindist();
-                // case ENDLESS must follow!
-            }
-            case IVP_MRC_ENDLESS_LOOP:
-            {
-                if (this->mindist_function == IVP_MF_PHANTOM || this->mindist_status == IVP_MD_HULL_RECURSIVE)
-                {
-                    return res;
-                }
-                // MINDIST RESCUE PUSH
-                mindist_rescue_push();
                 return res;
             }
-            default:
-                CORE;
-                break;
+            // MINDIST RESCUE PUSH
+            mindist_rescue_push();
+            return res;
+        }
+        default:
+            CORE;
+            break;
         }
         CORE;
-    }  // while
+    } // while
     CORE;
 }
 
@@ -243,7 +243,7 @@ IVP_MRC_TYPE IVP_Mindist::recalc_mindist()
     {
         IVP_MRC_TYPE res = mms.recalc_mindist_sub();
         if (res == IVP_MRC_OK)
-        {  // fast return if ok
+        { // fast return if ok
             recalc_result = IVP_MDRR_OK;
             return res;
         }
@@ -251,69 +251,69 @@ IVP_MRC_TYPE IVP_Mindist::recalc_mindist()
 
         switch (res)
         {
-            case IVP_MRC_BACKSIDE:
-            {
+        case IVP_MRC_BACKSIDE:
+        {
 #ifdef IVP_MINDIST_BEHAVIOUR_DEBUG
-                IVP_ASSERT(this->detect_collision(synapse[0]->to_poly()->get_ivp_polygon()->tetras, synapse[1]->to_poly()->get_ivp_polygon()->tetras) == IVP_FALSE);
+            IVP_ASSERT(this->detect_collision(synapse[0]->to_poly()->get_ivp_polygon()->tetras, synapse[1]->to_poly()->get_ivp_polygon()->tetras) == IVP_FALSE);
 #endif
-                // find best triangle on opposite of convex object
-                mms.pierce_mindist();
-                if (++pierce_counter < IVP_MAX_PIERCINGS)
-                {
-                    continue;
-                }
-                // case ENDLESS must follow!
+            // find best triangle on opposite of convex object
+            mms.pierce_mindist();
+            if (++pierce_counter < IVP_MAX_PIERCINGS)
+            {
+                continue;
             }
-            case IVP_MRC_ENDLESS_LOOP:
+            // case ENDLESS must follow!
+        }
+        case IVP_MRC_ENDLESS_LOOP:
+        {
+            if (this->mindist_function == IVP_MF_PHANTOM || this->mindist_status == IVP_MD_HULL_RECURSIVE)
             {
-                if (this->mindist_function == IVP_MF_PHANTOM || this->mindist_status == IVP_MD_HULL_RECURSIVE)
-                {
-                    return res;
-                }
-                IVP_IF(1)
-                {
-                    const char *name0 = get_synapse(0)->get_object()->get_name();
-                    if (!name0)
-                        name0 = "(null)";
-                    const char *name1 = get_synapse(1)->get_object()->get_name();
-                    if (!name1)
-                        name1 = "(null)";
-                    printf("recalc_mindist: Endless Loop without collision or termination problem.%s %s\n",
-                           name0,
-                           name1);
-                }
-                // MINDIST RESCUE PUSH
-                mindist_rescue_push();
-
-#ifdef IVP_MINDIST_BEHAVIOUR_DEBUG
-                if (detect_collision(psyn_0->get_ivp_polygon()->tetras, psyn_1->get_ivp_polygon()->tetras))
-                {
-                    CORE;
-                }
-                else
-                {
-                    IVP_IF(1)
-                    {
-                        mms.termination_len = P_DOUBLE_MAX;
-                    }
-                    P_Finish_Counter = 10;  // debug purposes
-                    IVP_IF(1)
-                    {
-                        printf("recalc_mindist : Endless Loop without collision or termination problem.\n");
-                    }
-                    continue;  // helps debugging
-                               //		CORE;
-                    return res;
-                }
-#endif
                 return res;
             }
-            default:
-                //	    CORE;
-                break;
+            IVP_IF(1)
+            {
+                const char *name0 = get_synapse(0)->get_object()->get_name();
+                if (!name0)
+                    name0 = "(null)";
+                const char *name1 = get_synapse(1)->get_object()->get_name();
+                if (!name1)
+                    name1 = "(null)";
+                printf("recalc_mindist: Endless Loop without collision or termination problem.%s %s\n",
+                       name0,
+                       name1);
+            }
+            // MINDIST RESCUE PUSH
+            mindist_rescue_push();
+
+#ifdef IVP_MINDIST_BEHAVIOUR_DEBUG
+            if (detect_collision(psyn_0->get_ivp_polygon()->tetras, psyn_1->get_ivp_polygon()->tetras))
+            {
+                CORE;
+            }
+            else
+            {
+                IVP_IF(1)
+                {
+                    mms.termination_len = P_DOUBLE_MAX;
+                }
+                P_Finish_Counter = 10; // debug purposes
+                IVP_IF(1)
+                {
+                    printf("recalc_mindist : Endless Loop without collision or termination problem.\n");
+                }
+                continue; // helps debugging
+                          //		CORE;
+                return res;
+            }
+#endif
+            return res;
+        }
+        default:
+            //	    CORE;
+            break;
         }
         //	CORE;
-    }  // while
+    } // while
     //    CORE;
     // TODO(nillerusr): add warnings here instead of using CORE;
 }
@@ -473,51 +473,51 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_FF(const IVP_Compact_Edge *
     IVP_ASSERT(m_cache_0->tmp.synapse == syn0);
     IVP_ASSERT(m_cache_1->tmp.synapse == syn1);
 
-    IVP_MRC_TYPE ret_val = IVP_MRC_UNINITIALIZED;  // (un)initialize
+    IVP_MRC_TYPE ret_val = IVP_MRC_UNINITIALIZED; // (un)initialize
 
     switch (syn0->get_status())
     {
+    case IVP_ST_POINT:
+    {
+        switch (syn1->get_status())
+        {
         case IVP_ST_POINT:
         {
-            switch (syn1->get_status())
-            {
-                case IVP_ST_POINT:
-                {
-                    ret_val = p_minimize_PP(e0, e1, m_cache_0, m_cache_1);
-                    break;
-                }
-                case IVP_ST_EDGE:
-                {
-                    ret_val = p_minimize_PK(e0, e1, m_cache_0, m_cache_1);
-                    break;
-                }
-                case IVP_ST_TRIANGLE:
-                {
-                    ret_val = p_minimize_PF(e0, e1, m_cache_0, m_cache_1);
-                    break;
-                }
-                default:
-                    printf("IVP_Mindist_Minimize_Solver::p_minimize_FF failed(%s:%d)\n", __FILE__, __LINE__);
-            }
+            ret_val = p_minimize_PP(e0, e1, m_cache_0, m_cache_1);
             break;
-        };
+        }
         case IVP_ST_EDGE:
         {
-            switch (syn1->get_status())
-            {
-                case IVP_ST_EDGE:
-                {
-                    ret_val = p_minimize_KK(e0, e1, m_cache_0, m_cache_1);
-                    break;
-                }
-                default:
-                    printf("IVP_Mindist_Minimize_Solver::p_minimize_FF failed(%s:%d)\n", __FILE__, __LINE__);
-                    break;
-            }
+            ret_val = p_minimize_PK(e0, e1, m_cache_0, m_cache_1);
+            break;
+        }
+        case IVP_ST_TRIANGLE:
+        {
+            ret_val = p_minimize_PF(e0, e1, m_cache_0, m_cache_1);
             break;
         }
         default:
             printf("IVP_Mindist_Minimize_Solver::p_minimize_FF failed(%s:%d)\n", __FILE__, __LINE__);
+        }
+        break;
+    };
+    case IVP_ST_EDGE:
+    {
+        switch (syn1->get_status())
+        {
+        case IVP_ST_EDGE:
+        {
+            ret_val = p_minimize_KK(e0, e1, m_cache_0, m_cache_1);
+            break;
+        }
+        default:
+            printf("IVP_Mindist_Minimize_Solver::p_minimize_FF failed(%s:%d)\n", __FILE__, __LINE__);
+            break;
+        }
+        break;
+    }
+    default:
+        printf("IVP_Mindist_Minimize_Solver::p_minimize_FF failed(%s:%d)\n", __FILE__, __LINE__);
     }
 
     return ret_val;
@@ -540,10 +540,10 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_default_poly_poly(IVP_Mindist
     IVP_Cache_Ledge_Point m_cache_0(poly_0, e0->get_compact_ledge());
     IVP_Cache_Ledge_Point m_cache_1(poly_1, e1->get_compact_ledge());
 
-    m_cache_0.tmp.synapse = syn0;  // remember order of synapses
+    m_cache_0.tmp.synapse = syn0; // remember order of synapses
     m_cache_1.tmp.synapse = syn1;
 
-    IVP_MRC_TYPE ret_val = IVP_MRC_UNINITIALIZED;  // (un)initialize
+    IVP_MRC_TYPE ret_val = IVP_MRC_UNINITIALIZED; // (un)initialize
 
     IVP_IF(ivp_check_debug_mindist(mms->mindist))
     {
@@ -553,30 +553,30 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_default_poly_poly(IVP_Mindist
 #define SYN_COMBINE(a, b) (a * IVP_ST_MAX_LEGAL + b)
     switch (SYN_COMBINE(syn0->get_status(), syn1->get_status()))
     {
-        case SYN_COMBINE(IVP_ST_POINT, IVP_ST_POINT):
-        {
-            ret_val = mms->p_minimize_PP(e0, e1, &m_cache_0, &m_cache_1);
-            break;
-        }
-        case SYN_COMBINE(IVP_ST_POINT, IVP_ST_EDGE):
-        {
-            ret_val = mms->p_minimize_PK(e0, e1, &m_cache_0, &m_cache_1);
-            break;
-        }
-        case SYN_COMBINE(IVP_ST_POINT, IVP_ST_TRIANGLE):
-        {
-            ret_val = mms->p_minimize_PF(e0, e1, &m_cache_0, &m_cache_1);
-            break;
-        }
-        case SYN_COMBINE(IVP_ST_EDGE, IVP_ST_EDGE):
-        {
-            ret_val = mms->p_minimize_KK(e0, e1, &m_cache_0, &m_cache_1);
-            break;
-        }
-        default:
-        {
-            ret_val = mms->p_minimize_FF(e0, e1, &m_cache_0, &m_cache_1);
-        }
+    case SYN_COMBINE(IVP_ST_POINT, IVP_ST_POINT):
+    {
+        ret_val = mms->p_minimize_PP(e0, e1, &m_cache_0, &m_cache_1);
+        break;
+    }
+    case SYN_COMBINE(IVP_ST_POINT, IVP_ST_EDGE):
+    {
+        ret_val = mms->p_minimize_PK(e0, e1, &m_cache_0, &m_cache_1);
+        break;
+    }
+    case SYN_COMBINE(IVP_ST_POINT, IVP_ST_TRIANGLE):
+    {
+        ret_val = mms->p_minimize_PF(e0, e1, &m_cache_0, &m_cache_1);
+        break;
+    }
+    case SYN_COMBINE(IVP_ST_EDGE, IVP_ST_EDGE):
+    {
+        ret_val = mms->p_minimize_KK(e0, e1, &m_cache_0, &m_cache_1);
+        break;
+    }
+    default:
+    {
+        ret_val = mms->p_minimize_FF(e0, e1, &m_cache_0, &m_cache_1);
+    }
     }
 
     m_cache_0.remove_reference();
@@ -606,7 +606,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_B_POLY(IVP_Mindist_Minimize_S
     IVP_Cache_Ball m_cache_B;
     m_cache_B.object = ball;
     m_cache_B.cache_object = ball->get_cache_object();
-    m_cache_B.tmp.synapse = syn_B;  // remember order of synapses
+    m_cache_B.tmp.synapse = syn_B; // remember order of synapses
 
     IVP_Synapse_Real *syn_P = mms->mindist->get_synapse(1);
     IVP_Polygon *poly_P = syn_P->get_object()->to_poly();
@@ -623,19 +623,19 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_B_POLY(IVP_Mindist_Minimize_S
     IVP_MRC_TYPE ret_val;
     switch (syn_P->get_status())
     {
-        case IVP_ST_POINT:
-            ret_val = mms->p_minimize_BP(&m_cache_B, P, &m_cache_P);
-            break;
+    case IVP_ST_POINT:
+        ret_val = mms->p_minimize_BP(&m_cache_B, P, &m_cache_P);
+        break;
 
-        case IVP_ST_EDGE:
-            ret_val = mms->p_minimize_BK(&m_cache_B, P, &m_cache_P);
-            break;
-        case IVP_ST_TRIANGLE:
-            ret_val = mms->p_minimize_BF(&m_cache_B, P, &m_cache_P);
-            break;
-        default:
-            ret_val = IVP_MRC_UNINITIALIZED;
-            CORE;
+    case IVP_ST_EDGE:
+        ret_val = mms->p_minimize_BK(&m_cache_B, P, &m_cache_P);
+        break;
+    case IVP_ST_TRIANGLE:
+        ret_val = mms->p_minimize_BF(&m_cache_B, P, &m_cache_P);
+        break;
+    default:
+        ret_val = IVP_MRC_UNINITIALIZED;
+        CORE;
     };
     m_cache_P.remove_reference();
     m_cache_B.cache_object->remove_reference();
@@ -682,7 +682,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_BB(IVP_Mindist_Minimize_Solve
     IVP_DOUBLE qlen = mms->mindist->contact_plane.quad_length();
     IVP_DOUBLE inv_len;
     if (IVP_Inline_Math::fabsd(qlen) > P_DOUBLE_EPS)
-    {  // used to be fabs, which was a sml call
+    { // used to be fabs, which was a sml call
         inv_len = IVP_Fast_Math::isqrt(qlen, 3);
     }
     else
@@ -712,7 +712,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::minimize_BB(IVP_Mindist_Minimize_Solve
 
 const IVP_Compact_Edge *IVP_Compact_Ledge_Solver::minimize_on_other_side(const IVP_Compact_Edge *edge, const IVP_U_Point *partner_os)
 {
-	// manage pierce count
+    // manage pierce count
     const IVP_Compact_Ledge *c_ledge = edge->get_compact_ledge();
 
     int n_triangles = c_ledge->get_n_triangles();
@@ -722,16 +722,16 @@ const IVP_Compact_Edge *IVP_Compact_Ledge_Solver::minimize_on_other_side(const I
     uchar *pierce_visited_array = (uchar *)alloca(n_triangles);
 #endif
 
-    memset(pierce_visited_array, 0, n_triangles);  // @@@OG could be optimized, depending on how often piercing takes place
+    memset(pierce_visited_array, 0, n_triangles); // @@@OG could be optimized, depending on how often piercing takes place
 
     int pierce_idx = edge->get_triangle()->get_pierce_index();
     const IVP_Compact_Triangle *pierced_tri = &c_ledge->get_first_triangle()[pierce_idx];
 
-    const IVP_Compact_Edge *F = pierced_tri->get_first_edge();  // precalculated piercing
+    const IVP_Compact_Edge *F = pierced_tri->get_first_edge(); // precalculated piercing
 
     while (1)
     {
-        pierce_visited_array[F->get_triangle()->get_tri_index()] = 1;  // tag triangle as visited
+        pierce_visited_array[F->get_triangle()->get_tri_index()] = 1; // tag triangle as visited
 
         IVP_Unscaled_QR_Result qr;
         IVP_CLS.calc_unscaled_qr_vals_F_space(c_ledge, F, partner_os, &qr);
@@ -743,10 +743,10 @@ const IVP_Compact_Edge *IVP_Compact_Ledge_Solver::minimize_on_other_side(const I
         for (e = F, j = 0; j < 3; e = e->get_next(), j++)
         {
             if (qr.checks[j] > 0.0f)
-                continue;  // inside triangle
+                continue; // inside triangle
             int tri_idx = e->get_opposite()->get_triangle()->get_tri_index();
             if (pierce_visited_array[tri_idx])
-                continue;  // already visited
+                continue; // already visited
 
             F = e->get_opposite();
             moved = 1;
