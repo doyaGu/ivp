@@ -2,7 +2,7 @@
 
 // IVP_EXPORT_PUBLIC
 
-#if !defined(IVP_ACTUATOR_SPRING_INCLUDED)
+#ifndef IVP_ACTUATOR_SPRING_INCLUDED
 #define IVP_ACTUATOR_SPRING_INCLUDED
 
 #include <ivp_actuator.hxx>

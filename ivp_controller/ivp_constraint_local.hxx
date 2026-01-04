@@ -30,13 +30,8 @@
 // added most linear constraints
 // Version 0.1: local linear ball-and-socket constraints
 
-#ifndef IVP_CONSTRAINT_INCLUDED
-#include <ivp_constraint.hxx>
-#endif
-
-#ifndef _IVP_U_MAPPING_INCLUDED
 #include <ivu_mapping.hxx>
-#endif
+#include <ivp_constraint.hxx>
 
 class IVP_Real_Object;
 class IVP_Core;

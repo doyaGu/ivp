@@ -10,13 +10,8 @@
 #ifndef IVP_FORCEFIELD_INCLUDED
 #define IVP_FORCEFIELD_INCLUDED
 
-#ifndef IVP_CONTROLLER_INCLUDED
-#include <ivp_controller.hxx>
-#endif
-
-#ifndef IVP_SET_INCLUDED
 #include <ivu_set.hxx>
-#endif
+#include <ivp_controller.hxx>
 
 /********************************************************************************
  *	Name:	  	IVP_ForceField
@@ -45,4 +40,4 @@ public:
     ~IVP_Forcefield();
 };
 
-#endif
+#endif // IVP_FORCEFIELD_INCLUDED

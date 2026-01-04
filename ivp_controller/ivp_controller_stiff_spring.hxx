@@ -2,12 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#if !defined(IVP_CONTROLLER_STIFF_SPRING_INCLUDED)
+#ifndef IVP_CONTROLLER_STIFF_SPRING_INCLUDED
 #define IVP_CONTROLLER_STIFF_SPRING_INCLUDED
 
-#if !defined(IVP_ACTUATOR_INCLUDED)
 #include <ivp_actuator.hxx>
-#endif
 
 /********************************************************************************
  *	Name:	       	IVP_Template_Stiff_Spring

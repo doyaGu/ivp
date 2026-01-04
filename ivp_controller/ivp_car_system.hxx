@@ -2,12 +2,10 @@
 
 // IVP_EXPORT_PUBLIC
 
-#if !defined(IVP_CAR_SYSTEM_INCLUDED)
+#ifndef IVP_CAR_SYSTEM_INCLUDED
 #define IVP_CAR_SYSTEM_INCLUDED
 
-#ifndef IVP_LISTENER_PSI_INCLUDED
 #include <ivp_listener_psi.hxx>
-#endif
 
 enum IVP_POS_WHEEL
 {

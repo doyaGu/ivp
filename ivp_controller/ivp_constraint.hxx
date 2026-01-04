@@ -5,11 +5,8 @@
 #ifndef IVP_CONSTRAINT_INCLUDED
 #define IVP_CONSTRAINT_INCLUDED
 
-#ifndef IVP_CONTROLLER_INCLUDED
-#include <ivp_controller.hxx>
-#endif
-
 #include "ivp_constraint_types.hxx"
+#include "ivp_controller.hxx"
 
 class IVP_Real_Object;
 class IVP_Core;

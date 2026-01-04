@@ -2,16 +2,11 @@
 
 // IVP_EXPORT_PUBLIC
 
-#ifndef _IVP_ATTACHER_TO_CORES_INCLUDED
-#define _IVP_ATTACHER_TO_CORES_INCLUDED
+#ifndef IVP_ATTACHER_TO_CORES_INCLUDED
+#define IVP_ATTACHER_TO_CORES_INCLUDED
 
-#ifndef _IVP_VHASH_INCLUDED
 #include <ivu_vhash.hxx>
-#endif
-
-#ifndef IVP_SET_INCLUDED
 #include <ivu_set.hxx>
-#endif
 
 /********************************************************************************
  *	Name:	  	IVP_Attacher_To_Cores
@@ -84,4 +79,4 @@ public:
 	}
 };
 
-#endif
+#endif // IVP_ATTACHER_TO_CORES_INCLUDED
