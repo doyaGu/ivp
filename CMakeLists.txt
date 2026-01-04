@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(ivp VERSION 1.0.0 LANGUAGES CXX)
 
+# Generate compile_commands.json for IDE integration
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Set C++98 standard
 set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,9 +43,16 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
     
-    # Set include directories
+    # Set include directories - include all IVP modules for cross-module includes
     target_include_directories(${LIBRARY_NAME} PUBLIC
         $<BUILD_INTERFACE:${SOURCE_DIR}>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_surface_manager>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_collision>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_intern>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_physics>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_controller>
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_compact_builder>
         $<INSTALL_INTERFACE:include>
     )
     
@@ -136,8 +146,18 @@ set(IVP_UTILITY_SOURCES
     ${IVP_DIR}/ivp_utility/ivu_vector.cxx
     ${IVP_DIR}/ivp_utility/ivu_vector.hxx
     ${IVP_DIR}/ivp_utility/ivu_vhash.cxx
+    ${IVP_DIR}/ivp_utility/ivu_vhash.hxx
 )
 add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_utility PRIVATE
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_surface_manager - Depends on utility
 set(IVP_SURFACEMANAGER_SOURCES
@@ -152,6 +172,16 @@ set(IVP_SURFACEMANAGER_SOURCES
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.hxx
 )
 add_ivp_library(ivp_surface_manager "${IVP_DIR}/ivp_surface_manager" "ivp_utility" "${IVP_SURFACEMANAGER_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_surface_manager PRIVATE
+    ${IVP_DIR}/ivp_utility
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_collision - Depends on utility and surface manager
 set(IVP_COLLISION_SOURCES
@@ -197,6 +227,16 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_universe_manager.hxx
 )
 add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_utility;ivp_surface_manager" "${IVP_COLLISION_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_collision PRIVATE
+    ${IVP_DIR}/ivp_utility
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_intern - Depends on utility, surface manager, and collision
 set(IVP_INTERN_SOURCES
@@ -235,6 +275,16 @@ set(IVP_INTERN_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_time.cxx
 )
 add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_manager;ivp_collision" "${IVP_INTERN_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_intern PRIVATE
+    ${IVP_DIR}/ivp_utility
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_physics - Main physics API, depends on core modules
 set(IVP_PHYSICS_SOURCES
@@ -271,7 +321,6 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_physics.hxx
     ${IVP_DIR}/ivp_physics/ivp_polygon.hxx
     ${IVP_DIR}/ivp_physics/ivp_radar.hxx
-    ${IVP_DIR}/ivp_physics/ivp_radar_appl.hxx
     ${IVP_DIR}/ivp_physics/ivp_real_object.hxx
     ${IVP_DIR}/ivp_physics/ivp_solver_core_reaction.hxx
     ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.cxx
@@ -283,7 +332,17 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_time.hxx
     ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
 )
-add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern" "${IVP_PHYSICS_SOURCES}")
+add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern;ivp_controller" "${IVP_PHYSICS_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_physics PRIVATE
+    ${IVP_DIR}/ivp_utility
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
@@ -306,9 +365,12 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_constraint_local.cxx
     ${IVP_DIR}/ivp_controller/ivp_constraint_local.hxx
     ${IVP_DIR}/ivp_controller/ivp_constraint_types.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller.cxx
     ${IVP_DIR}/ivp_controller/ivp_controller.hxx
     ${IVP_DIR}/ivp_controller/ivp_controller_airboat.cpp
     ${IVP_DIR}/ivp_controller/ivp_controller_airboat.h
+    ${IVP_DIR}/ivp_controller/ivp_controller_fake_jetski.cpp
+    ${IVP_DIR}/ivp_controller/ivp_controller_fake_jetski.h
     ${IVP_DIR}/ivp_controller/ivp_controller_buoyancy.cxx
     ${IVP_DIR}/ivp_controller/ivp_controller_buoyancy.hxx
     ${IVP_DIR}/ivp_controller/ivp_controller_floating.cxx
@@ -330,6 +392,16 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_template_constraint.hxx
 )
 add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_utility;ivp_physics" "${IVP_CONTROLLER_SOURCES}")
+# Add global include directories for all modules
+target_include_directories(ivp_controller PRIVATE
+    ${IVP_DIR}/ivp_utility
+    ${IVP_DIR}/ivp_surface_manager
+    ${IVP_DIR}/ivp_collision
+    ${IVP_DIR}/ivp_intern
+    ${IVP_DIR}/ivp_physics
+    ${IVP_DIR}/ivp_controller
+    ${IVP_DIR}/ivp_compact_builder
+)
 
 # ivp_compact_builder - Geometry building tools, depends on core modules
 set(IVP_COMPACT_BUILDER_DIR ${IVP_DIR}/ivp_compact_builder)
