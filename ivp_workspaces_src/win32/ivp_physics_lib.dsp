@@ -771,10 +771,6 @@ SOURCE=..\..\IVP_PHYSICS\ivp_radar.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\IVP_PHYSICS\ivp_radar_appl.hxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\IVP_PHYSICS\ivp_real_object.hxx
 # End Source File
 # Begin Source File
