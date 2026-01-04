@@ -15,9 +15,6 @@
 #include <ivp_surbuild_polyhdrn_cncv.hxx>
 #include <ivu_geometry.hxx>
 
-#include "3dsimport_load.cxx"
-#include "3dsimport_out.cxx"
-
 IVP_Template_SurfaceBuilder_3ds::IVP_Template_SurfaceBuilder_3ds()
 {
     this->scale = 1.0f;
