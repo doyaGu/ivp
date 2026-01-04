@@ -14,8 +14,8 @@
  *  Classes:	    IVP_SurfaceBuilder_Q12
  ********************************************************************************/
 
-#ifndef _IVP_SURBUILD_Q12_INCLUDED
-#define _IVP_SURBUILD_Q12_INCLUDED
+#ifndef IVP_SURBUILD_Q12_INCLUDED
+#define IVP_SURBUILD_Q12_INCLUDED
 
 // =====================================================================================
 
@@ -250,4 +250,4 @@ public:
     ~IVP_SurfaceBuilder_Q12();
 };
 
-#endif
+#endif // IVP_SURBUILD_Q12_INCLUDED

@@ -150,4 +150,8 @@ struct geompack_parameters {
     int **	fvl_out;
 };
 
+  #ifdef __cplusplus
+  } // extern "C"
+  #endif
+
 #endif // IVP_COMPACT_BUILDER_GEOMPACK_INCLUDED

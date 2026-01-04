@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_TETRA_INTRUDE_INCLUDED
+#define IVP_TETRA_INTRUDE_INCLUDED
+
 class IVP_Tri_Edge;
 class IVP_Hash;
 class IVP_Poly_Point;
@@ -125,3 +128,5 @@ public:
     int pe(const int pnt_num); // print all edges including pnt_num
     int p();
 };
+
+#endif // IVP_TETRA_INTRUDE_INCLUDED

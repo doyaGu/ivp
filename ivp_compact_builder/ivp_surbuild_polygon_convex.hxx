@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_SURBUILD_POLYGON_CONVEX_INCLUDED
+#define IVP_SURBUILD_POLYGON_CONVEX_INCLUDED
+
 class IVP_Triangle;
 class IVP_SurfaceManager_Polygon;
 class IVP_Object_Polygon_Tetra;
@@ -52,3 +55,5 @@ public:
     /////// very public
     static IVP_SurfaceManager_Polygon *create_surface_manager(IVP_Template_Polygon *templ);
 };
+
+#endif // IVP_SURBUILD_POLYGON_CONVEX_INCLUDED
