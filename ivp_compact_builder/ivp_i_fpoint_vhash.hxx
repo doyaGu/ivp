@@ -3,11 +3,7 @@
 #ifndef IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED
 #define IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED
 
-
-#ifndef _IVP_VHASH_INCLUDED
-#	include  "ivu_vhash.hxx"
-#endif
-
+#include  "ivu_vhash.hxx"
 
 class IVP_I_FPoint_VHash: protected IVP_VHash
 {
@@ -36,6 +32,5 @@ public:
     IVP_I_FPoint_VHash(int init_size):IVP_VHash(init_size){;};
     void print() const { IVP_VHash::print();};
 };
-
 
 #endif // IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED

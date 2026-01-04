@@ -11,8 +11,8 @@
  *  Classes:	    IVP_SurfaceBuilder_Halfspacesoup
  ********************************************************************************/
 
-#ifndef _IVP_SURBUILD_HALFSPACESOUP_INCLUDED
-#define _IVP_SURBUILD_HALFSPACESOUP_INCLUDED
+#ifndef IVP_SURBUILD_HALFSPACESOUP_INCLUDED
+#define IVP_SURBUILD_HALFSPACESOUP_INCLUDED
 
 /********************************************************************************
  *  Class:	    IVP_SurfaceBuilder_Halfspacesoup
@@ -80,4 +80,4 @@ public:
                                                                          IVP_DOUBLE pointmerge_threshold);
 };
 
-#endif
+#endif // IVP_SURBUILD_HALFSPACESOUP_INCLUDED

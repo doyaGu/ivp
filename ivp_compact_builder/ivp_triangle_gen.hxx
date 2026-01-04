@@ -1,8 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef _P_LIST_INCLUDED
+#ifndef IVP_TRIANGLE_GEN_INCLUDED
+#define IVP_TRIANGLE_GEN_INCLUDED
+
 #include <ivu_list.hxx>
-#endif
 
 class IVP_Triangle;
 class P_OPoint;
@@ -80,3 +81,5 @@ public:
     IVP_ERROR_STRING calc_line_representation();     // could be done in constructor
     IVP_ERROR_STRING calc_triangle_representation(); // -"-
 };
+
+#endif // IVP_TRIANGLE_GEN_INCLUDED

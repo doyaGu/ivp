@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COMPACT_BUILDER_IVV_CLUSTER_MIN_HASH_INCLUDED
+#define IVP_COMPACT_BUILDER_IVV_CLUSTER_MIN_HASH_INCLUDED
+
 #define SORT_MINDIST_ELEMENTS
 
 union IVV_Cluster_Min_Hash_Key
@@ -112,3 +115,5 @@ public:
         }
     }
 };
+
+#endif // IVP_COMPACT_BUILDER_IVV_CLUSTER_MIN_HASH_INCLUDED

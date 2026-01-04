@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_TEMPLATES_INTERN_INCLUDED
+#define IVP_TEMPLATES_INTERN_INCLUDED
+
 /********************************************************************************
  *	Name:	       	ivp_templates
  *	Description:	interface structures, needed to send the world representation
@@ -151,3 +154,5 @@ public:
     ~IVP_Template_Surface(); // note: calls close_surface
     int get_surface_index();
 };
+
+#endif // IVP_TEMPLATES_INTERN_INCLUDED

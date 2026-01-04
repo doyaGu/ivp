@@ -1640,12 +1640,14 @@ IVP_RETURN_TYPE IVP_SurfaceBuilder_Ledge_Soup::create_compact_ledgetree()
         debug_sphere_output(this->spheres_cluster[this->spheres_cluster[0].next].sphere);
     }
     // *** debugging END ********************************************************
-#ifdef DEBUG
+#ifndef NDEBUG
     IVP_Compact_Ledgetree_Node *root =
 #endif
-        this->build_ledgetree(cluster_node);
+    this->build_ledgetree(cluster_node);
     this->spheres_cluster[0].next = 0;
+#ifndef NDEBUG
     IVP_ASSERT(this->compact_surface->get_compact_ledge_tree_root() == root);
+#endif
 
     // *** debugging START ******************************************************
     IVP_IF(1)

@@ -38,8 +38,8 @@
 // See also 'qhull.readme'
 // -------------------------------------------------------------
 
-#ifndef _IVP_SURBUILD_POINTSOUP_INCLUDED
-#define _IVP_SURBUILD_POINTSOUP_INCLUDED
+#ifndef IVP_SURBUILD_POINTSOUP_INCLUDED
+#define IVP_SURBUILD_POINTSOUP_INCLUDED
 
 class IVP_Template_Point;
 class IVP_Template_Line;
@@ -133,4 +133,4 @@ public:
     static IVP_Compact_Surface *IVP_CDECL convert_pointsoup_to_compact_surface(IVP_U_Vector<IVP_U_Point> *points);
 };
 
-#endif
+#endif // IVP_SURBUILD_POINTSOUP_INCLUDED

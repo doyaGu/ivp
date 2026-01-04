@@ -10,8 +10,8 @@
  *  Classes:	    IVP_SurfaceBuilder_Polyhedron_Concave
  ********************************************************************************/
 
-#ifndef _IVP_SURBUILD_POLYHEDRON_CONCAVE_INCLUDED
-#define _IVP_SURBUILD_POLYHEDRON_CONCAVE_INCLUDED
+#ifndef IVP_SURBUILD_POLYHEDRON_CONCAVE_INCLUDED
+#define IVP_SURBUILD_POLYHEDRON_CONCAVE_INCLUDED
 
 class IVP_Compact_Surface;
 
@@ -63,4 +63,4 @@ public:
                                                                                      IVP_Convex_Decompositor_Parameters *params);
 };
 
-#endif
+#endif // IVP_SURBUILD_POLYHEDRON_CONCAVE_INCLUDED
