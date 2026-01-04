@@ -1,3 +1,6 @@
+#ifndef HAVANA_HAVOK_HK_BASE_DISPLAY_INCLUDED
+#define HAVANA_HAVOK_HK_BASE_DISPLAY_INCLUDED
+
 #include <hk_base/array/array.h>
 
 #if 0 && defined(HK_DEBUG)
@@ -11,3 +14,4 @@
 #	define HK_DISPLAY_RAY(p,d,c) /* nothing */
 #endif	/* HK_DEBUG */
 
+#endif // HAVANA_HAVOK_HK_BASE_DISPLAY_INCLUDED
