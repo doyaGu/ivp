@@ -17,16 +17,17 @@ class IVP_Compact_Surface;
 class IVP_Compact_Ledge;
 class IVP_Concave_Polyhedron;
 
-class IVP_Template_SurfaceBuilder_3ds {
+class IVP_Template_SurfaceBuilder_3ds
+{
 public:
-    IVP_FLOAT scale;    
+    IVP_FLOAT scale;
     IVP_Template_SurfaceBuilder_3ds();
 };
 
-class IVP_SurfaceBuilder_3ds {
+class IVP_SurfaceBuilder_3ds
+{
 public:
-    static IVP_Concave_Polyhedron* convert_3ds_to_concave( const char *filename, IVP_Template_SurfaceBuilder_3ds *);
+    static IVP_Concave_Polyhedron *convert_3ds_to_concave(const char *filename, IVP_Template_SurfaceBuilder_3ds *);
 };
-
 
 #endif // IVP_COMPACT_BUILDER_SURBUILD_3DS_INCLUDED

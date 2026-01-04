@@ -1,7 +1,8 @@
 #ifndef IVP_TEMPLATE_SURBUILD_LEDGE_SOUP_INCLUDED
 #define IVP_TEMPLATE_SURBUILD_LEDGE_SOUP_INCLUDED
 
-enum IVP_SURBUILD_LEDGE_SOUP_MERGE_POINT_TYPES {
+enum IVP_SURBUILD_LEDGE_SOUP_MERGE_POINT_TYPES
+{
     IVP_SLMP_NO_MERGE,
     IVP_SLMP_MERGE_AND_REALLOCATE,
     IVP_SLMP_MERGE_NO_REALLOCATE
@@ -9,14 +10,15 @@ enum IVP_SURBUILD_LEDGE_SOUP_MERGE_POINT_TYPES {
 
 class IVP_Compact_Ledge;
 
-class IVP_Template_Surbuild_LedgeSoup {
+class IVP_Template_Surbuild_LedgeSoup
+{
 public:
     /********************************************************************************
      *  Parameter:    force_convex_hull
      *  Default:      NULL
      *	Description:  todo(melvyn2)
      *******************************************************************************/
-    IVP_Compact_Ledge* force_convex_hull;
+    IVP_Compact_Ledge *force_convex_hull;
 
     /********************************************************************************
      *  Parameter:    build_root_convex_hull
@@ -58,16 +60,16 @@ public:
     IVP_SURBUILD_LEDGE_SOUP_MERGE_POINT_TYPES merge_points;
 
     IVP_Template_Surbuild_LedgeSoup()
-	{
-	    build_root_convex_hull = IVP_FALSE;
-		link_to_input_compact_ledges = IVP_FALSE;
-		free_input_compact_ledges = IVP_TRUE;
+    {
+        build_root_convex_hull = IVP_FALSE;
+        link_to_input_compact_ledges = IVP_FALSE;
+        free_input_compact_ledges = IVP_TRUE;
 #ifdef WIN32
-	    merge_points = IVP_SLMP_MERGE_AND_REALLOCATE;
+        merge_points = IVP_SLMP_MERGE_AND_REALLOCATE;
 #else
-		merge_points = IVP_SLMP_NO_MERGE;
+        merge_points = IVP_SLMP_NO_MERGE;
 #endif
-	};
+    };
 };
 
 #endif // IVP_TEMPLATE_SURBUILD_LEDGE_SOUP_INCLUDED
