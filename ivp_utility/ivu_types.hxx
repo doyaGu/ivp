@@ -14,6 +14,13 @@
 #include <signal.h>
 #endif
 
+// Platform detection
+#if defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) || defined(__x86_64__) || defined(__amd64__) || defined(__LP64__)
+#ifndef PLATFORM_64BITS
+#define PLATFORM_64BITS
+#endif
+#endif
+
 #ifdef WIN32
 // #define IVP_PIII			/* set for P3 specific code */
 // #define IVP_WILLAMETTE	/* set for Willamette specific code */
@@ -179,7 +186,7 @@ public:
         return result;
     }
 
-    IVP_Time() = default;
+    IVP_Time() : seconds(0.0) {}
     IVP_Time(double time) { seconds = time; }
 };
 
@@ -247,8 +254,13 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 
 #ifdef PLATFORM_64BITS
+#if defined(_MSC_VER)
+typedef __int64 intp;
+typedef unsigned __int64 uintp;
+#else
 typedef long long intp;
 typedef unsigned long long uintp;
+#endif
 #else
 typedef int intp;
 typedef unsigned int uintp;
@@ -285,11 +297,23 @@ enum IVP_RETURN_TYPE
     IVP_OK = 1
 };
 
+#if defined(_MSC_VER)
+#define IVP_CDECL __cdecl
+#elif defined(__GNUC__) && defined(_WIN32)
+#define IVP_CDECL __attribute__((__cdecl__))
+#else
 #define IVP_CDECL /* set this to whatever you need to satisfy your linker */
+#endif
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
 #ifdef OSX
 #include <malloc/malloc.h>
+#elif defined(_MSC_VER)
+#include <malloc.h>
+#elif defined(__GNUC__) && !defined(_LINUX)
+#include <malloc.h>
+#elif defined(_LINUX)
+// Linux uses stdlib.h for malloc
 #else
 #include <malloc.h>
 #endif

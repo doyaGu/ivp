@@ -1,5 +1,8 @@
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVU_STRING_INCLUDED
+#define IVU_STRING_INCLUDED
+
 #include <ivu_types.hxx>
 
 #define IVP_WHITESPACE " \t,;\n"
@@ -43,3 +46,5 @@ int strcasecmp(const char *a, const char *b);
 void replace_slash(const char *in, char *out);
 long p_get_time(); // returns seconds since 1970
 #endif
+
+#endif // IVU_STRING_INCLUDED

@@ -100,7 +100,7 @@ template <class T>
 class IVP_U_Set_Active : public IVP_U_Set<T>
 {
 protected:
-    IVP_U_Vector<IVP_Listener_Set_Active<T>> listeners;
+    IVP_U_Vector<IVP_Listener_Set_Active<T> > listeners;
 
 public:
     void add_element(T *elem)
