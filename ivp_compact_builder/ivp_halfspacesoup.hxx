@@ -9,8 +9,8 @@
  *  Classes:	    IVP_Halfspacesoup
  ********************************************************************************/
 
-#ifndef _IVP_HALFSPACE_SOUP_INCLUDED
-#define _IVP_HALFSPACE_SOUP_INCLUDED
+#ifndef IVP_COMPACT_BUILDER_HALFSPACESOUP_INCLUDED
+#define IVP_COMPACT_BUILDER_HALFSPACESOUP_INCLUDED
 
 #define HALFSPACESOUP_TOLERANCE 0.01f * P_MIN_EDGE_LEN
 
@@ -57,4 +57,4 @@ public:
 
 };
 
-#endif
+#endif // IVP_COMPACT_BUILDER_HALFSPACESOUP_INCLUDED

@@ -1,7 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef IVP_I_FPOINT_HASH_INCLUDED
-#define IVP_I_FPOINT_HASH_INCLUDED
+#ifndef IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED
+#define IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED
 
 
 #ifndef _IVP_VHASH_INCLUDED
@@ -38,4 +38,4 @@ public:
 };
 
 
-#endif
+#endif // IVP_COMPACT_BUILDER_I_FPOINT_VHASH_INCLUDED

@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COMPACT_BUILDER_OBJECT_POLYGON_TETRA_INCLUDED
+#define IVP_COMPACT_BUILDER_OBJECT_POLYGON_TETRA_INCLUDED
+
 #include <ivu_list.hxx>
 
 #define P_OBJECT_BLUR 0.01 // some other eps depend on it
@@ -271,6 +274,8 @@ public:
     void insert_pierce_info();
     static IVP_Triangle *generate_double_triangle(IVP_Poly_Point *p1, IVP_Poly_Point *p2, IVP_Poly_Point *p3);
 };
+
+#endif // IVP_COMPACT_BUILDER_OBJECT_POLYGON_TETRA_INCLUDED
 
 inline IVP_Real_Object *IVP_Poly_Point::get_real_object2() const { return NULL; } // l_tetras->real_object
 //inline IVP_Polygon *IVP_Poly_Point::get_polygon() const { return (IVP_Polygon *)l_tetras->real_object; };
