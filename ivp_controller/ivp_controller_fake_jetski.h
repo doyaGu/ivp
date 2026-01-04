@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 4-Wheel Vehicle attempt at a jetski/waverunner!
 //

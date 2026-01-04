@@ -534,7 +534,7 @@ int p_atoi(const char *s)
     return atoi(s);
 }
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #include <time.h>
 
 long p_get_time()

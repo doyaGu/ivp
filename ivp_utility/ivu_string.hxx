@@ -41,7 +41,7 @@ char *p_str_tok(char *str, const char *delimiter);
 int p_atoi(const char *value); // converts ascii to int
 IVP_DOUBLE p_atof(const char *s);
 
-#ifdef WIN32
+#ifdef _MSC_VER
 int strcasecmp(const char *a, const char *b);
 void replace_slash(const char *in, char *out);
 long p_get_time(); // returns seconds since 1970

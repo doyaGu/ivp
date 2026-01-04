@@ -17,7 +17,6 @@
 #include <ivp_listener_psi.hxx>
 #include <ivp_listener_object.hxx>
 #include <ivp_object.hxx>
-#include <ivp_real_object.hxx>
 
 #define IVP_Environment_Magic_Number 123456
 #define IVP_MOVEMENT_CHECK_COUNT 10 // do not always check movement state

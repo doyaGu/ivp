@@ -5,6 +5,11 @@
 #ifndef IVP_ACTUATOR_INCLUDED
 #define IVP_ACTUATOR_INCLUDED
 
+#include "ivp_actuator_info.hxx"
+#include "ivp_controller.hxx"
+#include "ivu_active_value.hxx"
+#include "ivp_listener_hull.hxx"
+
 class IVP_Template_Check_Dist;
 class IVP_Template_Force;
 class IVP_Template_Extra;
@@ -16,11 +21,6 @@ class IVP_Template_Four_Point;
 class IVP_Template_Anchor;
 
 class IVP_Actuator_Check_Dist;
-
-#include "ivp_actuator_info.hxx"
-#include "ivp_controller.hxx"
-#include "ivu_active_value.hxx"
-#include "ivp_listener_hull.hxx"
 
 /********************************************************************************
  *	Name:	       	IVP_Template_Anchor

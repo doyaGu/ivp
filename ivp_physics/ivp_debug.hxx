@@ -1,7 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#ifndef IVP_DEBUG_MANAGER_INCLUDED
-#define IVP_DEBUG_MANAGER_INCLUDED
+#ifndef IVP_DEBUG_INCLUDED
+#define IVP_DEBUG_INCLUDED
 
 class IVP_Mindist;
 
@@ -32,4 +32,4 @@ IVP_BOOL ivp_check_debug_mindist(IVP_Mindist *md);
 
 #endif
 
-#endif // IVP_DEBUG_MANAGER_INCLUDED
+#endif // IVP_DEBUG_INCLUDED

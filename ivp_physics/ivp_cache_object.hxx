@@ -9,6 +9,7 @@
 #ifndef IVP_CACHE_OBJECT_INCLUDED
 #define IVP_CACHE_OBJECT_INCLUDED
 
+#include <ivp_real_object.hxx>
 #include <ivp_environment.hxx>
 
 class IVP_Cache_Object
