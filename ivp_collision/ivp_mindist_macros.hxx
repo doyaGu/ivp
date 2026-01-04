@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COLLISION_MINDIST_MACROS_INCLUDED
+#define IVP_COLLISION_MINDIST_MACROS_INCLUDED
+
 void IVP_Synapse_Real::remove_exact_synapse_from_object()
 {
     if (next)
@@ -72,4 +75,6 @@ IVP_DOUBLE IVP_Synapse_Real::insert_lazy_in_hull_manager(IVP_DOUBLE rel_hull_tim
 {
     IVP_Time time = l_obj->get_environment()->get_current_time();
     return l_obj->to_real()->get_hull_manager()->insert_lazy_synapse(this, time, rel_hull_time);
-}
+};
+
+#endif // IVP_COLLISION_MINDIST_MACROS_INCLUDED

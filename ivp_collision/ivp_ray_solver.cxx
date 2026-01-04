@@ -12,7 +12,7 @@
 #include <ivp_compact_surface.hxx>
 
 #ifndef WIN32
-    #pragma implementation "ivp_ray_solver.hxx"
+#pragma implementation "ivp_ray_solver.hxx"
 #endif
 
 #include <ivp_ray_solver.hxx>
@@ -116,7 +116,7 @@ IVP_BOOL IVP_Ray_Solver_Group::check_ray_group_against_sphere(const IVP_U_Float_
 IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_sphere_os(const IVP_U_Float_Point *sphere_center_os, IVP_FLOAT sphere_radius)
 {
     // returns IVP_FALSE if sphere is not hit by ray
-    IVP_U_Float_Point delta_vec;  // quick check for ends of ray
+    IVP_U_Float_Point delta_vec; // quick check for ends of ray
     IVP_DOUBLE qrad_sum = ray_length * 0.5f + sphere_radius;
     IVP_DOUBLE qsphere_rad = sphere_radius * sphere_radius;
     qrad_sum *= qrad_sum;
@@ -139,7 +139,7 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_sphere_os(const IVP_U_Float_Point 
     IVP_FLOAT coll_dist = sphere_radius;
 
     if ((coll_dist * coll_dist - quad_dist) >= -0.01f)
-    {  //@@CB
+    { //@@CB
         return IVP_TRUE;
     }
 
@@ -343,11 +343,11 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
     int n_triangles = ledge_to_compare->get_n_triangles();
 
     if (n_triangles == 2)
-    {  // super fast version for triangle ledges
+    { // super fast version for triangle ledges
         const IVP_Compact_Triangle *tri = ledge_to_compare->get_first_triangle();
         const IVP_Compact_Edge *edge = tri->get_first_edge();
 
-        IVP_U_Point hesse_vec_os;  // prefer normized ?
+        IVP_U_Point hesse_vec_os; // prefer normized ?
         IVP_CLS.calc_hesse_vec_object_not_normized(edge, ledge_to_compare, &hesse_vec_os);
 
         const IVP_U_Float_Point *p0 = IVP_CLS.give_object_coords(edge, ledge_to_compare);
@@ -358,7 +358,7 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
 
         if (a * b >= 0)
         {
-            return IVP_FALSE;  // does not hit
+            return IVP_FALSE; // does not hit
         }
 
         IVP_DOUBLE hit_dist = a / (a - b);
@@ -393,14 +393,14 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
     {
         // check triangle
         const IVP_Compact_Edge *edge = tri->get_first_edge();
-        IVP_U_Point hesse_vec_os;  // prefer normized ?
+        IVP_U_Point hesse_vec_os; // prefer normized ?
         IVP_CLS.calc_hesse_vec_object_not_normized(edge, ledge_to_compare, &hesse_vec_os);
 
         // check direction
         IVP_DOUBLE dot_prod = hesse_vec_os.dot_product(&ray_dir_os);
 
         if (dot_prod > -P_DOUBLE_RES)
-        {  // @@@ select correct side
+        { // @@@ select correct side
             continue;
         }
 
@@ -413,12 +413,12 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
             // quick check second object
             IVP_DOUBLE b = ray_end_point.dot_product(&hesse_vec_os) - z;
             if (b > 0)
-                return IVP_FALSE;  // no way to get a hit
+                return IVP_FALSE; // no way to get a hit
             take_edge = edge;
             break;
         }
 
-    }  // for triangles
+    } // for triangles
 
     if (!take_edge)
     {
@@ -441,7 +441,7 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
 
             IVP_DOUBLE dot_p = hesse_vec_os.dot_product(&ray_dir_os);
             if (dot_p > -P_DOUBLE_RES)
-            {  // @@@ select correct EPS
+            { // @@@ select correct EPS
                 // walked beyond the 'terminator'
                 return IVP_FALSE;
             }
@@ -453,9 +453,9 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
 
             if (a * b >= 0)
             {
-                return IVP_FALSE;  // does not hit because
-                                   // a>0 b>0   : both points are outside the object
-                                   // a<0 b<0     both points are inside the object, no hits possible
+                return IVP_FALSE; // does not hit because
+                                  // a>0 b>0   : both points are outside the object
+                                  // a<0 b<0     both points are inside the object, no hits possible
             }
 
             IVP_DOUBLE hit_dist = a / (a - b);
@@ -473,7 +473,7 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
                 for (e = edge, j = 0; j < 3; e = e->get_next(), j++)
                 {
                     if (qr.checks[j] > 0.0f)
-                        continue;  // inside triangle
+                        continue; // inside triangle
                     edge = e->get_opposite();
                     goto continue_with_next_triangle;
                     break;
@@ -486,7 +486,7 @@ IVP_BOOL IVP_Ray_Solver_Os::check_ray_against_compact_ledge_os(const IVP_Compact
             hit_listener->add_hit_object(object, ledge_to_compare, edge->get_triangle(), hit_dist, &hesse_vec_os);
             return IVP_TRUE;
         continue_with_next_triangle:;
-        }  // for (tricnt)
+        } // for (tricnt)
 
         // now we know that we are in an endless loop
         // ...
@@ -507,7 +507,7 @@ void IVP_Ray_Solver_Os::check_ray_against_ledge_tree_node_os(const IVP_Compact_L
     center.set(node->center.k);
     IVP_BOOL ray_hits_sphere = this->check_ray_against_sphere_os(&center, node->radius);
     if (!ray_hits_sphere)
-        return;  // no hit
+        return; // no hit
 
     // Check ledge that is contained by this node.
     if (node->is_terminal() == IVP_TRUE)
@@ -567,7 +567,7 @@ void IVP_Ray_Solver::check_ray_against_ball(IVP_Ball *ball)
 
     // calculate hit distance
 
-    IVP_U_Point equ;  // quadratic equation
+    IVP_U_Point equ; // quadratic equation
     IVP_U_Point delta;
     delta.subtract(&ray_start_point, &center_ws);
 
@@ -576,15 +576,15 @@ void IVP_Ray_Solver::check_ray_against_ball(IVP_Ball *ball)
     equ.k[2] = quad_delta_len - quad_sphere_radius;
 
     IVP_U_Point solution;
-    solution.solve_quadratic_equation_accurate(&equ);  // TL: was fast
+    solution.solve_quadratic_equation_accurate(&equ); // TL: was fast
     if (solution.k[0] < 0.0f)
-        return;  // sphere missed!
+        return; // sphere missed!
     IVP_FLOAT hit_dist = (IVP_FLOAT)solution.k[1];
     if (hit_dist < 0.0f)
     {
         hit_dist = (IVP_FLOAT)solution.k[2];
         if (hit_dist < 0.0f)
-            return;  // hit lies in negative ray direction
+            return; // hit lies in negative ray direction
     }
 
     IVP_U_Point sur_hit_point;
@@ -626,22 +626,22 @@ void IVP_Ray_Solver::check_ray_against_object(IVP_Real_Object *object)
     IVP_OBJECT_TYPE type = object->get_type();
     switch (type)
     {
-        case IVP_BALL:
-        {
-            IVP_Ball *ball = object->to_ball();
-            this->check_ray_against_ball(ball);
-            break;
-        }
-        case IVP_POLYGON:
-        {
-            IVP_Polygon *poly = object->to_poly();
-            IVP_SurfaceManager *surman = poly->get_surface_manager();
-            // Check all ledges within ray radius
-            surman->insert_all_ledges_hitting_ray(this, poly);
-            break;
-        }
-        default:
-            break;
+    case IVP_BALL:
+    {
+        IVP_Ball *ball = object->to_ball();
+        this->check_ray_against_ball(ball);
+        break;
+    }
+    case IVP_POLYGON:
+    {
+        IVP_Polygon *poly = object->to_poly();
+        IVP_SurfaceManager *surman = poly->get_surface_manager();
+        // Check all ledges within ray radius
+        surman->insert_all_ledges_hitting_ray(this, poly);
+        break;
+    }
+    default:
+        break;
     }
 }
 
@@ -674,28 +674,28 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
     IVP_OBJECT_TYPE type = object->get_type();
     switch (type)
     {
-        case IVP_BALL:
+    case IVP_BALL:
+    {
+        IVP_Ball *ball = object->to_ball();
+        for (int i = n_ray_solvers - 1; i >= 0; i--)
         {
-            IVP_Ball *ball = object->to_ball();
-            for (int i = n_ray_solvers - 1; i >= 0; i--)
-            {
-                ray_solvers[i]->check_ray_against_ball(ball);
-            }
-            break;
+            ray_solvers[i]->check_ray_against_ball(ball);
         }
-        case IVP_POLYGON:
+        break;
+    }
+    case IVP_POLYGON:
+    {
+        IVP_Polygon *poly = object->to_poly();
+        IVP_SurfaceManager *surman = poly->get_surface_manager();
+        for (int i = n_ray_solvers - 1; i >= 0; i--)
         {
-            IVP_Polygon *poly = object->to_poly();
-            IVP_SurfaceManager *surman = poly->get_surface_manager();
-            for (int i = n_ray_solvers - 1; i >= 0; i--)
-            {
-                surman->insert_all_ledges_hitting_ray(ray_solvers[i], poly);
-            }
-            // Check all ledges within ray radius
-            break;
+            surman->insert_all_ledges_hitting_ray(ray_solvers[i], poly);
         }
-        default:
-            break;
+        // Check all ledges within ray radius
+        break;
+    }
+    default:
+        break;
     }
 }
 
@@ -704,13 +704,13 @@ void IVP_Ray_Solver::check_ray_against_node(IVP_OV_Node *node, IVP_OV_Tree_Manag
     // Recursive function
 
     // Check whether ray hits the long range cluster node.
-    IVP_U_Float_Point luf_point, rlb_point;  // left upper front / right lower back
+    IVP_U_Float_Point luf_point, rlb_point; // left upper front / right lower back
     IVP_FLOAT cubesize;
-    ov_tree_man->get_luf_coordinates_ws(node, &luf_point, &cubesize);  // fills vars with left-upper-front corner's coordinates
+    ov_tree_man->get_luf_coordinates_ws(node, &luf_point, &cubesize); // fills vars with left-upper-front corner's coordinates
     rlb_point.set(luf_point.k[0] + cubesize, luf_point.k[1] + cubesize, luf_point.k[2] + cubesize);
     IVP_BOOL ray_hits_cube = this->check_ray_against_cube(&luf_point, &rlb_point);
     if (!ray_hits_cube)
-        return;  // not hit
+        return; // not hit
 
     // Check all objects that are contained by this node.
     {
@@ -747,15 +747,15 @@ void IVP_Ray_Solver_Group::check_ray_group_against_node(IVP_OV_Node *node, IVP_O
     // Recursive function
 
     // Check whether ray hits the long range cluster node.
-    IVP_U_Float_Point luf_point, cube_center_point;  // left upper front / right lower back
+    IVP_U_Float_Point luf_point, cube_center_point; // left upper front / right lower back
     IVP_FLOAT cubesize;
-    ov_tree_man->get_luf_coordinates_ws(node, &luf_point, &cubesize);  // fills vars with left-upper-front corner's coordinates
+    ov_tree_man->get_luf_coordinates_ws(node, &luf_point, &cubesize); // fills vars with left-upper-front corner's coordinates
     IVP_FLOAT csh = cubesize * 0.5f;
     cube_center_point.set(luf_point.k[0] + csh, luf_point.k[1] + csh, luf_point.k[2] + csh);
 
     IVP_BOOL ray_hits_cube = this->check_ray_group_against_cube(&cube_center_point, cubesize);
     if (!ray_hits_cube)
-        return;  // not hit
+        return; // not hit
 
     // Check all objects that are contained by this node.
     {

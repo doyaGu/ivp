@@ -1,10 +1,15 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COLLISION_MINDIST_EVENT_INCLUDED
+#define IVP_COLLISION_MINDIST_EVENT_INCLUDED
+
+#include "ivp_mindist.hxx"
+
 class IVP_Cache_Ledge_Point;
 
 class IVP_Mindist_Event_Solver
 {
-  public:
+public:
     // to be set prior calc_time_of_next_event !!!
     //    IVP_U_Point direction;	// object0 to object1
     IVP_DOUBLE sum_max_surface_rot_speed;
@@ -20,16 +25,16 @@ class IVP_Mindist_Event_Solver
     IVP_COLL_TYPE event_type_out;
     IVP_Time event_time_out;
 
-  protected:
+protected:
     static void next_event_illegal(IVP_Mindist_Event_Solver *);
-    static void next_event_default_poly_poly(IVP_Mindist_Event_Solver *);  // not all cases
+    static void next_event_default_poly_poly(IVP_Mindist_Event_Solver *); // not all cases
     static void next_event_B_POLY(IVP_Mindist_Event_Solver *);
 
     static void next_event_BB(IVP_Mindist_Event_Solver *);
 
     static void (*mim_function_table[IVP_ST_MAX_LEGAL][IVP_ST_MAX_LEGAL])(IVP_Mindist_Event_Solver *mms);
 
-  protected:
+protected:
     /** calc the delta time of the next event, returns max_delta_time when no events found */
     void calc_next_event_PF(const IVP_Compact_Edge *P,
                             const IVP_Compact_Edge *F,
@@ -58,7 +63,7 @@ class IVP_Mindist_Event_Solver
     void calc_next_event_BP(IVP_Ball *B, const IVP_Compact_Edge *P, IVP_Cache_Object *m_cache_B, IVP_Cache_Ledge_Point *m_cache_P);
     void calc_next_event_BB(IVP_Cache_Object *m_cache_A, IVP_Cache_Object *m_cache_B);
 
-  public:
+public:
     static void init_mim_function_table();
 
     // get the next interesting event e.g. collision ....
@@ -71,3 +76,5 @@ class IVP_Mindist_Event_Solver
         mim_function_table[s0][s1](this);
     }
 };
+
+#endif // IVP_COLLISION_MINDIST_EVENT_INCLUDED

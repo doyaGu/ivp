@@ -22,7 +22,7 @@
 
 class IVP_3D_Solver_PF_COLL : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
     IVP_U_Point point_object;
 
@@ -51,7 +51,7 @@ IVP_DOUBLE IVP_3D_Solver_PF_COLL::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix 
 
 class IVP_3D_Solver_VEC_PARALLEL_AREA : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
     IVP_U_Point vec_object;
 
@@ -75,7 +75,7 @@ IVP_DOUBLE IVP_3D_Solver_VEC_PARALLEL_AREA::get_value(IVP_U_Matrix *A_w_f_c, IVP
 
 class IVP_3D_Solver_DISTANCE_OF_TWO_POINTS : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
     IVP_U_Point A_object;
     IVP_U_Point B_object;
@@ -105,17 +105,17 @@ IVP_DOUBLE IVP_3D_Solver_DISTANCE_OF_TWO_POINTS::get_value(IVP_U_Matrix *A_w_f_c
         return linear_dist;
     }
 
-    return IVP_Inline_Math::sqrtd(res);  // bad, but allows good estimates for first deviation
+    return IVP_Inline_Math::sqrtd(res); // bad, but allows good estimates for first deviation
 }
 
 class IVP_3D_Solver_S_VALS : public IVP_3D_Solver
 {
-  public:
+public:
     // object A is Point
     IVP_U_Point P_object;
     // object B is edge
     IVP_U_Point K_object;
-    IVP_U_Point K_vec_object;  // normized K_vec
+    IVP_U_Point K_vec_object; // normized K_vec
     IVP_DOUBLE get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B_w_f_c);
 };
 
@@ -138,13 +138,13 @@ IVP_DOUBLE IVP_3D_Solver_S_VALS::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *
 
 class IVP_3D_Solver_PK_KK : public IVP_3D_Solver
 {
-  public:
+public:
     // object A is Point
     IVP_U_Point P_object;
-    IVP_U_Point P_ne_vec_object;  // neighbour edge of P
+    IVP_U_Point P_ne_vec_object; // neighbour edge of P
     // object B is edge
     IVP_U_Point K_object;
-    IVP_U_Point K_vec_object;  // normized K_vec
+    IVP_U_Point K_vec_object; // normized K_vec
     IVP_DOUBLE get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B_w_f_c);
 };
 
@@ -183,14 +183,14 @@ IVP_DOUBLE IVP_3D_Solver_PK_KK::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B
  * and return the minimum of both distances */
 class IVP_3D_Solver_PK_COLL : public IVP_3D_Solver
 {
-  public:
-    IVP_DOUBLE plane_offset;  // negative offset for plane check
+public:
+    IVP_DOUBLE plane_offset; // negative offset for plane check
     // object A is Point
     IVP_U_Float_Point P_object;
     // object B is edge
     IVP_U_Float_Point K_object;
-    IVP_U_Point K_vec_object;  // normized K_vec
-    IVP_U_Point K_Lot_object;  // a normized vertical direction
+    IVP_U_Point K_vec_object; // normized K_vec
+    IVP_U_Point K_Lot_object; // a normized vertical direction
     IVP_DOUBLE get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B_w_f_c);
 };
 
@@ -200,7 +200,7 @@ IVP_DOUBLE IVP_3D_Solver_PK_COLL::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix 
 
     IVP_U_Point P_world;
     IVP_U_Point K_world;
-    IVP_U_Point K_vec_world;  // normized direction
+    IVP_U_Point K_vec_world; // normized direction
     IVP_U_Point K_Lot_world;
     A_w_f_c->vmult4(&t->P_object, &P_world);
     B_w_f_c->vmult4(&t->K_object, &K_world);
@@ -221,7 +221,7 @@ IVP_DOUBLE IVP_3D_Solver_PK_COLL::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix 
 
 class IVP_3D_Solver_PF_NPF : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
     IVP_U_Point vec_object;
 
@@ -233,7 +233,7 @@ class IVP_3D_Solver_PF_NPF : public IVP_3D_Solver
 IVP_DOUBLE IVP_3D_Solver_PF_NPF::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B_w_f_c)
 {
     IVP_U_Point hesse_world;
-    IVP_U_Point hesse_other_object;  // fast normized
+    IVP_U_Point hesse_other_object; // fast normized
 
     B_w_f_c->vmult3(&hesse_of_area_object, &hesse_world);
     A_w_f_c->vimult3(&hesse_world, &hesse_other_object);
@@ -253,7 +253,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_PF(const IVP_Compact_Edge *P, con
     IVP_U_Matrix_Cache cache_F(m_cache_F->clp_cache_object);
 
     IVP_DOUBLE max_rot_speed = cache_P.core->abs_omega + cache_F.core->abs_omega;
-    event_time_out = t_max;  // flag, set after next psi -> no event within this PSI
+    event_time_out = t_max; // flag, set after next psi -> no event within this PSI
 
     IVP_3D_Solver_PF_COLL pf_coll_solver;
 
@@ -269,7 +269,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_PF(const IVP_Compact_Edge *P, con
 
         // when does point P collide with surface F (no borders!) ?
         IVP_FLOAT radius = mindist->sum_extra_radius;
-        IVP_DOUBLE sec_dist = mindist->get_coll_dist() + radius;  // security distance
+        IVP_DOUBLE sec_dist = mindist->get_coll_dist() + radius; // security distance
         IVP_DOUBLE real_coll = ivp_mindist_settings.real_coll_dist + 0.5f * radius;
         IVP_DOUBLE now_len = mindist->len_numerator + radius;
         IVP_BOOL result = pf_coll_solver.find_first_t_for_value_coll(sec_dist, real_coll, t_now, event_time_out, &cache_P, &cache_F, &now_len, &event_time_out);
@@ -285,10 +285,10 @@ void IVP_Mindist_Event_Solver::calc_next_event_PF(const IVP_Compact_Edge *P, con
     // when are neighbor points of P nearer to F than P ?
 
     pf_npf_solver.hesse_of_area_object = pf_coll_solver.hesse_of_area_object;
-    IVP_DOUBLE sec_dist;  // gradient, which indicates a possible new collision
+    IVP_DOUBLE sec_dist; // gradient, which indicates a possible new collision
     {
         IVP_DOUBLE real_dist = P_MIN(mindist->get_coll_dist(), mindist->len_numerator);
-        real_dist += mindist->sum_extra_radius * 0.1f;  // lazy sector change for extra radius
+        real_dist += mindist->sum_extra_radius * 0.1f; // lazy sector change for extra radius
         sec_dist = -ivp_mindist_settings.mindist_change_force_dist * m_cache_F->get_core()->inv_object_diameter;
         sec_dist *= real_dist;
         sec_dist /= mindist->get_coll_dist();
@@ -312,9 +312,9 @@ void IVP_Mindist_Event_Solver::calc_next_event_PF(const IVP_Compact_Edge *P, con
         IVP_DOUBLE grad = hesse_in_P_object.dot_product(&vec_object);
         IVP_DOUBLE qlen = vec_object.quad_length();
         IVP_DOUBLE ilen = IVP_Inline_Math::isqrt_float(qlen);
-        grad *= ilen;  // search greatest gradient
+        grad *= ilen; // search greatest gradient
         if (grad < max_grad_change)
-        {  // fast check
+        { // fast check
             pf_npf_solver.vec_object.set_multiple(&vec_object, ilen);
             IVP_BOOL found_flag;
             found_flag = pf_npf_solver.find_first_t_for_value_max_dev(sec_dist, t_now, event_time_out, 0, &cache_P, &cache_F, &grad, &event_time_out);
@@ -351,8 +351,8 @@ void IVP_Mindist_Event_Solver::calc_next_event_BF(const IVP_Compact_Edge *F,
 
         // when does point P collide with surface F (no borders!) ?
         IVP_FLOAT radius = mindist->sum_extra_radius;
-        IVP_DOUBLE sec_dist = mindist->get_coll_dist() + radius;                     // security distance
-        IVP_DOUBLE real_coll = ivp_mindist_settings.real_coll_dist + 0.5f * radius;  // allow penetration
+        IVP_DOUBLE sec_dist = mindist->get_coll_dist() + radius;                    // security distance
+        IVP_DOUBLE real_coll = ivp_mindist_settings.real_coll_dist + 0.5f * radius; // allow penetration
         IVP_DOUBLE now_len = mindist->len_numerator + radius;
 
         //@@@ optimization for static reference object (linear movement of ball)
@@ -366,15 +366,15 @@ void IVP_Mindist_Event_Solver::calc_next_event_BF(const IVP_Compact_Edge *F,
 
 class IVP_3D_Solver_KK_COLL : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
-    IVP_U_Point k_point_object;  // a point of K
-    IVP_U_Point k_vec_object;    // k direction
+    IVP_U_Point k_point_object; // a point of K
+    IVP_U_Point k_vec_object;   // k direction
 
     IVP_U_Point l_point_object;
-    IVP_U_Point l_vec_object;  // l direction
+    IVP_U_Point l_vec_object; // l direction
 
-    IVP_DOUBLE side;  // direction of H
+    IVP_DOUBLE side; // direction of H
 
     // object B
     IVP_DOUBLE get_value(IVP_U_Matrix *K_w_f_c, IVP_U_Matrix *L_w_f_c);
@@ -395,20 +395,20 @@ IVP_DOUBLE IVP_3D_Solver_KK_COLL::get_value(IVP_U_Matrix *K_w_f_c, IVP_U_Matrix 
     L_w_f_c->vmult4(&l_point_object, &l_point_world);
 
     IVP_U_Point H;
-    H.calc_cross_product(&k_vec_world, &l_vec_world);  // unscaled normal
+    H.calc_cross_product(&k_vec_world, &l_vec_world); // unscaled normal
 
     IVP_DOUBLE res = H.dot_product(&k_point_world) - H.dot_product(&l_point_world);
-    IVP_DOUBLE iH_len = IVP_Inline_Math::isqrt_float(H.quad_length());  // bad, but allows good estimate for first deviation
+    IVP_DOUBLE iH_len = IVP_Inline_Math::isqrt_float(H.quad_length()); // bad, but allows good estimate for first deviation
     res *= iH_len;
     return res * side;
 }
 
 class IVP_3D_Solver_KK_PARALLEL : public IVP_3D_Solver
 {
-  public:
+public:
     // object A
-    IVP_U_Point k_vec_object;  // normized k direction
-    IVP_U_Point l_vec_object;  // normized l direction
+    IVP_U_Point k_vec_object; // normized k direction
+    IVP_U_Point l_vec_object; // normized l direction
 
     // object B
     IVP_DOUBLE get_value(IVP_U_Matrix *K_w_f_c, IVP_U_Matrix *L_w_f_c);
@@ -423,8 +423,8 @@ IVP_DOUBLE IVP_3D_Solver_KK_PARALLEL::get_value(IVP_U_Matrix *K_w_f_c, IVP_U_Mat
     L_w_f_c->vmult3(&l_vec_object, &l_vec_world);
 
     IVP_U_Point H;
-    H.calc_cross_product(&k_vec_world, &l_vec_world);  // unscaled normal
-    IVP_DOUBLE res = H.quad_length();                  // see comment on calc max_deviation
+    H.calc_cross_product(&k_vec_world, &l_vec_world); // unscaled normal
+    IVP_DOUBLE res = H.quad_length();                 // see comment on calc max_deviation
     return res;
 }
 
@@ -458,14 +458,14 @@ void IVP_Mindist_Event_Solver::calc_next_event_KK(const IVP_Compact_Edge *K,
         const IVP_U_Float_Point *l = IVP_CLS.give_object_coords(L, m_cache_L);
         const IVP_U_Float_Point *ln = IVP_CLS.give_object_coords(L->get_next(), m_cache_L);
 
-        solver_kk_coll.k_vec_object.subtract(kn, k);  // only rough estimate for KK parallel
+        solver_kk_coll.k_vec_object.subtract(kn, k); // only rough estimate for KK parallel
         solver_kk_coll.k_vec_object.fast_normize();
         solver_kk_coll.l_vec_object.subtract(ln, l);
         solver_kk_coll.l_vec_object.fast_normize();
 
         solver_kk_coll.k_point_object.set(k);
         solver_kk_coll.l_point_object.set(l);
-        solver_kk_coll.set_max_deviation(this->max_coll_speed);  // thats not correct, but ensures no collision !!!
+        solver_kk_coll.set_max_deviation(this->max_coll_speed); // thats not correct, but ensures no collision !!!
 
         // check side
         {
@@ -491,13 +491,13 @@ void IVP_Mindist_Event_Solver::calc_next_event_KK(const IVP_Compact_Edge *K,
 #endif
 
             if (val > 0.0f)
-            {              //
-                side = 0;  // H points from K to L
+            {             //
+                side = 0; // H points from K to L
                 solver_kk_coll.side = -1.0f;
             }
             else
             {
-                side = 1;  // H points from L to K
+                side = 1; // H points from L to K
                 solver_kk_coll.side = 1.0f;
             }
         }
@@ -515,7 +515,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_KK(const IVP_Compact_Edge *K,
         solver_kk_parallel.k_vec_object.set(&solver_kk_coll.k_vec_object);
         solver_kk_parallel.l_vec_object.set(&solver_kk_coll.l_vec_object);
         // deviation == max omega * max_len_of_H
-        IVP_DOUBLE dev = sum_abs_omega + sum_abs_omega;  // as kk parallel calcs the quadratic length we have to adjust dev:
+        IVP_DOUBLE dev = sum_abs_omega + sum_abs_omega; // as kk parallel calcs the quadratic length we have to adjust dev:
         // max (f^2') = max ( 2f * f') = max ( 2* 1 * f')
         solver_kk_parallel.set_max_deviation(dev + P_DOUBLE_EPS);
         IVP_DOUBLE found =
@@ -537,19 +537,19 @@ void IVP_Mindist_Event_Solver::calc_next_event_KK(const IVP_Compact_Edge *K,
 
     // when do PF-situations occur ?
 
-    const IVP_Compact_Edge *F[4];  // areas to check
+    const IVP_Compact_Edge *F[4]; // areas to check
     F[0] = K->get_opposite();
     F[1] = K;
     F[2] = L->get_opposite();
     F[3] = L;
 
-    IVP_U_Point *edge_object[4];                    // edges to check, see P array at p_minimize_Leave_KK
-    edge_object[0] = &solver_kk_coll.l_vec_object;  // normized
+    IVP_U_Point *edge_object[4];                   // edges to check, see P array at p_minimize_Leave_KK
+    edge_object[0] = &solver_kk_coll.l_vec_object; // normized
     edge_object[1] = &solver_kk_coll.l_vec_object;
     edge_object[2] = &solver_kk_coll.k_vec_object;
     edge_object[3] = &solver_kk_coll.k_vec_object;
 
-    int reversed[4];  // edge_object is meant reverse
+    int reversed[4]; // edge_object is meant reverse
     reversed[0] = side;
     reversed[1] = 1 - side;
     reversed[2] = side;
@@ -578,7 +578,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_KK(const IVP_Compact_Edge *K,
     {
         if (!reversed[i])
         {
-            solver_KK_PF.vec_object.set_multiple(edge_object[i], -1.0f);  // cache_e
+            solver_KK_PF.vec_object.set_multiple(edge_object[i], -1.0f); // cache_e
         }
         else
         {
@@ -674,9 +674,9 @@ void IVP_Mindist_Event_Solver::calc_next_event_PP(const IVP_Compact_Edge *P,
     }
     // check s vals for sector change
     {
-        IVP_DOUBLE deviation[2];              // dev[0] when Point[0] is point and Poit[1] is edge
-        IVP_DOUBLE neg_maximal_safe_s_value;  // needed to calc exact sector change value
-        {                                     // deviation calculation
+        IVP_DOUBLE deviation[2];             // dev[0] when Point[0] is point and Poit[1] is edge
+        IVP_DOUBLE neg_maximal_safe_s_value; // needed to calc exact sector change value
+        {                                    // deviation calculation
             // deviation for s:
             // speed P + speed P2 + speed of projection (= abs_omega_z * dist P P2 )
             IVP_DOUBLE max_dist_PP = mindist->get_length();
@@ -801,9 +801,9 @@ void IVP_Mindist_Event_Solver::calc_next_event_BP(IVP_Ball *ball, const IVP_Comp
 
     // check s vals for sector change
     {
-        IVP_DOUBLE deviation;                 // dev[0] when Point[0] is point and Poit[1] is edge
-        IVP_DOUBLE neg_maximal_safe_s_value;  // needed to calc exact sector change value
-        {                                     // deviation calculation
+        IVP_DOUBLE deviation;                // dev[0] when Point[0] is point and Poit[1] is edge
+        IVP_DOUBLE neg_maximal_safe_s_value; // needed to calc exact sector change value
+        {                                    // deviation calculation
             // deviation for s:
             // speed P + speed P2 + speed of projection (= abs_omega_z * dist P P2 )
             IVP_DOUBLE max_dist_PP = mindist->get_length();
@@ -926,7 +926,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_PK(const IVP_Compact_Edge *P,
         {
             IVP_U_Point P_world;
             IVP_U_Point K_world;
-            IVP_U_Point K_vec_world;  // normized direction
+            IVP_U_Point K_vec_world; // normized direction
             m_cache_P->get_object_cache()->transform_position_to_world_coords(&solver_pk_coll.P_object, &P_world);
             m_cache_K->get_object_cache()->transform_position_to_world_coords(&solver_pk_coll.K_object, &K_world);
             m_cache_K->get_object_cache()->transform_vector_to_world_coords(&solver_pk_coll.K_vec_object, &K_vec_world);
@@ -962,7 +962,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_PK(const IVP_Compact_Edge *P,
     // both areas F0/F1
     {
         IVP_3D_Solver_PF_COLL solver_pk_pf;
-        solver_pk_pf.set_max_deviation(this->worst_case_speed);  // when does point P move through lot area
+        solver_pk_pf.set_max_deviation(this->worst_case_speed); // when does point P move through lot area
 
         solver_pk_pf.point_object.set(p_object);
 
@@ -974,16 +974,16 @@ void IVP_Mindist_Event_Solver::calc_next_event_PK(const IVP_Compact_Edge *P,
         for (i = 0; i <= 1; i++)
         {
             // Generation of  collision surface for PF sector  lot = (hesse) x edge 0
-            const IVP_Compact_Edge *F = FF[i];  // area to consider
+            const IVP_Compact_Edge *F = FF[i]; // area to consider
             IVP_U_Point v0;
             const IVP_U_Float_Point *f_object = IVP_CLS.give_object_coords(F, m_cache_K);
             const IVP_U_Float_Point *fn_object = IVP_CLS.give_object_coords(F->get_next(), m_cache_K);
             const IVP_U_Float_Point *fp_object = IVP_CLS.give_object_coords(F->get_prev(), m_cache_K);
-            v0.subtract(fn_object, f_object);  // @@@ already calculated
+            v0.subtract(fn_object, f_object); // @@@ already calculated
             IVP_U_Point fhesse_vec;
             fhesse_vec.inline_set_vert_to_area_defined_by_three_points(f_object, fp_object, fn_object);
             solver_pk_pf.hesse_of_area_object.calc_cross_product(&v0, &fhesse_vec);
-            solver_pk_pf.hesse_of_area_object.normize();  // @@@ fast normize
+            solver_pk_pf.hesse_of_area_object.normize(); // @@@ fast normize
 
             solver_pk_pf.point_of_area_object.set(f_object);
 
@@ -1025,8 +1025,8 @@ void IVP_Mindist_Event_Solver::calc_next_event_PK(const IVP_Compact_Edge *P,
     }
 
     {
-        IVP_3D_Solver_PK_KK solver_pk_kk;  // calcs: - s_val * tmp.common.real_len
-                                           //	const IVP_U_Float_Point *p_object = IVP_CLS.give_object_coords(P,m_cache_P);
+        IVP_3D_Solver_PK_KK solver_pk_kk; // calcs: - s_val * tmp.common.real_len
+                                          //	const IVP_U_Float_Point *p_object = IVP_CLS.give_object_coords(P,m_cache_P);
         const IVP_U_Float_Point *k_object = IVP_CLS.give_object_coords(K, m_cache_K);
         const IVP_U_Float_Point *kn_object = IVP_CLS.give_object_coords(K->get_next(), m_cache_K);
 
@@ -1102,7 +1102,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_BK(IVP_Ball *ball, const IVP_Comp
         // find initial virtual collision plane
         {
             IVP_U_Point K_world;
-            IVP_U_Point K_vec_world;  // normized direction
+            IVP_U_Point K_vec_world; // normized direction
             IVP_U_Point *P_world = m_cache_B->m_world_f_object.get_position();
 
             m_cache_K->get_object_cache()->transform_position_to_world_coords(&solver_pk_coll.K_object, &K_world);
@@ -1140,7 +1140,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_BK(IVP_Ball *ball, const IVP_Comp
     {
         IVP_3D_Solver_PF_COLL solver_pk_pf;
         IVP_ASSERT(worst_case_speed > max_coll_speed);
-        solver_pk_pf.set_max_deviation(this->worst_case_speed);  // when does point P move through lot area
+        solver_pk_pf.set_max_deviation(this->worst_case_speed); // when does point P move through lot area
 
         solver_pk_pf.point_object.set(&p_object);
 
@@ -1152,16 +1152,16 @@ void IVP_Mindist_Event_Solver::calc_next_event_BK(IVP_Ball *ball, const IVP_Comp
         for (i = 0; i <= 1; i++)
         {
             // Generation of  collision surface for PF sector  lot = (hesse) x edge 0
-            const IVP_Compact_Edge *F = FF[i];  // area to consider
+            const IVP_Compact_Edge *F = FF[i]; // area to consider
             IVP_U_Point v0;
             const IVP_U_Float_Point *f_object = IVP_CLS.give_object_coords(F, m_cache_K);
             const IVP_U_Float_Point *fn_object = IVP_CLS.give_object_coords(F->get_next(), m_cache_K);
             const IVP_U_Float_Point *fp_object = IVP_CLS.give_object_coords(F->get_prev(), m_cache_K);
-            v0.subtract(fn_object, f_object);  // @@@ already calculated
+            v0.subtract(fn_object, f_object); // @@@ already calculated
             IVP_U_Point fhesse_vec;
             fhesse_vec.inline_set_vert_to_area_defined_by_three_points(f_object, fp_object, fn_object);
             solver_pk_pf.hesse_of_area_object.calc_cross_product(&v0, &fhesse_vec);
-            solver_pk_pf.hesse_of_area_object.normize();  // @@@ fast normize
+            solver_pk_pf.hesse_of_area_object.normize(); // @@@ fast normize
 
             solver_pk_pf.point_of_area_object.set(f_object);
 
@@ -1195,17 +1195,17 @@ void IVP_Mindist_Event_Solver::next_event_B_POLY(IVP_Mindist_Event_Solver *mim)
 
     switch (syn1->get_status())
     {
-        case IVP_ST_POINT:
-            mim->calc_next_event_BP(ball, e1, m_cache_0, &m_cache_1);
-            break;
-        case IVP_ST_EDGE:
-            mim->calc_next_event_BK(ball, e1, m_cache_0, &m_cache_1);
-            break;
-        case IVP_ST_TRIANGLE:
-            mim->calc_next_event_BF(e1, m_cache_0, &m_cache_1);
-            break;
-        default:
-            CORE;
+    case IVP_ST_POINT:
+        mim->calc_next_event_BP(ball, e1, m_cache_0, &m_cache_1);
+        break;
+    case IVP_ST_EDGE:
+        mim->calc_next_event_BK(ball, e1, m_cache_0, &m_cache_1);
+        break;
+    case IVP_ST_TRIANGLE:
+        mim->calc_next_event_BF(e1, m_cache_0, &m_cache_1);
+        break;
+    default:
+        CORE;
     };
 
     m_cache_0->remove_reference();
@@ -1241,11 +1241,11 @@ void IVP_Mindist_Event_Solver::next_event_default_poly_poly(IVP_Mindist_Event_So
     const IVP_Compact_Edge *e0 = syn0->edge;
     const IVP_Compact_Edge *e1 = syn1->edge;
 
-    IVP_Cache_Ledge_Point m_cache_0(syn0->get_object()->to_poly(), e0->get_compact_ledge());  // @@@ faster way? -OG
+    IVP_Cache_Ledge_Point m_cache_0(syn0->get_object()->to_poly(), e0->get_compact_ledge()); // @@@ faster way? -OG
     IVP_Cache_Ledge_Point m_cache_1(syn1->get_object()->to_poly(), e1->get_compact_ledge());
 
 #ifdef DEBUG
-    m_cache_0.tmp.synapse = NULL;  // remember order of synapses
+    m_cache_0.tmp.synapse = NULL; // remember order of synapses
     m_cache_1.tmp.synapse = NULL;
 #endif
 
@@ -1253,46 +1253,46 @@ void IVP_Mindist_Event_Solver::next_event_default_poly_poly(IVP_Mindist_Event_So
 
     switch (syn0->get_status())
     {
+    case IVP_ST_POINT:
+    {
+        switch (syn1->get_status())
+        {
         case IVP_ST_POINT:
         {
-            switch (syn1->get_status())
-            {
-                case IVP_ST_POINT:
-                {
-                    mim->calc_next_event_PP(e0, e1, &m_cache_0, &m_cache_1);
-                    break;
-                }
-                case IVP_ST_EDGE:
-                {
-                    mim->calc_next_event_PK(e0, e1, &m_cache_0, &m_cache_1);
-                    break;
-                }
-                case IVP_ST_TRIANGLE:
-                {
-                    mim->calc_next_event_PF(e0, e1, &m_cache_0, &m_cache_1);
-                    break;
-                }
-                default:
-                    CORE;
-            }
+            mim->calc_next_event_PP(e0, e1, &m_cache_0, &m_cache_1);
             break;
-        };
+        }
         case IVP_ST_EDGE:
         {
-            switch (syn1->get_status())
-            {
-                case IVP_ST_EDGE:
-                {
-                    mim->calc_next_event_KK(e0, e1, &m_cache_0, &m_cache_1);
-                    break;
-                }
-                default:
-                    CORE;
-            }
+            mim->calc_next_event_PK(e0, e1, &m_cache_0, &m_cache_1);
             break;
-        };
+        }
+        case IVP_ST_TRIANGLE:
+        {
+            mim->calc_next_event_PF(e0, e1, &m_cache_0, &m_cache_1);
+            break;
+        }
         default:
-            CORE;  // unknown synapse status
+            CORE;
+        }
+        break;
+    };
+    case IVP_ST_EDGE:
+    {
+        switch (syn1->get_status())
+        {
+        case IVP_ST_EDGE:
+        {
+            mim->calc_next_event_KK(e0, e1, &m_cache_0, &m_cache_1);
+            break;
+        }
+        default:
+            CORE;
+        }
+        break;
+    };
+    default:
+        CORE; // unknown synapse status
     }
 
     m_cache_0.remove_reference();

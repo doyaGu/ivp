@@ -2,13 +2,16 @@
 
 // IVP_EXPORT_PUBLIC
 
+#ifndef IVP_COLLISION_LISTENER_COLLISION_INCLUDED
+#define IVP_COLLISION_LISTENER_COLLISION_INCLUDED
+
 #ifndef _IVP_CONTACT_SITUATION_INCLUDED
-    #include <ivp_contact_situation.hxx>
+#include <ivp_contact_situation.hxx>
 #endif
 
 class IVP_Environment;
 
-class IVP_Contact_Point;  // a kind a (void *) pointer to identify friction points
+class IVP_Contact_Point; // a kind a (void *) pointer to identify friction points
 
 /********************************************************************************
  *	Name:	       	IVP_Contact_Point_API
@@ -16,7 +19,7 @@ class IVP_Contact_Point;  // a kind a (void *) pointer to identify friction poin
  ********************************************************************************/
 class IVP_Contact_Point_API
 {
-  public:
+public:
     /********************************************************************************
      *	Name:	       	get_eliminated_energy
      *	Description:	returns the integrated kinetic energy, which is destroyed by this
@@ -50,7 +53,7 @@ class IVP_Contact_Point_API
  ********************************************************************************/
 class IVP_Event_Collision
 {
-  public:
+public:
     // diff in sec when same objs collided last
     IVP_FLOAT d_time_since_last_collision;
 
@@ -62,7 +65,7 @@ class IVP_Event_Collision
 
 class IVP_Event_Friction
 {
-  public:
+public:
     // call environment->get_current_time() to get current time
     IVP_Environment *environment;
 
@@ -93,8 +96,8 @@ enum IVP_LISTENER_COLLISION_CALLBACKS
  ********************************************************************************/
 class IVP_Listener_Collision
 {
-    int enabled_callbacks;  // an or-ed IVP_LISTENER_COLLISION_CALLBACKS list
-  public:
+    int enabled_callbacks; // an or-ed IVP_LISTENER_COLLISION_CALLBACKS list
+public:
     int get_enabled_callbacks()
     {
         return enabled_callbacks;
@@ -133,9 +136,11 @@ class IVP_Listener_Collision
     // constructor
     IVP_Listener_Collision(int /* IVP_LISTENER_COLLISION_CALLBACKS */ enable_callbacks = 1)
     {
-        enabled_callbacks = enable_callbacks;  // set flags for implemented callbacks
+        enabled_callbacks = enable_callbacks; // set flags for implemented callbacks
     };
 
     // virtual destructor: @@CB
     virtual ~IVP_Listener_Collision() {}
 };
+
+#endif // IVP_COLLISION_LISTENER_COLLISION_INCLUDED

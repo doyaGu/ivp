@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COLLISION_COMPACT_LEDGE_SOLVER_INCLUDED
+#define IVP_COLLISION_COMPACT_LEDGE_SOLVER_INCLUDED
+
 #ifdef SUN4
     #define IVP_STATIC_INLINE inline
     #define IVP_STATIC
@@ -250,3 +253,5 @@ IVP_DOUBLE IVP_Compact_Ledge_Solver::calc_dot_product_vec_dot_connection(const I
     IVP_DOUBLE bz = az * vector->k[2];
     return bx + by + bz;
 }
+
+#endif // IVP_COLLISION_COMPACT_LEDGE_SOLVER_INCLUDED

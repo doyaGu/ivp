@@ -1,8 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 // IVP_EXPORT_PUBLIC
-#ifndef IVP_RAY_SOLVER_INCLUDED
-#define IVP_RAY_SOLVER_INCLUDED
+#ifndef IVP_COLLISION_RAY_SOLVER_INCLUDED
+#define IVP_COLLISION_RAY_SOLVER_INCLUDED
 
 class IVP_Environment;
 class IVP_Real_Object;
@@ -17,7 +17,7 @@ class IVP_OV_Tree_Manager;
 class IVP_Compact_Ledgetree_Node;
 
 #if !defined(_IVP_U_MINHASH_INCLUDED)
-    #include <ivu_min_hash.hxx>
+#include <ivu_min_hash.hxx>
 #endif
 
 /********************************************************************************
@@ -42,8 +42,8 @@ enum IVP_RAY_SOLVER_FLAGS
 class IVP_Ray_Hit
 {
     // used to describe ray contact situation
-  public:
-    IVP_U_Float_Point hit_surface_direction_os;  // not valid for ball objects! For balls, you can easily compute this direction at a later point of time.
+public:
+    IVP_U_Float_Point hit_surface_direction_os; // not valid for ball objects! For balls, you can easily compute this direction at a later point of time.
 
     IVP_Real_Object *hit_real_object;
     const IVP_Compact_Ledge *hit_compact_ledge;
@@ -57,7 +57,7 @@ class IVP_Ray_Hit
  ********************************************************************************/
 class IVP_Ray_Solver_Template
 {
-  public:
+public:
     IVP_U_Point ray_start_point;
     IVP_U_Float_Point ray_normized_direction;
     IVP_FLOAT ray_length;
@@ -72,7 +72,7 @@ class IVP_Ray_Solver_Template
  ********************************************************************************/
 class IVP_Ray_Hit_Listener
 {
-  public:
+public:
     virtual void add_hit_object(IVP_Real_Object *object, const IVP_Compact_Ledge *compact_ledge, const IVP_Compact_Triangle *compact_triangle, IVP_DOUBLE hit_dist, IVP_U_Point *hit_sur_vec_os) = 0;
     virtual ~IVP_Ray_Hit_Listener() {}
 };
@@ -84,7 +84,7 @@ class IVP_Ray_Hit_Listener
  ********************************************************************************/
 class IVP_Ray_Solver_Os
 {
-  protected:
+protected:
     friend class IVP_SurfaceManager_Grid;
     friend class IVP_SurfaceManager_Mopp;
     friend class hkMoppLongRayVirtualMachine;
@@ -101,7 +101,7 @@ class IVP_Ray_Solver_Os
 
     inline IVP_BOOL check_ray_against_sphere_os(const IVP_U_Float_Point *sphere_center_os, IVP_FLOAT sphere_radius);
 
-  public:
+public:
     void check_ray_against_ledge_tree_node_os(const IVP_Compact_Ledgetree_Node *);
     void check_ray_against_compact_surface_os(const IVP_Compact_Surface *);
     IVP_BOOL check_ray_against_compact_ledge_os(const IVP_Compact_Ledge *ledge_to_compare);
@@ -116,7 +116,7 @@ class IVP_Ray_Solver_Os
  ********************************************************************************/
 class IVP_Ray_Solver : public IVP_Ray_Hit_Listener
 {
-  public:
+public:
     // protected:
     friend class IVP_Ray_Solver_Os;
     friend class IVP_Ray_Solver_Group;
@@ -134,7 +134,7 @@ class IVP_Ray_Solver : public IVP_Ray_Hit_Listener
     void check_ray_against_compact_ledge_os(const IVP_Compact_Ledge *compact_ledge_to_compare, IVP_Real_Object *object);
     inline IVP_BOOL check_ray_against_sphere(const IVP_U_Float_Point *sphere_center_ws, IVP_FLOAT sphere_radius);
 
-  public:
+public:
     void check_ray_against_all_objects_in_sim(const IVP_Environment *environment);
     // output_min_hash is filled with hit IVP_Real_Objects
 
@@ -147,7 +147,7 @@ class IVP_Ray_Solver : public IVP_Ray_Hit_Listener
     IVP_BOOL check_ray_against_cube(const IVP_U_Float_Point *luf_point, const IVP_U_Float_Point *rlb_point);
     IVP_BOOL check_ray_against_square(IVP_FLOAT pos_dist, IVP_FLOAT pos_axis_len, const IVP_U_Float_Point *min_coords, const IVP_U_Float_Point *max_coords, int coord_0, int coord_1);
 
-    IVP_Ray_Solver(const IVP_Ray_Solver_Template *templ);  // inits class members
+    IVP_Ray_Solver(const IVP_Ray_Solver_Template *templ); // inits class members
 
     ~IVP_Ray_Solver() {}
 };
@@ -167,7 +167,7 @@ class IVP_Ray_Solver_Group
     IVP_Ray_Solver **ray_solvers;
     inline IVP_BOOL check_ray_group_against_sphere(const IVP_U_Float_Point *sphere_center_ws, IVP_FLOAT sphere_radius);
 
-  public:
+public:
     void check_ray_group_against_object(IVP_Real_Object *object_to_compare);
 
     // next functions return IVP_TRUE if ray hits
@@ -185,12 +185,12 @@ class IVP_Ray_Solver_Group
  ********************************************************************************/
 class IVP_Ray_Solver_Min_Hash : public IVP_Ray_Solver
 {
-  private:
-    IVP_U_Min_Hash output_min_hash;  // holds results
+private:
+    IVP_U_Min_Hash output_min_hash; // holds results
     IVP_Ray_Hit hit_info[IVP_MAX_NUM_RAY_HITS];
     virtual void add_hit_object(IVP_Real_Object *object, const IVP_Compact_Ledge *compact_ledge, const IVP_Compact_Triangle *compact_triangle, IVP_DOUBLE hit_dist, IVP_U_Point *hit_sur_vec_os);
 
-  public:
+public:
     IVP_U_Min_Hash *get_result_min_hash()
     {
         return &output_min_hash;
@@ -206,11 +206,11 @@ class IVP_Ray_Solver_Min_Hash : public IVP_Ray_Solver
  ********************************************************************************/
 class IVP_Ray_Solver_Min : public IVP_Ray_Solver
 {
-  protected:
+protected:
     IVP_FLOAT min_dist;
     IVP_Ray_Hit ray_hit;
 
-  public:
+public:
     IVP_Ray_Hit *get_ray_hit()
     {
         if (min_dist == P_FLOAT_MAX)
@@ -225,11 +225,11 @@ class IVP_Ray_Solver_Min : public IVP_Ray_Solver
     virtual void add_hit_object(IVP_Real_Object *object, const IVP_Compact_Ledge *compact_ledge, const IVP_Compact_Triangle *compact_triangle, IVP_DOUBLE hit_dist, IVP_U_Point *hit_sur_vec_os);
 
     IVP_Ray_Solver_Min(const IVP_Ray_Solver_Template *templ) : IVP_Ray_Solver(templ)
-    {  // inits class members
+    { // inits class members
         min_dist = P_FLOAT_MAX;
     }
 
     ~IVP_Ray_Solver_Min() {}
 };
 
-#endif  // IVP_INCLUDED
+#endif // IVP_COLLISION_RAY_SOLVER_INCLUDED

@@ -15,8 +15,8 @@
  *		    IVP_Collision_Filter_Exclusive_Pair
  ********************************************************************************/
 
-#ifndef IVP_COLLISION_FILTER_INCLUDED
-#define IVP_COLLISION_FILTER_INCLUDED
+#ifndef IVP_COLLISION_COLLISION_FILTER_INCLUDED
+#define IVP_COLLISION_COLLISION_FILTER_INCLUDED
 
 /********************************************************************************
  *  Class:	    IVP_Collision_Filter
@@ -224,4 +224,4 @@ class IVP_Meta_Collision_Filter : public IVP_Collision_Filter
     ~IVP_Meta_Collision_Filter();
 };
 
-#endif
+#endif // IVP_COLLISION_COLLISION_FILTER_INCLUDED

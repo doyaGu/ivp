@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PROTECTED
 
+#ifndef IVP_COLLISION_CLUSTERING_VISUAL_HASH_INCLUDED
+#define IVP_COLLISION_CLUSTERING_VISUAL_HASH_INCLUDED
+
 /********************************************************************************
  * Class:	IVP_Clustering_Visualizer_Object_Hash
  * Description:	hash table to store simple IVP_Real_Object pointers.
@@ -22,3 +25,5 @@ class IVP_Clustering_Visualizer_Object_Hash : protected IVP_VHash
     IVP_Clustering_Visualizer_Object_Hash(int create_size);
     ~IVP_Clustering_Visualizer_Object_Hash();
 };
+
+#endif // IVP_COLLISION_CLUSTERING_VISUAL_HASH_INCLUDED

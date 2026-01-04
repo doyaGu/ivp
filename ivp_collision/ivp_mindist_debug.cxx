@@ -49,7 +49,7 @@ IVP_BOOL ivp_check_debug_mindist(IVP_Mindist *md)
     return IVP_FALSE;
 }
 
-int p_sqrt(IVP_DOUBLE val)  // for debugger
+int p_sqrt(IVP_DOUBLE val) // for debugger
 {
     printf("%g\n", IVP_Inline_Math::sqrtd(val));
     return 0;
@@ -161,7 +161,7 @@ IVP_DOUBLE IVP_Mindist_Minimize_Solver::p_optimize_FF(const IVP_Compact_Edge *A,
                 IVP_KK_Input kkin(pA, pB, m_cache_A, m_cache_B);
                 IVP_DOUBLE quad_dist = kkin.cross_KL_Los.quad_length();
                 if (quad_dist <= (P_DOUBLE_RES * P_DOUBLE_RES * P_MAX_OBJECT_SIZE * P_MAX_OBJECT_SIZE))
-                {  // not parallel
+                { // not parallel
                     continue;
                 }
                 IVP_Unscaled_KK_Result kkr;
@@ -209,7 +209,7 @@ IVP_RETURN_TYPE IVP_Mindist_Minimize_Solver::proove_polypoly()
     IVP_Cache_Ledge_Point m_cache_1;
     m_cache_1.init_cache_ledge_point(poly_1, ledge1);
 
-    m_cache_0.tmp.synapse = syn0;  // remember order of synapses
+    m_cache_0.tmp.synapse = syn0; // remember order of synapses
     m_cache_1.tmp.synapse = syn1;
 
     IVP_DOUBLE min_qdist = P_DOUBLE_MAX;
@@ -364,7 +364,7 @@ int situation(IVP_Cache_Ledge_Point *tri_cache, IVP_Cache_Ledge_Point *e_cache, 
     vec_0.normize();
 
     // vector 2 (z) is orthogonal to triangle, i.e. emerging out of the paper
-    IVP_U_Hesse vec_2;  // world, normized
+    IVP_U_Hesse vec_2; // world, normized
     IVP_CLS.calc_hesse_normized_AT(triangle_e0, tri_cache, &vec_2);
     vec_2.mult(-1.0f);
 
@@ -458,7 +458,7 @@ int situation(IVP_Cache_Ledge_Point *tri_cache, IVP_Cache_Ledge_Point *e_cache, 
     printf("tri_edge(K) to edge(L): slK=%f skL=%f\n",
            kkr.checks_K[0] / (kkr.checks_K[0] + kkr.checks_K[1]),
            kkr.checks_L[0] / (kkr.checks_L[0] + kkr.checks_L[1]));
-    return 0;  // for debugger
+    return 0; // for debugger
 }
 #endif
 
@@ -539,14 +539,14 @@ IVP_RETURN_TYPE IVP_Mindist::validate_termination_len(IVP_DOUBLE now_len)
     return IVP_OK;
 }
 
-    #if 0
+#if 0
 IVP_RETURN_TYPE IVP_Mindist::check_len_PP(IVP_Compact_Ledge *A, IVP_Compact_Edge *B, IVP_Cache_Ledge_Point *m_cache_A, IVP_Cache_Ledge_Point *m_cache_B)
 {
     // termination function test
     IVP_DOUBLE now_len = calc_qlen_PP(A, B, m_cache_A, m_cache_B);
     return validate_termination_len(now_len);
 }
-    #endif
+#endif
 
 IVP_RETURN_TYPE IVP_Mindist::check_len_PF(IVP_Compact_Edge *P, IVP_Compact_Edge *F, IVP_Cache_Ledge_Point *m_cache_P, IVP_Cache_Ledge_Point *m_cache_F)
 {
@@ -579,6 +579,6 @@ IVP_RETURN_TYPE IVP_Mindist::check_len_FF(IVP_Compact_Edge *F, IVP_Compact_Edge 
 
     return validate_termination_len(now_len);
 }
-    #endif
+#endif
 
 #endif

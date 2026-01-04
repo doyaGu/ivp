@@ -1,5 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COLLISION_MINDIST_MINIMIZE_INCLUDED
+#define IVP_COLLISION_MINDIST_MINIMIZE_INCLUDED
+
 #ifndef IVP_HASH_INCLUDED
     #include <ivu_hash.hxx>
 #endif
@@ -145,3 +148,5 @@ class IVP_Mindist_Minimize_Solver
         return ret;
     }
 };
+
+#endif // IVP_COLLISION_MINDIST_MINIMIZE_INCLUDED

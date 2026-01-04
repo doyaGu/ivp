@@ -150,7 +150,7 @@ IVP_BOOL IVP_OV_Tree_Manager::box_contains_box(const struct IVP_OV_Node_Data *ma
     // returns IVP_TRUE  if second box completely fits into first box
     // returns IVP_FALSE if second box is (partially) outside of first box
 
-    int master_x1 = master_data->x << rasterlevel_diff;  // convert master rasterpoints to sub rasterpoints
+    int master_x1 = master_data->x << rasterlevel_diff; // convert master rasterpoints to sub rasterpoints
     int master_y1 = master_data->y << rasterlevel_diff;
     int master_z1 = master_data->z << rasterlevel_diff;
     int offset = (2 << rasterlevel_diff) - 2;
@@ -351,13 +351,19 @@ IVP_BOOL IVP_OV_Tree_Manager::box_overlaps_with_box(const IVP_OV_Node *largenode
 // returns IVP_TRUE  if the two boxes overlap
 // returns IVP_FALSE if the two boxes are disjunkt
 {
-    if (smallnode->data.x + 2 <= (largenode->data.x << rasterlevel_diff)) return (IVP_FALSE);
-    if (smallnode->data.y + 2 <= (largenode->data.y << rasterlevel_diff)) return (IVP_FALSE);
-    if (smallnode->data.z + 2 <= (largenode->data.z << rasterlevel_diff)) return (IVP_FALSE);
+    if (smallnode->data.x + 2 <= (largenode->data.x << rasterlevel_diff))
+        return (IVP_FALSE);
+    if (smallnode->data.y + 2 <= (largenode->data.y << rasterlevel_diff))
+        return (IVP_FALSE);
+    if (smallnode->data.z + 2 <= (largenode->data.z << rasterlevel_diff))
+        return (IVP_FALSE);
 
-    if (smallnode->data.x >= ((largenode->data.x + 2) << rasterlevel_diff)) return (IVP_FALSE);
-    if (smallnode->data.y >= ((largenode->data.y + 2) << rasterlevel_diff)) return (IVP_FALSE);
-    if (smallnode->data.z >= ((largenode->data.z + 2) << rasterlevel_diff)) return (IVP_FALSE);
+    if (smallnode->data.x >= ((largenode->data.x + 2) << rasterlevel_diff))
+        return (IVP_FALSE);
+    if (smallnode->data.y >= ((largenode->data.y + 2) << rasterlevel_diff))
+        return (IVP_FALSE);
+    if (smallnode->data.z >= ((largenode->data.z + 2) << rasterlevel_diff))
+        return (IVP_FALSE);
 
     return (IVP_TRUE);
 }
@@ -801,7 +807,7 @@ IVP_DOUBLE IVP_OV_Tree_Manager::insert_ov_element(IVP_OV_Element *element,
             element->node = this->root;
 
             P_DELETE(new_node);
-            new_node = this->root;  // necessary for e.g. finding the collision partners (see below)
+            new_node = this->root; // necessary for e.g. finding the collision partners (see below)
         }
         else
         {
@@ -837,8 +843,8 @@ IVP_DOUBLE IVP_OV_Tree_Manager::insert_ov_element(IVP_OV_Element *element,
 
 IVP_OV_Node *IVP_OV_Tree_Manager::cleanup_node(IVP_OV_Node *node)
 {
-    if (node->elements.n_elems != 0) return (NULL);  // still elements left in node!
-    if (node->children.n_elems != 0) return (NULL);  // still children left!
+    if (node->elements.n_elems != 0) return (NULL); // still elements left in node!
+    if (node->children.n_elems != 0) return (NULL); // still children left!
 
     if (node->parent == NULL)
     {

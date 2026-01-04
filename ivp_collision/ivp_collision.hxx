@@ -1,8 +1,8 @@
 // Copyright (C) Ipion Software GmbH 2000. All rights reserved.
 
 // IVP_EXPORT_PUBLIC
-#ifndef _IVP_COLLISION_INCLUDED
-#define _IVP_COLLISION_INCLUDED
+#ifndef IVP_COLLISION_COLLISION_INCLUDED
+#define IVP_COLLISION_COLLISION_INCLUDED
 
 class IVP_Compact_Ledge;
 class IVP_Real_Object;
@@ -101,4 +101,4 @@ class IVP_Collision : public IVP_Time_Event
     }
 };
 
-#endif
+#endif // IVP_COLLISION_COLLISION_INCLUDED

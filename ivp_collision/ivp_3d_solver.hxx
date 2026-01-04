@@ -1,9 +1,12 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
+#ifndef IVP_COLLISION_3D_SOLVER_INCLUDED
+#define IVP_COLLISION_3D_SOLVER_INCLUDED
+
 class IVP_Rot_z_Solver;
 
 #define IVP_3D_SOLVER_MAX_STEPS_PER_PSI 20
-#define IVP_3D_SOLVER_MIN_T_STEP_DPSI_FACTOR (1.0f / IVP_3D_SOLVER_MAX_STEPS_PER_PSI)  // factor of minimal t st= 1/500 second
+#define IVP_3D_SOLVER_MIN_T_STEP_DPSI_FACTOR (1.0f / IVP_3D_SOLVER_MAX_STEPS_PER_PSI) // factor of minimal t st= 1/500 second
 #define IVP_3D_SOLVER_PSIS_PER_SECOND ((int)(1.0f / IVP_MAX_DELTA_PSI_TIME))
 
 class IVP_U_Matrix_Cache
@@ -11,7 +14,7 @@ class IVP_U_Matrix_Cache
     static int hits;
     static int misses;
 
-  public:
+public:
     IVP_Real_Object *object;
     IVP_Core *core;
     IVP_Time base_time;
@@ -23,10 +26,7 @@ class IVP_U_Matrix_Cache
     IVP_U_Matrix *calc_matrix_at(IVP_Time t, int index)
     {
         IVP_ASSERT(index <= IVP_3D_SOLVER_MAX_STEPS_PER_PSI);
-        IVP_ASSERT(((int)((t - base_time)
-                              * (IVP_3D_SOLVER_MAX_STEPS_PER_PSI * IVP_3D_SOLVER_PSIS_PER_SECOND)
-                          + .5f))
-                   == index);
+        IVP_ASSERT(((int)((t - base_time) * (IVP_3D_SOLVER_MAX_STEPS_PER_PSI * IVP_3D_SOLVER_PSIS_PER_SECOND) + .5f)) == index);
 
         if (!m_world_f_object[index])
         {
@@ -56,7 +56,7 @@ class IVP_U_Matrix_Cache
         return m_world_f_object[0];
     }
 
-  private:
+private:
     void p_init(IVP_Cache_Object *co)
     {
         object = co->object;
@@ -66,7 +66,7 @@ class IVP_U_Matrix_Cache
         {
             for (int i = IVP_3D_SOLVER_MAX_STEPS_PER_PSI; i >= 0; i--)
             {
-                m_world_f_object[i] = &co->m_world_f_object;  // first value
+                m_world_f_object[i] = &co->m_world_f_object; // first value
                 //		m_world_f_core_next_PSI = &cc->current_m_world_f_core;
             }
         }
@@ -76,7 +76,7 @@ class IVP_U_Matrix_Cache
             {
                 m_world_f_object[i] = 0;
             }
-            m_world_f_object[0] = &co->m_world_f_object;  // first value
+            m_world_f_object[0] = &co->m_world_f_object; // first value
         }
         base_time_code = co->valid_until_time_code;
 #ifdef DEBUG
@@ -88,7 +88,7 @@ class IVP_U_Matrix_Cache
 #endif
     }
 
-  public:
+public:
     IVP_U_Matrix_Cache(IVP_Cache_Object *co)
     {
         p_init(co);
@@ -105,16 +105,16 @@ class IVP_U_Matrix_Cache
 
 enum IVP_3D_SOLVER_TYPE
 {
-    IVP_3D_SOLVER_TYPE_MAX_DEV,     // max deviation known
-    IVP_3D_SOLVER_TYPE_MAX_DEV2,    // max second deviation + deviation known
-    IVP_3D_SOLVER_TYPE_NO_ZERO_DEV  // max dev plus dev != 0 known
+    IVP_3D_SOLVER_TYPE_MAX_DEV,    // max deviation known
+    IVP_3D_SOLVER_TYPE_MAX_DEV2,   // max second deviation + deviation known
+    IVP_3D_SOLVER_TYPE_NO_ZERO_DEV // max dev plus dev != 0 known
 };
 
 /* There are some basic classes of solvers !! */
 
 class IVP_3D_Solver
 {
-  protected:
+protected:
     IVP_Time calc_nullstelle(IVP_Time t0,
                              IVP_Time t1,
                              IVP_DOUBLE value,
@@ -124,12 +124,12 @@ class IVP_3D_Solver
                              IVP_Real_Object *solver_b);
     virtual IVP_DOUBLE get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix *B_w_f_c) = 0;
 
-  public:
-    IVP_DOUBLE max_deviation;  // to be set by application
+public:
+    IVP_DOUBLE max_deviation; // to be set by application
     IVP_DOUBLE inv_max_deviation;
 
     IVP_3D_SOLVER_TYPE type;
-    IVP_DOUBLE max_deviation2;  // to be set by application
+    IVP_DOUBLE max_deviation2; // to be set by application
 
     void print(char *name);
 
@@ -140,28 +140,28 @@ class IVP_3D_Solver
     }
 
     IVP_BOOL find_first_t_for_value_max_dev(
-        IVP_DOUBLE value,  // returns true if found
+        IVP_DOUBLE value, // returns true if found
         IVP_Time t_now,
         IVP_Time t_max,
-        int t_now_cache_index,  // set to 0 if cache base is set to t_now
+        int t_now_cache_index, // set to 0 if cache base is set to t_now
         IVP_U_Matrix_Cache *mc_A,
         IVP_U_Matrix_Cache *mc_B,
         IVP_DOUBLE *opt_val_at_t_now,
         IVP_Time *t_out);
     IVP_BOOL find_first_t_for_value_max_dev2(
-        IVP_DOUBLE value,  // returns true if found
+        IVP_DOUBLE value, // returns true if found
         IVP_Time t_now,
         IVP_Time t_max,
-        int t_now_cache_index,  // set to 0 if cache base is set to t_now
+        int t_now_cache_index, // set to 0 if cache base is set to t_now
         IVP_U_Matrix_Cache *mc_A,
         IVP_U_Matrix_Cache *mc_B,
         IVP_DOUBLE *opt_val_at_t_now,
         IVP_Time *t_out);
     IVP_BOOL find_first_t_for_value_no_zero_dev(
-        IVP_DOUBLE value,  // returns true if found
+        IVP_DOUBLE value, // returns true if found
         IVP_Time t_now,
         IVP_Time t_max,
-        int t_now_cache_index,  // set to 0 if cache base is set to t_now
+        int t_now_cache_index, // set to 0 if cache base is set to t_now
         IVP_U_Matrix_Cache *mc_A,
         IVP_U_Matrix_Cache *mc_B,
         IVP_DOUBLE *opt_val_at_t_now,
@@ -171,7 +171,7 @@ class IVP_3D_Solver
     // (mit factor_1 * this^2 + factor_2 * term_2 = value)
 
     IVP_BOOL find_first_t_for_value_coll(IVP_DOUBLE value,
-                                         IVP_DOUBLE absolute_min_value,  // returns 0 when no value
+                                         IVP_DOUBLE absolute_min_value, // returns 0 when no value
                                          IVP_Time t_now,
                                          IVP_Time t_max,
                                          IVP_U_Matrix_Cache *mc_A,
@@ -179,3 +179,5 @@ class IVP_3D_Solver
                                          IVP_DOUBLE *opt_val_at_t_now,
                                          IVP_Time *t_out);
 };
+
+#endif // IVP_COLLISION_3D_SOLVER_INCLUDED
