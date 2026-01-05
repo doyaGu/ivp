@@ -162,6 +162,8 @@ class IVP_Clustering_Visualizer_Shortrange_Callback
 
     IVP_Clustering_Visualizer_Shortrange_Callback()
     {
+        this->private_property = NULL;
+        this->node = NULL;
         this->user_data = NULL;
     };
 
