@@ -1206,22 +1206,23 @@ void IVP_Friction_System::delete_friction_distance(IVP_Contact_Point *old_dist)
 		core1->sim_unit_of_core->union_find_needed_for_sim_unit = IVP_TRUE;
 	}
 
-	for (int i = 0; i < 2; i++)
-	{
-		IVP_Synapse_Friction *my_syn = old_dist->get_synapse(i);
-		if (my_syn->prev)
-		{
-			my_syn->prev->next = my_syn->next;
-		}
-		else
-		{
-			my_syn->l_obj->friction_synapses = my_syn->get_next();
-		}
-		if (my_syn->next)
-		{
-			my_syn->next->prev = my_syn->prev;
-		}
-	}
+	// dimhotepus: Done in old_dist destructor via remove_friction_synapse_from_object
+	// for (int i = 0; i < 2; i++)
+	// {
+	// 	IVP_Synapse_Friction *my_syn = old_dist->get_synapse(i);
+	// 	if (my_syn->prev)
+	// 	{
+	// 		my_syn->prev->next = my_syn->next;
+	// 	}
+	// 	else
+	// 	{
+	// 		my_syn->l_obj->friction_synapses = my_syn->get_next();
+	// 	}
+	// 	if (my_syn->next)
+	// 	{
+	// 		my_syn->next->prev = my_syn->prev;
+	// 	}
+	// }
 
 	// printf("deleting_frdist %lx o %lx c %lx  o %lx c %lx\n",(intp)old_dist,(intp)old_dist->synapse[0]->l_obj,(intp)old_dist->synapse[0]->l_obj->to_real()->physical_core,(intp)old_dist->synapse[1]->l_obj,(intp)old_dist->synapse[1]->l_obj->to_real()->physical_core);
 	P_DELETE(old_dist);
