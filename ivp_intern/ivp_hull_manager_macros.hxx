@@ -15,13 +15,13 @@ IVP_BOOL IVP_Hull_Manager::are_events_in_hull()
     }
 }
 
-void IVP_Hull_Manager::check_hull_synapses()
+void IVP_Hull_Manager::check_hull_synapses(IVP_Environment *pEnv)
 {
     // check all synapses
 
     // eventually throw hull limit exceeded event
     IVP_FLOAT syn_val;
-    int maxcnt = 100;
+    int maxcnt = get_synapse_check_count(pEnv);
     while ((syn_val = sorted_synapses.find_min_value() - hull_value_next_psi) < 0.0f)
     { // no other synapses need to be checked
         // syn hull event is to be fired
