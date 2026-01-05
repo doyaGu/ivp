@@ -181,8 +181,6 @@ IVP_BOOL IVP_3D_Solver::find_first_t_for_value_max_dev(IVP_DOUBLE value, IVP_Tim
 IVP_BOOL IVP_3D_Solver::find_first_t_for_value_max_dev2(IVP_DOUBLE value, IVP_Time t_now, IVP_Time t_max, int t_now_cache_index, IVP_U_Matrix_Cache *mc_A, IVP_U_Matrix_Cache *mc_B, IVP_DOUBLE *opt_val_at_t_now, IVP_Time *t_out)
 {
     return find_first_t_for_value_max_dev(value, t_now, t_max, t_now_cache_index, mc_A, mc_B, opt_val_at_t_now, t_out);
-    IVP_ASSERT(0 == 1);
-    return IVP_FALSE;
 }
 
 #if 0
