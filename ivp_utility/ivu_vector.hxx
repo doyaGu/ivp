@@ -21,6 +21,8 @@ class IVP_U_Vector_Base
     unsigned short n_elems;
     void **elems;
     void increment_mem();
+
+    IVP_U_Vector_Base() : memsize(0), n_elems(0), elems(NULL) {}
 };
 
 template <class T>

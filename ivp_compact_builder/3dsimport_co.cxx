@@ -518,7 +518,7 @@ IVP_Concave_Polyhedron *IVP_SurfaceBuilder_3ds::convert_3ds_to_concave(const cha
 #ifndef GEKKO
     //****
 
-    char *infn = 0, *outfn = 0;  // , * name=DEFNAME;
+    const char *infn = 0, *outfn = 0;  // , * name=DEFNAME;
     FILE *inf, *outf;
     int n;
     H3dsScene *scene;
@@ -611,7 +611,7 @@ IVP_Concave_Polyhedron *IVP_SurfaceBuilder_3ds::convert_3ds_to_concave(const cha
         }
     }
     #else
-    infn = (char *)filename;
+    infn = filename;
     outf = NULL;
     #endif
 
@@ -908,13 +908,13 @@ int p_graphlib_robust_convert_3dmax_object_to_compact_ledges(P_Hardware *hw, con
 #ifdef WIN32
     //    P_Hardware_W95 *w95_hw = (P_Hardware_W95 *)hw;
     flags |= NORMDUP;
-    char *infn = 0, *name = DEFNAME;
+    const char *infn = 0, *name = DEFNAME;
     FILE *inf, *outf;
     int n;
     H3dsScene *scene;
     //    float32 xscale, yscale, zscale;
 
-    infn = (char *)filename;
+    infn = filename;
     outf = NULL;
 
     if (!infn)

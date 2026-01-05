@@ -15,20 +15,17 @@ class hk_Pre_Allocated_Array : public hk_Array<T>
 	protected:
 
 		inline hk_Pre_Allocated_Array(T* elems, int initial_size)
-			:  hk_Array<T>( elems, initial_size)
-		{
-			;
-		} 
+			: hk_Array<T>(elems, initial_size)
+		{}
 
 	public:
 
 		inline ~hk_Pre_Allocated_Array()
 		{
-			if ( this->get_elems() == (T*)(this+1))
+			if ( this->get_elems() == reinterpret_cast<T*>(this+1))
 			{
-				this->m_elems = 0;
+				this->m_elems = nullptr;
 			}
-			
 		}
 	HK_NEW_DELETE_FUNCTION_CLASS( hk_Pre_Allocated_Array<T>, HK_MEMORY_CLASS_ARRAY )		// e.g. defines new as   new (hk_Memory *)hk_Class_Name and delete var, hk_Memory *
 };
