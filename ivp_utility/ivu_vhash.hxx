@@ -66,7 +66,7 @@ public:
     void activate(int preferred_size); // allocate memory
 
     int len() const { return size_mm + 1; }; // size of hash array
-    int n_elems() { return nelems; };        // elems in hash
+    int n_elems() const { return nelems; };  // elems in hash
     void *element_at(int i) const { return (void *)elems[i].elem; };
     IVP_BOOL is_element_touched(int i) const { return (IVP_BOOL)(elems[i].hash_index >= IVP_VHASH_TOUCH_BIT); }
     void untouch_all();
@@ -150,10 +150,10 @@ public:
 
     void *touch_element(void *key_elem, unsigned int hash_index); // finds and touches
 
-    int len() { return size; };
-    int n_elems() { return nelems; };
+    int len() const { return size; };
+    int n_elems() const { return nelems; };
     void *element_at(int i) { return elems_store[i].elem; };
-    IVP_BOOL is_element_touched(int i) { return (IVP_BOOL)(elems_store[i].hash_index >= IVP_VHASH_TOUCH_BIT); }
+    IVP_BOOL is_element_touched(int i) const { return (IVP_BOOL)(elems_store[i].hash_index >= IVP_VHASH_TOUCH_BIT); }
     void untouch_all();
     void print();
     void check(); // check internal consistency
@@ -192,20 +192,20 @@ inline IVP_BOOL IVP_VHash_Store::compare_store_hash(void *pointer0, void *pointe
 }
 
 // For threadsave usage
-template <class T>
+template <typename T>
 class IVP_VHash_Enumerator
 {
     int index;
 
 public:
-    IVP_VHash_Enumerator(IVP_VHash *vec)
+    explicit IVP_VHash_Enumerator(IVP_VHash *vec)
     {
         index = vec->len() - 1;
     }
 
     T *get_next_element(IVP_VHash *vec)
     {
-        while (1)
+        while (true)
         {
             if (index < 0)
                 return NULL;
