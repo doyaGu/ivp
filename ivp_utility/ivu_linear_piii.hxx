@@ -650,7 +650,13 @@ inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Q
 
 inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Float_Quat *q2)
 {
-    this->inline_set_mult_quat(q1, (IVP_U_Quat *)q2);
+    // Fix UB on cast IVP_U_Float_Quat -> IVP_U_Quat
+    IVP_U_Quat q3;
+    q3.x = q2->x;
+    q3.y = q2->y;
+    q3.z = q2->z;
+    q3.w = q2->w;
+    this->inline_set_mult_quat(q1, &q3);
 }
 
 void IVP_U_Quat::normize_correct_step(int steps)
