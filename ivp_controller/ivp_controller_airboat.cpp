@@ -100,8 +100,6 @@ bool IVP_Controller_Raycast_Airboat::PostRaycasts(IVP_Ray_Solver_Template *pRayS
         IVP_Raycast_Airboat_Pontoon_Temp *pTempPontoonPoint = &pTempPontoons[iPoint];
         IVP_Raycast_Airboat_Impact *pImpact = &pImpacts[iPoint];
         IVP_Ray_Solver_Template *pRaySolver = &pRaySolverTemplates[iPoint];
-        if (!pPontoonPoint || !pTempPontoonPoint || !pImpact || !pRaySolver)
-            continue;
 
         // Copy the ray length back, it may have changed.
         pPontoonPoint->raycast_length = pRaySolver->ray_length;

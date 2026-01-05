@@ -73,7 +73,6 @@ void IVP_Controller_Raycast_Car::SetupWheelRaycasts(IVP_Ray_Solver_Template *pRa
 	for (int iWheel = 0; iWheel < n_wheels; ++iWheel)
 	{
 		IVP_Raycast_Car_Wheel *pWheel = get_wheel(IVP_POS_WHEEL(iWheel));
-		if (pWheel)
 		{
 			// Fill the in the ray solver template for the current wheel.
 			IVP_Ray_Solver_Template &raySolverTemplate = pRaySolverTemplates[iWheel];
@@ -112,9 +111,6 @@ bool IVP_Controller_Raycast_Car::DoSimulationWheels(IVP_Ray_Solver_Template *pRa
 		IVP_Raycast_Car_Wheel *pWheel = get_wheel(IVP_POS_WHEEL(iWheel));
 		IVP_Raycast_Car_Wheel_Temp *pTempWheel = &pTempWheels[iWheel];
 		IVP_Ray_Hit *pRayHit = &pRayHits[iWheel];
-
-		if (!pWheel || !pTempWheel || !pRayHit)
-			continue;
 
 		if (pRayHit->hit_real_object)
 		{
@@ -215,8 +211,6 @@ void IVP_Controller_Raycast_Car::DoSimulationShocks(IVP_Raycast_Car_Wheel_Temp *
 	for (int iWheel = 0; iWheel < n_wheels; ++iWheel)
 	{
 		IVP_Raycast_Car_Wheel *pWheel = get_wheel(IVP_POS_WHEEL(iWheel));
-		if (!pWheel)
-			continue;
 
 		// Check to see if we hit anything, otherwise the shocks just go to rest.
 		if (!pRayHits[iWheel].hit_real_object)
