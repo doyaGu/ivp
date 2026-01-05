@@ -446,14 +446,11 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
         // convert polygon template to compact ledge
         // -----------------------------------------
         compact_ledge = IVP_SurfaceBuilder_Polygon_Convex::convert_template_to_ledge(templ);
-        IVP_IF(1)
+        IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
         {
-            IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
+            if (!compact_ledge)
             {
-                if (!compact_ledge)
-                {
-                    error_output(templ);
-                }
+                error_output(templ);
             }
         }
         P_DELETE(templ);
