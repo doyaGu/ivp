@@ -242,7 +242,7 @@ public:
         }
         return result;
     }
-    IVP_Time() {}
+    IVP_Time() : seconds(0), sub_seconds(0) {}
     IVP_Time(float time)
     {
         seconds = float(int(time));

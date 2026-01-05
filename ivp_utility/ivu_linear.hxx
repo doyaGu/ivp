@@ -128,7 +128,11 @@ public:
     IVP_RETURN_TYPE fast_normize(); // normize vector (0.1f% error)
     void print(const char *comment = 0) const;
 
-    IVP_U_Float_Point() = default;
+    IVP_U_Float_Point() : k{0, 0, 0}
+#ifdef IVP_VECTOR_UNIT_FLOAT
+                          , hesse_val{0}
+#endif
+    {}
     IVP_U_Float_Point(IVP_DOUBLE x, IVP_DOUBLE y, IVP_DOUBLE z)
     {
         k[0] = (IVP_FLOAT)x;
@@ -277,7 +281,11 @@ public:
 
     void print(const char *comment = 0);
 
-    IVP_U_Point() = default;
+    IVP_U_Point() : k{0, 0, 0}
+#ifdef IVP_VECTOR_UNIT_DOUBLE
+                    , hesse_val{0}
+#endif
+    {}
     inline IVP_U_Point(const IVP_U_Float_Point &p);
     IVP_U_Point(IVP_DOUBLE x, IVP_DOUBLE y, IVP_DOUBLE z)
     {
@@ -493,7 +501,7 @@ public:
     // get the distance between a point and the plane
     inline IVP_DOUBLE get_dist(const IVP_U_Float_Point *p) const; // get the distance between a point and the plane
 
-    IVP_U_Float_Hesse() = default;
+    IVP_U_Float_Hesse() : IVP_U_Float_Point() { hesse_val = 0; }
     IVP_U_Float_Hesse(IVP_DOUBLE xi, IVP_DOUBLE yi, IVP_DOUBLE zi, IVP_DOUBLE val)
     {
         k[0] = (IVP_FLOAT)xi;
@@ -738,7 +746,7 @@ public:
 
     inline IVP_DOUBLE inline_estimate_q_diff_to(const IVP_U_Float_Quat *reference) const; // roughly estimate the quad alpha
 
-    IVP_U_Quat() = default; // not initialized quat
+    IVP_U_Quat() : x{0}, y{0}, z{0}, w{0} {} // initialized quat
     IVP_U_Quat(const IVP_U_Point &p)
     {
         this->set_fast_multiple(&p, 1.0f);
