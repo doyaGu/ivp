@@ -1105,7 +1105,7 @@ IVP_Contact_Point::~IVP_Contact_Point()
 		}
 	}
 	{
-		IVP_Core *core0, *core1;
+		IVP_Core *core0 = NULL, *core1 = NULL;
 		IVP_IF(env->get_debug_manager()->check_fs)
 		{
 			core0 = get_synapse(0)->l_obj->friction_core;
