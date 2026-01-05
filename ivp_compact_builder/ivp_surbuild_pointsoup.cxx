@@ -331,7 +331,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
     }
 
     IVP_U_Vector<IVP_SurMan_PS_Plane> planes;
-    IVP_U_Vector<IVP_SB_PS_DUMMY> point_indizes; // array of point indizes
+    IVP_U_Vector<int> point_indizes; // array of point indizes
 
     facetT *facet; /* set by FORALLfacets */
     FORALLfacets
@@ -351,7 +351,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
         FOREACHvertex_(vertices)
         {
             int point_index = qh_pointid(vertex->point);
-            point_indizes.add((IVP_SB_PS_DUMMY *)point_index);
+            point_indizes.add((int *)(intp)point_index);
             plane->points.add(points->element_at(point_index));
             use_list[point_index]++;
         }
