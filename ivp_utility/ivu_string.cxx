@@ -280,7 +280,7 @@ char *gbs_add_path(char *path, char *name)
 char *GBS_remove_escape(char *com) /* \ is the escape charakter */
 {
     register char *result, *s, *d;
-    int ch;
+    char ch;
 
     s = d = result = p_strdup(com);
     while ((ch = *(s++)))
@@ -482,7 +482,7 @@ IVP_DOUBLE p_get_float()
     return IVP_DOUBLE(atof(str));
 }
 
-int p_strlen(const char *s)
+ptrdiff_t p_strlen(const char *s)
 {
     if (!s || s[0] == 0)
         return 0;
