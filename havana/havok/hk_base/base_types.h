@@ -38,7 +38,7 @@
 #ifdef _LINUX
 #define HK_BREAKPOINT() raise(SIGINT)
 #else
-#define HK_BREAKPOINT() *(int*)0=0
+#define HK_BREAKPOINT() __debugbreak()
 #endif
 
 
@@ -76,7 +76,7 @@ typedef unsigned int 	hk_size_t;
 #ifdef _LINUX
 #define HK_BREAK raise(SIGINT)
 #else
-#define HK_BREAK (*((int *)0)) = 0
+#define HK_BREAK __debugbreak()
 #endif
 
 #define HK_PUBLIC public
