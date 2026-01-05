@@ -14,9 +14,9 @@
  *                      elements are inserted
  ********************************************************************************/
 
-class IVP_U_BigVector_Base
+// dimhotepus: Use struct for objects without logic.
+struct IVP_U_BigVector_Base
 {
-  public:
     int memsize;
     int n_elems;
     void **elems;
@@ -163,7 +163,8 @@ class IVP_U_BigVector_Enumerator
     int index;
 
   public:
-    inline IVP_U_BigVector_Enumerator(IVP_U_BigVector<T> *vec)
+    // dimhotepus: Add explicit.
+    explicit inline IVP_U_BigVector_Enumerator(IVP_U_BigVector<T> *vec)
     {
         index = 0;  // vec->n_elems-1;
     }
@@ -173,7 +174,8 @@ class IVP_U_BigVector_Enumerator
         if (index >= vec->n_elems)
             return NULL;
         // if (index < 0) return NULL;
-        return vec->element_at(index--);
+        // dimhotepus: Fix enumeration [0..length).
+        return vec->element_at(index++);
     }
 };
 
