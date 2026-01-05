@@ -2437,7 +2437,7 @@ char *p_mergesort(void **array, IVP_INT32 start, IVP_INT32 end, IVP_INT32 (*comp
     IVP_INT32 dest;
     void **buffer;
     void *ibuf[256];
-    char *error;
+    char *error = NULL;
 
     size = end - start;
     if (size <= 1)
