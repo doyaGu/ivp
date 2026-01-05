@@ -94,7 +94,7 @@ IVP_BOOL IVP_Controller_Buoyancy::use_buoyancy_solver(const IVP_Buoyancy_Input *
 
 #if 0
 	printf("Buoyancy-Solver's results:\n");
-	((IVP_MI_Vector*) solution_values_out)->print();
+	solution_values_out->print();
 #endif
 	}
 	return (in_water);
@@ -274,7 +274,8 @@ void ivp_debug_show_real_values(const IVP_Buoyancy_Input * /*b_input*/,
 	solution_values_out.sum_impulse_x_movevector.set(&bs.sum_impulse_x_movevector);
 
 	printf("Buoyancy-Solver's results:\n");
-	((IVP_MI_Vector *)&solution_values_out)->print();
+	// Fix UB in print
+	solution_values_out.print();
 }
 
 /*************************************************************************************
