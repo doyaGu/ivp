@@ -14,7 +14,9 @@ class hk_Breakable_Constraint_BP  //: public hk_Effector_BP
 			:	m_real_constraint(HK_NULL),
 				m_linear_strength(0),
 				m_angular_strength(0)
-		{			
+		{
+			m_bodies[0] = UINT_MAX;
+			m_bodies[1] = UINT_MAX;
 		}
 
 	public: 
