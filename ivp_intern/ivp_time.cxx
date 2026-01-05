@@ -92,6 +92,8 @@ void IVP_Event_Manager::simulate_variable_time_step(IVP_Time_Manager *tman, IVP_
     }
 }
 
+IVP_Event_Manager::~IVP_Event_Manager() {}
+
 IVP_Time_Manager::IVP_Time_Manager()
 {
     P_MEM_CLEAR(this);
