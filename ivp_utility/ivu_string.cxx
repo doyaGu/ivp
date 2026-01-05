@@ -349,7 +349,7 @@ char *p_make_string_fast(const char *templat, ...)
     va_list parg;
     memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN)); // nur bei sparc-debugging
     va_start(parg, templat);
-    vsprintf(buffer, templat, parg);
+    vsnprintf(buffer, sizeof(buffer), templat, parg);
     va_end(parg);
     return p_strdup(buffer);
 }
@@ -367,11 +367,7 @@ char *p_make_string(const char *templat, ...)
     va_list parg;
     memset(buffer, 0, P_MIN(1000, MAX_MAKE_STRING_LEN)); // only for sparc-debugging
     va_start(parg, templat);
-#ifdef LINUX
-    vsnprintf(buffer, MAX_MAKE_STRING_LEN, templat, parg);
-#else
-    vsprintf(buffer, templat, parg);
-#endif
+    vsnprintf(buffer, sizeof(buffer), templat, parg);
     va_end(parg);
     return p_strdup(buffer);
 }
@@ -386,15 +382,11 @@ IVP_ERROR_STRING p_export_error(const char *templat, ...)
     char *p = buffer;
     va_list parg;
     memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN)); // only for sparc-debugging
-    sprintf(buffer, "ERROR: ");
+    snprintf(buffer, sizeof(buffer), "ERROR: ");
     p += strlen(p);
 
     va_start(parg, templat);
-#ifdef LINUX
-    vsnprintf(buffer, MAX_MAKE_STRING_LEN, templat, parg);
-#else
-    vsprintf(buffer, templat, parg);
-#endif
+    vsnprintf(p, sizeof(buffer) - (p - buffer), templat, parg);
     va_end(parg);
 
     P_FREE(p_error_buffer);
@@ -405,20 +397,16 @@ IVP_ERROR_STRING p_export_error(const char *templat, ...)
 void ivp_message(const char *templat, ...)
 {
     // for general error management... z.B. p_error_message()
-    char buffer[MAX_ERROR_BUFFER_LEN];
-    char *p = buffer;
+    char buffer_tmp[MAX_ERROR_BUFFER_LEN];
     va_list parg;
-    memset(buffer, 0, P_MIN(1000, MAX_ERROR_BUFFER_LEN)); // only for sparc-debugging
-    sprintf(buffer, "ERROR: ");
-    p += strlen(p);
 
     va_start(parg, templat);
-#ifdef LINUX
-    vsnprintf(buffer, MAX_MAKE_STRING_LEN, templat, parg);
-#else
-    vsprintf(buffer, templat, parg);
-#endif
+    vsnprintf(buffer_tmp, sizeof(buffer_tmp), templat, parg);
     va_end(parg);
+
+    char buffer[MAX_ERROR_BUFFER_LEN];
+    snprintf(buffer, sizeof(buffer), "[havok] %s", buffer_tmp);
+
 #ifdef WIN32
     OutputDebugString(buffer);
 #elif defined(LINUX)
