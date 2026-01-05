@@ -70,6 +70,7 @@ public:
         return (IVP_SYNAPSE_POLYGON_STATUS)status;
     }
 
+    IVP_Synapse() : next(NULL), prev(NULL), l_obj(NULL), edge(NULL), mindist_offset(SHRT_MAX), status(SHRT_MAX) {}
     virtual ~IVP_Synapse() {} // dummy, do not call
     const IVP_Compact_Ledge *get_ledge() const;
     const IVP_Compact_Edge *get_edge() const
