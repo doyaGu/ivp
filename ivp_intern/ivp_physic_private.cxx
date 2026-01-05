@@ -265,7 +265,8 @@ IVP_Real_Object *IVP_Cluster_Manager::get_next_real_object_in_cluster_tree(IVP_O
 	for (next = next_object; !next; next = object->next_in_cluster)
 	{
 		IVP_Object *old_father = object;
-		object = object->father_cluster;
+		// Prevent null dereference when going deep into object clusters
+		object = object ? object->father_cluster : NULL;
 		if (!object)
 		{
 			IVP_Cluster *root = get_root_cluster();
