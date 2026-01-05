@@ -16,47 +16,70 @@
 
 IVP_Template_Rot_Mot::IVP_Template_Rot_Mot()
 {
-    P_MEM_CLEAR(this);
+    max_rotation_speed = power = max_torque = 0;
+    active_float_max_rotation_speed = active_float_power =
+        active_float_max_torque = NULL;
+    active_float_rotation_speed_out = NULL;
 }
 
 IVP_Template_Torque::IVP_Template_Torque()
 {
-    P_MEM_CLEAR(this);
+    torque = 0;
+    active_float_torque = NULL;
+    max_rotation_speed = 0;
+    active_float_max_rotation_speed = NULL;
+    active_float_rotation_speed_out = NULL;
 }
 
 IVP_Template_Stabilizer::IVP_Template_Stabilizer()
 {
-    P_MEM_CLEAR(this);
+    stabi_constant = 0;
+    active_float_stabi_constant = NULL;
 }
 IVP_Template_Check_Dist::IVP_Template_Check_Dist()
 {
-    P_MEM_CLEAR(this);
+    client_data = NULL;
+    memset(objects, 0, sizeof(objects));
+    range = 0;
+    mod_is_outside = NULL;
 }
 
 //////////////////////////
 IVP_Template_Force::IVP_Template_Force()
 {
-    P_MEM_CLEAR(this);
+    force = 0;
+    active_float_force = NULL;
     push_first_object = IVP_TRUE;
     push_second_object = IVP_FALSE;
 }
 
 IVP_Template_Two_Point::IVP_Template_Two_Point()
 {
-    P_MEM_CLEAR(this);
+    client_data = NULL;
+    memset(anchors, 0, sizeof(anchors));
 }
 
 IVP_Template_Four_Point::IVP_Template_Four_Point()
 {
-    P_MEM_CLEAR(this);
+    client_data = NULL;
+    memset(anchors, 0, sizeof(anchors));
 }
 
 //////////////////////////
 
 IVP_Extra_Info::IVP_Extra_Info()
 {
-    P_MEM_CLEAR(this);
-    return;
+    client_data = NULL;
+
+    is_float_cam = IVP_FALSE;
+    active_float_bomb = NULL;
+    range = 0;
+
+    mod_fc_height = mod_fc_target_height = mod_fc_dist = mod_fc_speed = active_float_force = NULL;
+
+    is_physic_cam = is_puck_force = 0;
+
+    mod_pf_forward = mod_pf_sideward = NULL;
 }
 
 //////////////////////////
@@ -65,7 +88,6 @@ void IVP_Template_Anchor::set_anchor_position_ws(IVP_Real_Object *obj, const IVP
 {
     this->object = obj;
     this->coords_world = *coords_ws;
-    return;
 }
 
 void IVP_Template_Anchor::set_anchor_position_ws(IVP_Real_Object *obj, const IVP_DOUBLE x, const IVP_DOUBLE y, const IVP_DOUBLE z)
@@ -74,7 +96,6 @@ void IVP_Template_Anchor::set_anchor_position_ws(IVP_Real_Object *obj, const IVP
     this->coords_world.k[0] = x;
     this->coords_world.k[1] = y;
     this->coords_world.k[2] = z;
-    return;
 }
 
 void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP_U_Float_Point *coords_os)
@@ -83,8 +104,6 @@ void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP
 
     IVP_Cache_Object *cache = obj->get_cache_object_no_lock();
     cache->transform_position_to_world_coords(coords_os, &this->coords_world);
-
-    return;
 }
 
 void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP_DOUBLE x, const IVP_DOUBLE y, const IVP_DOUBLE z)
