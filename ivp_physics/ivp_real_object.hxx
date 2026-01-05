@@ -62,7 +62,16 @@ public:
     IVP_FLOAT hull_value_next_psi; // optimistic, may be less
     int time_of_next_reset;        // counting seconds only
 public:
-    IVP_Hull_Manager_Base_Gradient() : last_vpsi_time(0.0f) {}
+    IVP_Hull_Manager_Base_Gradient()
+        : last_vpsi_time(0.0f),
+          gradient(0.0f),
+          center_gradient(0.0f),
+          hull_value_last_vpsi(0.0f),
+          hull_center_value_last_vpsi(0.0f),
+          hull_value_next_psi(0.0f),
+          time_of_next_reset(0)
+    {
+    }
     ~IVP_Hull_Manager_Base_Gradient() {}
 };
 
@@ -92,7 +101,15 @@ protected:
     IVP_Synapse_Friction *friction_synapses; // Linked list of contact points.
     IVP_U_Quat *q_core_f_object;             // in object !!!!
     IVP_U_Float_Point shift_core_f_object;
-    IVP_Real_Object_Fast_Static(IVP_Cluster* father, const IVP_Template_Object* templ) : IVP_Object(father, templ) {}
+    IVP_Real_Object_Fast_Static(IVP_Cluster *father, const IVP_Template_Object *templ)
+        : IVP_Object(father, templ),
+          controller_phantom(NULL),
+          exact_synapses(NULL),
+          invalid_synapses(NULL),
+          friction_synapses(NULL),
+          q_core_f_object(NULL)
+    {
+    }
 
 public:
     const IVP_U_Float_Point *get_shift_core_f_object() const { return &shift_core_f_object; }
@@ -116,7 +133,11 @@ public:
         unsigned int collision_listener_exists : 1; /* all flags of object listeners functions */
         unsigned int collision_listener_listens_to_friction : 1;
     } flags;
-    IVP_Real_Object_Fast(IVP_Cluster *father, const IVP_Template_Object *templ) : IVP_Real_Object_Fast_Static(father, templ) { ; };
+    IVP_Real_Object_Fast(IVP_Cluster *father, const IVP_Template_Object *templ)
+        : IVP_Real_Object_Fast_Static(father, templ), cache_object(NULL)
+    {
+        memset(&flags, 0, sizeof(flags));
+    }
 };
 
 class IVP_Real_Object : public IVP_Real_Object_Fast
