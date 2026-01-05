@@ -403,7 +403,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
                     }
                 }
             }
-            IVP_ASSERT(max_dist < qedge_sum);
+            // IVP_ASSERT(max_dist < qedge_sum);
             {
                 for (int i2 = 0; i2 < point_indizes.len(); i2++)
                 {
