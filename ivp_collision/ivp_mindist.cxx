@@ -1150,7 +1150,7 @@ void IVP_Mindist::update_exact_mindist_events(IVP_BOOL allow_hull_conversion, IV
         else
         {
             IVP_FLOAT event_time = next_event - tm->base_time;
-            this->index = tm->min_hash->add((void *)this, event_time);
+            this->index = tm->min_hash->add(this, event_time);
         }
 
         IVP_ASSERT(this->index != IVP_U_MINLIST_UNUSED);
