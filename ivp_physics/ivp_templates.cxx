@@ -54,4 +54,5 @@ void IVP_Template_Real_Object::set_nocoll_group_ident(const char *id)
         CORE;
     }
     strncpy(nocoll_group_ident, id, IVP_NO_COLL_GROUP_STRING_LEN);
+    nocoll_group_ident[IVP_NO_COLL_GROUP_STRING_LEN - 1] = '\0';
 }
