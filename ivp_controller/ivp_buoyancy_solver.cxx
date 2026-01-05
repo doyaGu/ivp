@@ -1154,7 +1154,7 @@ void IVP_Buoyancy_Solver::compute_values_for_one_triangle(IVP_Real_Object *objec
     // check if triangle is under/above surface
     IVP_FLOAT distance[6]; // indicates distance of the 3 vertices of the triangle
     int sum_distance = 0;  // indicates the distance of the whole triangle: completely above/under surface, if 0 or 3
-    int index_positiv, index_neg;
+    int index_positiv = 0, index_neg = 0;
 
     for (int j = 2; j >= 0; j--)
     {
