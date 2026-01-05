@@ -161,11 +161,16 @@ class IVP_Clustering_Visualizer_Shortrange_Callback
     virtual void visualize_request_for_intruder_radius() = 0;
 
     IVP_Clustering_Visualizer_Shortrange_Callback()
+        : private_property(NULL),
+          node(NULL),
+          sphere_radius(-1),
+          n_touches(-1),
+          reported_ledge(IVP_FALSE),
+          user_data(NULL)
     {
-        this->private_property = NULL;
-        this->node = NULL;
-        this->user_data = NULL;
-    };
+        position.set_to_zero();
+        box_extents.set_to_zero();
+    }
 
     virtual ~IVP_Clustering_Visualizer_Shortrange_Callback();
 };
