@@ -136,7 +136,8 @@ class IVP_OO_Watcher : public IVP_Collision, public IVP_Collision_Delegator
     void hull_manager_is_going_to_be_deleted_event();
     virtual ~IVP_OO_Watcher();
     IVP_OO_Watcher(IVP_Collision_Delegator *del, IVP_Real_Object *obj0, IVP_Real_Object *obj1);
-    void simulate_time_event(IVP_Environment *)
+    // dimhotepus: Add missed override.
+    virtual void simulate_time_event(IVP_Environment *)
     {
         CORE;
     }
