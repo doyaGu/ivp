@@ -60,7 +60,11 @@ inline void hk_Vector3::operator= (ConsT hkVector3ExpressionPlus HK_REF v)
 	y = v.m_a.y + v.m_b.y;
 	z = v.m_a.z + v.m_b.z;
 }
-inline hk_Vector3::hk_Vector3(ConsT hkVector3ExpressionPlus HK_REF v) { operator= (v); }
+inline hk_Vector3::hk_Vector3(ConsT hkVector3ExpressionPlus HK_REF v)
+{
+	operator= (v);
+	w = 0;
+}
 
 inline void hk_Vector3::operator= (ConsT hkVector3ExpressionMinus HK_REF v)
 {
@@ -68,7 +72,11 @@ inline void hk_Vector3::operator= (ConsT hkVector3ExpressionMinus HK_REF v)
 	y = v.m_a.y - v.m_b.y;
 	z = v.m_a.z - v.m_b.z;
 }
-inline hk_Vector3::hk_Vector3(ConsT hkVector3ExpressionMinus HK_REF  v) { operator= (v); }
+inline hk_Vector3::hk_Vector3(ConsT hkVector3ExpressionMinus HK_REF  v)
+{
+	operator= (v);
+	w = 0;
+}
 
 void hk_Vector3::operator+= (const hk_Vector3& v)
 {
