@@ -106,13 +106,17 @@ class IVP_Mindist_Minimize_Solver
     int loop_hash_size;
 #endif
 
-    IVP_Mindist_Minimize_Solver(IVP_Mindist *md)
+    // dimhotepus: Add explicit.
+    explicit IVP_Mindist_Minimize_Solver(IVP_Mindist *md)
     {
         mindist = md;
+        // dimhotepus: Ensure initialized.
+        memset(&pos_opposite_BacksideOs, 0, sizeof(pos_opposite_BacksideOs));
 #if !defined(IVP_LOOP_LIST_SIZE)
         loop_hash = NULL;
 #else
-        memset(loop_hash, 0, sizeof(IVP_MM_Loop_Hash_Struct));
+        // dimhotepus: Fix memset size.
+        memset(&loop_hash, 0, sizeof(loop_hash));
         loop_hash_size = 0;
 #endif
 
