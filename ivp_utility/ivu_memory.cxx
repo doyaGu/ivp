@@ -42,6 +42,9 @@ void ivp_memory_check(void *a)
 
 void ivp_byte_swap4(uint &fourbytes)
 {
+#ifdef _WIN32
+    fourbytes = _byteswap_ulong(fourbytes);
+#else
     struct FOURBYTES
     {
         union
@@ -59,10 +62,14 @@ void ivp_byte_swap4(uint &fourbytes)
     out.b[3] = in.b[0];
 
     fourbytes = out.v;
+#endif
 }
 
 void ivp_byte_swap2(ushort &twobytes)
 {
+#ifdef _WIN32
+    twobytes = _byteswap_ushort(twobytes);
+#else
     struct TWOBYTES
     {
         union
@@ -78,6 +85,7 @@ void ivp_byte_swap2(ushort &twobytes)
     out.b[1] = in.b[0];
 
     twobytes = out.v;
+#endif
 }
 
 void *p_malloc(size_t size)
