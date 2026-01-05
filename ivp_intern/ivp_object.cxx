@@ -589,9 +589,6 @@ void IVP_Real_Object::reset_time(IVP_Time offset)
  **************************************************************************************/
 void IVP_Real_Object::delete_and_check_vicinity()
 {
-    if (!this)
-        return;
-
     IVP_Core *my_core = this->get_core();
     if (!my_core->physical_unmoveable)
     {
