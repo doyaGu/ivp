@@ -189,17 +189,30 @@ void IVP_Merge_Core::set_speed()
 
 IVP_Merge_Core::IVP_Merge_Core()
 {
-    P_MEM_CLEAR(this);
+    memset(core_stack, 0, sizeof(core_stack));
+    n_cores = 2;
+
+    cores = &core_stack[0];
+
+    unmovable_core = NULL;
+    movement_type = IVP_MT_UNDEFINED;
+
+    mcore = NULL;
 }
 
 IVP_Merge_Core::IVP_Merge_Core(IVP_Core_Merged *mcore_, IVP_Core *first_core, IVP_Core *second_core)
 {
-    P_MEM_CLEAR(this);
-    mcore = mcore_;
+    memset(core_stack, 0, sizeof(core_stack));
     n_cores = 2;
+
     cores = &core_stack[0];
     cores[0] = first_core;
     cores[1] = second_core;
+
+    unmovable_core = NULL;
+    movement_type = IVP_MT_UNDEFINED;
+
+    mcore = mcore_;
 }
 
 IVP_Merge_Core::~IVP_Merge_Core()

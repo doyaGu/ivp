@@ -35,16 +35,39 @@ void IVP_Statistic_Manager::clear_statistic()
 
 IVP_Statistic_Manager::IVP_Statistic_Manager()
 {
-    P_MEM_CLEAR(this);
+    l_environment = NULL;
+    sum_energy_destr = 0;
+
+    max_rescue_speed = max_speed_gain = 0;
+
+    impact_sys_num = impact_counter = impact_sum_sys = 0;
+    impact_hard_rescue_counter = impact_rescue_after_counter = impact_delayed_counter = 0;
+
+    impact_coll_checks = impact_unmov = 0;
+
+    sum_of_mindists = mindists_generated = mindists_deleted = 0;
+    range_intra_exceeded = range_world_exceeded = 0;
+
+    processed_fmindists = 0;
+    global_fmd_counter = 0;
 }
 
 IVP_Application_Environment::IVP_Application_Environment()
 {
-    P_MEM_CLEAR(this);
     n_cache_object = 256;
 
-#if defined(PSXII) && 0
-    scratchpad_addr = (char *)0x70000000;
-    scratchpad_size = 0x4000;
-#endif
+    scratchpad_addr = NULL;
+    scratchpad_size = 0;
+
+    material_manager = NULL;
+    collision_filter = NULL;
+    universe_manager = NULL;
+    performancecounter = NULL;
+    anomaly_manager = NULL;
+    anomaly_limits = NULL;
+
+    default_collision_delegator_root = NULL;
+
+    env_active_float_manager = NULL;
+    range_manager = NULL;
 }

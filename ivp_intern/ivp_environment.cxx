@@ -492,7 +492,9 @@ void IVP_Environment::set_current_time(IVP_Time time)
 
 IVP_Draw_Vector_Debug::IVP_Draw_Vector_Debug()
 {
-    P_MEM_CLEAR(this);
+    next = NULL;
+    color = 0;
+    debug_text = NULL;
 }
 
 IVP_Draw_Vector_Debug::~IVP_Draw_Vector_Debug()
@@ -503,12 +505,9 @@ IVP_Draw_Vector_Debug::~IVP_Draw_Vector_Debug()
 void IVP_Debug_Manager::clear_debug_manager()
 {
 #if !defined(PSXII)
-    if (out_deb_file)
+    if (out_deb_file && out_deb_file != stdout)
     {
-        if (out_deb_file != stdout)
-        {
-            fclose(out_deb_file);
-        }
+        fclose(out_deb_file);
     }
 #endif
 }
