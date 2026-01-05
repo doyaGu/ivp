@@ -109,6 +109,7 @@ protected:
           friction_synapses(NULL),
           q_core_f_object(NULL)
     {
+        shift_core_f_object.set_to_zero();
     }
 
 public:
