@@ -1,7 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #if !defined(SUN) && !defined(SUN4)
-    #include <string.h>
+    #include <cstring>
 #endif
 #include <ivu_types.hxx>
 
@@ -24,21 +24,7 @@ void ivp_srand(int seed)
     IVP_RAND_SEED = seed;
 }
 
-int ivp_srand_read(void)
+int ivp_srand_read()
 {
     return IVP_RAND_SEED;
 }
-
-extern void *p_malloc(unsigned int size);
-
-#if 0 
-FILE *p_glob_fp;
-void p_init_glob_fp()
-{
-    #ifdef WIN32
-	p_glob_fp=fopen(ERRORFILEPATH,"a");
-    #else
-	p_glob_fp=stdout;
-    #endif
-}
-#endif
