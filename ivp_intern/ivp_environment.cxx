@@ -889,7 +889,7 @@ void IVP_Environment::do_d_events()
 #endif
 }
 
-IVP_Time_Event_D::IVP_Time_Event_D(IVP_Time time)
+IVP_Time_Event_D::IVP_Time_Event_D(IVP_Time time) : number_of_sons{0}
 {
     IVP_USE(time);
 }
