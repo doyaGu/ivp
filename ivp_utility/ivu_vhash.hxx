@@ -43,7 +43,7 @@ protected:
     IVP_VHash(IVP_VHash_Elem *static_elems, int size);            // assert(size = 2**x)
     virtual IVP_BOOL compare(void *elem0, void *elem1) const = 0; // return TRUE if equal
 public:
-    static inline int hash_index(const char *data, int size); // useable index calculation, result is [0,0xfffffff]
+    static inline int hash_index(const char *data, intp size); // useable index calculation, result is [0,0xfffffff]
     static inline int fast_hash_index(
         int key); // useable index calculation when size == 4 , result is [0,0xfffffff]
 
@@ -79,11 +79,11 @@ public:
 // note: the order of entries ( comparing each (hash_index&size_mm) ) is preserved
 
 // basic function for calculating the hash_index
-inline int IVP_VHash::hash_index(const char *key, int key_size)
+inline int IVP_VHash::hash_index(const char *key, intp key_size)
 {
     unsigned int c;
     unsigned int index = 0xffffffffL;
-    int i;
+    intp i;
     for (i = key_size - 1; i >= 0; i--)
     {
         c = *((unsigned char *)(key++));
