@@ -92,7 +92,14 @@ public:
         friction_is_broken = IVP_FALSE;
     };
 
-    IVP_Impact_Solver_Long_Term() { init_tmp_contact_info(); };
+    IVP_Impact_Solver_Long_Term()
+    {
+        index_in_fs = -1;
+        virtual_mass = -1;
+        inv_virtual_mass = -1;
+        memset(contact_core, 0, sizeof(contact_core));
+        init_tmp_contact_info();
+    }
 
     inline IVP_DOUBLE get_closing_speed() const; // based on current core speed
 
