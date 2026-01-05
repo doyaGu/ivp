@@ -41,6 +41,7 @@
 
 IVP_Constraint_Local_Anchor::IVP_Constraint_Local_Anchor()
 {
+	object = NULL;
 	rot = NULL;
 }
 
@@ -931,7 +932,7 @@ void IVP_Constraint_Local::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vec
 			for (int i = 0; i < 3; i++)
 			{
 				short map[5] = {0, 1, 2, 0, 1};
-				IVP_DOUBLE simplenorm_transdir, simplenorm_rotdir;
+				IVP_DOUBLE simplenorm_transdir, simplenorm_rotdir = 0;
 				switch (norm)
 				{
 				case IVP_NORM_MINIMUM:

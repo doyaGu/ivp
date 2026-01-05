@@ -64,6 +64,7 @@ IVP_Buoyancy_Solver::IVP_Buoyancy_Solver(IVP_Core *core_, IVP_Controller_Buoyanc
 {
     core = core_;
     environment = core->environment;
+    delta_time = core->i_delta_time;
 
     simulate_wing_behavior = input->simulate_wing_behavior;
 

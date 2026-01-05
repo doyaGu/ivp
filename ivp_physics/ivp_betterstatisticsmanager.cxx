@@ -314,6 +314,7 @@ IVP_BetterStatisticsmanager::IVP_BetterStatisticsmanager()
     this->enabled = IVP_TRUE;
     this->update_interval = 1.0;
     this->update_delayed = IVP_TRUE;
+    this->simulation_time = 0;
 }
 
 IVP_BetterStatisticsmanager::~IVP_BetterStatisticsmanager() {}
