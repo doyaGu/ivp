@@ -14,7 +14,8 @@ public:
 
     IVP_Time_Event() : index(-1) {}
 
-    virtual void simulate_time_event(IVP_Environment *) { CORE; } // to be implemented by application
+    // dimhotepus: Make pure instead of CORE.
+    virtual void simulate_time_event(IVP_Environment *) = 0; // to be implemented by application
 
     virtual ~IVP_Time_Event();
 };
