@@ -31,6 +31,11 @@ class IVP_Unscaled_QR_Result
         unsigned int sign_bit = a | b | c;
         return IVP_BOOL(sign_bit >> 31);
     }
+    IVP_Unscaled_QR_Result()
+    {
+        checks[0] = checks[1] = checks[2] = 0.0f;
+        scale = 0.0f;
+    }
 };
 
 class IVP_Unscaled_S_Result
@@ -43,6 +48,10 @@ class IVP_Unscaled_S_Result
         unsigned int b = *((int *)&checks[1]);
         unsigned int sign_bit = a | b;
         return IVP_BOOL(sign_bit >> 31);
+    }
+    IVP_Unscaled_S_Result()
+    {
+        checks[0] = checks[1] = 0.0f;
     }
 };
 
