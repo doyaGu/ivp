@@ -699,8 +699,8 @@ void IVP_Real_Object::unlink_contact_points(IVP_BOOL silent)
             printf("still_left_fd ");
             while (debug_syn)
             {
-                printf("fd %lx sys %lx  ", (intp)debug_syn->get_contact_point(),
-                       (intp)debug_syn->get_contact_point()->l_friction_system);
+                printf("fd %p sys %p  ", debug_syn->get_contact_point(),
+                       debug_syn->get_contact_point()->l_friction_system);
                 debug_syn = debug_syn->get_next();
             }
             printf("\n");

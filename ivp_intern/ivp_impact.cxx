@@ -251,10 +251,10 @@ IVP_Contact_Point *IVP_Mindist::try_to_generate_managed_friction(IVP_Friction_Sy
 				fs1 = info_for_core->l_friction_system;
 			}
 		}
-		printf("\nmaking_new_frdist for cores %lx %d  %lx %d  fss %lx %lx  with sim_units: %lx %lx\n",
-			   (intp)core0, core0->physical_unmoveable,
-			   (intp)core1, core1->physical_unmoveable,
-			   (intp)fs0, (intp)fs1, (intp)core0->sim_unit_of_core, (intp)core1->sim_unit_of_core);
+		printf("\nmaking_new_frdist for cores %p %d  %p %d  fss %p %p  with sim_units: %p %p\n",
+			   core0, core0->physical_unmoveable,
+			   core1, core1->physical_unmoveable,
+			   fs0, fs1, core0->sim_unit_of_core, core1->sim_unit_of_core);
 		core0->sim_unit_of_core->sim_unit_debug_out();
 		core1->sim_unit_of_core->sim_unit_debug_out();
 	}
@@ -884,7 +884,7 @@ delaying_test:
 	{
 		IVP_IF(0)
 		{
-			printf("switched_to_temporarily_unmov %lx %lx %f\n", (intp)core[0], (intp)core[1], core[0]->environment->get_current_time().get_time());
+			printf("switched_to_temporarily_unmov %p %p %f\n", core[0], core[1], core[0]->environment->get_current_time().get_time());
 		}
 		core[0]->environment->get_statistic_manager()->impact_unmov++;
 
@@ -1763,7 +1763,7 @@ IVP_BOOL IVP_Impact_System::test_loop_all_pairs()
 			{
 				IVP_IF(l_environment->get_debug_manager()->debug_imp_sys)
 				{
-					printf("did_not_test %lx\n", 0x0000ffff & (intp)my_fr);
+					printf("did_not_test %zi\n", 0x0000ffff & (intp)my_fr);
 				}
 			}
 			else
@@ -2011,7 +2011,7 @@ void IVP_Contact_Point::calc_coll_distance()
 			IVP_Core *core0, *core1;
 			core0 = get_synapse(0)->l_obj->friction_core;
 			core1 = get_synapse(1)->l_obj->friction_core;
-			fprintf(fp, "  %lx %lx-%lx: ", 0x0000ffff & (intp)this, 0x0000ffff & (intp)core0, 0x0000ffff & (intp)core1);
+			fprintf(fp, "  %zi %zi-%zi: ", 0x0000ffff & (intp)this, 0x0000ffff & (intp)core0, 0x0000ffff & (intp)core1);
 			fprintf(fp, "di %.4f  ", get_gap_length());
 			IVP_DOUBLE debug_cs = closing_speed + info->impact.rescue_speed_addon * 0.5f;
 			fprintf(fp, "cs %.4f  ", debug_cs);
@@ -2019,7 +2019,7 @@ void IVP_Contact_Point::calc_coll_distance()
 		}
 		IVP_IF(env->get_debug_manager()->debug_imp_sys)
 		{
-			printf("tested_frdist %lx di %.4f cs %.4f dr %.4f\n",
+			printf("tested_frdist %zi di %.4f cs %.4f dr %.4f\n",
 				   0x0000ffff & (intp)this,
 				   get_gap_length(),
 				   closing_speed + info->impact.rescue_speed_addon * 0.5f,

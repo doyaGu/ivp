@@ -727,7 +727,7 @@ void IVP_Friction_System::test_hole_fr_system_data()
 
                 if (fr_info->l_friction_system != this)
                 {
-                    printf("test_fr l_friction_system %f %lx\n", time.get_time(), (intp)obj_obj);
+                    printf("test_fr l_friction_system %f %p\n", time.get_time(), obj_obj);
                     CORE;
                 }
 
@@ -753,15 +753,15 @@ void IVP_Friction_System::test_hole_fr_system_data()
                         }
                         if (!is_in_collection)
                         {
-                            printf("test_fr there was mindist %lx in obj which is not in system\n",
-                                   (intp)all_dists & 0x0000ffff);
+                            printf("test_fr there was mindist %p in obj which is not in system\n",
+                                   all_dists);
                             CORE;
                         }
                     }
                 }
                 if (!found_mine)
                 {
-                    printf("test_fr mindist %lx missing in obj\n", (intp)mindist);
+                    printf("test_fr mindist %p missing in obj\n", mindist);
                     CORE;
                 }
             }
@@ -783,7 +783,7 @@ void IVP_Friction_System::test_hole_fr_system_data()
                 }
                 if (!found_mine)
                 {
-                    printf("test_fr dist %lx not found in pairs\n", (intp)mindist);
+                    printf("test_fr dist %p not found in pairs\n", mindist);
                     CORE;
                 }
             }
@@ -811,9 +811,9 @@ void IVP_Friction_System::test_hole_fr_system_data()
                     }
                     if (!found_mine)
                     {
-                        printf("test_fr pair %lx containing dist %lx not in system\n",
-                               (intp)fr_pair,
-                               (intp)fr_dist);
+                        printf("test_fr pair %p containing dist %p not in system\n",
+                               fr_pair,
+                               fr_dist);
                         CORE;
                     }
                 }
@@ -933,7 +933,7 @@ void out_friction_info_obj(IVP_Core *obj)
         IVP_Friction_Info_For_Core *fr_info = obj->moveable_core_has_friction_info();
         while (fr_info)
         {
-            printf("obj %lx fs %lx obj_ma %d",
+            printf("obj %zi fs %zi obj_ma %d",
                    (intp)obj & 0x0000ffff,
                    (intp)fr_info->l_friction_system & 0x0000ffff,
                    obj->physical_unmoveable);
@@ -941,7 +941,7 @@ void out_friction_info_obj(IVP_Core *obj)
             for (int i = fr_info->friction_springs.len() - 1; i >= 0; i--)
             {
                 IVP_Contact_Point *mindist = fr_info->friction_springs.element_at(i);
-                printf("  md %lx", (intp)mindist & 0x0000ffff);
+                printf("  md %zi", (intp)mindist & 0x0000ffff);
             }
             fr_info = NULL;
             printf("\n");
@@ -1118,7 +1118,7 @@ void debug_out_friction_system(IVP_Friction_System *fr_sys)
 
         IVP_IF(0)
         {
-            char *out_text = p_make_string("%ddistdd%lx", cou, my_dist);
+            char *out_text = p_make_string("%ddistdd%p", cou, my_dist);
             syn0->get_object()->get_environment()->add_draw_vector(
                 &world_p, &world_push_debug, out_text, 3);
             delete (out_text);
@@ -1202,11 +1202,11 @@ void IVP_Friction_System::ivp_debug_fs_pointers()
 {
     IVP_IF(1)
     {
-        printf("%lx  ", (intp)first_friction_dist & 0x0000ffff);
+        printf("%zi  ", (intp)first_friction_dist & 0x0000ffff);
         for (IVP_Contact_Point *fr_d = get_first_friction_dist(); fr_d;
              fr_d = get_next_friction_dist(fr_d))
         {
-            printf("%lx %lx %d %lx  ",
+            printf("%zi %zi %d %zi  ",
                    (intp)fr_d->prev_dist_in_friction & 0x0000ffff,
                    (intp)fr_d & 0x0000ffff,
                    fr_d->has_negative_pull_since,
