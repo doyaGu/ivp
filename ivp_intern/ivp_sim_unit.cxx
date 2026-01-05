@@ -307,6 +307,8 @@ IVP_Simulation_Unit::IVP_Simulation_Unit()
     sim_unit_movement_type = IVP_MT_NOT_SIM;
     sim_unit_just_slowed_down = IVP_FALSE;
     sim_unit_has_fast_objects = IVP_FALSE;
+    prev_sim_unit = NULL;
+    next_sim_unit = NULL;
 }
 
 void IVP_Simulation_Unit::rem_sim_unit_controller(IVP_Controller *rem_controller)

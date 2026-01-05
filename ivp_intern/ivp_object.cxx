@@ -444,7 +444,7 @@ void IVP_Real_Object::set_new_surface_manager(IVP_SurfaceManager *new_sm)
 
     this->surface_manager = new_sm;
 
-    IVP_FLOAT rad, rad_dev;
+    IVP_FLOAT rad = 0.0f, rad_dev = 0.0f;
 
     IVP_OBJECT_TYPE type = get_type();
     switch (type)
@@ -479,7 +479,7 @@ void IVP_Real_Object::set_new_surface_manager(IVP_SurfaceManager *new_sm)
 void IVP_Real_Object::recalc_core_radius()
 {
 
-    IVP_FLOAT rad, rad_dev;
+    IVP_FLOAT rad = 0.0f, rad_dev = 0.0f;
 
     IVP_OBJECT_TYPE type = get_type();
     switch (type)
@@ -924,7 +924,7 @@ void IVP_Real_Object::init_object_core(IVP_Environment *i_environment, const IVP
     IVP_Core *core = get_core();
     // radius
 
-    IVP_FLOAT rad, rad_dev;
+    IVP_FLOAT rad = 0.0f, rad_dev = 0.0f;
     switch (type)
     {
     case IVP_POLYGON:
