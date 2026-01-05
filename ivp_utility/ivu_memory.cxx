@@ -80,7 +80,7 @@ void ivp_byte_swap2(ushort &twobytes)
     twobytes = out.v;
 }
 
-void *p_malloc(unsigned int size)
+void *p_malloc(size_t size)
 {
 #ifndef GEKKO
     return malloc(size);
@@ -89,9 +89,9 @@ void *p_malloc(unsigned int size)
 #endif
 }
 
-char *p_calloc(int nelem, int size)
+char *p_calloc(size_t nelem, size_t size)
 {
-    int s = nelem * size;
+    size_t s = nelem * size;
 
 #ifndef GEKKO
     char *sp = (char *)malloc(s);
@@ -104,7 +104,7 @@ char *p_calloc(int nelem, int size)
     return sp;
 }
 
-void *p_realloc(void *memblock, int size)
+void *p_realloc(void *memblock, size_t size)
 {
 #ifndef GEKKO
     return realloc(memblock, size);
@@ -123,28 +123,52 @@ void p_free(void *data)
 #endif
 }
 
-#define IVP_MEMORY_MAGIC 0x65981234
+#define IVP_MEMORY_MAGIC 0x65981234U
 struct IVP_Aligned_Memory
 {
-    int magic_number;
+    unsigned int magic_number;
     void *back_link;
 };
 
-void *ivp_malloc_aligned(int size, int alignment)
+void *ivp_malloc_aligned(size_t size, unsigned short alignment)
 {
 #if defined(SUN__)
     return memalign(alignment, size);
 #else
     size += alignment + sizeof(IVP_Aligned_Memory);
 
-    IVP_Aligned_Memory *data = (IVP_Aligned_Memory *)p_malloc((unsigned int)size);
-    data->magic_number = IVP_MEMORY_MAGIC;
+    IVP_Aligned_Memory *data = (IVP_Aligned_Memory *)p_malloc(size);
+    if (data)
+    {
+        data->magic_number = IVP_MEMORY_MAGIC;
 
-    void *ret =
-        (void *)((((intp)data) + alignment + sizeof(IVP_Aligned_Memory) - 1) & (-alignment));
-    ((void **)ret)[-1] = (void *)data;
-    return ret;
+        void *ret =
+            (void *)((((uintp)data) + alignment + sizeof(IVP_Aligned_Memory) - 1) & (-(int)alignment));
+        ((void **)ret)[-1] = (void *)data;
+        return ret;
+    }
+
+    return NULL;
 #endif
+}
+
+void *ivp_calloc_aligned(size_t size, unsigned short alignment)
+{
+    size += alignment + sizeof(IVP_Aligned_Memory);
+
+    IVP_Aligned_Memory *data = (IVP_Aligned_Memory *)p_malloc(size);
+    if (data)
+    {
+        memset(data, 0, size);
+        data->magic_number = IVP_MEMORY_MAGIC;
+
+        void *ret =
+            (void *)((((uintp)data) + alignment + sizeof(IVP_Aligned_Memory) - 1) & (-(int)alignment));
+        ((void **)ret)[-1] = (void *)data;
+        return ret;
+    }
+
+    return NULL;
 }
 
 void ivp_free_aligned(void *data)
@@ -167,7 +191,7 @@ IVP_U_Memory::~IVP_U_Memory()
     free_mem();
 }
 
-void IVP_U_Memory::init_mem_transaction_usage(char *external_mem, int size)
+void IVP_U_Memory::init_mem_transaction_usage(char *external_mem, size_t size)
 {
     // IVP_IF(1) {
     transaction_in_use = 0;
@@ -230,7 +254,7 @@ void IVP_U_Memory::free_mem_transaction()
 }
 
 #if !defined(MEMTEST)
-char *IVP_U_Memory::neuer_sp_block(unsigned int groesse)
+char *IVP_U_Memory::neuer_sp_block(size_t groesse)
 {
     size_t ng = IVU_MEMORY_BLOCK_SIZE - sizeof(p_Memory_Elem);
     groesse += IVU_MEM_ALIGN - 1;
@@ -251,13 +275,12 @@ char *IVP_U_Memory::neuer_sp_block(unsigned int groesse)
 }
 #endif
 
-void *IVP_U_Memory::get_memc(unsigned int groesse)
+void *IVP_U_Memory::get_memc(size_t groesse)
 {
     //	if (groesse & 0x7) *(int *)0 = 0;
     void *neubeginn = get_mem(groesse);
-    register long *z = (long *)neubeginn;
-    memset((char *)z, 0, groesse);
-    return (neubeginn);
+    memset(neubeginn, 0, groesse);
+    return neubeginn;
 }
 
 IVP_U_Memory::IVP_U_Memory()
