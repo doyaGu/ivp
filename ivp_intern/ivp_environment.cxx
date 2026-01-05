@@ -838,8 +838,11 @@ void ivp_dummy_func()
     IVP_U_Set_Active<IVP_Core> ivp_class_dummy1(16);
     IVP_U_Set_Active<IVP_Real_Object> ivp_class_dummy2(16);
     IVP_U_Set_Active<IVP_Mindist_Base> ivp_class_dummy3(16);
-    IVP_Attacher_To_Cores<IVP_Controller_Buoyancy> *ivp_class_dummy8 = new IVP_Attacher_To_Cores<IVP_Controller_Buoyancy>(NULL);
-    (void)ivp_class_dummy8;
+    IVP_Attacher_To_Cores<IVP_Controller_Buoyancy> *ivp_class_dummy4 = NULL;
+    (void)ivp_class_dummy1;
+    (void)ivp_class_dummy2;
+    (void)ivp_class_dummy3;
+    (void)ivp_class_dummy4;
 }
 
 void IVP_Time_Event_D::simulate_time_event(IVP_Environment *env)
