@@ -13,15 +13,15 @@
  *	File:	       	ivu_vhash.hxx
  *	Description:	special, superfast hashclass base,
  *                      key is calculated from the elems
- *                      hash is automatically expanded but does not automatically shrink#
+ *                      hash is automatically expanded but does not automatically shrink
  *
  *      Note:           highest bit of hash_index is used as a flag
  ********************************************************************************/
 
-class IVP_VHash_Elem
+struct IVP_VHash_Elem
 {
-public:
-    unsigned int hash_index; // unmasked index : highest bit is used to touch elements
+    // unmasked index : highest bit is used to touch elements
+    unsigned int hash_index;
     const void *elem;
 };
 
@@ -99,10 +99,10 @@ inline int IVP_VHash::fast_hash_index(int key)
     return index | IVP_VHASH_TOUCH_BIT; // set touch bit
 }
 
-class IVP_VHash_Store_Elem
+struct IVP_VHash_Store_Elem
 {
-public:
-    unsigned int hash_index; // unmasked index : highest bit is used to touch elements
+    // unmasked index : highest bit is used to touch elements
+    unsigned int hash_index;
     void *key_elem;
     void *elem;
 };
