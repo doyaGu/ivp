@@ -10,10 +10,10 @@
 
 IVP_Template_Controller_Floating::IVP_Template_Controller_Floating()
 {
-    P_MEM_CLEAR(this);
     max_repulsive_force = P_FLOAT_MAX;
     max_adhesive_force = P_FLOAT_MAX;
     ray_direction_ws.set(0.0f, 1.0f, 0.0f);
+    target_distance = current_distance = 0;
 }
 
 void IVP_Template_Controller_Floating::set_position_ws(IVP_Real_Object *obj, const IVP_U_Point *pos_ws)
