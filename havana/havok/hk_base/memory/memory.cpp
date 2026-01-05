@@ -4,14 +4,14 @@
 
 class hk_Memory_With_Size {
 public:
-	hk_int32 m_size;
+	hk_size_t m_size;
 	enum {
-		MAGIC_MEMORY_WITH_SIZE = 0x2345656
+		MAGIC_MEMORY_WITH_SIZE = 0x2345656U
 	} m_magic;
 	hk_int32 m_dummy[2];
 };
 
-void hk_Memory::init_memory( char *buffer, int buffer_size )
+void hk_Memory::init_memory( char *buffer, hk_size_t buffer_size )
 {
 	m_memory_start = buffer;
 	m_used_end = buffer;
@@ -24,11 +24,11 @@ void hk_Memory::init_memory( char *buffer, int buffer_size )
 		m_blocks_in_use[i] = 0;
 	}
 
-	for (int j = 0; j <= HK_MEMORY_MAX_SIZE_SMALL_BLOCK; j++ )
+	for (hk_size_t j = 0; j <= HK_MEMORY_MAX_SIZE_SMALL_BLOCK; j++ )
 	{
-		int row = size_to_row(j);
+		hk_uchar row = size_to_row(j);
 		m_size_to_row[ j ] = row;
-		m_row_to_size[row] = j;
+		m_row_to_size[row] = (hk_uint16)j;
 	}
 	{ // statistics
 		for (int i = 0; i< HK_MEMORY_CLASS_MAX; i++)
@@ -51,7 +51,7 @@ hk_Memory::hk_Memory()
 #endif
 }
 
-hk_Memory::hk_Memory(char *buffer, int buffer_size)
+hk_Memory::hk_Memory(char *buffer, hk_size_t buffer_size)
 {
 	init_memory( buffer, buffer_size );
 }
@@ -71,7 +71,7 @@ hk_Memory::~hk_Memory()
 
 
 
-void *hk_Memory::allocate_real( int size )
+void *hk_Memory::allocate_real( hk_size_t size )
 {
 	if ( size > HK_MEMORY_MAX_SIZE_SMALL_BLOCK)
 	{
@@ -82,10 +82,10 @@ void *hk_Memory::allocate_real( int size )
 	}
 
 
-	int row = m_size_to_row[ size ];
+	hk_uchar row = m_size_to_row[ size ];
 	size = m_row_to_size[ row ];
 
-	int allocated_size = size;
+	hk_size_t allocated_size = size;
 	void *result;
 
 	// allocate first block
@@ -109,7 +109,7 @@ void *hk_Memory::allocate_real( int size )
 	m_used_end += size;
 
 	// allocate rest to get make sure the alignment is ok
-	int biu = m_blocks_in_use[row];
+	hk_size_t biu = m_blocks_in_use[row];
 	while ( allocated_size < 256 )
 	{
 		if ( size + m_used_end < m_memory_end){
@@ -126,7 +126,7 @@ void *hk_Memory::allocate_real( int size )
 	return result;
 }
 
-void* hk_Memory::allocate(int size, hk_MEMORY_CLASS cl)
+void* hk_Memory::allocate(hk_size_t size, hk_MEMORY_CLASS cl)
 {
 #ifdef HK_MEMORY_ENABLE_STATISTICS 
 	hk_Memory_Statistics &s = m_statistics[cl];
@@ -147,7 +147,7 @@ void* hk_Memory::allocate(int size, hk_MEMORY_CLASS cl)
 #else
 
 	if ( size <= HK_MEMORY_MAX_SIZE_SMALL_BLOCK){
-		int row = m_size_to_row[size];
+		hk_uchar row = m_size_to_row[size];
 		m_blocks_in_use[row]++;
 		hk_Memory_Elem *n = m_free_list[row];
 		if ( n ){
@@ -160,7 +160,7 @@ void* hk_Memory::allocate(int size, hk_MEMORY_CLASS cl)
 #endif
 }
 
-void hk_Memory::deallocate(void* p, int size, hk_MEMORY_CLASS cl)
+void hk_Memory::deallocate(void* p, hk_size_t size, hk_MEMORY_CLASS cl)
 {
 #ifdef HK_MEMORY_ENABLE_STATISTICS 
 	hk_Memory_Statistics &s = m_statistics[cl];
@@ -179,7 +179,7 @@ void hk_Memory::deallocate(void* p, int size, hk_MEMORY_CLASS cl)
 #else
 	if ( size <= HK_MEMORY_MAX_SIZE_SMALL_BLOCK ){
 		hk_Memory_Elem *me = (hk_Memory_Elem *)p;
-		int row = m_size_to_row[size];
+		hk_uchar row = m_size_to_row[size];
 		m_blocks_in_use[row]--;
 		me->m_next = m_free_list[row];
 		HK_ASSERT( me->m_magic != HK_MEMORY_MAGIC_NUMBER);
@@ -191,7 +191,7 @@ void hk_Memory::deallocate(void* p, int size, hk_MEMORY_CLASS cl)
 #endif
 }
 
-int hk_Memory::size_to_row( int size )
+hk_uchar hk_Memory::size_to_row( hk_size_t size )
 {
 	HK_ASSERT (HK_MEMORY_MAX_ROW == 12 );
 		 if (size <= 8 ) return 1;
@@ -207,13 +207,13 @@ int hk_Memory::size_to_row( int size )
 	else if (size <= 512 ) return 11;
 	else{
 		HK_BREAK;
-		return -1;
+		return 0;
 	}
 }
 
 
 
-void* hk_Memory::allocate_debug(int n,
+void* hk_Memory::allocate_debug(hk_size_t n,
 		const char* /*file*/,
 		int /*line*/)
 {
@@ -222,7 +222,7 @@ void* hk_Memory::allocate_debug(int n,
 
 void hk_Memory::deallocate_debug(
 		void* p,
-		int /*n*/,
+		hk_size_t /*n*/,
 		const char* /*file*/,
 		int /*line*/)
 {
@@ -231,7 +231,7 @@ void hk_Memory::deallocate_debug(
 
 
 
-void* hk_Memory::allocate_and_store_size(int byte_size, hk_MEMORY_CLASS cl)
+void* hk_Memory::allocate_and_store_size(hk_size_t byte_size, hk_MEMORY_CLASS cl)
 {
 	hk_Memory_With_Size *x = (hk_Memory_With_Size *)this->allocate( byte_size + sizeof( hk_Memory_With_Size ), cl);
 	x->m_size = byte_size; 

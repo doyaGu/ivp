@@ -4,16 +4,16 @@
 #	include <string.h>
 #endif //HK_PS2
 
-inline void* hk_Memory::memcpy(void* dest, const void* src, int size)
+inline void* hk_Memory::memcpy(void* dest, const void* src, hk_size_t size)
 {
 #ifdef _WIN32
-	return ::memcpy(dest,src,size);
+	return ::memcpy(dest, src, size);
 #else
-	return memcpy(dest,src,size);
+	return memcpy(dest, src, size);
 #endif
 }
 
-inline void* hk_Memory::memset(void* dest, hk_uchar val, hk_int32 size)
+inline void* hk_Memory::memset(void* dest, hk_uchar val, hk_size_t size)
 {
 #ifdef _WIN32
 	return ::memset(dest, val, size);
