@@ -75,28 +75,33 @@ void IVP_U_Active_Value_Manager::init_active_values_generic()
 {
     IVP_U_Active_Terminal_Double *mod_double_null = new IVP_U_Active_Terminal_Double("double_null", 0.0f);
     this->mod_current_time = new IVP_U_Active_Terminal_Double(IVP_ACTIVE_FLOAT_CURRENT_TIME_NAME, 0.0f);
-    this->insert_active_float(mod_double_null);
+    // Do not leak if insert fails.
+    if (!this->insert_active_float(mod_double_null))
+    {
+        delete mod_double_null;
+    }
     this->insert_active_float(mod_current_time);
 }
 
-void IVP_U_Active_Value_Manager::insert_active_float(IVP_U_Active_Float *mod)
+bool IVP_U_Active_Value_Manager::insert_active_float(IVP_U_Active_Float *mod)
 {
     const char *name = mod->get_name();
     if (p_strlen(name) == 0)
     {
         printf("insert_active_float: tried to insert active_IVP_FLOAT without name!\n");
-        return;
+        return false;
     }
 
     IVP_U_Active_Float *found = (IVP_U_Active_Float *)floats_name_hash->find_active_value(mod);
     if (found)
     {
         printf("insert_active_float: name '%s' already exists in name_hash!\n", name);
-        return;
+        return false;
     }
 
     floats_name_hash->add_active_value(mod);
     mod->l_mod_manager = this;  // provide backlink
+    return true;
 }
 
 void IVP_U_Active_Value_Manager::insert_active_int(IVP_U_Active_Int *mod)

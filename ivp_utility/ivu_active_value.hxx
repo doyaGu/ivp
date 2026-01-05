@@ -58,7 +58,7 @@ public:
         }
     };
 
-    virtual void insert_active_float(IVP_U_Active_Float *mod); // add to name_hash
+    virtual bool insert_active_float(IVP_U_Active_Float *mod); // add to name_hash, returns false if failed
     virtual void remove_active_float(IVP_U_Active_Float *mod); // remove from name_hash
 
     virtual void insert_active_int(IVP_U_Active_Int *mod); // add to name_hash
