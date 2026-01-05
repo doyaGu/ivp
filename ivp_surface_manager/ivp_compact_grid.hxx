@@ -52,7 +52,7 @@ class IVP_Compact_Grid
 
     IVP_FLOAT radius;
 
-    int byte_size;
+    intp byte_size;
 
     IVP_FLOAT inv_grid_size;
 
