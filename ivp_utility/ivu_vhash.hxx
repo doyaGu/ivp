@@ -33,13 +33,13 @@ private:
     void rehash(int new_size);
 
 protected:
-    int size_mm; // size -1, used for masking index
+    int size_mm; // size - 1, used for masking index
     unsigned int nelems : 24;
     IVP_BOOL dont_free : 8; // indicating external memory
 
     IVP_VHash_Elem *elems;
 
-    IVP_VHash(int size);                                          // assert(size = 2**x)
+    explicit IVP_VHash(int size);                                 // assert(size = 2**x)
     IVP_VHash(IVP_VHash_Elem *static_elems, int size);            // assert(size = 2**x)
     virtual IVP_BOOL compare(void *elem0, void *elem1) const = 0; // return TRUE if equal
 public:
@@ -82,7 +82,7 @@ public:
 inline int IVP_VHash::hash_index(const char *key, intp key_size)
 {
     unsigned int c;
-    unsigned int index = 0xffffffffL;
+    unsigned int index = 0xffffffffU;
     intp i;
     for (i = key_size - 1; i >= 0; i--)
     {
@@ -170,7 +170,7 @@ public:
 inline int IVP_VHash_Store::hash_index_store(const char *key, int key_size)
 {
     unsigned int c;
-    unsigned int index = 0xffffffffL;
+    unsigned int index = 0xffffffffU;
     int i;
     for (i = key_size - 1; i >= 0; i--)
     {
