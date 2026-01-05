@@ -10,6 +10,8 @@
 #ifndef IVP_LISTENER_HULL_INCLUDED
 #define IVP_LISTENER_HULL_INCLUDED
 
+#include <climits>
+
 class IVP_Hull_Manager;
 
 enum IVP_HULL_ELEM_TYPE
@@ -28,6 +30,8 @@ class IVP_Listener_Hull
 {
 
 public:
+    IVP_Listener_Hull() : minlist_index(UINT_MAX) {}
+
     virtual IVP_HULL_ELEM_TYPE get_type() = 0;
     virtual void hull_limit_exceeded_event(IVP_Hull_Manager *, IVP_HTIME hull_intrusion_value) = 0;
     virtual void hull_manager_is_going_to_be_deleted_event(IVP_Hull_Manager *) = 0;

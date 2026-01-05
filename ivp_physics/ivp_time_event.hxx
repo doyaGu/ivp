@@ -11,8 +11,11 @@ class IVP_Time_Event
 {
 public:
     int index;
-    IVP_Time_Event() = default;
+
+    IVP_Time_Event() : index(-1) {}
+
     virtual void simulate_time_event(IVP_Environment *) { CORE; } // to be implemented by application
+
     virtual ~IVP_Time_Event();
 };
 
