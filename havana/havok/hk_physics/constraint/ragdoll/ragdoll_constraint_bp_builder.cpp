@@ -56,8 +56,9 @@ hk_result hk_Ragdoll_Constraint_BP_Builder::initialize_from_limited_ball_socket_
 					}
 				}
 			}
-			hk_Rotation m0 = r.m_transform_os_ks[0];
-			hk_Rotation m1 = r.m_transform_os_ks[1];
+			// hk_Rotation -> hk_Transform to not slice
+			hk_Transform m0 = r.m_transform_os_ks[0];
+			hk_Transform m1 = r.m_transform_os_ks[1];
 
 			// rotate matrix to center axis
 			m0.rotate( axis, limit_mid[axis]);
@@ -148,8 +149,9 @@ hk_result hk_Ragdoll_Constraint_BP_Builder::initialize_from_limited_ball_socket_
 					int x = l_axis; l_axis = u_axis; u_axis = x;
 				}
 
-				hk_Rotation m0 = r.m_transform_os_ks[0];
-				hk_Rotation m1 = r.m_transform_os_ks[1];
+				// hk_Rotation -> hk_Transform to not slice
+				hk_Transform m0 = r.m_transform_os_ks[0];
+				hk_Transform m1 = r.m_transform_os_ks[1];
 
 				// now use u_axis for cone
 				m0.rotate( u_axis, limit_mid[u_axis]);
