@@ -35,7 +35,7 @@
 
 void P_String::uppercase(char *str)
 {
-    register char c;
+    char c;
     while ((c = *str))
     {
         if ((c <= 'z') && (c >= 'a'))
@@ -60,8 +60,8 @@ const char *P_String::find_string(const char *str, const char *key, int upper_ca
     if (str == NULL)
         return NULL;
 
-    register const char *p1, *p2;
-    register char b;
+    const char *p1, *p2;
+    char b;
     switch (upper_case)
     {
     case 1:
@@ -171,9 +171,9 @@ int P_String::string_cmp(const char *str, const char *search, IVP_BOOL upper_cas
 /*	returns 0 if strings are equal -1 or +1 if left strings is
     less/greater than right string */
 {
-    register const char *p1, *p2;
-    register char a, b, *d;
-    register IVP_INT32 i;
+    const char *p1, *p2;
+    char a, b, *d;
+    IVP_INT32 i;
     char fsbuf[256];
 
     p1 = str;
@@ -279,7 +279,7 @@ char *gbs_add_path(char *path, char *name)
 
 char *GBS_remove_escape(char *com) /* \ is the escape charakter */
 {
-    register char *result, *s, *d;
+    char *result, *s, *d;
     char ch;
 
     s = d = result = p_strdup(com);
