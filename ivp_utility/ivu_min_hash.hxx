@@ -29,7 +29,7 @@ extern unsigned int IVP_Hash_crctab[];
 class IVP_U_Min_Hash
 {
     friend class IVP_U_Min_Hash_Enumerator;
-    inline int hash_index(const int *key) const;
+    inline int hash_index(const intp *key) const;
     unsigned int size;
     IVP_U_Min_Hash_Elem **stadel;
     IVP_U_Min_Hash_Elem **min_per_array_pos;

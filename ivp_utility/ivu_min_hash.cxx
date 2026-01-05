@@ -6,10 +6,16 @@
 
 #include "ivu_min_hash.hxx"
 
-inline int IVP_U_Min_Hash::hash_index(const int *key) const
+inline int IVP_U_Min_Hash::hash_index(const intp *key) const
 {
-    unsigned int x = *key * 101;
-    unsigned int y = (x >> 8) + *key * 1001;
+    intp k = *key;
+    unsigned int x = (unsigned int)(k * 101);
+    unsigned int y = (x >> 8) + (unsigned int)(k * 1001);
+    // Mix in upper bits on 64-bit platforms
+#ifdef PLATFORM_64BITS
+    unsigned int z = (unsigned int)(k >> 32);
+    y ^= z * 1009;
+#endif
     return y & (size - 1);
 #if 0
 	unsigned int c;		
@@ -164,7 +170,8 @@ void IVP_U_Min_Hash::min_removed_at_index(IVP_U_Min_Hash_Elem *elem, int i)
 
 void IVP_U_Min_Hash::add(void *elem, IVP_DOUBLE val)
 {
-    int i = hash_index((int *)&elem);
+    intp elem_as_intp = (intp)elem;
+    int i = hash_index(&elem_as_intp);
     IVP_U_Min_Hash_Elem *el =
         new IVP_U_Min_Hash_Elem();  //(IVP_U_Min_Hash_Elem *)p_malloc(sizeof(IVP_U_Min_Hash_Elem));
 #if defined(SORT_MINDIST_ELEMENTS)
@@ -193,7 +200,8 @@ void IVP_U_Min_Hash::change_value(void *elem, IVP_DOUBLE val)
 /** try to remove element from min_hash */
 void IVP_U_Min_Hash::remove(void *elem)
 {
-    int i = hash_index((int *)&elem);
+    intp elem_as_intp = (intp)elem;
+    int i = hash_index(&elem_as_intp);
     IVP_U_Min_Hash_Elem *el, *last_el;
     last_el = 0;
     for (el = elems[i]; el; el = el->next)
@@ -222,7 +230,8 @@ void IVP_U_Min_Hash::remove(void *elem)
 
 int IVP_U_Min_Hash::is_elem(void *elem) const
 {
-    int i = hash_index((int *)&elem);
+    intp elem_as_intp = (intp)elem;
+    int i = hash_index(&elem_as_intp);
     IVP_U_Min_Hash_Elem *el;
     for (el = elems[i]; el; el = el->next)
     {

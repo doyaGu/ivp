@@ -48,7 +48,7 @@ protected:
     }
     int elem_to_index(T *elem)
     {
-        return fast_hash_index((long)elem);
+        return fast_hash_index((intp)elem);
     }
 
 public:

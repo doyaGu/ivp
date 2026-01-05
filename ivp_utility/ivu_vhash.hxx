@@ -45,7 +45,7 @@ protected:
 public:
     static inline int hash_index(const char *data, intp size); // useable index calculation, result is [0,0xfffffff]
     static inline int fast_hash_index(
-        int key); // useable index calculation when size == 4 , result is [0,0xfffffff]
+        intp key); // useable index calculation for pointer-sized key, result is [0,0xfffffff]
 
     // touches element
     void add_elem(const void *elem, int hash_index);
@@ -92,10 +92,10 @@ inline int IVP_VHash::hash_index(const char *key, intp key_size)
     return index | IVP_VHASH_TOUCH_BIT; // set touch bit
 }
 
-// basic function for calculating the hash_index of key is a long
-inline int IVP_VHash::fast_hash_index(int key)
+// basic function for calculating the hash_index of key is a pointer-sized int
+inline int IVP_VHash::fast_hash_index(intp key)
 {
-    int index = ((key * 1001) >> 16) + key * 75;
+    int index = (int)(((key * 1001) >> (sizeof(intp) * 4)) + key * 75);
     return index | IVP_VHASH_TOUCH_BIT; // set touch bit
 }
 

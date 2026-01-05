@@ -833,13 +833,13 @@ void check_fr_info_mindist(IVP_Friction_Solver *fsolv,IVP_Contact_Point *my_dist
     fr_i=obj0->get_first_friction_info_of_obj();
     if(fr_i!=fsolv->friction_infos[dist_counter_two])
     {
-	printf("fr_info_damaged obj %lx\n",(intp)obj0&0x0000ffff);
+	printf("fr_info_damaged obj %zx\n",(intp)obj0&0x0000ffff);
 	CORE;
     }
     fr_i=obj1->get_first_friction_info_of_obj();
     if(fr_i!=fsolv->friction_infos[dist_counter_two+1])
     {
-	printf("fr_info_damaged obj %lx\n",(intp)obj1&0x0000ffff);
+	printf("fr_info_damaged obj %zx\n",(intp)obj1&0x0000ffff);
 	CORE;
     }
 }
