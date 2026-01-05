@@ -15,6 +15,7 @@ void IVP_Constraint::core_is_going_to_be_deleted_event(IVP_Core *)
 IVP_Constraint::IVP_Constraint()
 {
     is_enabled = IVP_TRUE;
+    client_data = NULL;
 }
 
 IVP_DOUBLE IVP_Constraint::get_minimum_simulation_frequency()

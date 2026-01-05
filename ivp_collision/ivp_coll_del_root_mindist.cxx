@@ -79,5 +79,4 @@ IVP_Collision *IVP_Collision_Delegator_Root_Mindist::delegate_collisions_for_obj
 IVP_Collision_Delegator_Root_Mindist::~IVP_Collision_Delegator_Root_Mindist() {}
 IVP_Collision_Delegator_Root_Mindist::IVP_Collision_Delegator_Root_Mindist()
 {
-    P_MEM_CLEAR_M4(this);
 }
