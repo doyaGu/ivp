@@ -469,7 +469,10 @@ class IVP_Vector_of_Hulls_128 : public IVP_U_Vector<IVP_Hull_Manager_Base>
     IVP_Hull_Manager_Base *elem_buffer[128];
 
 public:
-    IVP_Vector_of_Hulls_128() : IVP_U_Vector<IVP_Hull_Manager_Base>((void **)&elem_buffer[0], 128) { ; };
+    IVP_Vector_of_Hulls_128() : IVP_U_Vector<IVP_Hull_Manager_Base>((void **)&elem_buffer[0], 128)
+    {
+        memset(elem_buffer, 0, sizeof(elem_buffer));
+    }
 };
 
 class IVP_Vector_of_Cores_128 : public IVP_U_Vector<IVP_Core>
@@ -477,7 +480,10 @@ class IVP_Vector_of_Cores_128 : public IVP_U_Vector<IVP_Core>
     void *elem_buffer[128];
 
 public:
-    IVP_Vector_of_Cores_128() : IVP_U_Vector<IVP_Core>(&elem_buffer[0], 128) { ; };
+    IVP_Vector_of_Cores_128() : IVP_U_Vector<IVP_Core>(&elem_buffer[0], 128)
+    {
+        memset(elem_buffer, 0, sizeof(elem_buffer));
+    }
 };
 
 /********************************************************************************
