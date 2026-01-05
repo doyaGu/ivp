@@ -2,13 +2,28 @@
 cmake_minimum_required(VERSION 3.12)
 project(ivp VERSION 1.0.0 LANGUAGES CXX)
 
-# Generate compile_commands.json for IDE integration
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Determine if IVP is built as a subproject (using add_subdirectory) or standalone
+if(NOT DEFINED IVP_IS_SUBPROJECT)
+    get_directory_property(IVP_PARENT_DIR PARENT_DIRECTORY)
+    if(IVP_PARENT_DIR)
+        set(IVP_IS_SUBPROJECT ON)
+    else()
+        set(IVP_IS_SUBPROJECT OFF)
+    endif()
+    set(IVP_IS_SUBPROJECT ${IVP_IS_SUBPROJECT} CACHE BOOL "Whether IVP is a subproject")
+endif()
 
-# Set C++98 standard
-set(CMAKE_CXX_STANDARD 98)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Generate compile_commands.json for IDE integration (only for standalone builds)
+if(NOT IVP_IS_SUBPROJECT)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
+# Set C++98 standard (only if not already set by parent project)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 98)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 # Set IVP root directory
 set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -18,9 +33,17 @@ set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # ============================================================================
 
 # Options for including external dependencies in compact builder
-option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
-option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
-option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
+# Use CACHE INTERNAL to avoid polluting parent project's cache when used as submodule
+if(IVP_IS_SUBPROJECT)
+    option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
+    option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
+    option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
+    mark_as_advanced(IVP_INCLUDE_GEOMPACK IVP_INCLUDE_3DSIMPORT IVP_INCLUDE_QHULL)
+else()
+    option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
+    option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
+    option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
+endif()
 
 # Compiler options for C++98 compatibility
 if(MSVC)
@@ -569,6 +592,9 @@ endif()
 
 # Check if Havana sources should be built
 option(IVP_BUILD_HAVANA "Build Havana libraries alongside IVP" OFF)
+if(IVP_IS_SUBPROJECT)
+    mark_as_advanced(IVP_BUILD_HAVANA)
+endif()
 
 # Check if Havana directory exists
 set(HAVANA_SOURCES_FOUND FALSE)
@@ -610,90 +636,105 @@ endif()
 # Installation and Export Configuration
 # ============================================================================
 
-# Include GNUInstallDirs to use standard directories
-include(GNUInstallDirs)
-
-# Install libraries
-install(TARGETS ivp_utility ivp_surface_manager ivp_collision ivp_intern ivp_physics ivp_controller ivp_compact_builder
-    EXPORT ivp_targets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-# Install header files
-install(DIRECTORY
-    ${IVP_DIR}/ivp_collision/
-    ${IVP_DIR}/ivp_controller/
-    ${IVP_DIR}/ivp_intern/
-    ${IVP_DIR}/ivp_physics/
-    ${IVP_DIR}/ivp_surface_manager/
-    ${IVP_DIR}/ivp_utility/
-    ${IVP_DIR}/ivp_compact_builder/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ivp
-    FILES_MATCHING PATTERN "*.hxx" PATTERN "*.h"
-)
-
-# Install Havana headers if available
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/havana")
-    install(DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/havana/havok
-        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.inl"
-    )
+# Option to control installation (disabled by default when used as subproject)
+if(IVP_IS_SUBPROJECT)
+    option(IVP_INSTALL "Generate installation target" OFF)
+else()
+    option(IVP_INSTALL "Generate installation target" ON)
 endif()
 
-# Create and install export targets
-install(EXPORT ivp_targets
-    FILE ivp_targets.cmake
-    NAMESPACE ivp::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
-)
+if(IVP_INSTALL)
+    # Include GNUInstallDirs to use standard directories
+    include(GNUInstallDirs)
 
-# Create package configuration files
-include(CMakePackageConfigHelpers)
+    # Install libraries
+    install(TARGETS ivp_utility ivp_surface_manager ivp_collision ivp_intern ivp_physics ivp_controller ivp_compact_builder
+        EXPORT ivp_targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp-config.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
-)
+    # Install header files
+    install(DIRECTORY
+        ${IVP_DIR}/ivp_collision/
+        ${IVP_DIR}/ivp_controller/
+        ${IVP_DIR}/ivp_intern/
+        ${IVP_DIR}/ivp_physics/
+        ${IVP_DIR}/ivp_surface_manager/
+        ${IVP_DIR}/ivp_utility/
+        ${IVP_DIR}/ivp_compact_builder/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ivp
+        FILES_MATCHING PATTERN "*.hxx" PATTERN "*.h"
+    )
 
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+    # Install Havana headers if available
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/havana")
+        install(DIRECTORY
+            ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok/
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/havana/havok
+            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.inl"
+        )
+    endif()
 
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
-)
+    # Create and install export targets
+    install(EXPORT ivp_targets
+        FILE ivp_targets.cmake
+        NAMESPACE ivp::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
+    )
 
-# Generate pkg-config file for easier integration
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp.pc.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/ivp.pc"
-    @ONLY
-)
+    # Create package configuration files
+    include(CMakePackageConfigHelpers)
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ivp.pc"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-)
+    configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp-config.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
+    )
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
+    )
+
+    # Generate pkg-config file for easier integration
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp.pc.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/ivp.pc"
+        @ONLY
+    )
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ivp.pc"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    )
+endif()
 
 # ============================================================================
 # Configuration Summary
 # ============================================================================
 
-message(STATUS "")
-message(STATUS "IVP Configuration Summary:")
-message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "  Build Havana: ${IVP_BUILD_HAVANA}")
-if(IVP_BUILD_HAVANA)
-    message(STATUS "    Havana sources found: ${HAVANA_SOURCES_FOUND}")
+if(NOT IVP_IS_SUBPROJECT)
+    message(STATUS "")
+    message(STATUS "IVP Configuration Summary:")
+    message(STATUS "  Build Mode: Standalone")
+    message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+    message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "  Install Enabled: ${IVP_INSTALL}")
+    message(STATUS "  Build Havana: ${IVP_BUILD_HAVANA}")
+    if(IVP_BUILD_HAVANA)
+        message(STATUS "    Havana sources found: ${HAVANA_SOURCES_FOUND}")
+    endif()
+    message(STATUS "")
+else()
+    message(STATUS "IVP: Configured as subproject (installation disabled by default)")
 endif()
-message(STATUS "")
