@@ -10,7 +10,9 @@ void hk_Array_Base::alloc_mem( int size, int num)
 
 void hk_Array_Base::grow_mem( int size )
 {
-	int new_memsize = m_memsize + m_memsize;
+	// Ensure m_memsize * 2 doesn't overflow unsigned short
+	int double_memsize = m_memsize + m_memsize;
+	int new_memsize = (double_memsize > USHRT_MAX) ? USHRT_MAX : double_memsize;
 	if (!new_memsize) {
 		new_memsize = 2;
 	}
