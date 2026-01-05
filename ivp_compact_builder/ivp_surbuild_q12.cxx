@@ -687,6 +687,7 @@ IVP_SurfaceBuilder_Q12::IVP_SurfaceBuilder_Q12()
     this->dclipnodes = NULL;
     this->shrink_value = 0.0f;
     this->scale = 1.0f;
+    this->ledges = NULL;
     this->bsptree_loaded_from_disk = IVP_FALSE;
     this->halfspaces = new IVP_Halfspacesoup();
 
