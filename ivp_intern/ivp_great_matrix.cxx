@@ -1333,7 +1333,7 @@ IVP_RETURN_TYPE IVP_Linear_Constraint_Solver::solve_lc()
 				{
 					printf("incorrect_accel %f at %d  should be zero\n", accel[idx], idx);
 				}
-				IVP_IF(IVP_Inline_Math::fabsd(full_x[idx] < solver_eps))
+				IVP_IF(IVP_Inline_Math::fabsd(full_x[idx]) < solver_eps)
 				{
 					if (IVP_Inline_Math::fabsd(full_x[ignored_full_index]) < solver_eps)
 					{
