@@ -99,7 +99,8 @@ char *p_calloc(int nelem, int size)
     char *sp = new char[s];
 #endif
 
-    memset(sp, 0, s);
+    if (sp)
+        memset(sp, 0, s);
     return sp;
 }
 
