@@ -799,8 +799,10 @@ void IVP_Core::stop_physical_movement()
 void IVP_Core::reset_freeze_check_values()
 {
     IVP_Time time = environment->get_current_time();
-    this->time_of_calm_reference[0] = time.get_time();
-    this->time_of_calm_reference[1] = time.get_time();
+    // Cache time computation in variable
+    IVP_DOUBLE t = time.get_time();
+    this->time_of_calm_reference[0] = t;
+    this->time_of_calm_reference[1] = t;
 }
 
 // init core for calc_next_PSI_matrix

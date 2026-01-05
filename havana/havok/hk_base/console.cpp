@@ -39,7 +39,7 @@ void hk_Console::printf( const char *fmt, ...)
 #ifdef WIN32
     char buffer[MAX_ERROR_BUFFER_LEN];
     va_start(vlist,fmt);	
-    vsprintf(buffer, fmt,vlist);
+    vsnprintf(buffer, MAX_ERROR_BUFFER_LEN, fmt, vlist);
     va_end(vlist);
     OutputDebugString(buffer);
 #endif
@@ -49,7 +49,7 @@ void hk_Console::flush()
 {
 #ifndef WIN32
 #ifndef HK_PS2
-	fflush(stdout);
+	fflush(stderr);
 #endif
 #endif
 }
