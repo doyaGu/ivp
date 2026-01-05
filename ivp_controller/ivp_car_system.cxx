@@ -276,6 +276,8 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	n_wheels = templ->n_wheels;
 	n_axis = templ->n_axis;
 
+	max_speed = 0;
+
 	booster_actuator[0] = 0;
 	booster_actuator[1] = 0;
 	booster_seconds_to_go = 0;
