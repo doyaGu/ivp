@@ -621,27 +621,28 @@ void IVP_Ray_Solver::check_ray_against_object(IVP_Real_Object *object)
             if (IVP_MTIS_IS_STATIC(object->get_movement_state()))
                 return;
         }
-    }
 
-    IVP_OBJECT_TYPE type = object->get_type();
-    switch (type)
-    {
-    case IVP_BALL:
-    {
-        IVP_Ball *ball = object->to_ball();
-        this->check_ray_against_ball(ball);
-        break;
-    }
-    case IVP_POLYGON:
-    {
-        IVP_Polygon *poly = object->to_poly();
-        IVP_SurfaceManager *surman = poly->get_surface_manager();
-        // Check all ledges within ray radius
-        surman->insert_all_ledges_hitting_ray(this, poly);
-        break;
-    }
-    default:
-        break;
+        // dimhotepus: Prevent nullptr dereference.
+        IVP_OBJECT_TYPE type = object->get_type();
+        switch (type)
+        {
+        case IVP_BALL:
+        {
+            IVP_Ball *ball = object->to_ball();
+            this->check_ray_against_ball(ball);
+            break;
+        }
+        case IVP_POLYGON:
+        {
+            IVP_Polygon *poly = object->to_poly();
+            IVP_SurfaceManager *surman = poly->get_surface_manager();
+            // Check all ledges within ray radius
+            surman->insert_all_ledges_hitting_ray(this, poly);
+            break;
+        }
+        default:
+            break;
+        }
     }
 }
 
@@ -669,33 +670,34 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
             if (IVP_MTIS_IS_STATIC(object->get_movement_state()))
                 return;
         }
-    }
 
-    IVP_OBJECT_TYPE type = object->get_type();
-    switch (type)
-    {
-    case IVP_BALL:
-    {
-        IVP_Ball *ball = object->to_ball();
-        for (int i = n_ray_solvers - 1; i >= 0; i--)
+        // dimhotepus: Prevent nullptr dereference.
+        IVP_OBJECT_TYPE type = object->get_type();
+        switch (type)
         {
-            ray_solvers[i]->check_ray_against_ball(ball);
-        }
-        break;
-    }
-    case IVP_POLYGON:
-    {
-        IVP_Polygon *poly = object->to_poly();
-        IVP_SurfaceManager *surman = poly->get_surface_manager();
-        for (int i = n_ray_solvers - 1; i >= 0; i--)
+        case IVP_BALL:
         {
-            surman->insert_all_ledges_hitting_ray(ray_solvers[i], poly);
+            IVP_Ball *ball = object->to_ball();
+            for (int i = n_ray_solvers - 1; i >= 0; i--)
+            {
+                ray_solvers[i]->check_ray_against_ball(ball);
+            }
+            break;
         }
-        // Check all ledges within ray radius
-        break;
-    }
-    default:
-        break;
+        case IVP_POLYGON:
+        {
+            IVP_Polygon *poly = object->to_poly();
+            IVP_SurfaceManager *surman = poly->get_surface_manager();
+            for (int i = n_ray_solvers - 1; i >= 0; i--)
+            {
+                surman->insert_all_ledges_hitting_ray(ray_solvers[i], poly);
+            }
+            // Check all ledges within ray radius
+            break;
+        }
+        default:
+            break;
+        }
     }
 }
 
