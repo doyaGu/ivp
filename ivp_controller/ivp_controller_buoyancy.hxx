@@ -136,7 +136,26 @@ public:
         sum_impulse.set(0.0f, 0.0f, 0.0f);
         sum_impulse_x_point.set(0.0f, 0.0f, 0.0f);
         sum_impulse_x_movevector.set(0.0f, 0.0f, 0.0f);
-    };
+    }
+
+    // Fix UB in print - provide proper print method
+    void print() const
+    {
+        ivp_message("volume center %1.3e,%1.3e,%1.3e, ", volume_center_under.k[0],
+                    volume_center_under.k[1], volume_center_under.k[2]);
+        ivp_message("sum impulse %1.3e,%1.3e,%1.3e, ", sum_impulse.k[0],
+                    sum_impulse.k[1], sum_impulse.k[2]);
+        ivp_message("sum impulse x point %1.3e,%1.3e,%1.3e, ",
+                    sum_impulse_x_point.k[0], sum_impulse_x_point.k[1],
+                    sum_impulse_x_point.k[2]);
+        ivp_message("sum impulse x move vector %1.3e,%1.3e,%1.3e, ",
+                    sum_impulse_x_movevector.k[0], sum_impulse_x_movevector.k[1],
+                    sum_impulse_x_movevector.k[2]);
+
+        ivp_message("volume under %1.3e, ", volume_under);
+        ivp_message("object visible surface content under %1.3e\n",
+                    object_visible_surface_content_under);
+    }
 };
 
 /********************************************************************************
