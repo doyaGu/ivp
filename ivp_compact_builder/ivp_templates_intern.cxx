@@ -37,7 +37,10 @@ IVP_Template_Polygon::~IVP_Template_Polygon()
 
 IVP_Template_Surface::IVP_Template_Surface()
 {
-    P_MEM_CLEAR(this);
+    templ_poly = NULL;
+    n_lines = 0;
+    lines = NULL;
+    revert_line = NULL;
 }
 
 void IVP_Template_Surface::close_surface()

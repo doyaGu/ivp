@@ -136,7 +136,8 @@ int IVP_Intrusion_Status::p()
 
 IVP_Intrusion_Status::IVP_Intrusion_Status()
 {
-	P_MEM_CLEAR(this);
+	intruded_points = NULL;
+	intersections = NULL;
 }
 
 IVP_Intrusion_Status::~IVP_Intrusion_Status()
@@ -162,10 +163,9 @@ void IVP_Tetra_Point::init(IVP_Tetra_Intrude *)
 
 IVP_Tetra_Intrude::IVP_Tetra_Intrude(IVP_Tetra_Point *i_tetra_points, int orig_pnt_anz)
 {
-	P_MEM_CLEAR(this);
 	twop_2_tetra_edge_hash = new IVP_Hash(orig_pnt_anz * 2,
 										  sizeof(IVP_Tetra_Edge *) * 2,
-										  (void *)P_INVALID_TETRA_EDGE);
+										  P_INVALID_TETRA_EDGE);
 	tetra_points = i_tetra_points;
 	n_tetra_points = orig_pnt_anz;
 	memsize_of_tetra_edges = n_tetra_points * 10;
@@ -174,22 +174,22 @@ IVP_Tetra_Intrude::IVP_Tetra_Intrude(IVP_Tetra_Point *i_tetra_points, int orig_p
 	{ // search min max extends of opoints
 		min_koord.set(tetra_points[0].opoint);
 		max_koord.set(tetra_points[0].opoint);
-		int i;
 		IVP_Tetra_Point *p = &tetra_points[0];
-		for (i = orig_pnt_anz - 1; i >= 0; i--, p++)
+		for (int i = orig_pnt_anz - 1; i >= 0; i--, p++)
 		{
 			min_koord.line_min(p->opoint);
 			max_koord.line_max(p->opoint);
 		}
 	}
 	{
-		int i;
 		IVP_Tetra_Point *p = &tetra_points[0];
-		for (i = orig_pnt_anz - 1; i >= 0; i--, p++)
+		for (int i = orig_pnt_anz - 1; i >= 0; i--, p++)
 		{
 			p->init(this);
 		}
 	}
+
+	n_tetra_points_malloced = 0;
 }
 
 IVP_Tetra_Intrude::~IVP_Tetra_Intrude()
