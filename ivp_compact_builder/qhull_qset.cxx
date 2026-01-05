@@ -416,8 +416,6 @@ void *qh_setdelnth(setT *set, int nth) {
   void **elemp, **lastp, *elem;
   int *sizep;
 
-
-  elemp= SETelemaddr_(set, nth, void);
   sizep= SETsizeaddr_(set);
   if (!(*sizep)--)         /*  if was a full set */
     *sizep= set->maxsize;  /*     *sizep= (maxsize-1)+ 1 */
@@ -426,6 +424,9 @@ void *qh_setdelnth(setT *set, int nth) {
     qh_setprint (qhmem.ferr, "", set);
     qh_errexit (qhmem_ERRqhull, NULL, NULL);
   }
+
+  // Check nth in range before access
+  elemp= SETelemaddr_(set, nth, void);
   lastp= SETelemaddr_(set, *sizep-1, void);
   elem= *elemp;
   *elemp= *lastp;      /* may overwrite itself */
