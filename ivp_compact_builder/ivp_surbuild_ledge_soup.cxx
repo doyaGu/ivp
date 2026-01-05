@@ -34,7 +34,14 @@ public:
 
     IVP_Compact_Ledge *compact_ledge;
     IVV_Sphere *child_1, *child_2;
-    IVV_Sphere() { P_MEM_CLEAR(this); };
+
+    IVV_Sphere() {
+        number = 0;
+        radius = 0;
+        memset(box_sizes, 0, sizeof(box_sizes));
+        compact_ledge = NULL;
+        child_1 = child_2 = NULL;
+    }
 };
 
 struct IVV_Sphere_Cluster
