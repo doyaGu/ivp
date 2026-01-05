@@ -90,8 +90,9 @@ void IVP_Mindist_Recursive::do_impact()
                 const IVP_Compact_Ledgetree_Node *n0 = l0->get_ledgetree_node();
                 const IVP_Compact_Ledgetree_Node *n1 = l1->get_ledgetree_node();
 
-                IVP_DOUBLE rad0 = n0 ? n0->radius : P_FLOAT_MAX;
-                IVP_DOUBLE rad1 = n1 ? n1->radius : P_FLOAT_MAX;
+                // dimhotepus: Drop checks which never true.
+                IVP_DOUBLE rad0 = n0->radius;
+                IVP_DOUBLE rad1 = n1->radius;
 
                 if (rad0 > rad1)
                 {
@@ -163,8 +164,9 @@ void IVP_Mindist_Recursive::exact_mindist_went_invalid(IVP_Mindist_Manager *mm)
         const IVP_Compact_Ledgetree_Node *n0 = l0->get_ledgetree_node();
         const IVP_Compact_Ledgetree_Node *n1 = l1->get_ledgetree_node();
 
-        IVP_DOUBLE rad0 = n0 ? n0->radius : P_FLOAT_MAX;
-        IVP_DOUBLE rad1 = n1 ? n1->radius : P_FLOAT_MAX;
+        // dimhotepus: Drop checks which never true.
+        IVP_DOUBLE rad0 = n0->radius;
+        IVP_DOUBLE rad1 = n1->radius;
 
         if (rad0 > rad1)
         {
