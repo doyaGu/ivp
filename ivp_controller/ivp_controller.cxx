@@ -1,6 +1,7 @@
 #include "ivp_controller.hxx"
 
 IVP_Event_Sim::IVP_Event_Sim(IVP_Environment *env, IVP_DOUBLE dtime)
+    : sim_unit(NULL)
 {
     environment = env;
     delta_time = dtime;
@@ -15,6 +16,7 @@ IVP_Event_Sim::IVP_Event_Sim(IVP_Environment *env, IVP_DOUBLE dtime)
 }
 
 IVP_Event_Sim::IVP_Event_Sim(IVP_Environment *env)
+    : sim_unit(NULL)
 {
     environment = env;
     delta_time = env->get_delta_PSI_time();

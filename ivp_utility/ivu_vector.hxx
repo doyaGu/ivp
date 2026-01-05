@@ -134,7 +134,8 @@ class IVP_U_Vector : public IVP_U_Vector_Base
         int j = n_elems;
         while (j > index)
         {
-            elems[j] = elems[--j];
+            elems[j] = elems[j - 1];
+            --j;
         }
         elems[index] = (void *)elem;
         n_elems++;

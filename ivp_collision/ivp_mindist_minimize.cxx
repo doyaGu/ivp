@@ -94,31 +94,34 @@ IVP_BOOL IVP_Mindist_Minimize_Solver::check_loop_hash(IVP_SYNAPSE_POLYGON_STATUS
     IVP_ASSERT(i_s0 < 4);
     IVP_ASSERT(i_s1 < 4);
 
+    // Early return on loop instead of out-of-bounds
+    if (loop_hash_size >= IVP_LOOP_LIST_SIZE)
+    {
+        return IVP_TRUE;
+    }
+
     intp x0 = intp(i_e0) | i_s0;
     intp x1 = intp(i_e1) | i_s1;
 
     if (x0 < x1)
     {
-        int h = x0;
+        intp h = x0;
         x0 = x1;
         x1 = h;
     }
 
+    // Fix out of bounds read from loop_hash
     IVP_MM_Loop_Hash_Struct *s = &loop_hash[loop_hash_size];
-    for (int i = loop_hash_size; i >= 0; i--)
+    for (int i = loop_hash_size; i > 0; i--)
     {
+        s--;
         if (s->a == x0 && s->b == x1)
         {
             return IVP_TRUE;
         }
-        s--;
     }
-    if (loop_hash_size >= IVP_LOOP_LIST_SIZE)
-    {
-        return IVP_TRUE;
-    }
-    loop_hash[loop_hash_size].a = x0;
-    loop_hash[loop_hash_size].b = x1;
+
+    loop_hash[loop_hash_size] = {x0, x1};
     loop_hash_size++;
     return IVP_FALSE;
 }
@@ -136,8 +139,8 @@ void IVP_Mindist::mindist_rescue_push()
 
     IVP_Real_Object *obj0 = get_synapse(0)->get_object();
     IVP_Real_Object *obj1 = get_synapse(1)->get_object();
-    // todo(crack); should a delta speed be calculated here?
-    obj0->get_environment()->get_anomaly_manager()->inter_penetration(this, obj0, obj1, 0);
+    IVP_Anomaly_Manager *anomaly_manager = obj0->get_environment()->get_anomaly_manager();
+    anomaly_manager->inter_penetration(this, obj0, obj1, anomaly_manager->get_push_speed_penetration(obj0, obj1));
 }
 
 void IVP_Mindist_Minimize_Solver::pierce_mindist()

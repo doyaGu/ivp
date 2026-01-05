@@ -16,6 +16,8 @@ public:
                                      IVP_Core *core,
                                      IVP_U_Float_Hesse *surface_normal_out,
                                      IVP_U_Float_Point *abs_speed_of_current_out) = 0;
+
+    virtual ~IVP_Liquid_Surface_Descriptor();
 };
 
 class IVP_Liquid_Surface_Descriptor_Simple : public IVP_Liquid_Surface_Descriptor
