@@ -485,6 +485,7 @@ IVP_Actuator_Rot_Mot::IVP_Actuator_Rot_Mot(IVP_Environment *env, IVP_Template_Ro
     this->max_rotation_speed = templ->max_rotation_speed;
     this->power = templ->power;
     this->max_torque = templ->max_torque;
+    this->rot_inertia = 0;
     this->rot_speed_out = 0;
     this->active_float_rotation_speed_out = templ->active_float_rotation_speed_out;
     if (active_float_rotation_speed_out)
@@ -668,6 +669,7 @@ IVP_Actuator_Torque::IVP_Actuator_Torque(IVP_Environment *env, IVP_Template_Torq
 {
     this->max_rotation_speed = templ->max_rotation_speed;
     this->rot_speed_out = 0.0f;
+    this->rot_inertia = 0;
     this->active_float_rotation_speed_out = templ->active_float_rotation_speed_out;
     if (active_float_rotation_speed_out)
         active_float_rotation_speed_out->add_reference();
@@ -1013,6 +1015,7 @@ void IVP_Actuator_Extra::do_float_cam(IVP_DOUBLE d_time)
 
 IVP_Actuator_Stabilizer::IVP_Actuator_Stabilizer(IVP_Environment *env, IVP_Template_Stabilizer *templ) : IVP_Actuator_Four_Point(env, templ, IVP_ACTUATOR_TYPE_STABILIZER)
 {
+    l_environment = env;
     stabi_constant = templ->stabi_constant;
 }
 
