@@ -239,6 +239,9 @@ char *IVP_U_Memory::neuer_sp_block(unsigned int groesse)
         ng = groesse;
     struct p_Memory_Elem *memelem =
         (struct p_Memory_Elem *)p_malloc(sizeof(p_Memory_Elem) + ng + IVU_MEM_ALIGN);
+    if (!memelem)
+        return NULL;
+
     memelem->next = last_elem;
     last_elem = memelem;
     char *tmp = (char *)align_to_next_adress(&memelem->data[0]);
