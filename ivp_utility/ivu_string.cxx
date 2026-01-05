@@ -16,6 +16,9 @@
 #endif
 #ifdef WIN32
 #ifndef _XBOX
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -200,7 +203,7 @@ int P_String::string_cmp(const char *str, const char *search, IVP_BOOL upper_cas
             }
             if (*p2 != '*')
             {
-                p1 += strlen((char *)p1) - i; /* check the end of the string */
+                p1 += strlen(p1) - i; /* check the end of the string */
                 if (p1 < str)
                     return -1; /* neither less or greater */
                 p2 -= i;
@@ -243,7 +246,7 @@ int P_String::string_cmp(const char *str, const char *search, IVP_BOOL upper_cas
 
 char *gbs_add_path(char *path, char *name)
 {
-    int i, len, found;
+    intp i, len, found;
     char *erg;
     if (!name)
         return name;
@@ -327,9 +330,9 @@ char *p_strdup(const char *s)
     // kann auch NULLen
     if (s)
     {
-        int len = strlen((char *)s) + 1;
+        size_t len = strlen(s) + 1;
         char *s2 = (char *)p_malloc(len);
-        memcpy(s2, (char *)s, len);
+        memcpy(s2, s, len);
         return s2;
     }
     else
