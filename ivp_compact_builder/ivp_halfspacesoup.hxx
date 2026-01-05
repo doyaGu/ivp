@@ -12,7 +12,7 @@
 #ifndef IVP_COMPACT_BUILDER_HALFSPACESOUP_INCLUDED
 #define IVP_COMPACT_BUILDER_HALFSPACESOUP_INCLUDED
 
-#define HALFSPACESOUP_TOLERANCE 0.01f * P_MIN_EDGE_LEN
+#define HALFSPACESOUP_TOLERANCE (0.01f * P_MIN_EDGE_LEN)
 
 
 /********************************************************************************
