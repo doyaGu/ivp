@@ -685,7 +685,7 @@ IVP_Concave_Polyhedron *IVP_SurfaceBuilder_3ds::convert_3ds_to_concave(const cha
     if (fseek(inf, 0, SEEK_END))
     {
         ivp_message("Error seeking %s\n", infn);
-        if (outf != stdout)
+        if (outf && outf != stdout)
             fclose(outf);
         fclose(inf);
         return NULL;
@@ -939,7 +939,7 @@ int p_graphlib_robust_convert_3dmax_object_to_compact_ledges(P_Hardware *hw, con
     if (fseek(inf, 0, SEEK_END))
     {
         ivp_message("Error seeking %s\n", infn);
-        if (outf != stdout)
+        if (outf && outf != stdout)
             fclose(outf);
         fclose(inf);
         return 1;

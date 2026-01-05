@@ -134,6 +134,9 @@ public:
         k[0] = (IVP_FLOAT)x;
         k[1] = (IVP_FLOAT)y;
         k[2] = (IVP_FLOAT)z;
+#ifdef IVP_VECTOR_UNIT_FLOAT
+        hesse_val = 0.0f;
+#endif
     };
     IVP_U_Float_Point(const IVP_U_Float_Point *p);
 
@@ -281,6 +284,9 @@ public:
         k[0] = x;
         k[1] = y;
         k[2] = z;
+#ifdef IVP_VECTOR_UNIT_DOUBLE
+        hesse_val = 0.0;
+#endif
     };
 
     inline void byte_swap()
