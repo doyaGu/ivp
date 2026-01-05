@@ -10,6 +10,8 @@
 #include <ivu_float.hxx>
 #include <ivu_memory.hxx>
 
+#include <cmath>
+
 #include <ivp_core_macros.hxx>
 #include <ivp_sim_unit.hxx>
 #include <ivp_hull_manager.hxx>
@@ -903,9 +905,22 @@ void IVP_Core::calc_calc()
     IVP_ASSERT(get_rot_inertia()->real_length() > P_DOUBLE_EPS);
     IVP_U_Float_Hesse *iri = (IVP_U_Float_Hesse *)get_inv_rot_inertia();
 
-    const IVP_U_Float_Point *ri = get_rot_inertia();
+    // Clamp to valid values so we don't end up with NaNs along the way
+    IVP_U_Float_Point &ri = rot_inertia;
+    for (int i = 0; i < 3; i++)
+    {
+        if (std::isfinite(ri.k[i]) && ri.k[i] <= 1e18f)
+        {
+            if (ri.k[i] < -1e18f)
+                ri.k[i] = -1e18f;
+        }
+        else
+        {
+            ri.k[i] = 1e18f;
+        }
+    }
 
-    iri->set(1.0f / ri->k[0], 1.0f / ri->k[1], 1.0f / ri->k[2]);
+    iri->set(1.0f / ri.k[0], 1.0f / ri.k[1], 1.0f / ri.k[2]);
     iri->hesse_val = 1.0f / get_mass();
 
     IVP_U_Float_Point diff_vec(iri->k[1] - iri->k[2],

@@ -286,7 +286,6 @@ public:
 
     ////////// debugging
     IVP_Debug_Manager *debug_information;
-    IVP_BOOL delete_debug_information;
 
     IVP_Draw_Vector_Debug *draw_vectors;
     void add_draw_vector(const IVP_U_Point *start_ws, const IVP_U_Float_Point *vec, const char *debug_text, int color);

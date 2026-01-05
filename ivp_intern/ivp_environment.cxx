@@ -185,7 +185,11 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
     IVP_IF(1)
     {
         this->debug_information = new IVP_Debug_Manager();
-        this->delete_debug_information = IVP_TRUE;
+    }
+    else
+    {
+        // Initialize in other case to prevent crashes in Release mode
+        this->debug_information = NULL;
     }
 
     integrated_energy_damp = IVP_Inline_Math::ivp_expf(IVP_FLOAT(log(0.9f)) * get_delta_PSI_time());
@@ -253,10 +257,7 @@ IVP_Environment::~IVP_Environment()
     P_DELETE(ov_tree_manager);
     P_DELETE(this->better_statisticsmanager);
 
-    IVP_IF(delete_debug_information == IVP_TRUE)
-    {
-        P_DELETE(this->debug_information);
-    }
+    P_DELETE(this->debug_information);
 
     performancecounter->environment_is_going_to_be_deleted(this);
 
