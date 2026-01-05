@@ -285,5 +285,10 @@ public:
 
 #endif // IVP_COMPACT_BUILDER_OBJECT_POLYGON_TETRA_INCLUDED
 
-inline IVP_Real_Object *IVP_Poly_Point::get_real_object2() const { return NULL; } // l_tetras->real_object
+// Return real object instead of NULL
+inline IVP_Real_Object *IVP_Poly_Point::get_real_object2() const
+{
+    return l_tetras->real_object;
+}
+
 // inline IVP_Polygon *IVP_Poly_Point::get_polygon() const { return (IVP_Polygon *)l_tetras->real_object; };
