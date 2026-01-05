@@ -283,6 +283,10 @@ char *GBS_remove_escape(char *com) /* \ is the escape charakter */
     char ch;
 
     s = d = result = p_strdup(com);
+    // Handle p_strdup failure.
+    if (!s)
+        return NULL;
+
     while ((ch = *(s++)))
     {
         switch (ch)
