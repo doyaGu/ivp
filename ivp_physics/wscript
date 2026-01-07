@@ -105,7 +105,6 @@ def build(bld):
 		'../ivp_utility/ivu_os_dep.cxx',
 		'../ivp_utility/ivu_quat.cxx',
 		'../ivp_utility/ivu_string.cxx',
-		'../ivp_utility/ivu_types.cxx',
 		'../ivp_utility/ivu_vector.cxx',
 		'../ivp_utility/ivu_vhash.cxx'
 	]
