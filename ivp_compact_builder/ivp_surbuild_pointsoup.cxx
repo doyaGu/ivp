@@ -715,28 +715,43 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
      * FPU mode
      ************************************************/
     // doesnt work with threads !!
-#if defined WIN32 && defined(_M_IX86)
-    WORD tmpflag;
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
+    unsigned short tmpflag;
     __asm FSTCW tmpflag;
 
-    WORD newFPUflag = tmpflag | 0x0300;
+    unsigned short newFPUflag = tmpflag | 0x0300;
     __asm FLDCW newFPUflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    unsigned short tmpflag;
+    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
+
+    unsigned short newFPUflag = tmpflag | 0x0300;
+    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
 #endif
+
+    IVP_Compact_Ledge *result = NULL;
     int n_points = points->len();
 
     if (n_points < 3)
-        return NULL;
-    if (n_points == 3)
+    {
+        result = NULL;
+    }
+    else if (n_points == 3)
     { // special case: 2-dimensional triangles
-        return convert_triangle_to_compace_ledge(points->element_at(0), points->element_at(1), points->element_at(2));
+        result = convert_triangle_to_compace_ledge(points->element_at(0), points->element_at(1), points->element_at(2));
     }
     else
     { // use QHULL to convert pointsoup
-        return IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge_internal(points);
+        result = IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge_internal(points);
     }
-#if defined WIN32 && defined(_M_IX86)
+
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
     __asm FLDCW tmpflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
 #endif
+
+    return result;
 }
 
 IVP_Compact_Surface *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_surface(IVP_U_Vector<IVP_U_Point> *points)

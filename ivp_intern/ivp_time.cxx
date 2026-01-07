@@ -177,12 +177,18 @@ void IVP_Time_Manager::event_loop(IVP_Environment *env, IVP_Time time)
      * FPU mode
      ************************************************/
     // doesnt work with threads !!
-#if defined WIN32 && defined(_M_IX86)
-    WORD tmpflag;
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
+    unsigned short tmpflag;
     __asm FSTCW tmpflag;
 
-    WORD newFPUflag = tmpflag | 0x0300;
+    unsigned short newFPUflag = tmpflag | 0x0300;
     __asm FLDCW newFPUflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    unsigned short tmpflag;
+    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
+
+    unsigned short newFPUflag = tmpflag | 0x0300;
+    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
 #endif
 
 #ifdef IVP_ENABLE_PERFORMANCE_COUNTER
@@ -195,8 +201,10 @@ void IVP_Time_Manager::event_loop(IVP_Environment *env, IVP_Time time)
     env->get_performancecounter()->stop_pcount();
 #endif
 
-#if defined WIN32 && defined(_M_IX86)
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
     __asm FLDCW tmpflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
 #endif
 }
 
@@ -206,12 +214,18 @@ void IVP_Time_Manager::simulate_variable_time_step(IVP_Environment *env, IVP_FLO
      * FPU mode
      ************************************************/
     // doesnt work with threads !!
-#if defined WIN32 && defined(_M_IX86)
-    WORD tmpflag;
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
+    unsigned short tmpflag;
     __asm FSTCW tmpflag;
 
-    WORD newFPUflag = tmpflag | 0x0300;
+    unsigned short newFPUflag = tmpflag | 0x0300;
     __asm FLDCW newFPUflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    unsigned short tmpflag;
+    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
+
+    unsigned short newFPUflag = tmpflag | 0x0300;
+    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
 #endif
     if (delta_time < IVP_MIN_DELTA_PSI_TIME)
     {
@@ -232,8 +246,10 @@ void IVP_Time_Manager::simulate_variable_time_step(IVP_Environment *env, IVP_FLO
     env->get_performancecounter()->stop_pcount();
 #endif
 
-#if defined WIN32 && defined(_M_IX86)
+#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
     __asm FLDCW tmpflag;
+#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
+    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
 #endif
 }
 
