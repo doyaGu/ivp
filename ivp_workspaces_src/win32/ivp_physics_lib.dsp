@@ -1003,10 +1003,6 @@ SOURCE=..\..\IVP_UTILITY\ivu_string_hash.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\Ivp_utility\ivu_types.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\IVP_UTILITY\ivu_types.hxx
 # End Source File
 # Begin Source File
