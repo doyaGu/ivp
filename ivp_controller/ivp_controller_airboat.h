@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 4-Wheel Vehicle attempt at an airboat!
 //
@@ -93,12 +93,12 @@ public:
     IVP_U_Float_Point raycast_dir_ws;                   // raycast direction in world-space
     IVP_U_Float_Point spring_direction_ws;              // spring direction (raycast for impact direction) in world-space
     IVP_U_Float_Point surface_speed_wheel_ws;           // wheel speed in world-space
-    IVP_U_Float_Point projected_surface_speed_wheel_ws; // ???
+    IVP_U_Float_Point projected_surface_speed_wheel_ws; // projected surface speed in world-space
     IVP_U_Float_Point axis_direction_ws;                // axle direction in world-space
-    IVP_U_Float_Point projected_axis_direction_ws;      // ???
+    IVP_U_Float_Point projected_axis_direction_ws;      // projected axis direction in world-space
 
     IVP_FLOAT forces_needed_to_drive_straight; // forces need to keep the vehicle driving straight (attempt and directional wheel friction)
-    IVP_FLOAT inv_normal_dot_dir;              // ???
+    IVP_FLOAT inv_normal_dot_dir;              // inverse of normal dot direction
 };
 
 //-----------------------------------------------------------------------------

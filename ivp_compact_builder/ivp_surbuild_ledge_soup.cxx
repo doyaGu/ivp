@@ -2,6 +2,7 @@
 
 #include <ivp_physics.hxx>
 #include <string.h>
+#include <stdint.h>
 
 // #define STATS
 // #define IVP_CLUSTER_SHORTRANGE_BOTTOMUP
@@ -1462,7 +1463,7 @@ void IVP_SurfaceBuilder_Ledge_Soup::insert_compact_ledges()
             IVV_Sphere *sphere = this->terminal_spheres.element_at(i);
             IVP_Compact_Ledge *source = sphere->compact_ledge;
 
-            IVP_ASSERT((long(dest) & 0xf) == 0);
+            IVP_ASSERT(((uintptr_t)dest & 0xf) == 0);
 
             sphere->compact_ledge = (IVP_Compact_Ledge *)dest;
             int ledge_size = recompile_point_indizes_of_compact_ledge(source, dest);
@@ -1479,7 +1480,7 @@ void IVP_SurfaceBuilder_Ledge_Soup::insert_compact_ledges()
         IVV_Sphere *sphere = this->rec_spheres.element_at(j);
         IVP_Compact_Ledge *source = sphere->compact_ledge;
 
-        IVP_ASSERT((long(dest) & 0xf) == 0);
+        IVP_ASSERT(((uintptr_t)dest & 0xf) == 0);
 
         sphere->compact_ledge = (IVP_Compact_Ledge *)dest;
 
