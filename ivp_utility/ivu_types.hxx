@@ -442,7 +442,7 @@ IVP_FLOAT ivp_rand(); // returns [0 .. 1]
 #endif
 #define IVP_IF_PREFETCH_ENABLED(x) if (x)
 #include <xmmintrin.h>
-#define IVP_PREFETCH(pntr, offset) _mm_prefetch(int(offset) + (char *)pntr, _MM_HINT_T1);
+#define IVP_PREFETCH(pntr, offset) _mm_prefetch((const char *)(pntr) + (size_t)(offset), _MM_HINT_T1);
 #endif
 
 #elif defined(PSXII) && 0
