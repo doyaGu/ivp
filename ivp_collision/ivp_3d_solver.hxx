@@ -79,8 +79,10 @@ private:
             m_world_f_object[0] = &co->m_world_f_object; // first value
         }
         base_time_code = co->valid_until_time_code;
-#ifdef DEBUG
+        // base_time is required by runtime assertions (see find_first_t_for_value_coll).
+        // It must be initialized regardless of build type.
         base_time = object->get_environment()->get_current_time();
+#ifdef DEBUG
         if (IVP_MTIS_SIMULATED(object->get_movement_state()))
         {
             IVP_ASSERT(base_time_code == co->valid_until_time_code);
