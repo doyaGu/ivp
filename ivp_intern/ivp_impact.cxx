@@ -1168,9 +1168,19 @@ void IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(IVP_Mindist *mindist,
 		return;
 	}
 	IVP_Impact_Solver_Long_Term *imp_solve = my_fr_dist->tmp_contact_info;
+	if (!imp_solve)
+	{
+		IVP_ASSERT(imp_solve);
+		return;
+	}
 
 	IVP_Time now_time, last_time;
 	IVP_Friction_Core_Pair *pair = affected_friction_system->find_pair_of_cores(core0, core1);
+	if (!pair)
+	{
+		IVP_ASSERT(pair);
+		return;
+	}
 	now_time = mindist->get_environment()->get_current_time();
 	last_time = pair->last_impact_time_pair;
 	pair->last_impact_time_pair = now_time;
@@ -1328,6 +1338,9 @@ extern bool g_fDeferDeleteMindist;
 // #+# simplify, move synchronize and revive to do_impact_of_two_objects
 void IVP_Mindist::do_impact()
 {
+	IVP_Mindist *previous_mindist = g_pCurrentMindist;
+	bool previous_defer_delete = g_fDeferDeleteMindist;
+	g_fDeferDeleteMindist = false;
 	g_pCurrentMindist = this;
 	IVP_Environment *env;
 	env = get_environment();
@@ -1349,8 +1362,8 @@ void IVP_Mindist::do_impact()
 	{
 		// BUGBUG: someone changed a collision filter and didn't tell us!
 		IVP_ASSERT(0);
-		g_pCurrentMindist = NULL;
-		g_fDeferDeleteMindist = false;
+		g_pCurrentMindist = previous_mindist;
+		g_fDeferDeleteMindist = previous_defer_delete;
 		delete this;
 		return;
 	}
@@ -1371,10 +1384,11 @@ void IVP_Mindist::do_impact()
 
 	IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(this, objects[0], objects[1]);
 	env->sim_unit_mem->end_memory_transaction();
-	g_pCurrentMindist = NULL;
-	if (g_fDeferDeleteMindist)
+	bool delete_current = g_fDeferDeleteMindist;
+	g_pCurrentMindist = previous_mindist;
+	g_fDeferDeleteMindist = previous_defer_delete;
+	if (delete_current)
 	{
-		g_fDeferDeleteMindist = false;
 		delete this;
 		return;
 	}
@@ -1560,6 +1574,11 @@ void IVP_Impact_System::impact_system_check_start_pair(IVP_Friction_Core_Pair *s
 // remove
 void IVP_Impact_System::init_and_solve_impact_system(IVP_Friction_System *fs_system, IVP_Friction_Core_Pair *start_pair, IVP_Contact_Point *start_fr_dist)
 {
+	if (!fs_system || !start_pair || !start_fr_dist || !start_pair->objs[0] || !start_pair->objs[1])
+	{
+		IVP_ASSERT(fs_system && start_pair && start_fr_dist && start_pair->objs[0] && start_pair->objs[1]);
+		return;
+	}
 	IVP_Core *start_core0 = start_fr_dist->get_synapse(0)->get_object()->get_core();
 	IVP_Core *start_core1 = start_fr_dist->get_synapse(1)->get_object()->get_core();
 
@@ -1616,7 +1635,7 @@ void IVP_Impact_System::init_and_solve_impact_system(IVP_Friction_System *fs_sys
 	{
 		impact_sys_counter++;
 		sum_of_pushes++;
-		if (sum_of_pushes > MAXIMUM_SYSTEM_PUSH_NUMBER)
+		if (sum_of_pushes >= MAXIMUM_SYSTEM_PUSH_NUMBER)
 		{
 			IVP_IF(1)
 			{
