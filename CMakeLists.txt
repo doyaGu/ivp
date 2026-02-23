@@ -90,6 +90,10 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Set target properties
     set_target_properties(${LIBRARY_NAME} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
+        # IVP modules have intentional cyclic references; increase repeat count
+        # for static link interfaces so consumers resolve all symbols without
+        # target-specific linker flags.
+        LINK_INTERFACE_MULTIPLICITY 4
     )
     
     # Platform-specific configurations
@@ -355,7 +359,7 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_time.hxx
     ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
 )
-add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern;ivp_controller" "${IVP_PHYSICS_SOURCES}")
+add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern" "${IVP_PHYSICS_SOURCES}")
 # Add global include directories for all modules
 target_include_directories(ivp_physics PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -425,6 +429,13 @@ target_include_directories(ivp_controller PRIVATE
     ${IVP_DIR}/ivp_controller
     ${IVP_DIR}/ivp_compact_builder
 )
+
+# Model real cross-module links explicitly. These modules are mutually coupled
+# in legacy IVP code and must expose those links to consumers.
+target_link_libraries(ivp_surface_manager PUBLIC ivp_collision ivp_physics)
+target_link_libraries(ivp_collision PUBLIC ivp_intern)
+target_link_libraries(ivp_intern PUBLIC ivp_physics ivp_controller)
+target_link_libraries(ivp_controller PUBLIC ivp_intern)
 
 # ivp_compact_builder - Geometry building tools, depends on core modules
 set(IVP_COMPACT_BUILDER_DIR ${IVP_DIR}/ivp_compact_builder)
@@ -555,6 +566,7 @@ target_link_libraries(ivp_compact_builder PUBLIC
 # Set target properties
 set_target_properties(ivp_compact_builder PROPERTIES
     POSITION_INDEPENDENT_CODE ON
+    LINK_INTERFACE_MULTIPLICITY 4
 )
 
 # Platform-specific configurations for compact builder
