@@ -238,6 +238,14 @@ void IVP_Synapse_Real::print()
         stat_text = "Triangle";
         n_points = 3;
         break;
+    case IVP_ST_BALL:
+        stat_text = "Ball";
+        n_points = 1;
+        break;
+    case IVP_ST_BACKSIDE:
+        stat_text = "Backside";
+        n_points = 0;
+        break;
     default:
         CORE;
     }
