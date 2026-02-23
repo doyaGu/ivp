@@ -1215,7 +1215,7 @@ void IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(IVP_Mindist *mindist,
 	//	if((having_new_dist==IVP_FALSE)||1)
 	{
 		IVP_Impact_System imp_sys;
-		imp_sys.init_and_solve_impact_system(mindist, affected_friction_system, pair, my_fr_dist);
+		imp_sys.init_and_solve_impact_system(affected_friction_system, pair, my_fr_dist);
 	}
 
 	// copy changed values
@@ -1558,7 +1558,7 @@ void IVP_Impact_System::impact_system_check_start_pair(IVP_Friction_Core_Pair *s
 
 // #+# these things with start_pair and except_pair are weird and not necessary any longer:
 // remove
-void IVP_Impact_System::init_and_solve_impact_system(IVP_Mindist *mindist, IVP_Friction_System *fs_system, IVP_Friction_Core_Pair *start_pair, IVP_Contact_Point *start_fr_dist)
+void IVP_Impact_System::init_and_solve_impact_system(IVP_Friction_System *fs_system, IVP_Friction_Core_Pair *start_pair, IVP_Contact_Point *start_fr_dist)
 {
 	IVP_Core *start_core0 = start_fr_dist->get_synapse(0)->get_object()->get_core();
 	IVP_Core *start_core1 = start_fr_dist->get_synapse(1)->get_object()->get_core();
@@ -1622,7 +1622,7 @@ void IVP_Impact_System::init_and_solve_impact_system(IVP_Mindist *mindist, IVP_F
 			{
 				printf("system_push_number exceeded\n");
 			}
-			P_DELETE(mindist);
+			// Abort this impact-system pass; caller retains ownership of the mindist.
 			break;
 			// put some mindists into hull!
 		}
