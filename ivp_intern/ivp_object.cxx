@@ -760,7 +760,7 @@ void IVP_Real_Object::clear_internal_references()
 IVP_Object::IVP_Object(IVP_Cluster *father, const IVP_Template_Object *templ)
 {
     this->init(father->environment);
-    father->add_object(this);
+    this->assign_to_cluster(father);
     this->name = p_strdup(templ->get_name());
 }
 
@@ -775,6 +775,29 @@ void IVP_Object::init(IVP_Environment *env)
     environment = env;
     name = 0;
     this->set_type(IVP_NONE);
+}
+
+void IVP_Object::assign_to_cluster(IVP_Cluster *cluster)
+{
+    if (father_cluster == cluster)
+    {
+        return;
+    }
+
+    if (cluster)
+    {
+        IVP_ASSERT(cluster->environment == environment);
+    }
+
+    if (father_cluster)
+    {
+        father_cluster->remove_object(this);
+    }
+
+    if (cluster)
+    {
+        cluster->add_object(this);
+    }
 }
 
 IVP_Object::~IVP_Object()
@@ -837,6 +860,8 @@ IVP_Cluster::~IVP_Cluster()
 
 void IVP_Cluster::add_object(IVP_Object *object)
 {
+    IVP_ASSERT(object);
+    IVP_ASSERT(object->father_cluster == NULL);
     object->next_in_cluster = objects;
     object->prev_in_cluster = NULL;
     if (objects != NULL)
@@ -849,6 +874,8 @@ void IVP_Cluster::add_object(IVP_Object *object)
 
 void IVP_Cluster::remove_object(IVP_Object *object)
 {
+    IVP_ASSERT(object);
+    IVP_ASSERT(object->father_cluster == this);
     if (object->prev_in_cluster == NULL)
     {
         objects = object->next_in_cluster;
@@ -862,6 +889,10 @@ void IVP_Cluster::remove_object(IVP_Object *object)
     {
         object->next_in_cluster->prev_in_cluster = object->prev_in_cluster;
     }
+
+    object->father_cluster = NULL;
+    object->next_in_cluster = NULL;
+    object->prev_in_cluster = NULL;
 }
 
 void IVP_Real_Object::calc_at_matrix(IVP_Time current_time, IVP_U_Matrix *m_world_f_object_out) const
