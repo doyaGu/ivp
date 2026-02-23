@@ -649,7 +649,10 @@ void IVP_Simulation_Unit::sim_unit_exchange_controllers(int first, int second)
 IVP_Sim_Units_Manager::IVP_Sim_Units_Manager(IVP_Environment *env)
 {
     l_environment = env;
-    sim_units_slots[0] = NULL;
+    for (int i = 0; i < IVP_SIM_SLOTS_NUM; i++)
+    {
+        sim_units_slots[i] = NULL;
+    }
     still_slot = NULL;
     nb = IVP_Time(9.73f);
     bt = IVP_Time(0.3f);
@@ -1093,7 +1096,14 @@ sim_units_0:
 
 void IVP_Sim_Units_Manager::reset_time(IVP_Time offset)
 {
-    for (IVP_Simulation_Unit *s = this->sim_units_slots[0]; s; s = s->next_sim_unit)
+    for (int slot_i = 0; slot_i < IVP_SIM_SLOTS_NUM; slot_i++)
+    {
+        for (IVP_Simulation_Unit *s = this->sim_units_slots[slot_i]; s; s = s->next_sim_unit)
+        {
+            s->reset_time(offset);
+        }
+    }
+    for (IVP_Simulation_Unit *s = this->still_slot; s; s = s->next_sim_unit)
     {
         s->reset_time(offset);
     }
