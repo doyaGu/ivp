@@ -339,7 +339,7 @@ public:
 
     static inline int int_div_2(int a); // workaround for compiler bug in CodeWarrior1.6
 
-#if defined(IVP_NO_DOUBLE) && !defined(SUN)
+#if defined(IVP_NO_DOUBLE)
     static IVP_DOUBLE fabsd(IVP_DOUBLE f)
     {
         return fabsf(f);

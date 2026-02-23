@@ -8,7 +8,7 @@
 #include <float.h>
 #endif
 
-#if defined(IVP_NO_DOUBLE) && !defined(SUN)
+#if defined(IVP_NO_DOUBLE)
 #if defined(WIN32) || defined(PSXII) || defined(LINUX)
 union p_float_ieee
 {
@@ -38,7 +38,8 @@ inline int PFM_LD(float a)
     return ((p_float_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
 }
 #else
-#if defined(POSIX) || defined(WIN32) || defined(__APPLE__) || defined(__unix__)
+#if (defined(POSIX) || defined(WIN32) || defined(__APPLE__) || defined(__unix__)) && \
+    !defined(__POWERPC__) && !defined(GEKKO)
 
 union p_double_ieee
 {
@@ -63,7 +64,7 @@ inline int PFM_LD(double a)
 };
 #endif
 
-#if defined(SUN) || defined(SUN4) || defined(__POWERPC__) || defined(GEKKO)
+#if defined(__POWERPC__) || defined(GEKKO)
 union p_double_ieee
 {
     double val;

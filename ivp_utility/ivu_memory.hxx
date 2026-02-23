@@ -62,15 +62,6 @@ class IVP_U_Memory
 void IVP_U_Memory::start_memory_transaction()
 {
     // IVP_ASSERT(transaction_in_use==0);
-    IVP_IF(1)
-    {
-#ifdef SUN
-        if (size_of_external_mem == 0)
-        {
-            init_mem_transaction_usage();  // get first block
-        }
-#endif
-    }
     transaction_in_use++;
 }
 
@@ -81,12 +72,6 @@ void IVP_U_Memory::end_memory_transaction()
     //}
     // IVP_ASSERT(transaction_in_use==0);
     free_mem_transaction();
-    IVP_IF(1)
-    {
-#ifdef SUN
-        free_mem();  // clear last block to be able to detect unitialized memory access
-#endif
-    }
 }
 
 //warning: dependency with function neuer_sp_block
