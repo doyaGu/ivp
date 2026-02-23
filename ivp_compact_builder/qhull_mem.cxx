@@ -62,15 +62,9 @@ qhmemT qhmem= {0};     /* remove "= {0}" if this causes a compiler error */
   qh_intcompare( i, j )
     used by qsort and bsearch to compare two integers
 */
-#ifdef SUN
-extern "C" {
-#endif    
 static int qh_intcompare(const void *i, const void *j) {
   return(*((int *)i) - *((int *)j));
 } /* intcompare */
-#ifdef SUN
-}
-#endif    
 
 
 /*-<a                             href="qh-c.htm#mem"

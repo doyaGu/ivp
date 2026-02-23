@@ -219,7 +219,7 @@ class IVP_Compact_Ledge
         return n_triangles;
     }
 
-#if defined(LINUX) || defined(SUN) || (defined(__MWERKS__) && defined(__POWERPC__)) || defined(GEKKO)
+#if defined(LINUX) || (defined(__MWERKS__) && defined(__POWERPC__)) || defined(GEKKO)
     inline int get_n_points() const
     {
         return size_div_16 - n_triangles - 1;

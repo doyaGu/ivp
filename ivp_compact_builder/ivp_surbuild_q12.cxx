@@ -165,7 +165,7 @@ IVP_FLOAT LittleFloat(IVP_FLOAT l)
 #define LUMP_CLIPNODES 9
 #define LUMP_MODELS 14
 
-#if defined(SUN4) || defined(SUN) || (defined(__MWERKS__) && defined(__POWERPC__)) || defined(GEKKO)
+#if (defined(__MWERKS__) && defined(__POWERPC__)) || defined(GEKKO)
 void IVP_SurfaceBuilder_Q12::swap_bsp_data()
 {
     int i, j;
@@ -346,11 +346,7 @@ int IVP_SurfaceBuilder_Q12::load_q12bsp_file(char *filename)
     int i;
     for (i = 0; i < (int)sizeof(dheader_t) / 4; i++)
     {
-#if defined(SUN4) || defined(SUN)
-        ((int *)header)[i] = BigLong(((int *)header)[i]);
-#else
         ((int *)header)[i] = LittleLong(((int *)header)[i]);
-#endif
     }
 
     IVP_IF(1)

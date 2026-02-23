@@ -553,17 +553,11 @@ boolT qh_checkzero (boolT testall) {
   qh_compareangle( angle1, angle2 )
     used by qsort() to order merges by angle
 */
-#ifdef SUN
-extern "C" {
-#endif    
 static int qh_compareangle(const void *p1, const void *p2) {
   mergeT *a= *((mergeT **)p1), *b= *((mergeT **)p2);
  
   return ((a->angle > b->angle) ? 1 : -1);
 } /* compareangle */
-#ifdef SUN
-}
-#endif
 
 /*-<a                             href="qh-c.htm#merge"
   >-------------------------------</a><a name="comparemerge">-</a>
@@ -571,17 +565,11 @@ static int qh_compareangle(const void *p1, const void *p2) {
   qh_comparemerge( merge1, merge2 )
     used by qsort() to order merges
 */
-#ifdef SUN
-extern "C" {
-#endif    
 static int qh_comparemerge(const void *p1, const void *p2) {
   mergeT *a= *((mergeT **)p1), *b= *((mergeT **)p2);
  
   return (a->type - b->type);
 } /* comparemerge */
-#ifdef SUN
-}
-#endif
 
 /*-<a                             href="qh-c.htm#merge"
   >-------------------------------</a><a name="comparevisit">-</a>
@@ -589,17 +577,11 @@ static int qh_comparemerge(const void *p1, const void *p2) {
   qh_comparevisit( vertex1, vertex2 )
     used by qsort() to order vertices by their visitid
 */
-#ifdef SUN
-extern "C" {
-#endif    
 static int qh_comparevisit (const void *p1, const void *p2) {
   vertexT *a= *((vertexT **)p1), *b= *((vertexT **)p2);
  
   return (a->visitid - b->visitid);
 } /* comparevisit */
-#ifdef SUN
-}
-#endif
     
 /*-<a                             href="qh-c.htm#merge"
   >-------------------------------</a><a name="copynonconvex">-</a>
