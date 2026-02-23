@@ -7,7 +7,7 @@
 
 #include <ivp_physics.hxx>
 
-#if defined(LINUX) || defined(SUN) || (__MWERKS__ && __POWERPC__)
+#if defined(LINUX) || (__MWERKS__ && __POWERPC__)
 #include <alloca.h>
 #endif
 #include <ivp_great_matrix.hxx>
@@ -425,7 +425,7 @@ void IVP_Great_Matrix_Many_Zero::add_multiple_line(int first, int second, IVP_DO
 
 void IVP_Great_Matrix_Many_Zero::debug_fill_zero()
 {
-	// prevent SUN from getting read from uninitialized errors
+	// Keep matrix buffer initialized for diagnostics and sanitizer-friendly behavior.
 	for (int i = 0; i < columns; i++)
 	{
 		for (int j = 0; j < aligned_row_len; j++)
@@ -655,7 +655,7 @@ IVP_RETURN_TYPE IVP_Great_Matrix_Many_Zero::solve_lower_null_matrix()
 					i = columns - 1;
 					while (i >= 0)
 					{
-						result_vector[i] = 0.0f; // prevent SUN from detecting rui error
+						result_vector[i] = 0.0f; // avoid reading uninitialized result values
 						i--;
 					}
 				}

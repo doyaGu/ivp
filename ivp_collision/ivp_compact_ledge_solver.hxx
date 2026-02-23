@@ -3,13 +3,8 @@
 #ifndef IVP_COLLISION_COMPACT_LEDGE_SOLVER_INCLUDED
 #define IVP_COLLISION_COMPACT_LEDGE_SOLVER_INCLUDED
 
-#ifdef SUN4
-    #define IVP_STATIC_INLINE inline
-    #define IVP_STATIC
-#else
-    #define IVP_STATIC_INLINE static inline
-    #define IVP_STATIC static
-#endif
+#define IVP_STATIC_INLINE static inline
+#define IVP_STATIC static
 
 #define IVP_MAGIC_INERTIA_RADIUS 100.0f  // for ill calculated inertias use this default radius
 

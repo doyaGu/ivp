@@ -135,9 +135,6 @@ int qh_compare_vertexpoint(const void *p1, const void *p2) {
   qh_compare_facetarea( p1, p2 )
     used by qsort() to order facets by area
 */
-#ifdef SUN
-extern "C" {
-#endif
 static int qh_compare_facetarea(const void *p1, const void *p2) {
   facetT *a= *((facetT **)p1), *b= *((facetT **)p2);
 
@@ -151,9 +148,6 @@ static int qh_compare_facetarea(const void *p1, const void *p2) {
     return 0;
   return -1;
 } /* compare_facetarea */
-#ifdef SUN
-}
-#endif
 
 /*-<a                             href="qh-c.htm#io"
   >-------------------------------</a><a name="compare_facetmerge">-</a>
@@ -161,17 +155,11 @@ static int qh_compare_facetarea(const void *p1, const void *p2) {
   qh_compare_facetmerge( p1, p2 )
     used by qsort() to order facets by number of merges
 */
-#ifdef SUN
-extern "C" {
-#endif
 static int qh_compare_facetmerge(const void *p1, const void *p2) {
   facetT *a= *((facetT **)p1), *b= *((facetT **)p2);
  
   return (a->nummerge - b->nummerge);
 } /* compare_facetvisit */
-#ifdef SUN
-}
-#endif
 
 /*-<a                             href="qh-c.htm#io"
   >-------------------------------</a><a name="compare_facetvisit">-</a>
@@ -179,9 +167,6 @@ static int qh_compare_facetmerge(const void *p1, const void *p2) {
   qh_compare_facetvisit( p1, p2 )
     used by qsort() to order facets by visit id or id
 */
-#ifdef SUN
-extern "C" {
-#endif
 static int qh_compare_facetvisit(const void *p1, const void *p2) {
   facetT *a= *((facetT **)p1), *b= *((facetT **)p2);
   int i,j;
@@ -192,9 +177,6 @@ static int qh_compare_facetvisit(const void *p1, const void *p2) {
     j= b->id;
   return (i - j);
 } /* compare_facetvisit */
-#ifdef SUN
-}
-#endif
 
 /*-<a                             href="qh-c.htm#io"
   >-------------------------------</a><a name="countfacets">-</a>

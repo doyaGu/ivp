@@ -132,7 +132,7 @@ hk_result hk_Gauss_Elm_Solver::solve_lower_null_matrix()
 		if(1) {
 		    i=m_n_columns-1;
 		    while(i>=0) {
-		        m_result[i]=0.0; //prevent SUN from detecting rui error
+		        m_result[i]=0.0; // avoid reading uninitialized result values
 		        i--;
 		    }
 		}
