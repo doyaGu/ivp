@@ -1651,7 +1651,6 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 		IVP_Core *obj = new_fr_sys->cores_of_friction_system.element_at(0);
 		IVP_Friction_Info_For_Core *fr_i = obj->get_friction_info(new_fr_sys);
 		obj->delete_friction_info(fr_i);
-		P_DELETE(fr_i);
 		P_DELETE(new_fr_sys);
 		return;
 	}
@@ -1661,7 +1660,6 @@ void IVP_Friction_System::split_friction_system(IVP_Core *split_father)
 		IVP_Core *obj = fr_sys->cores_of_friction_system.element_at(0);
 		IVP_Friction_Info_For_Core *fr_i = obj->get_friction_info(fr_sys);
 		obj->delete_friction_info(fr_i);
-		P_DELETE(fr_i);
 		P_DELETE(fr_sys);
 		return;
 	}
@@ -2275,7 +2273,15 @@ IVP_BOOL IVP_Core::grow_friction_system()
 
 void IVP_Friction_System::get_controlled_cores(IVP_U_Vector<IVP_Core> *vectr)
 {
-	vectr = NULL;
+	if (!vectr)
+	{
+		return;
+	}
+	vectr->clear();
+	for (int i = 0; i < moveable_cores_of_friction_system.len(); i++)
+	{
+		vectr->add(moveable_cores_of_friction_system.element_at(i));
+	}
 }
 
 IVP_DOUBLE IVP_Friction_System::get_minimum_simulation_frequency()
