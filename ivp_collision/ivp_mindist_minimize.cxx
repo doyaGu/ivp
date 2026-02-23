@@ -121,7 +121,8 @@ IVP_BOOL IVP_Mindist_Minimize_Solver::check_loop_hash(IVP_SYNAPSE_POLYGON_STATUS
         }
     }
 
-    loop_hash[loop_hash_size] = {x0, x1};
+    loop_hash[loop_hash_size].a = x0;
+    loop_hash[loop_hash_size].b = x1;
     loop_hash_size++;
     return IVP_FALSE;
 }

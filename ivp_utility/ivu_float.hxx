@@ -38,7 +38,7 @@ inline int PFM_LD(float a)
     return ((p_float_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
 }
 #else
-#if defined(POSIX) || defined(WIN32)
+#if defined(POSIX) || defined(WIN32) || defined(__APPLE__) || defined(__unix__)
 
 union p_double_ieee
 {

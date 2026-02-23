@@ -20,7 +20,11 @@
 #include <ivp_controller_raycast_car.hxx>
 #include <ivp_solver_core_reaction.hxx>
 
+#ifdef _WIN32
 #include <windows.h>
+#else
+#define OutputDebugString(x) ((void)0)
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Main raycast jetski simulation.

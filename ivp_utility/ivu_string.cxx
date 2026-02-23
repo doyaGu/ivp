@@ -8,10 +8,12 @@
 #include <ctype.h>
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
-#ifdef OSX
+#if defined(__APPLE__)
 #include <malloc/malloc.h>
-#else
+#elif defined(_MSC_VER) || (defined(__GNUC__) && defined(_WIN32))
 #include <malloc.h>
+#else
+// Non-Windows platforms use stdlib.h for malloc
 #endif
 #endif
 #ifdef WIN32

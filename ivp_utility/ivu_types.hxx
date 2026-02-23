@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef _LINUX
+#if !defined(WIN32)
 #include <signal.h>
 #endif
 
@@ -310,16 +310,16 @@ enum IVP_RETURN_TYPE
 #endif
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
-#ifdef OSX
+#if defined(__APPLE__)
 #include <malloc/malloc.h>
 #elif defined(_MSC_VER)
 #include <malloc.h>
-#elif defined(__GNUC__) && !defined(_LINUX)
+#elif defined(__GNUC__) && defined(_WIN32)
 #include <malloc.h>
 #elif defined(_LINUX)
 // Linux uses stdlib.h for malloc
 #else
-#include <malloc.h>
+// Non-Windows platforms use stdlib.h for malloc
 #endif
 #endif
 
