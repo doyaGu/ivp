@@ -28,8 +28,19 @@ public:
         mass_center_out->set_to_zero();
     }
 
-    virtual void get_radius_and_radius_dev_to_given_center(const IVP_U_Float_Point * /*center*/, IVP_FLOAT * /*radius*/, IVP_FLOAT * /*radius_deviation*/) const { CORE; }
-    virtual void get_rotation_inertia(IVP_U_Float_Point * /*rotation_inertia_out*/) const { CORE; }
+    virtual void get_radius_and_radius_dev_to_given_center(const IVP_U_Float_Point * /*center*/, IVP_FLOAT *radius, IVP_FLOAT *radius_deviation) const
+    {
+        // Shared ball surface manager has no per-object radius information.
+        if (radius)
+            *radius = 0.0f;
+        if (radius_deviation)
+            *radius_deviation = 0.0f;
+    }
+    virtual void get_rotation_inertia(IVP_U_Float_Point *rotation_inertia_out) const
+    {
+        if (rotation_inertia_out)
+            rotation_inertia_out->set_to_zero();
+    }
 
     /********************************************************************************
      *	Name:	     	get_all_ledges_within_radius
@@ -48,13 +59,12 @@ public:
 
     void get_all_terminal_ledges(IVP_U_BigVector<IVP_Compact_Ledge> *resulting_ledges)
     {
-        CORE;
         resulting_ledges->add(compact_ledge);
     }
 
     virtual void insert_all_ledges_hitting_ray(IVP_Ray_Solver * /*ray_solver*/, IVP_Real_Object * /*object_to_insert*/)
     {
-        CORE;
+        // Balls are handled by IVP_Ray_Solver::check_ray_against_ball.
     } // dummy
 
     ~IVP_SurfaceManager_Ball()
@@ -64,7 +74,8 @@ public:
 
     IVP_SurfaceManager_Ball()
     {
-        int size = 32;
+        const int size = (int)(sizeof(IVP_Compact_Ledge) + sizeof(IVP_Compact_Triangle));
+        IVP_ASSERT((size & 0x0f) == 0);
         void *buffer = ivp_malloc_aligned(size, 16);
         memset(buffer, 0, size);
         compact_ledge = (IVP_Compact_Ledge *)buffer;
