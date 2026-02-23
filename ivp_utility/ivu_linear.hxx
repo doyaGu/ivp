@@ -128,11 +128,15 @@ public:
     IVP_RETURN_TYPE fast_normize(); // normize vector (0.1f% error)
     void print(const char *comment = 0) const;
 
-    IVP_U_Float_Point() : k{0, 0, 0}
+    IVP_U_Float_Point()
+    {
+        k[0] = 0.0f;
+        k[1] = 0.0f;
+        k[2] = 0.0f;
 #ifdef IVP_VECTOR_UNIT_FLOAT
-                          , hesse_val{0}
+        hesse_val = 0.0f;
 #endif
-    {}
+    }
     IVP_U_Float_Point(IVP_DOUBLE x, IVP_DOUBLE y, IVP_DOUBLE z)
     {
         k[0] = (IVP_FLOAT)x;
@@ -281,11 +285,15 @@ public:
 
     void print(const char *comment = 0);
 
-    IVP_U_Point() : k{0, 0, 0}
+    IVP_U_Point()
+    {
+        k[0] = 0.0f;
+        k[1] = 0.0f;
+        k[2] = 0.0f;
 #ifdef IVP_VECTOR_UNIT_DOUBLE
-                    , hesse_val{0}
+        hesse_val = 0.0f;
 #endif
-    {}
+    }
     inline IVP_U_Point(const IVP_U_Float_Point &p);
     IVP_U_Point(IVP_DOUBLE x, IVP_DOUBLE y, IVP_DOUBLE z)
     {
@@ -746,7 +754,7 @@ public:
 
     inline IVP_DOUBLE inline_estimate_q_diff_to(const IVP_U_Float_Quat *reference) const; // roughly estimate the quad alpha
 
-    IVP_U_Quat() : x{0}, y{0}, z{0}, w{0} {} // initialized quat
+    IVP_U_Quat() : x(0), y(0), z(0), w(0) {} // initialized quat
     IVP_U_Quat(const IVP_U_Point &p)
     {
         this->set_fast_multiple(&p, 1.0f);

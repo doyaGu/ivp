@@ -3,11 +3,13 @@
 #include <ivu_memory.hxx>
 
 #if !defined(__MWERKS__) || !defined(__POWERPC__)
-    #ifdef OSX
-        #include <malloc/malloc.h>
-    #else
-        #include <malloc.h>
-    #endif
+#if defined(__APPLE__)
+#include <malloc/malloc.h>
+#elif defined(_MSC_VER) || (defined(__GNUC__) && defined(_WIN32))
+#include <malloc.h>
+#else
+// Non-Windows platforms use stdlib.h for malloc
+#endif
 #endif
 
 #ifndef WIN32
