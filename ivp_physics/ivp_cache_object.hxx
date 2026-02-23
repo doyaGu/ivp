@@ -60,7 +60,7 @@ public:
 #ifdef DEBUG
     void check(); // check when no locks are set
 #endif
-    IVP_Cache_Object_Manager(int number_of_cache_elements); // number_of_cache_elements is 2**x
+    IVP_Cache_Object_Manager(int number_of_cache_elements); // number_of_cache_elements must be > 0
     ~IVP_Cache_Object_Manager();
 };
 

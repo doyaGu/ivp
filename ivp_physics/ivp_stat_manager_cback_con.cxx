@@ -64,7 +64,7 @@ void IVP_Statisticsmanager_Console_Callback::output_request(IVP_BetterStatistics
         printf("%s\n", entity->text);
 
         int i;
-        for (i = 0; i < entity->data.int_array.size; i++)
+        for (i = 0; i < entity->data.double_array.size; i++)
         {
             IVP_DOUBLE value = entity->data.double_array.array[i];
             printf("%f\n", value);
