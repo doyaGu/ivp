@@ -161,7 +161,29 @@ void IVP_SurfaceManager_Polygon::get_all_ledges_within_radius(
     }
     else
     {
+        if (root_ledge->is_terminal())
+        {
+            if (root_ledge->get_n_triangles() == 2)
+            {
+                // IVP_DOUBLE triangle allows deeper search
+                const IVP_Compact_Triangle *triangle = root_ledge->get_first_triangle();
+                IVP_DOUBLE qdist =
+                    IVP_CLS.calc_qlen_PF_F_space(root_ledge, triangle, visitor_position_object_space);
+                if (qdist > radius * radius)
+                {
+                    return;
+                }
+            }
+            resulting_ledges->add((IVP_Compact_Ledge *)root_ledge);
+            return;
+        }
+
         const IVP_Compact_Ledgetree_Node *root_node = root_ledge->get_ledgetree_node();
+        if (root_node->is_terminal())
+        {
+            sps.traverse_cluster(root_node, visitor_position_object_space, radius, resulting_ledges);
+            return;
+        }
         sps.traverse_cluster(
             root_node->left_son(), visitor_position_object_space, radius, resulting_ledges);
         sps.traverse_cluster(

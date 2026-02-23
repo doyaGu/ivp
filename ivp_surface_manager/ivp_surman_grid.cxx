@@ -70,6 +70,11 @@ void IVP_SurfaceManager_Grid::traverse_grid(
                 int ledge_id = ge[idx].compact_ledge_index[i];
                 if (ledge_id < 0)
                     continue;  // flagged as not existent
+                if (ledge_id >= compact_grid->n_compact_ledges)
+                {
+                    IVP_ASSERT(ledge_id < compact_grid->n_compact_ledges);
+                    continue;
+                }
                 if (flags[ledge_id])
                     continue;  // ledge already in our vector
                 flags[ledge_id] = 1;
@@ -139,12 +144,14 @@ void IVP_SurfaceManager_Grid::get_rotation_inertia(IVP_U_Float_Point *rotation_i
 }
 
 void IVP_SurfaceManager_Grid::get_radius_and_radius_dev_to_given_center(
-    const IVP_U_Float_Point * /*center*/,
+    const IVP_U_Float_Point *center,
     IVP_FLOAT *radius,
     IVP_FLOAT *radius_deviation) const
 {
-    *radius = compact_grid->radius;
-    *radius_deviation = compact_grid->radius;
+    IVP_DOUBLE center_shift = compact_grid->center.quad_distance_to(center);
+    center_shift = IVP_Inline_Math::sqrtd(center_shift);
+    *radius = compact_grid->radius + center_shift;
+    *radius_deviation = *radius; // grid has no separate deviation metric
 }
 
 const IVP_Compact_Ledge *IVP_SurfaceManager_Grid::get_single_convex() const
