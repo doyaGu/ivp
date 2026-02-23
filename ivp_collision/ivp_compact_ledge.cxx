@@ -5,7 +5,7 @@
  *	Description:	compacted ledge representation
  ********************************************************************************/
 
-// #include <string.h>
+#include <string.h>
 #include <ivp_physics.hxx>
 #include <ivu_hash.hxx>
 
@@ -39,7 +39,8 @@ void IVP_Compact_Edge::byte_swap()
     */
 
     // XXX COMPILER SPECIFIC XXX
-    uint bitfields = *(uint *)(this);
+    uint bitfields;
+    memcpy(&bitfields, this, sizeof(bitfields));
 
 #if defined(__POWERPC__)
 
@@ -83,7 +84,8 @@ void IVP_Compact_Triangle::byte_swap()
      IVP_Compact_Edge c_three_edges[3];
    */
 
-    uint bitfields = *(uint *)(this);
+    uint bitfields;
+    memcpy(&bitfields, this, sizeof(bitfields));
 
 #if defined(__POWERPC__)
 
@@ -152,7 +154,8 @@ void IVP_Compact_Ledge::byte_swap()
     ivp_byte_swap4((uint &)c_point_offset);
     ivp_byte_swap4((uint &)ledgetree_node_offset);
 
-    uint bitfields = *(uint *)(&ledgetree_node_offset + 1);  // as can't get addr of bitfield member..
+    uint bitfields;
+    memcpy(&bitfields, (&ledgetree_node_offset + 1), sizeof(bitfields)); // as can't get addr of bitfield member..
 
 #if defined(__POWERPC__)
 

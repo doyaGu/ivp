@@ -93,13 +93,20 @@ IVP_SurfaceBuilder_Polygon_Convex::IVP_SurfaceBuilder_Polygon_Convex(IVP_Templat
         IVP_Compact_Ledge_Generator ledge_gen;
 
         int size = ledge_gen.prepare_compact_ledge(&tri_vec);
+        if (size <= 0)
+        {
+            mem = NULL;
+        }
+        else
+        {
 
-        // printf("Compact ledge size: '%d'\n", size);
-        mem = (uchar *)ivp_malloc_aligned(size, 16); // 16 should be enough, but ...
-        memset(mem, 0, size);
-        ledge_gen.generate_compact_ledge(mem);
+            // printf("Compact ledge size: '%d'\n", size);
+            mem = (uchar *)ivp_malloc_aligned(size, 16); // 16 should be enough, but ...
+            memset(mem, 0, size);
+            ledge_gen.generate_compact_ledge(mem);
+        }
 #ifdef DEBUG
-        if (ledge_gen.validate() != IVP_OK)
+        if (mem && ledge_gen.validate() != IVP_OK)
         {
             printf("Compact ledge generation fizzled :-(\n");
         }
@@ -169,12 +176,19 @@ void IVP_SurfaceBuilder_Polygon_Convex::init_surface_manager_polygon()
             IVP_Compact_Ledge_Generator ledge_gen;
 
             int size = ledge_gen.prepare_compact_ledge(&tri_vec);
+            if (size <= 0)
+            {
+                mem = NULL;
+            }
+            else
+            {
 
-            // printf("Compact ledge size: '%d'\n", size);
-            mem = (uchar *)ivp_malloc_aligned(size, 16); // @@@ 16 should be enough, but ...
-            ledge_gen.generate_compact_ledge(mem);
+                // printf("Compact ledge size: '%d'\n", size);
+                mem = (uchar *)ivp_malloc_aligned(size, 16); // @@@ 16 should be enough, but ...
+                ledge_gen.generate_compact_ledge(mem);
+            }
 #ifdef DEBUG
-            if (ledge_gen.validate() != IVP_OK)
+            if (mem && ledge_gen.validate() != IVP_OK)
             {
                 printf("Compact ledge generation fizzled :-(\n");
             }
