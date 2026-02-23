@@ -441,7 +441,7 @@ public:
     int n_cache_object; // == 2**x number of caches for moving objects, should be larger than typical number of moving objects
 
     char *scratchpad_addr; // scratch pad: a fast area which is temporarily used and is already cached in
-    int scratchpad_size;
+    size_t scratchpad_size;
 
     /********************************************************************************
      *	Name:	     	Several custom managers

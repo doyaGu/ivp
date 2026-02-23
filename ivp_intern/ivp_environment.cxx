@@ -175,9 +175,27 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
         short_term_mem = new IVP_U_Memory();
         sim_unit_mem = new IVP_U_Memory();
 
-        int ssizeh = appl_env->scratchpad_size >> 1;
-        short_term_mem->init_mem_transaction_usage(appl_env->scratchpad_addr, ssizeh);
-        sim_unit_mem->init_mem_transaction_usage(ssizeh + appl_env->scratchpad_addr, ssizeh);
+        if (appl_env->scratchpad_addr && appl_env->scratchpad_size > 0)
+        {
+            size_t scratchpad_size = appl_env->scratchpad_size;
+            size_t short_term_size = scratchpad_size >> 1;
+            size_t sim_unit_size = scratchpad_size - short_term_size;
+            if (short_term_size > IVU_MEM_ALIGN && sim_unit_size > IVU_MEM_ALIGN)
+            {
+                short_term_mem->init_mem_transaction_usage(appl_env->scratchpad_addr, short_term_size);
+                sim_unit_mem->init_mem_transaction_usage(appl_env->scratchpad_addr + short_term_size, sim_unit_size);
+            }
+            else
+            {
+                short_term_mem->init_mem_transaction_usage();
+                sim_unit_mem->init_mem_transaction_usage();
+            }
+        }
+        else
+        {
+            short_term_mem->init_mem_transaction_usage();
+            sim_unit_mem->init_mem_transaction_usage();
+        }
     }
 
     next_movement_check = IVP_MOVEMENT_CHECK_COUNT;
@@ -191,8 +209,6 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
         // Initialize in other case to prevent crashes in Release mode
         this->debug_information = NULL;
     }
-
-    integrated_energy_damp = IVP_Inline_Math::ivp_expf(IVP_FLOAT(log(0.9f)) * get_delta_PSI_time());
 
     IVP_Mindist_Minimize_Solver::init_mms_function_table();
     IVP_Mindist_Event_Solver::init_mim_function_table();
@@ -226,6 +242,7 @@ void IVP_Environment::set_delta_PSI_time(IVP_DOUBLE psi_time)
     IVP_ASSERT(psi_time <= IVP_MAX_DELTA_PSI_TIME);
     delta_PSI_time = psi_time;
     inv_delta_PSI_time = 1.0f / delta_PSI_time;
+    integrated_energy_damp = IVP_Inline_Math::ivp_expf(IVP_FLOAT(log(0.9f)) * delta_PSI_time);
 }
 
 IVP_Environment::~IVP_Environment()
@@ -540,7 +557,6 @@ void IVP_Environment::delete_draw_vector_debug()
     dv = this->draw_vectors;
     while (dv != NULL)
     {
-        P_FREE(dv->debug_text);
         next_dv = dv->next;
         P_DELETE(dv);
         dv = next_dv;
