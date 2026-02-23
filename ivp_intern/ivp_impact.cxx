@@ -73,12 +73,26 @@ IVP_Contact_Point *IVP_Mindist::try_to_generate_managed_friction(IVP_Friction_Sy
 	IVP_Environment *my_env = core0->environment;
 	IVP_Contact_Point *friction_dist;
 	IVP_BOOL gen_success;
+	*associated_fs = NULL;
+	*having_new = IVP_FALSE;
 
 	friction_dist = IVP_Friction_Manager::generate_contact_point(my_dist, &gen_success);
+	if (friction_dist == NULL)
+	{
+		if (fr_info0)
+		{
+			*associated_fs = fr_info0->l_friction_system;
+		}
+		return NULL;
+	}
 	{
 		if (gen_success != IVP_TRUE)
 		{
-			*associated_fs = fr_info0->l_friction_system;
+			*associated_fs = friction_dist->l_friction_system;
+			if ((*associated_fs == NULL) && fr_info0)
+			{
+				*associated_fs = fr_info0->l_friction_system;
+			}
 			*having_new = IVP_FALSE;
 			if (call_recalc_svals)
 			{
@@ -1148,6 +1162,11 @@ void IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(IVP_Mindist *mindist,
 	}
 
 	IVP_Contact_Point *my_fr_dist = mindist->try_to_generate_managed_friction(&affected_friction_system, &having_new_dist, sim_u, IVP_TRUE); // with recalc_friction_s_vals
+	if (!my_fr_dist || !affected_friction_system)
+	{
+		IVP_ASSERT(my_fr_dist && affected_friction_system);
+		return;
+	}
 	IVP_Impact_Solver_Long_Term *imp_solve = my_fr_dist->tmp_contact_info;
 
 	IVP_Time now_time, last_time;
@@ -1326,13 +1345,13 @@ void IVP_Mindist::do_impact()
 		obj->revive_object_for_simulation();
 	}
 
-	g_pCurrentMindist = NULL;
 	if (g_fDeferDeleteMindist)
 	{
 		// BUGBUG: someone changed a collision filter and didn't tell us!
 		IVP_ASSERT(0);
-		delete this;
+		g_pCurrentMindist = NULL;
 		g_fDeferDeleteMindist = false;
+		delete this;
 		return;
 	}
 
@@ -1352,6 +1371,13 @@ void IVP_Mindist::do_impact()
 
 	IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(this, objects[0], objects[1]);
 	env->sim_unit_mem->end_memory_transaction();
+	g_pCurrentMindist = NULL;
+	if (g_fDeferDeleteMindist)
+	{
+		g_fDeferDeleteMindist = false;
+		delete this;
+		return;
+	}
 }
 
 // find second critical core for core0 that is not core1
