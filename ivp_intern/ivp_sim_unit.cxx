@@ -469,14 +469,25 @@ void IVP_Controller_Manager::ensure_core_in_simulation(IVP_Core *core)
     core->ensure_core_in_simulation_delayed();
 }
 
+static IVP_BOOL sim_unit_was_touched(IVP_U_Vector<IVP_Simulation_Unit> *units, IVP_Simulation_Unit *unit)
+{
+    for (int i = units->len() - 1; i >= 0; i--)
+    {
+        if (units->element_at(i) == unit)
+        {
+            return IVP_TRUE;
+        }
+    }
+    return IVP_FALSE;
+}
+
 // only for Controllers that have all cores computed at the same time
 void IVP_Controller_Manager::remove_controller_from_environment(IVP_Controller_Dependent *cntrl, IVP_BOOL silently)
 {
     IVP_U_Vector<IVP_Core> *controlled_cores = cntrl->get_associated_controlled_cores();
+    IVP_U_Vector<IVP_Simulation_Unit> touched_units;
 
-    IVP_Simulation_Unit *reference_unit = NULL;
-    int i;
-    for (i = controlled_cores->len() - 1; i >= 0; i--)
+    for (int i = controlled_cores->len() - 1; i >= 0; i--)
     {
         IVP_Core *my_core = controlled_cores->element_at(i);
         if (!my_core)
@@ -487,11 +498,23 @@ void IVP_Controller_Manager::remove_controller_from_environment(IVP_Controller_D
         {
             continue;
         }
+        IVP_Simulation_Unit *core_unit = my_core->sim_unit_of_core;
+        if (!core_unit)
+        {
+            // Keep state consistent in release builds when a movable core lost its sim unit.
+            IVP_ASSERT(0);
+            my_core->controllers_of_core.remove(cntrl);
+            continue;
+        }
         my_core->rem_core_controller(cntrl);
-        reference_unit = my_core->sim_unit_of_core;
+        if (sim_unit_was_touched(&touched_units, core_unit) == IVP_FALSE)
+        {
+            touched_units.add(core_unit);
+        }
     }
-    if (reference_unit)
+    for (int i = touched_units.len() - 1; i >= 0; i--)
     {
+        IVP_Simulation_Unit *reference_unit = touched_units.element_at(i);
         reference_unit->union_find_needed_for_sim_unit = IVP_TRUE;
         if (silently == IVP_FALSE)
         {
@@ -504,6 +527,7 @@ void IVP_Controller_Manager::ensure_controller_in_simulation(IVP_Controller_Depe
 {
     IVP_U_Vector<IVP_Core> *controlled_cores = cntrl->get_associated_controlled_cores();
     IVP_ASSERT(controlled_cores->len() > 0);
+    IVP_Core *fallback_core = NULL;
     for (int i = 0; i < controlled_cores->len(); i++)
     {
         IVP_Core *core = controlled_cores->element_at(i);
@@ -515,12 +539,21 @@ void IVP_Controller_Manager::ensure_controller_in_simulation(IVP_Controller_Depe
         {
             continue;
         }
+        if (!fallback_core)
+        {
+            fallback_core = core;
+        }
         if (!core->sim_unit_of_core)
         {
             continue;
         }
         core->sim_unit_of_core->sim_unit_ensure_in_simulation();
-        break;
+        return;
+    }
+    if (fallback_core)
+    {
+        // Avoid losing wakeups when a movable core is temporarily detached from a sim unit.
+        fallback_core->ensure_core_in_simulation_delayed();
     }
 }
 
@@ -563,39 +596,49 @@ void IVP_Controller_Manager::announce_controller_to_environment(IVP_Controller_D
     for (i = controlled_cores->len() - 1; i >= 0; i--)
     {
         IVP_Core *test_core = controlled_cores->element_at(i);
-        if (!test_core->physical_unmoveable)
+        if (!test_core)
         {
+            continue;
+        }
+        if (test_core->physical_unmoveable)
+        {
+            continue;
+        }
+        mtype = (IVP_Movement_Type)((int)mtype & (int)test_core->movement_state);
+        IVP_Simulation_Unit *test_sim_unit = test_core->sim_unit_of_core;
+        if (!test_sim_unit)
+        {
+            IVP_ASSERT(0);
+            test_core->ensure_core_in_simulation_delayed();
+            continue;
+        }
+        if (reference_unit != NULL)
+        {
+            if (test_sim_unit != reference_unit)
+            {
+                reference_unit->throw_cores_into_my_sim_unit(test_sim_unit); //
+                P_DELETE(test_sim_unit);
+                did_fusion = IVP_TRUE;
+            }
+        }
+        else
+        {
+            reference_unit = test_sim_unit;
+        }
 
-            mtype = (IVP_Movement_Type)((int)mtype & (int)test_core->movement_state);
-            IVP_Simulation_Unit *test_sim_unit = test_core->sim_unit_of_core;
-            if (reference_unit != NULL)
-            {
-                if (test_sim_unit != reference_unit)
-                {
-                    reference_unit->throw_cores_into_my_sim_unit(test_sim_unit); //
-                    P_DELETE(test_sim_unit);
-                    did_fusion = IVP_TRUE;
-                }
-            }
-            else
-            {
-                reference_unit = test_sim_unit;
-            }
-
-            if (core_has_controller(test_core, cntrl) == IVP_FALSE)
-            {
-                test_core->add_core_controller(cntrl);
-            }
+        if (core_has_controller(test_core, cntrl) == IVP_FALSE)
+        {
+            test_core->add_core_controller(cntrl);
         }
     }
 
-    if (did_fusion == IVP_TRUE)
+    if (did_fusion == IVP_TRUE && reference_unit)
     {
         reference_unit->clean_sim_unit();
         reference_unit->sim_unit_calc_redundants();
     }
 
-    if (mtype < IVP_MT_NOT_SIM)
+    if (mtype < IVP_MT_NOT_SIM && reference_unit)
     {
         reference_unit->sim_unit_revive_for_simulation(l_environment); // ensure in simulation is not enough (cannot handle mixture of simulated and not simulated objects)
     }
@@ -604,11 +647,23 @@ void IVP_Controller_Manager::announce_controller_to_environment(IVP_Controller_D
 void IVP_Core::rem_core_controller(IVP_Controller *rem_cntrl)
 {
     controllers_of_core.remove(rem_cntrl);
-    this->sim_unit_of_core->remove_controller_of_core(this, rem_cntrl);
+    if (this->sim_unit_of_core)
+    {
+        this->sim_unit_of_core->remove_controller_of_core(this, rem_cntrl);
+    }
+    else
+    {
+        IVP_ASSERT(0);
+    }
 }
 
 void IVP_Core::add_core_controller(IVP_Controller *add_cntrl)
 {
+    if (!sim_unit_of_core)
+    {
+        IVP_ASSERT(0);
+        return;
+    }
     controllers_of_core.add(add_cntrl);
     sim_unit_of_core->add_controller_of_core(this, add_cntrl);
 }
