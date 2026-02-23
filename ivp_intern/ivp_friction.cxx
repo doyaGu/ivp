@@ -329,7 +329,7 @@ bool IVP_Contact_Point::friction_force_local_constraint_2d_wheel(IVP_Core *core_
 	if (ret != IVP_OK)
 	{
 		flEnergy = 0.0f;
-		return true;
+		return false; // fall back to generic 2D friction solver
 	}
 
 	IVP_U_Float_Point impulses;
@@ -340,6 +340,11 @@ bool IVP_Contact_Point::friction_force_local_constraint_2d_wheel(IVP_Core *core_
 
 	//
 	IVP_DOUBLE relaxation_coefficient = 0.3f; // ~1.0f tends to oscillate
+	if (IVP_Inline_Math::fabsd(p_body) < P_FLOAT_RES)
+	{
+		flEnergy = 0.0f;
+		return false; // avoid unstable wheel-body scaling, use generic solver instead
+	}
 	IVP_DOUBLE body_impulse_factor = (project_span_v1 * p_wheel / p_body + 1.0f) * relaxation_coefficient;
 
 	IVP_DOUBLE imp0_sqrd = impulses.k[0] * impulses.k[0];
