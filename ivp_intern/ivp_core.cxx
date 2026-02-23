@@ -10,8 +10,6 @@
 #include <ivu_float.hxx>
 #include <ivu_memory.hxx>
 
-#include <cmath>
-
 #include <ivp_core_macros.hxx>
 #include <ivp_sim_unit.hxx>
 #include <ivp_hull_manager.hxx>
@@ -369,7 +367,7 @@ void IVP_Core::apply_velocity_limit()
             rot_speed.mult(unk);
         }
 
-        IVP_DOUBLE rot_change_len = speed_change.real_length();
+        IVP_DOUBLE rot_change_len = rot_speed_change.real_length();
         if (rot_change_len > max_rot_speed)
         {
             unk = max_rot_speed / rot_change_len;
@@ -548,10 +546,25 @@ void IVP_Core::damp_object(IVP_DOUBLE delta_time_, const IVP_U_Float_Point *rota
 
 void IVP_Core::set_rotation_inertia(const IVP_U_Float_Point *r)
 {
-    rot_inertia.set(
-        r->k[0] > P_FLOAT_MAX ? P_FLOAT_MAX : r->k[0],
-        r->k[1] > P_FLOAT_MAX ? P_FLOAT_MAX : r->k[1],
-        r->k[2] > P_FLOAT_MAX ? P_FLOAT_MAX : r->k[2]);
+    const IVP_FLOAT min_inertia = P_FLOAT_EPS;
+    const IVP_FLOAT max_inertia = P_FLOAT_MAX;
+    IVP_FLOAT k0 = r->k[0];
+    IVP_FLOAT k1 = r->k[1];
+    IVP_FLOAT k2 = r->k[2];
+    if (!(k0 >= min_inertia && k0 <= max_inertia))
+    {
+        k0 = (k0 < min_inertia) ? min_inertia : max_inertia;
+    }
+    if (!(k1 >= min_inertia && k1 <= max_inertia))
+    {
+        k1 = (k1 < min_inertia) ? min_inertia : max_inertia;
+    }
+    if (!(k2 >= min_inertia && k2 <= max_inertia))
+    {
+        k2 = (k2 < min_inertia) ? min_inertia : max_inertia;
+    }
+
+    rot_inertia.set(k0, k1, k2);
 
     this->calc_calc();
 }
@@ -907,19 +920,21 @@ void IVP_Core::calc_calc()
     IVP_ASSERT(get_rot_inertia()->real_length() > P_DOUBLE_EPS);
     IVP_U_Float_Hesse *iri = (IVP_U_Float_Hesse *)get_inv_rot_inertia();
 
-    // Clamp to valid values so we don't end up with NaNs along the way
+    // Clamp inertia to a finite, positive range to avoid invalid inverses.
+    const IVP_FLOAT min_inertia = P_FLOAT_EPS;
+    const IVP_FLOAT max_inertia = P_FLOAT_MAX;
     IVP_U_Float_Point &ri = rot_inertia;
     for (int i = 0; i < 3; i++)
     {
-        if (std::isfinite(ri.k[i]) && ri.k[i] <= 1e18f)
+        if (!(ri.k[i] >= min_inertia && ri.k[i] <= max_inertia))
         {
-            if (ri.k[i] < -1e18f)
-                ri.k[i] = -1e18f;
+            ri.k[i] = (ri.k[i] < min_inertia) ? min_inertia : max_inertia;
         }
-        else
-        {
-            ri.k[i] = 1e18f;
-        }
+    }
+
+    if (!(ri.hesse_val >= P_RES_EPS && ri.hesse_val <= P_DOUBLE_MAX))
+    {
+        ri.hesse_val = P_RES_EPS;
     }
 
     iri->set(1.0f / ri.k[0], 1.0f / ri.k[1], 1.0f / ri.k[2]);
@@ -1209,7 +1224,6 @@ void IVP_Core_Collision::split_collision_merged_core_next_PSI()
 
 void IVP_Core::set_matrizes_and_speed(IVP_Core_Merged *template_core, IVP_U_Matrix *m_CORE_f_core_out)
 {
-
     /************** for all old cores do: ***********/
     // Note: Convention: all matrixnames for current time are in capitel letters
 
@@ -1229,7 +1243,7 @@ void IVP_Core::set_matrizes_and_speed(IVP_Core_Merged *template_core, IVP_U_Matr
         IVP_Core_Merged *core;
         for (core = this->merged_core_which_replace_this_core;
              core;
-             core = this->merged_core_which_replace_this_core)
+             core = core->merged_core_which_replace_this_core)
         {
             IVP_U_Matrix m_WORLD_f_world_one_core;
             core->m_world_f_core_last_psi.mi2mult4(&core->m_world_f_core_when_created,
@@ -1282,9 +1296,26 @@ void IVP_Core::update_exact_mindist_events_of_core()
 
 void IVP_Core::set_mass(IVP_FLOAT new_mass)
 {
-    IVP_DOUBLE factor = new_mass / this->get_mass();
+    if (!(new_mass >= P_RES_EPS && new_mass <= P_DOUBLE_MAX))
+    {
+        new_mass = P_RES_EPS;
+    }
+
+    IVP_DOUBLE old_mass = this->get_mass();
     IVP_U_Float_Hesse *ri = (IVP_U_Float_Hesse *)get_rot_inertia();
-    ri->mult(factor);
+
+    if (old_mass >= P_RES_EPS && old_mass <= P_DOUBLE_MAX)
+    {
+        IVP_DOUBLE factor = new_mass / old_mass;
+        ri->mult(factor);
+    }
+    else
+    {
+        ri->k[0] = P_FLOAT_EPS;
+        ri->k[1] = P_FLOAT_EPS;
+        ri->k[2] = P_FLOAT_EPS;
+    }
+
     ri->hesse_val = new_mass;
     this->calc_calc();
 }
