@@ -142,9 +142,6 @@ struct IVP_Aligned_Memory
 
 void *ivp_malloc_aligned(size_t size, unsigned short alignment)
 {
-#if defined(SUN__)
-    return memalign(alignment, size);
-#else
     size += alignment + sizeof(IVP_Aligned_Memory);
 
     IVP_Aligned_Memory *data = (IVP_Aligned_Memory *)p_malloc(size);
@@ -159,7 +156,6 @@ void *ivp_malloc_aligned(size_t size, unsigned short alignment)
     }
 
     return NULL;
-#endif
 }
 
 void *ivp_calloc_aligned(size_t size, unsigned short alignment)
@@ -183,9 +179,6 @@ void *ivp_calloc_aligned(size_t size, unsigned short alignment)
 
 void ivp_free_aligned(void *data)
 {
-#if defined(SUN__)
-    p_free(data);
-#else
     IVP_Aligned_Memory *am = (IVP_Aligned_Memory *)((void **)data)[-1];
     IVP_ASSERT(am->magic_number == IVP_MEMORY_MAGIC);
     IVP_IF(1)
@@ -193,7 +186,6 @@ void ivp_free_aligned(void *data)
         am->magic_number = 0;
     }
     p_free((char *)am);
-#endif
 }
 
 IVP_U_Memory::~IVP_U_Memory()

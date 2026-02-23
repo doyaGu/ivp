@@ -1,8 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#if !defined(SUN) && !defined(SUN4)
-    #include <cstring>
-#endif
+#include <cstring>
 #include <ivu_types.hxx>
 
 // WIN32 ---------------------------------------------------------------------
