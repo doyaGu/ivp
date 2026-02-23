@@ -49,7 +49,8 @@ void IVP_Template_Real_Object::set_nocoll_group_ident(const char *id)
         nocoll_group_ident[0] = 0;
         return;
     }
-    if (strlen(id) > IVP_NO_COLL_GROUP_STRING_LEN)
+    // Reserve one byte for '\0'.
+    if (strlen(id) >= IVP_NO_COLL_GROUP_STRING_LEN)
     {
         CORE;
     }
