@@ -192,14 +192,11 @@ void IVP_Mindist_Recursive::exact_mindist_went_invalid(IVP_Mindist_Manager *mm)
 
 void IVP_Mindist_Recursive::delete_all_children()
 {
-    int l = mindists.len(); //@@CB
     for (int i = mindists.len() - 1; i >= 0; i--)
     {
         IVP_Collision *ma = mindists.element_at(i);
         P_DELETE(ma);
     }
-    this->change_spawned_mindist_count(-l); //@@CB
-                                            //	ivp_message("0x%x has %d total spawned mindists\n", this, this->get_spawned_mindist_count());//@@CB
     mindists.clear();
 }
 
@@ -216,7 +213,10 @@ IVP_Mindist_Recursive::~IVP_Mindist_Recursive()
 
 void IVP_Mindist_Recursive::collision_is_going_to_be_deleted_event(IVP_Collision *c)
 {
+    if (mindists.index_of(c) < 0)
+        return;
     mindists.remove_allow_resort(c);
+    this->change_spawned_mindist_count(-1);
 }
 
 void IVP_Mindist_Recursive::recheck_recursive_childs(IVP_DOUBLE dist_intra)

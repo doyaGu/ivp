@@ -279,6 +279,7 @@ class IVP_Mindist_Base : public IVP_Collision
 #endif
     IVP_MINIMAL_DIST_STATUS mindist_status : 4;
     unsigned int coll_dist_selector : 8;
+    unsigned int coll_dist_decrease_counter : 8;
 
     IVP_Synapse_Real synapse[2];
     IVP_FLOAT sum_extra_radius;  // sum of extra radius around each object
