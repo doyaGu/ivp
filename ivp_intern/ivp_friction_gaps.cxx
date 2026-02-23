@@ -857,12 +857,11 @@ void IVP_Friction_Solver::setup_coords_mindists(IVP_Friction_System *fs)
 
         IVP_Impact_Solver_Long_Term *info = my_dist->tmp_contact_info;
 
-        if (total_dist_counter < fs->complex_not_necessary_number)
+        if (total_dist_counter++ < fs->complex_not_necessary_number)
         {
             info->index_in_fs = -1; // not used in complex
             continue;
         }
-        total_dist_counter++;
 
         info->friction.friction_infos[0] =
             my_dist->get_synapse(0)->get_object()->get_core()->get_friction_info(
