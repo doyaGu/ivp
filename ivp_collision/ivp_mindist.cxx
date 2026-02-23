@@ -95,6 +95,7 @@ IVP_Mindist_Base::IVP_Mindist_Base(IVP_Collision_Delegator *del) : IVP_Collision
     mindist_status = IVP_MD_UNINITIALIZED;
     mindist_function = IVP_MF_COLLISION;
     coll_dist_selector = IVP_MAX_STEPS_FOR_COLLDIST_DECREASE - 1;
+    coll_dist_decrease_counter = 0;
     sum_extra_radius = 0;
     len_numerator = 0;
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
@@ -182,7 +183,7 @@ void IVP_Mindist::print(const char *)
     ivp_message("syn0: ");
     this->get_synapse(0)->print();
     ivp_message("\nsyn1: ");
-    this->get_synapse(0)->print();
+    this->get_synapse(1)->print();
     ivp_message("\n");
 }
 
@@ -1087,11 +1088,10 @@ void IVP_Mindist::update_exact_mindist_events(IVP_BOOL allow_hull_conversion, IV
     if (coll_dist_selector > 0)
     {
         // decrease collision distance
-        static int count = 0;
-        if (count++ > 2)
+        if (coll_dist_decrease_counter++ > 2)
         {
             coll_dist_selector -= 1;
-            count = 0;
+            coll_dist_decrease_counter = 0;
         }
     }
     mim.calc_time_of_next_event();
