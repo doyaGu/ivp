@@ -70,7 +70,11 @@ public:
     const char *get_name() const { return name; }
     IVP_Environment *get_environment() const { return environment; }
 
-    IVP_Polygon *to_poly() { return (IVP_Polygon *)this; } // cast
+    IVP_Polygon *to_poly()
+    {
+        IVP_ASSERT(get_type() == IVP_POLYGON);
+        return (IVP_Polygon *)this;
+    } // cast
     IVP_Cluster *to_cluster()
     {
         IVP_ASSERT(get_type() == IVP_CLUSTER);
