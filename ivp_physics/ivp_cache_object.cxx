@@ -30,9 +30,17 @@ IVP_Cache_Object *IVP_Cache_Object_Manager::get_cache_object(IVP_Real_Object *ob
     IVP_Cache_Object *co;
     while ((co = cache_object_at(reuse_loop_index))->reference_count)
     {
-        reuse_loop_index = (reuse_loop_index + 1) & (n_cache_objects - 1);
+        reuse_loop_index++;
+        if (reuse_loop_index >= n_cache_objects)
+        {
+            reuse_loop_index = 0;
+        }
     }
-    reuse_loop_index = (reuse_loop_index + 1) & (n_cache_objects - 1);
+    reuse_loop_index++;
+    if (reuse_loop_index >= n_cache_objects)
+    {
+        reuse_loop_index = 0;
+    }
     IVP_Real_Object *obj = co->object;
     if (obj)
     {
@@ -54,7 +62,7 @@ IVP_Cache_Object *IVP_Cache_Object_Manager::get_cache_object(IVP_Real_Object *ob
 #ifdef DEBUG
 void IVP_Cache_Object_Manager::check()
 {
-    IVP_ASSERT(reuse_loop_index <= n_cache_objects);
+    IVP_ASSERT(reuse_loop_index < n_cache_objects);
     for (int i = 0; i < n_cache_objects; i++)
     {
         IVP_Cache_Object *co = cache_object_at(i);
@@ -69,10 +77,11 @@ void IVP_Cache_Object_Manager::check()
 
 IVP_Cache_Object_Manager::IVP_Cache_Object_Manager(int number_of_cache_elements)
 {
-    this->n_cache_objects = number_of_cache_elements;
+    IVP_ASSERT(number_of_cache_elements > 0);
+    this->n_cache_objects = (number_of_cache_elements > 0) ? number_of_cache_elements : 1;
     unsigned int size = sizeof(IVP_Cache_Object);
     size = (size + 0xf) & ~0xf; // align 16
-    this->cache_objects_buffer = (char *)p_calloc(size, number_of_cache_elements);
+    this->cache_objects_buffer = (char *)p_calloc(size, this->n_cache_objects);
     this->reuse_loop_index = 0;
 }
 

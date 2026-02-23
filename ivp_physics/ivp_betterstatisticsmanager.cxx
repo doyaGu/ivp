@@ -186,9 +186,9 @@ IVP_BetterStatisticsmanager_Data_Entity::IVP_BetterStatisticsmanager_Data_Entity
         this->data.double_array.height = 10;
         this->data.double_array.xpos = 0;
         this->data.double_array.ypos = 0;
-        this->data.int_array.bg_color = 0;
-        this->data.int_array.border_color = 1;
-        this->data.int_array.graph_color = 2;
+        this->data.double_array.bg_color = 0;
+        this->data.double_array.border_color = 1;
+        this->data.double_array.graph_color = 2;
         break;
     case STRING:
         break;
@@ -197,6 +197,18 @@ IVP_BetterStatisticsmanager_Data_Entity::IVP_BetterStatisticsmanager_Data_Entity
 
 IVP_BetterStatisticsmanager_Data_Entity::~IVP_BetterStatisticsmanager_Data_Entity()
 {
+    switch (this->type)
+    {
+    case INT_ARRAY:
+        P_FREE(this->data.int_array.array);
+        break;
+    case DOUBLE_ARRAY:
+        P_FREE(this->data.double_array.array);
+        break;
+    default:
+        break;
+    }
+
     P_FREE(this->text);
 }
 
