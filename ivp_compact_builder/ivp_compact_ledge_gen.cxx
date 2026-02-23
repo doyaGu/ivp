@@ -34,6 +34,11 @@ int IVP_Compact_Ledge_Generator::prepare_compact_ledge(IVP_U_Vector<IVP_Triangle
 {
     this->orig_triangles = triangles; // for validate    
     n_triangles = triangles->len();
+    if (n_triangles <= 0 || n_triangles > IVP_MAX_TRIANGLES_PER_LEDGE)
+    {
+        IVP_ASSERT(n_triangles > 0 && n_triangles <= IVP_MAX_TRIANGLES_PER_LEDGE);
+        return 0;
+    }
 
     // some intermediate data structs
     int hash_size=16;

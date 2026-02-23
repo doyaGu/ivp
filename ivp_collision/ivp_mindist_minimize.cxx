@@ -720,6 +720,11 @@ const IVP_Compact_Edge *IVP_Compact_Ledge_Solver::minimize_on_other_side(const I
     const IVP_Compact_Ledge *c_ledge = edge->get_compact_ledge();
 
     int n_triangles = c_ledge->get_n_triangles();
+    if (n_triangles <= 0 || n_triangles > IVP_MAX_TRIANGLES_PER_LEDGE)
+    {
+        IVP_ASSERT(n_triangles > 0 && n_triangles <= IVP_MAX_TRIANGLES_PER_LEDGE);
+        return edge;
+    }
 #if defined(IVP_NO_ALLOCA)
     uchar pierce_visited_array[IVP_MAX_TRIANGLES_PER_LEDGE];
 #else

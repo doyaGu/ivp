@@ -36,7 +36,8 @@ class IVP_Compact_Poly_Point : public IVP_U_Float_Hesse
     void *get_client_data() const { return ((void **)&this->hesse_val)[0]; }
 };
 
-#define IVP_MAX_TRIANGLES_PER_LEDGE 8192
+// tri_index/pierce_index are 12-bit fields in IVP_Compact_Triangle.
+#define IVP_MAX_TRIANGLES_PER_LEDGE (1 << 12)
 
 class IVP_Compact_Edge
 {
@@ -107,12 +108,12 @@ class IVP_Compact_Triangle  //
     // safety functions for creation
     inline void set_tri_index(int val)
     {
-        IVP_ASSERT(val >= 0 && val < (1 << 12));
+        IVP_ASSERT(val >= 0 && val < IVP_MAX_TRIANGLES_PER_LEDGE);
         tri_index = val;
     }
     inline void set_pierce_index(int val)
     {
-        IVP_ASSERT(val >= 0 && val < (1 << 12));
+        IVP_ASSERT(val >= 0 && val < IVP_MAX_TRIANGLES_PER_LEDGE);
         pierce_index = val;
     }
     inline void set_material_index(int val)
@@ -389,5 +390,9 @@ const IVP_Compact_Ledge *IVP_Compact_Triangle::get_compact_ledge() const
     c_tri -= c_tri->get_tri_index();  // first triangle
     return (IVP_Compact_Ledge *)(((char *)c_tri) - sizeof(IVP_Compact_Ledge));
 }
+
+typedef char ivp_compact_edge_must_be_4_bytes[(sizeof(IVP_Compact_Edge) == 4) ? 1 : -1];
+typedef char ivp_compact_triangle_must_be_16_bytes[(sizeof(IVP_Compact_Triangle) == 16) ? 1 : -1];
+typedef char ivp_compact_ledge_must_be_16_bytes[(sizeof(IVP_Compact_Ledge) == 16) ? 1 : -1];
 
 #endif // IVP_COLLISION_COMPACT_LEDGE_INCLUDED
