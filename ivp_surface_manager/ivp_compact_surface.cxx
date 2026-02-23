@@ -5,6 +5,8 @@
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_surface.hxx>
 
+#include <string.h>
+
 void IVP_Compact_Surface::byte_swap()
 {
     /*
@@ -22,7 +24,8 @@ void IVP_Compact_Surface::byte_swap()
     ivp_byte_swap4((uint &)upper_limit_radius);    // 1 float
     ivp_byte_swap4((uint &)offset_ledgetree_root); // 1 float
 
-    uint bitfields = *(uint *)(&upper_limit_radius + 1);
+    uint bitfields;
+    memcpy(&bitfields, (&upper_limit_radius + 1), sizeof(bitfields));
 
 #if defined(__POWERPC__)
 
