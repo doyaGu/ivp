@@ -765,25 +765,25 @@ void IVP_Friction_System::remove_dist_from_system(IVP_Contact_Point *old_dist)
 void IVP_Friction_System::dist_added_update_pair_info(IVP_Contact_Point *new_dist)
 {
 	// manage info of obj pairs
+	IVP_Friction_Core_Pair *my_pair_info;
+	IVP_Core *core0, *core1;
+	core0 = new_dist->get_synapse(0)->l_obj->physical_core;
+	core1 = new_dist->get_synapse(1)->l_obj->physical_core;
+	my_pair_info = this->get_pair_info_for_objs(core0, core1);
+	if (my_pair_info)
 	{
-		IVP_Friction_Core_Pair *my_pair_info;
-		IVP_Core *core0, *core1;
-		core0 = new_dist->get_synapse(0)->l_obj->physical_core;
-		core1 = new_dist->get_synapse(1)->l_obj->physical_core;
-		my_pair_info = this->get_pair_info_for_objs(core0, core1);
-		if (my_pair_info)
-		{
-			;
-		}
-		else
-		{
-			my_pair_info = new IVP_Friction_Core_Pair();
-			my_pair_info->objs[0] = core0;
-			my_pair_info->objs[1] = core1;
-			this->add_fr_pair(my_pair_info);
-		}
 		my_pair_info->add_fr_dist_obj_pairs(new_dist);
 	}
+	else
+	{
+		my_pair_info = new IVP_Friction_Core_Pair();
+		my_pair_info->objs[0] = core0;
+		my_pair_info->objs[1] = core1;
+		// Add first distance before firing "pair created" callbacks.
+		my_pair_info->add_fr_dist_obj_pairs(new_dist);
+		this->add_fr_pair(my_pair_info);
+	}
+	return;
 }
 
 void IVP_Friction_System::add_dist_to_system(IVP_Contact_Point *new_dist)

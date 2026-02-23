@@ -1670,16 +1670,22 @@ void IVP_Impact_System::add_pushed_core_with_pairs_except(IVP_Core *new_core, IV
 			{
 				if (pair_is_already_in_system(fr_pair) == IVP_FALSE)
 				{
+					IVP_Core *pair_core0 = fr_pair->objs[0];
+					IVP_Core *pair_core1 = fr_pair->objs[1];
 					if (fr_pair->check_all_fr_mindists_to_be_valid(this->associated_fs_system) > 0)
 					{
-						// warning: at this point fr_pair could be deleted
-						add_pair_to_impact_system(fr_pair);
+						// check_all_fr_mindists_to_be_valid may delete the pair.
+						IVP_Friction_Core_Pair *validated_pair = associated_fs_system->find_pair_of_cores(pair_core0, pair_core1);
+						if (validated_pair && pair_is_already_in_system(validated_pair) == IVP_FALSE)
+						{
+							add_pair_to_impact_system(validated_pair);
+						}
 					}
 				}
 			}
 		}
 	}
-}
+	}
 
 // speedup: put flag in pairs
 IVP_BOOL IVP_Impact_System::pair_is_already_in_system(IVP_Friction_Core_Pair *test_pair)
