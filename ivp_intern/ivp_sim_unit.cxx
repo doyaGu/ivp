@@ -479,6 +479,14 @@ void IVP_Controller_Manager::remove_controller_from_environment(IVP_Controller_D
     for (i = controlled_cores->len() - 1; i >= 0; i--)
     {
         IVP_Core *my_core = controlled_cores->element_at(i);
+        if (!my_core)
+        {
+            continue;
+        }
+        if (core_has_controller(my_core, cntrl) == IVP_FALSE)
+        {
+            continue;
+        }
         my_core->rem_core_controller(cntrl);
         reference_unit = my_core->sim_unit_of_core;
     }
@@ -496,9 +504,23 @@ void IVP_Controller_Manager::ensure_controller_in_simulation(IVP_Controller_Depe
 {
     IVP_U_Vector<IVP_Core> *controlled_cores = cntrl->get_associated_controlled_cores();
     IVP_ASSERT(controlled_cores->len() > 0);
-    if (controlled_cores->len() > 0)
-    { // #+# is this to avoid an assert ???
-        controlled_cores->element_at(0)->sim_unit_of_core->sim_unit_ensure_in_simulation();
+    for (int i = 0; i < controlled_cores->len(); i++)
+    {
+        IVP_Core *core = controlled_cores->element_at(i);
+        if (!core)
+        {
+            continue;
+        }
+        if (core->physical_unmoveable)
+        {
+            continue;
+        }
+        if (!core->sim_unit_of_core)
+        {
+            continue;
+        }
+        core->sim_unit_of_core->sim_unit_ensure_in_simulation();
+        break;
     }
 }
 
@@ -510,6 +532,22 @@ void IVP_Controller_Manager::add_controller_to_core(IVP_Controller_Independent *
 void IVP_Controller_Manager::remove_controller_from_core(IVP_Controller_Independent *cntrl, IVP_Core *core)
 {
     core->rem_core_controller(cntrl);
+}
+
+IVP_BOOL IVP_Controller_Manager::core_has_controller(IVP_Core *core, IVP_Controller *controller)
+{
+    if (!core)
+    {
+        return IVP_FALSE;
+    }
+    for (int i = core->controllers_of_core.len() - 1; i >= 0; i--)
+    {
+        if (core->controllers_of_core.element_at(i) == controller)
+        {
+            return IVP_TRUE;
+        }
+    }
+    return IVP_FALSE;
 }
 
 // only for Controllers that have all cores computed at the same time
@@ -544,7 +582,10 @@ void IVP_Controller_Manager::announce_controller_to_environment(IVP_Controller_D
                 reference_unit = test_sim_unit;
             }
 
-            test_core->add_core_controller(cntrl);
+            if (core_has_controller(test_core, cntrl) == IVP_FALSE)
+            {
+                test_core->add_core_controller(cntrl);
+            }
         }
     }
 

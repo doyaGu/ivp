@@ -179,6 +179,8 @@ public:
      ********************************************************************************/
     static void remove_controller_from_core(IVP_Controller_Independent *cntrl, IVP_Core *core);
 
+    static IVP_BOOL core_has_controller(IVP_Core *core, IVP_Controller *controller);
+
     /********************************************************************************
      *	Name:	  	ensure_controller_in_simulation
      *	Description:	forces all objects to wake up at next PSI
