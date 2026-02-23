@@ -391,7 +391,7 @@ public:
     void change_fast_piling_allowed(IVP_BOOL flag);
     void set_pinned(IVP_BOOL is_pinned); //@@CB
 
-    void change_nocoll_group_ident(const char *new_identify_string); // note: max length IVP_NO_COLL_GROUP_STRING_LEN
+    void change_nocoll_group_ident(const char *new_identify_string); // note: max chars IVP_NO_COLL_GROUP_STRING_LEN - 1
 
     void recompile_values_changed();
     void recompile_material_changed();

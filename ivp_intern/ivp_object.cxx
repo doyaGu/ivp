@@ -37,7 +37,8 @@ void IVP_Real_Object::change_nocoll_group_ident(const char *new_string)
         nocoll_group_ident[0] = 0;
         return;
     }
-    if (strlen(new_string) > IVP_NO_COLL_GROUP_STRING_LEN)
+    // Reserve one byte for '\0'.
+    if (strlen(new_string) >= IVP_NO_COLL_GROUP_STRING_LEN)
     {
         CORE;
     }
@@ -163,6 +164,9 @@ void IVP_Real_Object::change_unmovable_flag(IVP_BOOL flag)
     {
         // printf("switch_to_movable\n");
     }
+
+    // Keep core/object movement states in sync with the updated immovability.
+    my_core->values_changed_recalc_redundants();
 }
 
 void IVP_Real_Object::recompile_values_changed()
@@ -1009,6 +1013,11 @@ void IVP_Real_Object::init_object_core(IVP_Environment *i_environment, const IVP
     core->transform_PSI_matrizes_core(&m_object_f_core);
     IVP_Event_Sim es(i_environment, i_environment->get_next_PSI_time() - i_environment->get_current_time());
     core->calc_next_PSI_matrix_zero_speed(&es);
+
+    if (templ->pinned == IVP_TRUE)
+    {
+        set_pinned(IVP_TRUE);
+    }
 }
 
 void IVP_Real_Object::unlink_contact_points_for_object(IVP_Real_Object *other_object)
