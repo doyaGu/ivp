@@ -22,7 +22,9 @@
 #endif
 
 #ifdef WIN32
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #define IVP_PIII			/* set for P3 specific code */
+#endif
 // #define IVP_WILLAMETTE	/* set for Willamette specific code */
 // #define IVP_WMT_ALIGN		/* set to compile with MS but Willamette compatible */
 // #define IVP_PSXII			/* playstation II */
