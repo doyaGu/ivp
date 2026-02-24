@@ -17,6 +17,9 @@
 
 #if defined(WIN32) && !defined(_XBOX)
 #include "wtypes.h"
+#if defined(_MSC_VER)
+#include <float.h>
+#endif
 #elif defined(_XBOX)
 #ifndef WINVER
 #define WINVER 0x0500
@@ -715,12 +718,11 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
      * FPU mode
      ************************************************/
     // doesnt work with threads !!
-#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
-    unsigned short tmpflag;
-    __asm FSTCW tmpflag;
-
-    unsigned short newFPUflag = tmpflag | 0x0300;
-    __asm FLDCW newFPUflag;
+#if defined(WIN32) && defined(_MSC_VER)
+    unsigned int oldControl = 0;
+    unsigned int ignoredControl = 0;
+    _controlfp_s(&oldControl, 0, 0);
+    _controlfp_s(&ignoredControl, _PC_64, _MCW_PC);
 #elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
     unsigned short tmpflag;
     __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
@@ -745,8 +747,8 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
         result = IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge_internal(points);
     }
 
-#if defined(WIN32) && defined(_M_IX86) && defined(_MSC_VER)
-    __asm FLDCW tmpflag;
+#if defined(WIN32) && defined(_MSC_VER)
+    _controlfp_s(&ignoredControl, oldControl, _MCW_PC);
 #elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
     __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
 #endif
