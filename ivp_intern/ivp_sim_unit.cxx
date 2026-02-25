@@ -72,7 +72,7 @@ void IVP_Simulation_Unit::add_controlled_core_for_controller(IVP_Controller *cnt
     }
     IVP_ASSERT(i >= 0);
     // IVP_ASSERT( controller_cores.element_at(i)->l_controller == cntrl );
-    controller_cores.element_at(i)->cores_controlled_by.add(my_core);
+    controller_cores.element_at(i)->cores_controlled_by.install(my_core);
 }
 
 void IVP_Simulation_Unit::add_controller_unit_sim(IVP_Controller *new_cntrl)
@@ -559,11 +559,27 @@ void IVP_Controller_Manager::ensure_controller_in_simulation(IVP_Controller_Depe
 
 void IVP_Controller_Manager::add_controller_to_core(IVP_Controller_Independent *cntrl, IVP_Core *core)
 {
+    if (!core || !cntrl)
+    {
+        return;
+    }
+    if (core_has_controller(core, cntrl))
+    {
+        return;
+    }
     core->add_core_controller(cntrl);
 }
 
 void IVP_Controller_Manager::remove_controller_from_core(IVP_Controller_Independent *cntrl, IVP_Core *core)
 {
+    if (!core || !cntrl)
+    {
+        return;
+    }
+    if (core_has_controller(core, cntrl) == IVP_FALSE)
+    {
+        return;
+    }
     core->rem_core_controller(cntrl);
 }
 
