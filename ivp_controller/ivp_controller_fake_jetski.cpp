@@ -89,7 +89,7 @@ void IVP_Controller_Raycast_Fake_Jetski::SetupWheelRaycasts(IVP_Ray_Solver_Templ
 			raySolverTemplate.ray_normized_direction.set(&pTempWheels[iWheel].spring_direction_ws);
 
 			// Set the length of the ray cast.
-			IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[1] - pWheel->raycast_start_cs.k[1];
+			IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[index_y] - pWheel->raycast_start_cs.k[index_y];
 			raySolverTemplate.ray_length = pWheel->spring_len + pWheel->wheel_radius + flHeightDelta;
 
 			// Set the ray solver template flags.  This defines wish objects you wish to
@@ -127,7 +127,7 @@ bool IVP_Controller_Raycast_Fake_Jetski::DoSimulationWheels(const IVP_U_Matrix *
 				pCacheObject->transform_vector_to_world_coords(&pRayHit->hit_surface_direction_os, &pTempWheel->ground_normal_ws);
 
 				// Set the wheel's distance to move along the ray to reach the impact surface.
-				IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[1] - pWheel->raycast_start_cs.k[1];
+				IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[index_y] - pWheel->raycast_start_cs.k[index_y];
 				pWheel->raycast_dist = pRayHit->hit_distance - flHeightDelta;
 
 				// Get the inverse portion of the surface normal in the direction of the ray cast (shock - used in the shock simulation code for the sign
@@ -140,7 +140,7 @@ bool IVP_Controller_Raycast_Fake_Jetski::DoSimulationWheels(const IVP_U_Matrix *
 			// The wheel is in air (i.e. no pressure on the wheel and it is at full extension).
 			pWheel->pressure = 0.0f;
 
-			IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[1] - pWheel->raycast_start_cs.k[1];
+			IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[index_y] - pWheel->raycast_start_cs.k[index_y];
 			pWheel->raycast_dist = pWheel->spring_len + pWheel->wheel_radius - flHeightDelta;
 
 			// Set default non-impact data.
@@ -160,8 +160,10 @@ bool IVP_Controller_Raycast_Fake_Jetski::DoSimulationWheels(const IVP_U_Matrix *
 		// Verify - just improves accuracy!
 		IVP_U_Point tracePosWS;
 		m_world_f_core->vmult4(&pWheel->raycast_start_cs, &tracePosWS);
-		IVP_FLOAT flHeight = tracePosWS.k[1] + (pTempWheel->spring_direction_ws.k[1] * pRayHit->hit_distance);
-		pTempWheel->ground_hit_ws.k[1] = flHeight;
+		IVP_FLOAT flHeightDelta = pWheel->hp_cs.k[index_y] - pWheel->raycast_start_cs.k[index_y];
+		IVP_FLOAT flRayDistance = pWheel->raycast_dist + flHeightDelta;
+		IVP_FLOAT flHeight = tracePosWS.k[index_y] + (pTempWheel->spring_direction_ws.k[index_y] * flRayDistance);
+		pTempWheel->ground_hit_ws.k[index_y] = flHeight;
 
 		// Get the speed (velocity) at the impact point.
 		pCarCore->get_surface_speed_ws(&pTempWheel->ground_hit_ws, &pTempWheel->surface_speed_wheel_ws);
@@ -414,7 +416,7 @@ IVP_DOUBLE IVP_Controller_Raycast_Fake_Jetski::GetSteeringForceRotational(int iW
 	}
 
 	// General force that will help get us back to zero rotation.
-	IVP_FLOAT flRotSpeedSign = pCarCore->rot_speed.k[1] < 0.0f ? -1.0f : 1.0f;
+	IVP_FLOAT flRotSpeedSign = pCarCore->rot_speed.k[index_y] < 0.0f ? -1.0f : 1.0f;
 	IVP_FLOAT flRotationalDrag = -0.5f * m_SteeringRate * pCarCore->get_mass() * pEventSim->i_delta_time;
 	flRotationalDrag *= flRotSpeedSign;
 	flForceRotational += flRotationalDrag;
@@ -536,7 +538,7 @@ void IVP_Controller_Raycast_Fake_Jetski::TurnInPlaceHack(IVP_Raycast_Fake_Jetski
 	// Check to see if we are going slow enough and want to turn to turn in place.
 	if (flSpeed < 1.0f)
 	{
-		for (int iWheel = 0; iWheel < 4; ++iWheel)
+		for (int iWheel = 0; iWheel < n_wheels; ++iWheel)
 		{
 			IVP_Raycast_Fake_Jetski_Wheel *pWheel = get_wheel(IVP_POS_WHEEL(iWheel));
 			IVP_Raycast_Fake_Jetski_Wheel_Temp *pTempWheel = &pTempWheels[iWheel];
