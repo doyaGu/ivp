@@ -651,6 +651,11 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
     // Checks wether the specified object is hit by the specified ray.
     // Adds the corresponding object to the min hash for each hit.
     // check flags
+    if (!object)
+        return;
+    if (!ray_solvers || n_ray_solvers <= 0 || !ray_solvers[0])
+        return;
+
     if (object)
     {
         IVP_RAY_SOLVER_FLAGS ray_flags = ray_solvers[0]->ray_flags;
@@ -680,7 +685,10 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
             IVP_Ball *ball = object->to_ball();
             for (int i = n_ray_solvers - 1; i >= 0; i--)
             {
-                ray_solvers[i]->check_ray_against_ball(ball);
+                IVP_Ray_Solver *solver = ray_solvers[i];
+                if (!solver)
+                    continue;
+                solver->check_ray_against_ball(ball);
             }
             break;
         }
@@ -690,7 +698,10 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
             IVP_SurfaceManager *surman = poly->get_surface_manager();
             for (int i = n_ray_solvers - 1; i >= 0; i--)
             {
-                surman->insert_all_ledges_hitting_ray(ray_solvers[i], poly);
+                IVP_Ray_Solver *solver = ray_solvers[i];
+                if (!solver)
+                    continue;
+                surman->insert_all_ledges_hitting_ray(solver, poly);
             }
             // Check all ledges within ray radius
             break;
@@ -704,6 +715,8 @@ void IVP_Ray_Solver_Group::check_ray_group_against_object(IVP_Real_Object *objec
 void IVP_Ray_Solver::check_ray_against_node(IVP_OV_Node *node, IVP_OV_Tree_Manager *ov_tree_man)
 {
     // Recursive function
+    if (!node)
+        return;
 
     // Check whether ray hits the long range cluster node.
     IVP_U_Float_Point luf_point, rlb_point; // left upper front / right lower back
@@ -747,6 +760,8 @@ void IVP_Ray_Solver::check_ray_against_node(IVP_OV_Node *node, IVP_OV_Tree_Manag
 void IVP_Ray_Solver_Group::check_ray_group_against_node(IVP_OV_Node *node, IVP_OV_Tree_Manager *ov_tree_man)
 {
     // Recursive function
+    if (!node)
+        return;
 
     // Check whether ray hits the long range cluster node.
     IVP_U_Float_Point luf_point, cube_center_point; // left upper front / right lower back
@@ -801,6 +816,8 @@ void IVP_Ray_Solver::check_ray_against_all_objects_in_sim(const IVP_Environment 
         return;
 
     IVP_OV_Node *node = ov_tree_man->root;
+    if (!node)
+        return;
 
     check_ray_against_node(node, ov_tree_man);
 }
@@ -817,30 +834,56 @@ void IVP_Ray_Solver_Group::check_ray_group_against_all_objects_in_sim(const IVP_
         return;
 
     IVP_OV_Node *node = ov_tree_man->root;
+    if (!node)
+        return;
 
     check_ray_group_against_node(node, ov_tree_man);
 }
 
 IVP_Ray_Solver_Group::IVP_Ray_Solver_Group(int n_ray_solvers_, IVP_Ray_Solver **ray_solvers_)
 {
+    IVP_ASSERT(n_ray_solvers_ > 0);
+    IVP_ASSERT(ray_solvers_);
     ray_solvers = ray_solvers_;
     n_ray_solvers = n_ray_solvers_;
 
     center_ws.set_to_zero();
+    radius = 0.0f;
+
+    if (!ray_solvers || n_ray_solvers <= 0)
+    {
+        n_ray_solvers = 0;
+        return;
+    }
+
+    int valid_ray_solvers = 0;
 
     for (int i = 0; i < n_ray_solvers; i++)
     {
-        center_ws.add(&ray_solvers[i]->ray_center_point);
+        IVP_Ray_Solver *solver = ray_solvers[i];
+        if (!solver)
+            continue;
+        center_ws.add(&solver->ray_center_point);
+        valid_ray_solvers++;
     }
-    center_ws.mult(1.0f / n_ray_solvers);
+    if (valid_ray_solvers <= 0)
+    {
+        n_ray_solvers = 0;
+        return;
+    }
+
+    center_ws.mult(1.0f / valid_ray_solvers);
     IVP_DOUBLE qradius = 0.0f;
     for (int j = 0; j < n_ray_solvers; j++)
     {
-        IVP_DOUBLE qdist = ray_solvers[j]->ray_start_point.quad_distance_to(&center_ws);
+        IVP_Ray_Solver *solver = ray_solvers[j];
+        if (!solver)
+            continue;
+        IVP_DOUBLE qdist = solver->ray_start_point.quad_distance_to(&center_ws);
         if (qdist > qradius)
             qradius = qdist;
 
-        qdist = ray_solvers[j]->ray_end_point.quad_distance_to(&center_ws);
+        qdist = solver->ray_end_point.quad_distance_to(&center_ws);
         if (qdist > qradius)
             qradius = qdist;
     }
