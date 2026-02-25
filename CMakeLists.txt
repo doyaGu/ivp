@@ -270,7 +270,6 @@ set(IVP_INTERN_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_ball.cxx
     ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.cxx
     ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.hxx
-    ${IVP_DIR}/ivp_intern/ivp_controller_phantom.cxx
     ${IVP_DIR}/ivp_intern/ivp_core.cxx
     ${IVP_DIR}/ivp_intern/ivp_environment.cxx
     ${IVP_DIR}/ivp_intern/ivp_friction.cxx
@@ -344,6 +343,7 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_object_attach.hxx
     ${IVP_DIR}/ivp_physics/ivp_performancecounter.cxx
     ${IVP_DIR}/ivp_physics/ivp_performancecounter.hxx
+    ${IVP_DIR}/ivp_physics/ivp_phantom.cxx
     ${IVP_DIR}/ivp_physics/ivp_phantom.hxx
     ${IVP_DIR}/ivp_physics/ivp_physics.hxx
     ${IVP_DIR}/ivp_physics/ivp_polygon.hxx
