@@ -23,9 +23,14 @@
 int IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_polyhedron_to_compact_ledges(IVP_Concave_Polyhedron *concave_polyhedron_in, IVP_Convex_Decompositor_Parameters *params,
                                                                                         IVP_U_BigVector<IVP_Compact_Ledge> *ledges_out)
 {
+    if (!concave_polyhedron_in || !params || !ledges_out)
+    {
+        return 0;
+    }
 
     IVP_U_BigVector<IVP_Convex_Subpart> convex_subparts;
     int n_subparts = IVP_Convex_Decompositor::perform_convex_decomposition_on_concave_polyhedron(concave_polyhedron_in, params, &convex_subparts);
+    int n_ledges_out = 0;
 
     for (int x = 0; x < n_subparts; x++)
     {
@@ -33,15 +38,21 @@ int IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_polyhedron_to_compact
         if (compact_ledge)
         {
             ledges_out->add(compact_ledge);
+            n_ledges_out++;
         }
         delete (convex_subparts.element_at(x));
     }
 
-    return (n_subparts);
+    return (n_ledges_out);
 }
 
 void IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_face_soup_to_compact_ledges(IVP_Concave_Polyhedron *concave_polyhedron_in, IVP_U_BigVector<IVP_Compact_Ledge> *ledges_out)
 {
+    if (!concave_polyhedron_in || !ledges_out)
+    {
+        return;
+    }
+
     IVP_U_Vector<IVP_U_Point> points;
 
     int n_faces = concave_polyhedron_in->faces.len();
@@ -61,7 +72,10 @@ void IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_face_soup_to_compact
             points.add(p);
         }
         IVP_Compact_Ledge *ledge = IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge(&points);
-        ledges_out->add(ledge);
+        if (ledge)
+        {
+            ledges_out->add(ledge);
+        }
     }
 }
 
@@ -77,6 +91,11 @@ void IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_face_soup_to_compact
 IVP_Compact_Surface *IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_polyhedron_to_single_compact_surface(IVP_Concave_Polyhedron *concave_polyhedron_in,
                                                                                                                  IVP_Convex_Decompositor_Parameters *params)
 {
+    if (!concave_polyhedron_in || !params)
+    {
+        return NULL;
+    }
+
     IVP_U_BigVector<IVP_Compact_Ledge> ledges_local;
 
     IVP_SurfaceBuilder_Polyhedron_Concave::convert_concave_polyhedron_to_compact_ledges(concave_polyhedron_in, params, &ledges_local);
