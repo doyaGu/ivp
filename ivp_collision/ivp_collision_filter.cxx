@@ -133,7 +133,9 @@ IVP_CFEP_Hash::~IVP_CFEP_Hash()
  ********************************************************************************/
 void IVP_Collision_Filter_Exclusive_Pair::generate_hash_entry(IVP_Real_Object *obj0, IVP_Real_Object *obj1, IVP_CFEP_Objectpair *entry)
 {
-    if (obj1 > obj0)
+    const intp key0 = (intp)obj0;
+    const intp key1 = (intp)obj1;
+    if (key1 > key0)
     {  // always sort objects by their memory address!
         entry->object0 = obj0;
         entry->object1 = obj1;
@@ -147,12 +149,12 @@ void IVP_Collision_Filter_Exclusive_Pair::generate_hash_entry(IVP_Real_Object *o
 
 void IVP_Collision_Filter_Exclusive_Pair::disable_collision_between_objects(IVP_Real_Object *obj0, IVP_Real_Object *obj1)
 {
-    IVP_CFEP_Objectpair *new_pair = new IVP_CFEP_Objectpair();
-
-    generate_hash_entry(obj0, obj1, new_pair);
-
-    if (!this->hash_table->find(new_pair))
-    {                                     // pair already stored?
+    IVP_CFEP_Objectpair pair;
+    generate_hash_entry(obj0, obj1, &pair);
+    if (!this->hash_table->find(&pair))
+    {                                     // pair not stored yet?
+        IVP_CFEP_Objectpair *new_pair = new IVP_CFEP_Objectpair();
+        *new_pair = pair;
         this->hash_table->add(new_pair);  // no, then store now...
     }
 }
