@@ -84,6 +84,16 @@ void IVP_Controller_Stiff_Spring::set_damp(IVP_DOUBLE c)
     this->ensure_actuator_in_simulation();
 }
 
+void IVP_Controller_Stiff_Spring::add_listener_stiff_spring(IVP_Listener_Stiff_Spring *listener)
+{
+    listeners_spring_event.add(listener);
+}
+
+void IVP_Controller_Stiff_Spring::remove_listener_stiff_spring(IVP_Listener_Stiff_Spring *listener)
+{
+    listeners_spring_event.remove(listener);
+}
+
 IVP_Controller_Stiff_Spring::~IVP_Controller_Stiff_Spring()
 {
 }
@@ -187,10 +197,14 @@ void IVP_Controller_Stiff_Spring::do_simulation_controller(IVP_Event_Sim *es, IV
         }
     }
 
-    if (pc0->movement_state >= IVP_MT_NOT_SIM)
+    if (pc0->movement_state >= IVP_MT_NOT_SIM || pc0->pinned)
         pc0 = NULL;
-    if (pc1->movement_state >= IVP_MT_NOT_SIM)
+    if (pc1->movement_state >= IVP_MT_NOT_SIM || pc1->pinned)
         pc1 = NULL;
+    if (!pc0 && !pc1)
+    {
+        return;
+    }
 
     /* second step: calc and apply forces */
     IVP_Solver_Core_Reaction scr;
@@ -201,7 +215,12 @@ void IVP_Controller_Stiff_Spring::do_simulation_controller(IVP_Event_Sim *es, IV
     IVP_DOUBLE a = (this->spring_len - dlen) * es->i_delta_time * this->spring_constant -
                    scr.delta_velocity_ds.k[0] * (this->spring_constant + this->spring_damp * (1.0f - this->spring_constant));
     IVP_U_Float_Point impulses;
-    impulses.k[0] = a / tpm.get_elem(0, 0);
+    const IVP_DOUBLE tpm00 = tpm.get_elem(0, 0);
+    if (tpm00 < P_FLOAT_EPS && tpm00 > -P_FLOAT_EPS)
+    {
+        return;
+    }
+    impulses.k[0] = a / tpm00;
 
     scr.exert_impulse_dim1(pc0, pc1, impulses);
 }

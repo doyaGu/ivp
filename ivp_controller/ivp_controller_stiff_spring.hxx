@@ -64,6 +64,7 @@ public:
 class IVP_Listener_Stiff_Spring
 {
 public:
+    virtual ~IVP_Listener_Stiff_Spring() {}
     virtual void event_stiff_spring_broken(class IVP_Controller_Stiff_Spring *) = 0;
 };
 
