@@ -313,7 +313,17 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 		hard_points.add(&templ->wheel_pos_Bos[i]);
 	}
 
-	car_constraint_solver->init_constraint_system(environment, car_body, wheels, hard_points);
+	IVP_RETURN_TYPE init_res = car_constraint_solver->init_constraint_system(environment, car_body, wheels, hard_points);
+	if (init_res != IVP_OK)
+	{
+		ivp_message("IVP_Car_System_Real_Wheels: failed to initialize constraint system\n");
+		IVP_ASSERT(0);
+		P_DELETE(car_constraint_solver);
+		car_constraint_solver = NULL;
+		n_wheels = 0;
+		n_axis = 1;
+		return;
+	}
 	IVP_Constraint_Solver_Car *cs_car = this->car_constraint_solver;
 
 	/////////////////////////////////////////////////////////////
@@ -408,21 +418,34 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	////////   STABILIZERS    /////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
-	// equip vehicle axles with stabilizers
-	if (n_wheels != n_axis)
+	// Equip each axis that has at least two wheels with one stabilizer.
+	int wheels_per_axis = (n_axis > 0) ? (n_wheels / n_axis) : 0;
+	if (wheels_per_axis >= 2)
 	{
-		for (int i = 0; i < 2; i++)
+		int axis_count = n_axis;
+		if (axis_count > IVP_CAR_SYSTEM_MAX_AXIS)
 		{
-			// i=0: front stabi, i=1: rear stabi
+			axis_count = IVP_CAR_SYSTEM_MAX_AXIS;
+		}
+
+		for (int i = 0; i < axis_count; i++)
+		{
+			int wheel0 = i * wheels_per_axis;
+			int wheel1 = wheel0 + 1;
+			if (wheel1 >= n_wheels)
+			{
+				break;
+			}
+
 			IVP_Template_Stabilizer stabi_template;
 
 			// set default
 			stabi_template.stabi_constant = templ->stabilizer_constant[i]; // Newton/meter
 
-			stabi_template.anchors[0] = &anchor_body_template[i * 2];
-			stabi_template.anchors[1] = &anchor_wheel_template[i * 2];
-			stabi_template.anchors[2] = &anchor_body_template[i * 2 + 1];
-			stabi_template.anchors[3] = &anchor_wheel_template[i * 2 + 1];
+			stabi_template.anchors[0] = &anchor_body_template[wheel0];
+			stabi_template.anchors[1] = &anchor_wheel_template[wheel0];
+			stabi_template.anchors[2] = &anchor_body_template[wheel1];
+			stabi_template.anchors[3] = &anchor_wheel_template[wheel1];
 			this->car_stabilizer[i] = environment->create_stabilizer(&stabi_template);
 		}
 	}
@@ -574,9 +597,16 @@ void IVP_Car_System_Real_Wheels::set_powerslide(IVP_FLOAT front_accel, IVP_FLOAT
 // stop wheel completely (e.g. handbrake )
 void IVP_Car_System_Real_Wheels::fix_wheel(IVP_POS_WHEEL wheel_nr, IVP_BOOL stop_wheel)
 {
+	IVP_Constraint_Solver_Car *cs_car = car_constraint_solver;
+	IVP_ASSERT(cs_car);
+	if (!cs_car)
+	{
+		return;
+	}
+
 	if (!stop_wheel)
 	{
-		car_constraint_solver->wheel_objects.element_at(wheel_nr)->fix_wheel_constraint = NULL;
+		cs_car->wheel_objects.element_at(wheel_nr)->fix_wheel_constraint = NULL;
 		P_DELETE(fix_wheel_constraint[wheel_nr]);
 		return;
 	}
@@ -591,12 +621,12 @@ void IVP_Car_System_Real_Wheels::fix_wheel(IVP_POS_WHEEL wheel_nr, IVP_BOOL stop
 	IVP_Template_Constraint constraint;
 	constraint.set_reference_object(wheel);	  // set reference object
 	constraint.set_attached_object(car_body); // set attached object
-	constraint.fix_rotation_axis(IVP_INDEX_X);
-	constraint.free_rotation_axis(IVP_INDEX_Y);
-	constraint.free_rotation_axis(IVP_INDEX_Z);
-	constraint.free_translation_axis(IVP_INDEX_X);
-	constraint.free_translation_axis(IVP_INDEX_Y);
-	constraint.free_translation_axis(IVP_INDEX_Z);
+	constraint.fix_rotation_axis(IVP_COORDINATE_INDEX(cs_car->x_idx));
+	constraint.free_rotation_axis(IVP_COORDINATE_INDEX(cs_car->y_idx));
+	constraint.free_rotation_axis(IVP_COORDINATE_INDEX(cs_car->z_idx));
+	constraint.free_translation_axis(IVP_COORDINATE_INDEX(cs_car->x_idx));
+	constraint.free_translation_axis(IVP_COORDINATE_INDEX(cs_car->y_idx));
+	constraint.free_translation_axis(IVP_COORDINATE_INDEX(cs_car->z_idx));
 
 	// Magic Trick: slow down wheel to avoid effects that would normally
 	// result from such an immediate blocking (inertias!)
@@ -606,7 +636,7 @@ void IVP_Car_System_Real_Wheels::fix_wheel(IVP_POS_WHEEL wheel_nr, IVP_BOOL stop
 
 	IVP_Environment *env = this->environment;
 	this->fix_wheel_constraint[wheel_nr] = env->create_constraint(&constraint);
-	car_constraint_solver->wheel_objects.element_at(wheel_nr)->fix_wheel_constraint = this->fix_wheel_constraint[wheel_nr];
+	cs_car->wheel_objects.element_at(wheel_nr)->fix_wheel_constraint = this->fix_wheel_constraint[wheel_nr];
 }
 
 /********************************************************************************
