@@ -43,10 +43,6 @@ void IVP_Controller_Raycast_Fake_Jetski::do_simulation_controller(IVP_Event_Sim 
 	SetupWheelRaycasts(raySolverTemplates, matWorldFromCore, wheelsTemp);
 	do_raycasts(pEventSim, n_wheels, raySolverTemplates, rayHits, flFrictions);
 
-#if 1
-	//
-
-#else
 	// Wheels.
 	if (!DoSimulationWheels(matWorldFromCore, wheelsTemp, rayHits, flFrictions, pJetskiCore))
 		return;
@@ -65,7 +61,6 @@ void IVP_Controller_Raycast_Fake_Jetski::do_simulation_controller(IVP_Event_Sim 
 
 	// Steering.
 	DoSimulationSteering(wheelsTemp, pJetskiCore, pEventSim);
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -610,7 +605,7 @@ void IVP_Controller_Raycast_Fake_Jetski::change_spring_dampening_compression(IVP
 void IVP_Controller_Raycast_Fake_Jetski::change_spring_pre_tension(IVP_POS_WHEEL pos, IVP_FLOAT pre_tension_length)
 {
 	IVP_Raycast_Fake_Jetski_Wheel *wheel = get_wheel(pos);
-	wheel->spring_len = gravity_y_direction * (wheel->distance_orig_hp_to_hp - pre_tension_length);
+	wheel->spring_len = -pre_tension_length;
 }
 
 void IVP_Controller_Raycast_Fake_Jetski::change_spring_length(IVP_POS_WHEEL pos, IVP_FLOAT spring_length)
@@ -808,8 +803,31 @@ void IVP_Controller_Raycast_Fake_Jetski::InitRaycastCarEnvironment(IVP_Environme
 void IVP_Controller_Raycast_Fake_Jetski::InitRaycastCarBody(const IVP_Template_Car_System *pCarSystemTemplate)
 {
 	// Car body attributes.
-	n_wheels = pCarSystemTemplate->n_wheels;
-	n_axis = pCarSystemTemplate->n_axis;
+	int template_wheels = pCarSystemTemplate->n_wheels;
+	if (template_wheels < 0)
+	{
+		template_wheels = 0;
+	}
+	if (template_wheels > IVP_CAR_SYSTEM_MAX_WHEELS)
+	{
+		template_wheels = IVP_CAR_SYSTEM_MAX_WHEELS;
+	}
+	if (template_wheels > IVP_RAYCAST_FAKE_JETSKI_MAX_WHEELS)
+	{
+		template_wheels = IVP_RAYCAST_FAKE_JETSKI_MAX_WHEELS;
+	}
+	n_wheels = (short)template_wheels;
+
+	int template_axis = pCarSystemTemplate->n_axis;
+	if (template_axis < 1)
+	{
+		template_axis = 1;
+	}
+	if (template_axis > n_wheels)
+	{
+		template_axis = (n_wheels > 0) ? n_wheels : 1;
+	}
+	n_axis = (short)template_axis;
 	wheels_per_axis = n_wheels / n_axis;
 
 	// Add the car body "core" to the list of raycast car controller "cores."
