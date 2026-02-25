@@ -89,7 +89,15 @@ void IVP_Template_Constraint::set_constraint_Ros(IVP_Real_Object *_objR, const I
 	{
 		m_Aos_f_Afs = &mm_Aos_f_Afs;
 		IVP_U_Matrix m_Aos_f_Rfs;
-		m_Aos_f_Ros.mmult4(m_Ros_f_Rfs, &m_Aos_f_Rfs);
+		if (m_Ros_f_Rfs)
+		{
+			m_Aos_f_Ros.mmult4(m_Ros_f_Rfs, &m_Aos_f_Rfs);
+		}
+		else
+		{
+			// If no translation frame is provided, Rfs == Ros.
+			m_Aos_f_Rfs.set_matrix(&m_Aos_f_Ros);
+		}
 		m_Aos_f_Rfs.mmult4(m_Rfs_f_Afs, m_Aos_f_Afs);
 	}
 	else
@@ -121,24 +129,23 @@ void IVP_Template_Constraint::set_constraint_ws(IVP_Real_Object *_objR, const IV
 		m_ws_f_Ros.init();
 	}
 	IVP_U_Point point_Ros;
+	const IVP_U_Point *anchor_Ros = NULL;
 	if (_anchor_ws)
 	{
 		m_ws_f_Ros.vimult4(_anchor_ws, &point_Ros);
-	}
-	else
-	{
-		point_Ros.set_to_zero();
+		anchor_Ros = &point_Ros;
 	}
 	IVP_U_Point known_axis_Ros;
+	const IVP_U_Point *known_axis_Ros_ptr = NULL;
 	if (_known_axis_ws)
 	{
 		m_ws_f_Ros.vimult3(_known_axis_ws, &known_axis_Ros);
+		if (known_axis_Ros.quad_length() > P_DOUBLE_EPS * P_DOUBLE_EPS)
+		{
+			known_axis_Ros_ptr = &known_axis_Ros;
+		}
 	}
-	else
-	{
-		known_axis_Ros.set_to_zero();
-	}
-	set_constraint_Ros(_objR, &point_Ros, &known_axis_Ros, _transdim, _rotdim, _objA, m_Rfs_f_Afs);
+	set_constraint_Ros(_objR, anchor_Ros, known_axis_Ros_ptr, _transdim, _rotdim, _objA, m_Rfs_f_Afs);
 }
 
 void IVP_Template_Constraint::set_stiffness_for_limited_axis(IVP_FLOAT stiffness)
@@ -442,7 +449,13 @@ IVP_Constraint *IVP_Environment::create_constraint(const IVP_Template_Constraint
 	if (!tmpl->objectR && !tmpl->objectA)
 		return NULL;
 
-	IVP_Constraint *newconstraint = new IVP_Constraint_Local(*tmpl);
+	IVP_Template_Constraint checked_tmpl = *tmpl;
+	if (checked_tmpl.force_factor <= P_FLOAT_EPS)
+	{
+		checked_tmpl.force_factor = P_FLOAT_EPS;
+	}
+
+	IVP_Constraint *newconstraint = new IVP_Constraint_Local(checked_tmpl);
 
 	return newconstraint;
 }
