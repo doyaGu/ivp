@@ -34,35 +34,71 @@ void IVP_Controller_Phantom::remove_listener_phantom(IVP_Listener_Phantom *liste
 
 void IVP_Controller_Phantom::add_sleeping_object(IVP_Real_Object *obj)
 {
-    obj->add_listener_object(this);
-    set_of_sleeping_cores->add_element(obj->get_core());
+    if (!set_of_sleeping_cores)
+    {
+        return;
+    }
+
+    IVP_Core *core = obj->get_core();
+    if (set_of_sleeping_cores->find_element(core))
+    {
+        return;
+    }
+
+    for (int i = core->objects.len() - 1; i >= 0; i--)
+    {
+        IVP_Real_Object *core_obj = core->objects.element_at(i);
+        core_obj->add_listener_object(this);
+    }
+    set_of_sleeping_cores->add_element(core);
 }
 
 void IVP_Controller_Phantom::remove_sleeping_object(IVP_Real_Object *obj)
 {
-    obj->remove_listener_object(this);
-    set_of_sleeping_cores->remove_element(obj->get_core());
+    if (!set_of_sleeping_cores)
+    {
+        return;
+    }
+
+    IVP_Core *core = obj->get_core();
+    if (!set_of_sleeping_cores->find_element(core))
+    {
+        return;
+    }
+
+    for (int i = core->objects.len() - 1; i >= 0; i--)
+    {
+        IVP_Real_Object *core_obj = core->objects.element_at(i);
+        core_obj->remove_listener_object(this);
+    }
+    set_of_sleeping_cores->remove_element(core);
 }
 
 void IVP_Controller_Phantom::wake_all_sleeping_objects()
 {
-    IVP_U_Set_Enumerator<IVP_Core> all_sleeping_cores(set_of_sleeping_cores);
-    while (IVP_Core *core = all_sleeping_cores.get_next_element(set_of_sleeping_cores))
+    if (set_of_sleeping_cores)
     {
-        for (int i = core->objects.len() - 1; i >= 0; i--)
+        IVP_U_Set_Enumerator<IVP_Core> all_sleeping_cores(set_of_sleeping_cores);
+        while (IVP_Core *core = all_sleeping_cores.get_next_element(set_of_sleeping_cores))
         {
-            IVP_Real_Object *obj = core->objects.element_at(i);
-            obj->ensure_in_simulation();
+            for (int i = core->objects.len() - 1; i >= 0; i--)
+            {
+                IVP_Real_Object *obj = core->objects.element_at(i);
+                obj->ensure_in_simulation();
+            }
         }
     }
 
-    IVP_U_Set_Enumerator<IVP_Core> all_cores(set_of_cores);
-    while (IVP_Core *core = all_cores.get_next_element(set_of_cores))
+    if (set_of_cores)
     {
-        for (int i = core->objects.len() - 1; i >= 0; i--)
+        IVP_U_Set_Enumerator<IVP_Core> all_cores(set_of_cores);
+        while (IVP_Core *core = all_cores.get_next_element(set_of_cores))
         {
-            IVP_Real_Object *obj = core->objects.element_at(i);
-            obj->ensure_in_simulation();
+            for (int i = core->objects.len() - 1; i >= 0; i--)
+            {
+                IVP_Real_Object *obj = core->objects.element_at(i);
+                obj->ensure_in_simulation();
+            }
         }
     }
 }
@@ -87,19 +123,25 @@ void IVP_Controller_Phantom::fire_event_core_left(IVP_Core *core)
 
 IVP_Controller_Phantom::~IVP_Controller_Phantom()
 {
-    IVP_U_Set_Enumerator<IVP_Core> all_cores(set_of_cores);
-    while (IVP_Core *core = all_cores.get_next_element(set_of_cores))
-        fire_event_core_left(core);
-
-    IVP_U_Set_Enumerator<IVP_Core> all_sleeping_cores(set_of_sleeping_cores);
-    while (IVP_Core *core = all_sleeping_cores.get_next_element(set_of_sleeping_cores))
+    if (set_of_cores)
     {
-        fire_event_core_left(core);
+        IVP_U_Set_Enumerator<IVP_Core> all_cores(set_of_cores);
+        while (IVP_Core *core = all_cores.get_next_element(set_of_cores))
+            fire_event_core_left(core);
+    }
 
-        for (int i = core->objects.len() - 1; i >= 0; i--)
+    if (set_of_sleeping_cores)
+    {
+        IVP_U_Set_Enumerator<IVP_Core> all_sleeping_cores(set_of_sleeping_cores);
+        while (IVP_Core *core = all_sleeping_cores.get_next_element(set_of_sleeping_cores))
         {
-            IVP_Real_Object *obj = core->objects.element_at(i);
-            obj->remove_listener_object(this);
+            fire_event_core_left(core);
+
+            for (int i = core->objects.len() - 1; i >= 0; i--)
+            {
+                IVP_Real_Object *obj = core->objects.element_at(i);
+                obj->remove_listener_object(this);
+            }
         }
     }
 
@@ -345,15 +387,15 @@ IVP_Controller_Phantom::IVP_Controller_Phantom(IVP_Real_Object *object_in, const
 
 void IVP_Controller_Phantom::event_object_revived(IVP_Event_Object *obj)
 {
-    if (set_of_sleeping_cores && set_of_sleeping_cores->find_element(obj->real_object->get_core()))
+    IVP_Core *core = obj->real_object->get_core();
+    if (set_of_sleeping_cores && set_of_sleeping_cores->find_element(core))
     {
-        obj->real_object->remove_listener_object(this);
-        set_of_sleeping_cores->remove_element(obj->real_object->get_core());
+        remove_sleeping_object(obj->real_object);
 
         if (set_of_cores)
         {
-            if (!mindist_core_counter->find_elem(obj->real_object->get_core()))
-                fire_event_core_left(obj->real_object->get_core());
+            if (!mindist_core_counter->find_elem(core))
+                fire_event_core_left(core);
         }
     }
 }
