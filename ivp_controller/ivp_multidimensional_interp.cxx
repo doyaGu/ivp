@@ -17,7 +17,11 @@
 
 void IVP_MI_Vector::set(const IVP_MI_Vector *v)
 {
-	IVP_ASSERT(nr_of_elements >= v->nr_of_elements);
+	if (nr_of_elements < v->nr_of_elements)
+	{
+		IVP_ASSERT(nr_of_elements >= v->nr_of_elements);
+		return;
+	}
 	nr_of_elements = v->nr_of_elements;
 	weight_statistic = v->weight_statistic;
 	for (int i = 0; i < nr_of_elements; i++)
@@ -236,8 +240,19 @@ IVP_RETURN_TYPE IVP_Multidimensional_Interpolator::check_interpolation(const IVP
 																	   IVP_MI_Vector *output)
 {
 
-	if (nr_occupied < 2)
+	if ((nr_occupied < 2) || (nr_of_elements_input <= 0))
 	{ // solver has to compute the solution for itself, because there is not enough data yet
+		return (IVP_FAULT);
+	}
+
+	int max_vectors_involved = nr_occupied;
+	const int max_vectors_by_dimension = nr_of_elements_input + 1;
+	if (max_vectors_involved > max_vectors_by_dimension)
+	{
+		max_vectors_involved = max_vectors_by_dimension;
+	}
+	if (max_vectors_involved < 2)
+	{
 		return (IVP_FAULT);
 	}
 
@@ -283,13 +298,13 @@ IVP_RETURN_TYPE IVP_Multidimensional_Interpolator::check_interpolation(const IVP
 	else
 	{
 		// more than 1 input vector needed for the interpolation
-		if ((nr_of_vectors_involved < 2) || (nr_of_vectors_involved > nr_occupied))
+		if ((nr_of_vectors_involved < 2) || (nr_of_vectors_involved > max_vectors_involved))
 		{
 			// in the previous interpolation run one vector was sufficient (but not now)
 			nr_of_vectors_involved = 2;
 		}
 
-		while (nr_of_vectors_involved <= nr_occupied)
+		while (nr_of_vectors_involved <= max_vectors_involved)
 		{
 			// initialize the scratchboard
 			for (int i = 0; i < (nr_of_vectors_involved - 1); i++)
@@ -444,6 +459,11 @@ IVP_RETURN_TYPE IVP_Multidimensional_Interpolator::check_interpolation(const IVP
 
 void IVP_Multidimensional_Interpolator::add_new_input_solution_combination_conventional(const IVP_MI_Vector *new_input, const IVP_MI_Vector *new_solution)
 {
+	if (nr_of_vectors <= 0)
+	{
+		IVP_ASSERT(nr_of_vectors > 0);
+		return;
+	}
 
 	// move all vectors one position further, the new vectors will be copied to the first position
 	IVP_MI_Vector *tmp_vec_input = previous_inputs[nr_of_vectors - 1];
@@ -473,6 +493,11 @@ void IVP_Multidimensional_Interpolator::add_new_input_solution_combination_conve
 
 void IVP_Multidimensional_Interpolator::add_new_input_solution_combination_stochastic(const IVP_MI_Vector *new_input, const IVP_MI_Vector *new_solution)
 {
+	if (nr_of_vectors <= 0)
+	{
+		IVP_ASSERT(nr_of_vectors > 0);
+		return;
+	}
 
 	// define the location of the new pair of values by stochastic means
 	int solution_slot = (counter_vector_replacement-- * 101) % nr_of_vectors;
@@ -501,6 +526,22 @@ IVP_Multidimensional_Interpolator::IVP_Multidimensional_Interpolator(int nr_of_v
 {
 
 	int i;
+	if (nr_of_vectors_ < 1)
+	{
+		IVP_ASSERT(nr_of_vectors_ > 0);
+		nr_of_vectors_ = 1;
+	}
+	if (nr_of_elements_input_ < 1)
+	{
+		IVP_ASSERT(nr_of_elements_input_ > 0);
+		nr_of_elements_input_ = 1;
+	}
+	if (nr_of_elements_solution_ < 1)
+	{
+		IVP_ASSERT(nr_of_elements_solution_ > 0);
+		nr_of_elements_solution_ = 1;
+	}
+
 	nr_of_vectors = nr_of_vectors_;
 	nr_of_elements_input = nr_of_elements_input_;
 	nr_of_elements_solution = nr_of_elements_solution_;
