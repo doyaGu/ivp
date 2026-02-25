@@ -193,7 +193,7 @@ void IVP_Controller_Motion::set_target_q_world_f_core(const IVP_U_Quat *orientat
                         normalized_orientation.y * normalized_orientation.y +
                         normalized_orientation.z * normalized_orientation.z +
                         normalized_orientation.w * normalized_orientation.w;
-    if (square <= P_DOUBLE_EPS)
+    if (square != square || !(square > P_DOUBLE_EPS && square <= P_DOUBLE_MAX))
     {
         IVP_ASSERT(0);
         return;
@@ -226,12 +226,18 @@ IVP_Controller_Golem::IVP_Controller_Golem(IVP_Real_Object *o, const IVP_Templat
     max_golem_force = t->max_golem_force;
     filter_dtime = t->filter_dtime;
 
+    IVP_Time current_time = l_environment->get_current_time();
+    time_of_prime_position = current_time;
+    time_of_prime_orientation_0 = current_time;
+
     angular_velocity_set = IVP_FALSE;
-    i_delta_prime_orientation_time = 1.0f;
-    prime_position_ws.set_to_zero();
+    i_delta_prime_orientation_time = 0.0f;
+
+    const IVP_U_Matrix *m_world_f_core = core->get_m_world_f_core_PSI();
+    prime_position_ws.set(m_world_f_core->get_position());
     velocity_ws.set_to_zero();
-    prime_orientation_0.init();
-    prime_orientation_1.init();
+    prime_orientation_0 = core->q_world_f_core_next_psi;
+    prime_orientation_1 = prime_orientation_0;
 }
 
 IVP_Controller_Golem::~IVP_Controller_Golem()
@@ -390,7 +396,7 @@ void IVP_Controller_Golem::set_prime_orientation(const IVP_U_Quat *orientation0,
 {
     prime_orientation_0 = *orientation0;
 
-    if (orientation1)
+    if (orientation1 && dt > P_FLOAT_EPS)
     {
         prime_orientation_1 = *orientation1;
         angular_velocity_set = IVP_TRUE;
@@ -398,7 +404,13 @@ void IVP_Controller_Golem::set_prime_orientation(const IVP_U_Quat *orientation0,
     }
     else
     {
+        if (orientation1)
+        {
+            IVP_ASSERT(0);
+        }
+        prime_orientation_1 = prime_orientation_0;
         angular_velocity_set = IVP_FALSE;
+        i_delta_prime_orientation_time = 0.0f;
     }
     time_of_prime_orientation_0 = time0;
     l_environment->get_controller_manager()->ensure_core_in_simulation(core);
