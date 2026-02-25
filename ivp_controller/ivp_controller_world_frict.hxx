@@ -46,13 +46,13 @@ protected:
     IVP_BOOL clip_manhattan;
 
 public:
-    void set_desired_speed_ws(IVP_U_Float_Point *speed_ws) { desired_speed_ws.set(speed_ws); };
-    void set_desired_rot_speed_cs(IVP_U_Float_Point *rot_speed_cs) { desired_rot_speed_cs.set(rot_speed_cs); };
+    void set_desired_speed_ws(IVP_U_Float_Point *speed_ws);
+    void set_desired_rot_speed_cs(IVP_U_Float_Point *rot_speed_cs);
     const IVP_U_Float_Point *get_desired_speed_ws() const { return &desired_speed_ws; };
     const IVP_U_Float_Point *get_desired_rot_speed_cs() const { return &desired_rot_speed_cs; };
 
-    void set_friction_value_translation(IVP_U_Point value_trans) { friction_value_translation.set(&value_trans); };
-    void set_friction_value_rotation(IVP_U_Point value_rot) { friction_value_rotation.set(&value_rot); };
+    void set_friction_value_translation(IVP_U_Point value_trans);
+    void set_friction_value_rotation(IVP_U_Point value_rot);
     const IVP_U_Float_Point *get_friction_value_rotation() { return &friction_value_rotation; };
     const IVP_U_Float_Point *get_friction_value_translation() { return &friction_value_translation; };
 

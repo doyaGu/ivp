@@ -8,6 +8,31 @@
 #include <ivp_solver_core_reaction.hxx>
 #include <ivp_controller_world_frict.hxx>
 
+static void ivp_world_friction_clamp_non_negative(IVP_U_Float_Point *values)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		if (values->k[i] < 0.0f)
+		{
+			values->k[i] = 0.0f;
+		}
+	}
+}
+
+static void ivp_world_friction_wake_core(IVP_Real_Object *obj)
+{
+	if (!obj)
+	{
+		return;
+	}
+	IVP_Core *core = obj->get_core();
+	if (!core)
+	{
+		return;
+	}
+	obj->get_environment()->get_controller_manager()->ensure_core_in_simulation(core);
+}
+
 IVP_Template_Controller_World_Friction::IVP_Template_Controller_World_Friction()
 {
 	desired_speed_ws.set_to_zero();
@@ -28,6 +53,34 @@ IVP_Controller_World_Friction::IVP_Controller_World_Friction(IVP_Real_Object *ob
 
 	this->friction_value_translation.set(&templ->friction_value_translation);
 	this->friction_value_rotation.set(&templ->friction_value_rotation);
+	ivp_world_friction_clamp_non_negative(&this->friction_value_translation);
+	ivp_world_friction_clamp_non_negative(&this->friction_value_rotation);
+}
+
+void IVP_Controller_World_Friction::set_desired_speed_ws(IVP_U_Float_Point *speed_ws)
+{
+	desired_speed_ws.set(speed_ws);
+	ivp_world_friction_wake_core(real_obj);
+}
+
+void IVP_Controller_World_Friction::set_desired_rot_speed_cs(IVP_U_Float_Point *rot_speed_cs)
+{
+	desired_rot_speed_cs.set(rot_speed_cs);
+	ivp_world_friction_wake_core(real_obj);
+}
+
+void IVP_Controller_World_Friction::set_friction_value_translation(IVP_U_Point value_trans)
+{
+	friction_value_translation.set(&value_trans);
+	ivp_world_friction_clamp_non_negative(&friction_value_translation);
+	ivp_world_friction_wake_core(real_obj);
+}
+
+void IVP_Controller_World_Friction::set_friction_value_rotation(IVP_U_Point value_rot)
+{
+	friction_value_rotation.set(&value_rot);
+	ivp_world_friction_clamp_non_negative(&friction_value_rotation);
+	ivp_world_friction_wake_core(real_obj);
 }
 
 void IVP_Controller_World_Friction::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vector<IVP_Core> *)
