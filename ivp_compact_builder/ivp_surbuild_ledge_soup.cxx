@@ -114,6 +114,7 @@ IVP_SurfaceBuilder_Ledge_Soup::IVP_SurfaceBuilder_Ledge_Soup()
 
 IVP_SurfaceBuilder_Ledge_Soup::~IVP_SurfaceBuilder_Ledge_Soup()
 {
+    this->cleanup();
 }
 
 void IVP_SurfaceBuilder_Ledge_Soup::insert_ledge(IVP_Compact_Ledge *c_ledge)
@@ -131,6 +132,9 @@ void IVP_SurfaceBuilder_Ledge_Soup::insert_ledge(IVP_Compact_Ledge *c_ledge)
 
 IVP_Compact_Surface *IVP_SurfaceBuilder_Ledge_Soup::compile(IVP_Template_Surbuild_LedgeSoup *templ)
 {
+    // Reset transient clustering/build state to allow safe builder reuse.
+    this->cleanup();
+
     IVP_Template_Surbuild_LedgeSoup t2;
     if (!templ)
         templ = &t2;
@@ -175,23 +179,53 @@ IVP_Compact_Surface *IVP_SurfaceBuilder_Ledge_Soup::compile(IVP_Template_Surbuil
         this->build_root_convex_hull();
     }
 
-    this->allocate_compact_surface();
-    this->create_compact_ledgetree();
+    if (!this->allocate_compact_surface())
+    {
+        // Root convex hulls are internally created and must not leak on failure.
+        for (int i = 0; i < this->rec_spheres.len(); i++)
+        {
+            IVV_Sphere *sphere = this->rec_spheres.element_at(i);
+            IVP_Compact_Ledge *hull = sphere ? sphere->compact_ledge : NULL;
+            if (!hull)
+            {
+                continue;
+            }
+            int idx = this->c_ledge_vec.index_of(hull);
+            if (idx >= 0)
+            {
+                this->c_ledge_vec.remove_at(idx);
+            }
+            P_FREE_ALIGNED(hull);
+            sphere->compact_ledge = NULL;
+        }
+        this->cleanup();
+        return NULL;
+    }
+
+    if (this->create_compact_ledgetree() != IVP_OK)
+    {
+        ivp_free_aligned(this->compact_surface);
+        this->compact_surface = NULL;
+        this->cleanup();
+        return NULL;
+    }
     this->insert_radius_in_compact_surface();
 
-    this->cleanup();
-
     IVP_Compact_Surface *res = compact_surface;
-
-    if (this->number_of_terminal_spheres > 1 && !parameters->link_to_input_compact_ledges)
+    if (this->number_of_terminal_spheres > 1 &&
+        !this->parameters->link_to_input_compact_ledges &&
+        this->parameters->merge_points == IVP_SLMP_MERGE_AND_REALLOCATE)
     {
-        if (parameters->merge_points == IVP_SLMP_MERGE_AND_REALLOCATE)
+        IVP_Compact_Surface *res_realloc = (IVP_Compact_Surface *)ivp_malloc_aligned(compact_surface->byte_size, 16);
+        if (res_realloc)
         {
-            res = (IVP_Compact_Surface *)ivp_malloc_aligned(compact_surface->byte_size, 16);
-            memcpy((void *)res, this->compact_surface, compact_surface->byte_size);
+            memcpy((void *)res_realloc, this->compact_surface, compact_surface->byte_size);
             ivp_free_aligned(compact_surface);
+            res = res_realloc;
         }
     }
+
+    this->cleanup();
     compact_surface = NULL;
 
     return res;
@@ -234,6 +268,10 @@ void IVP_SurfaceBuilder_Ledge_Soup::build_root_convex_hull()
     // return something_1;
 
     IVP_Compact_Ledge *hull = cr.compile();
+    if (!hull)
+    {
+        return;
+    }
     c_ledge_vec.add(hull);
     node->compact_ledge = hull;
     rec_spheres.add(node);
@@ -289,6 +327,9 @@ IVP_Compact_Ledge * __thiscall build_root_convex_hull(IVP_SurfaceBuilder_Ledge_S
 void IVP_SurfaceBuilder_Ledge_Soup::cleanup()
 {
     this->terminal_spheres.clear();
+    this->rec_spheres.clear();
+    this->overlapping_spheres.clear();
+    this->built_spheres.clear();
     int i;
     for (i = 0; i < this->all_spheres.len(); i++)
     {
@@ -297,6 +338,23 @@ void IVP_SurfaceBuilder_Ledge_Soup::cleanup()
     }
     this->all_spheres.clear();
     P_FREE(this->spheres_cluster);
+    P_DELETE(this->interval_minhash);
+    P_DELETE(this->point_hash);
+    this->number_of_terminal_spheres = 0;
+    this->number_of_nodes = 0;
+    this->smallest_radius = 0.0f;
+    this->size_of_tree_in_bytes = 0;
+    this->longest_axis = 0;
+    this->number_of_unclustered_spheres = 0;
+    this->parameters = NULL;
+    this->first_compact_ledge = NULL;
+    this->first_poly_point = NULL;
+    this->n_poly_points_allocated = 0;
+    this->ledgetree_work = NULL;
+    this->clt_highmem = NULL;
+    this->clt_lowmem = NULL;
+    this->extents_min.set(1000000.0f, 1000000.0f, 1000000.0f);
+    this->extents_max.set(-1000000.0f, -1000000.0f, -1000000.0f);
     return;
 }
 
