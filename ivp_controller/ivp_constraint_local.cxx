@@ -177,9 +177,17 @@ void IVP_Constraint_Local::init(const IVP_Template_Constraint &tmpl)
 	IVP_Real_Object *objectR = tmpl.objectR;
 	IVP_Real_Object *objectA = tmpl.objectA;
 	if (objectR && !objectR->get_core()->physical_unmoveable)
-		cores_of_constraint_system.add(objectR->get_core());
+		cores_of_constraint_system.install(objectR->get_core());
 	if (objectA && !objectA->get_core()->physical_unmoveable)
-		cores_of_constraint_system.add(objectA->get_core());
+		cores_of_constraint_system.install(objectA->get_core());
+	if (cores_of_constraint_system.len() <= 0)
+	{
+		// keep a valid environment anchor even if all constrained cores are unmoveable
+		if (objectR)
+			cores_of_constraint_system.install(objectR->get_core());
+		else
+			cores_of_constraint_system.install(objectA->get_core());
+	}
 	if (tmpl.m_Aos_f_Afs)
 		(objectR ? objectR : objectA)->ensure_in_simulation();
 	IVP_U_Matrix m_ws_f_Ros;
@@ -1377,19 +1385,23 @@ void IVP_Constraint_Local::change_Aos_to_relaxe_constraint()
 		m_Rfs_f_Rcs.object->ensure_in_simulation();
 	else
 		m_Afs_f_Acs.object->ensure_in_simulation();
-	const IVP_U_Matrix *m_ws_f_Rcs;
-	m_ws_f_Rcs = m_Rfs_f_Rcs.object->get_core()->get_m_world_f_core_PSI();
-	const IVP_U_Matrix *m_ws_f_Acs;
-	m_ws_f_Acs = m_Afs_f_Acs.object->get_core()->get_m_world_f_core_PSI();
+	IVP_U_Matrix m_identity;
+	m_identity.init();
+	const IVP_U_Matrix *m_ws_f_Rcs = m_Rfs_f_Rcs.object ? m_Rfs_f_Rcs.object->get_core()->get_m_world_f_core_PSI() : &m_identity;
+	const IVP_U_Matrix *m_ws_f_Acs = m_Afs_f_Acs.object ? m_Afs_f_Acs.object->get_core()->get_m_world_f_core_PSI() : &m_identity;
 	IVP_U_Matrix m_Rcs_f_Acs;
 	m_ws_f_Rcs->mimult4(m_ws_f_Acs, &m_Rcs_f_Acs);
 	m_Rfs_f_Rcs.mmult4(&m_Rcs_f_Acs, &m_Afs_f_Acs);
 	if (m_Rfs_f_Rcs.rot)
 	{
+		if (!m_Afs_f_Acs.rot)
+			m_Afs_f_Acs.rot = new IVP_U_Matrix3;
 		m_Rfs_f_Rcs.rot->mmult3(&m_Rcs_f_Acs, m_Afs_f_Acs.rot);
 	}
 	else
 	{
+		if (m_Afs_f_Acs.rot)
+			P_DELETE(m_Afs_f_Acs.rot);
 		m_Afs_f_Acs.rot = NULL;
 	}
 }
@@ -1400,20 +1412,24 @@ void IVP_Constraint_Local::change_Ros_to_relaxe_constraint()
 		m_Rfs_f_Rcs.object->ensure_in_simulation();
 	else
 		m_Afs_f_Acs.object->ensure_in_simulation();
-	const IVP_U_Matrix *m_ws_f_Rcs;
-	m_ws_f_Rcs = m_Rfs_f_Rcs.object->get_core()->get_m_world_f_core_PSI();
-	const IVP_U_Matrix *m_ws_f_Acs;
-	m_ws_f_Acs = m_Afs_f_Acs.object->get_core()->get_m_world_f_core_PSI();
+	IVP_U_Matrix m_identity;
+	m_identity.init();
+	const IVP_U_Matrix *m_ws_f_Rcs = m_Rfs_f_Rcs.object ? m_Rfs_f_Rcs.object->get_core()->get_m_world_f_core_PSI() : &m_identity;
+	const IVP_U_Matrix *m_ws_f_Acs = m_Afs_f_Acs.object ? m_Afs_f_Acs.object->get_core()->get_m_world_f_core_PSI() : &m_identity;
 
 	IVP_U_Matrix m_Acs_f_Rcs;
 	m_ws_f_Acs->mimult4(m_ws_f_Rcs, &m_Acs_f_Rcs);
 	m_Afs_f_Acs.mmult4(&m_Acs_f_Rcs, &m_Rfs_f_Rcs);
 	if (m_Afs_f_Acs.rot)
 	{
+		if (!m_Rfs_f_Rcs.rot)
+			m_Rfs_f_Rcs.rot = new IVP_U_Matrix3;
 		m_Afs_f_Acs.rot->mmult3(&m_Acs_f_Rcs, m_Rfs_f_Rcs.rot);
 	}
 	else
 	{
+		if (m_Rfs_f_Rcs.rot)
+			P_DELETE(m_Rfs_f_Rcs.rot);
 		m_Rfs_f_Rcs.rot = NULL;
 	}
 }

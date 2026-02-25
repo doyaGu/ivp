@@ -3,6 +3,7 @@
 #include <ivp_physics.hxx>
 
 #include <ivp_constraint.hxx>
+#include <ivp_constraint_local.hxx>
 #include <ivp_template_constraint.hxx>
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,6 +27,10 @@ IVP_DOUBLE IVP_Constraint::get_minimum_simulation_frequency()
 
 IVP_Environment *IVP_Constraint::get_environment()
 {
+    if (cores_of_constraint_system.len() <= 0)
+    {
+        return NULL;
+    }
     return cores_of_constraint_system.element_at(0)->environment;
 }
 
@@ -33,8 +38,13 @@ void IVP_Constraint::activate()
 {
     if (!is_enabled)
     {
+        IVP_Environment *env = get_environment();
+        if (!env)
+        {
+            return;
+        }
         is_enabled = IVP_TRUE;
-        get_environment()->get_controller_manager()->announce_controller_to_environment(this);
+        env->get_controller_manager()->announce_controller_to_environment(this);
     }
 }
 
@@ -42,8 +52,14 @@ void IVP_Constraint::deactivate()
 {
     if (is_enabled)
     {
+        IVP_Environment *env = get_environment();
+        if (!env)
+        {
+            is_enabled = IVP_FALSE;
+            return;
+        }
         is_enabled = IVP_FALSE;
-        get_environment()->get_controller_manager()->remove_controller_from_environment(this, IVP_FALSE);
+        env->get_controller_manager()->remove_controller_from_environment(this, IVP_FALSE);
     }
 }
 
@@ -123,3 +139,13 @@ void IVP_Constraint::change_max_rotation_impulse(IVP_CONSTRAINT_FORCE_EXCEED for
 
 void IVP_Constraint::change_Aos_to_relaxe_constraint() { printf("You are repositioning a constraint which does not exist.\n"); }
 void IVP_Constraint::change_Ros_to_relaxe_constraint() { printf("You are repositioning a constraint which does not exist.\n"); }
+
+IVP_Constraint *IVP_Constraint::create_constraint_any_solver(IVP_Template_Constraint *constraint_template)
+{
+    if (!constraint_template)
+        return NULL;
+    if (!constraint_template->objectR && !constraint_template->objectA)
+        return NULL;
+
+    return new IVP_Constraint_Local(*constraint_template);
+}
