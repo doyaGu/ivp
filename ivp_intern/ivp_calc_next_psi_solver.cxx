@@ -318,7 +318,7 @@ void IVP_Calc_Next_PSI_Solver::set_transformation(const IVP_U_Quat *rotation, co
 
     // do collision checking
     // calc rotation axis in world space and rotation speed. using quaternions
-    IVP_DOUBLE diff = core->max_surface_deviation * core->max_surface_rot_speed * simulation_delta_time + moved_distance_val;
+    IVP_DOUBLE diff = core->max_surface_rot_speed * simulation_delta_time + moved_distance_val;
 
     for (int c = core->objects.len() - 1; c >= 0; c--)
     {
