@@ -346,25 +346,23 @@ void IVP_Controller_Raycast_Airboat::DoSimulationSteering(IVP_Raycast_Airboat_Po
     }
 
     // General force that will help get us back to zero rotation.
-    IVP_FLOAT flRotSpeedSign = pAirboatCore->rot_speed.k[1] < 0.0f ? -1.0f : 1.0f;
+    IVP_FLOAT flRotSpeedSign = pAirboatCore->rot_speed.k[index_y] < 0.0f ? -1.0f : 1.0f;
     IVP_FLOAT flRotationalDrag = -0.5f * IVP_RAYCAST_AIRBOAT_STEERING_RATE * pAirboatCore->get_mass() * pEventSim->i_delta_time;
     flRotationalDrag *= flRotSpeedSign;
     flForceRotational += flRotationalDrag;
 
     IVP_U_Float_Point vecImpulse;
-    for (int iPoint = 0; iPoint < 4; ++iPoint)
+    for (int iPoint = 0; iPoint < n_wheels; ++iPoint)
     {
         IVP_Raycast_Airboat_Wheel *pPontoonPoint = get_wheel(IVP_POS_WHEEL(iPoint));
 
-        IVP_FLOAT flPontoonSign = iPoint >= 2 ? -1.0f : 1.0f;
+        IVP_FLOAT flPontoonSign = iPoint >= (n_wheels / 2) ? -1.0f : 1.0f;
         IVP_FLOAT flForceRot = flForceRotational * flPontoonSign;
 
         vecImpulse.set_multiple(&vecRightWS, flForceRot * pEventSim->delta_time);
 
-        IVP_U_Float_Point vecPointPosCS, vecPointPosWS;
-        vecPointPosCS = pPontoonPoint->raycast_start_cs;
-        matWorldFromCore->vmult3(&vecPointPosCS, &vecPointPosWS);
-        IVP_U_Point vecPointPositionWS(vecPointPosWS);
+        IVP_U_Point vecPointPositionWS;
+        matWorldFromCore->vmult4(&pPontoonPoint->raycast_start_cs, &vecPointPositionWS);
         pAirboatCore->push_core_ws(&vecPointPositionWS, &vecImpulse);
     }
 }
@@ -672,6 +670,7 @@ void IVP_Controller_Raycast_Airboat::InitRaycastCarBody(const IVP_Template_Car_S
     // Init extra downward force applied to car.
     down_force_vertical_offset = pCarSystemTemplate->body_down_force_vertical_offset;
     down_force = 0.0f;
+    m_flThrust = 0.0f;
 
     // Initialize.
     for (int iAxis = 0; iAxis < 3; ++iAxis)
