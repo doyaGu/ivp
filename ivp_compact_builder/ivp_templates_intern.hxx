@@ -145,8 +145,24 @@ public:
     /** methods **/
     void set_line(int sur_l_i, int line_index, char revert)
     {
-        lines[sur_l_i] = line_index;
-        revert_line[sur_l_i] = revert;
+        if (!this->lines || !this->revert_line)
+        {
+            return;
+        }
+        if (sur_l_i < 0 || sur_l_i >= this->n_lines)
+        {
+            return;
+        }
+        if (line_index < 0 || line_index > 0xffff)
+        {
+            return;
+        }
+        if (this->templ_poly && line_index >= this->templ_poly->n_lines)
+        {
+            return;
+        }
+        this->lines[sur_l_i] = (ushort)line_index;
+        this->revert_line[sur_l_i] = (revert != 0);
     }
     void init_surface(int line_count); // malloc line_count lines
     void close_surface();              // free all values: 'lines' array and 'revert_line' array

@@ -35,6 +35,19 @@ IVP_Template_Polygon::~IVP_Template_Polygon()
     P_DELETE_ARRAY(this->surfaces);
 }
 
+void IVP_Template_Polygon::scale(int scaling_factor)
+{
+    if (this->n_points <= 0 || !this->points)
+    {
+        return;
+    }
+    IVP_DOUBLE factor = (IVP_DOUBLE)scaling_factor;
+    for (int i = 0; i < this->n_points; i++)
+    {
+        this->points[i].mult(factor);
+    }
+}
+
 IVP_Template_Surface::IVP_Template_Surface()
 {
     templ_poly = NULL;
@@ -47,6 +60,9 @@ void IVP_Template_Surface::close_surface()
 {
     P_FREE(this->lines);
     P_DELETE_ARRAY(this->revert_line);
+    this->lines = NULL;
+    this->revert_line = NULL;
+    this->n_lines = 0;
 }
 
 void IVP_Template_Surface::calc_surface_normal_template(int a, int b, int c)
@@ -59,9 +75,23 @@ void IVP_Template_Surface::calc_surface_normal_template(int a, int b, int c)
 
 void IVP_Template_Surface::init_surface(int line_count)
 {
-    this->n_lines = line_count;
-    this->lines = (ushort *)p_calloc(sizeof(lines), line_count);
+    this->close_surface();
+    if (line_count <= 0)
+    {
+        return;
+    }
+
+    this->lines = (ushort *)p_calloc(line_count, sizeof(ushort));
     this->revert_line = new char[line_count];
+    if (!this->lines || !this->revert_line)
+    {
+        P_FREE(this->lines);
+        P_DELETE_ARRAY(this->revert_line);
+        this->lines = NULL;
+        this->revert_line = NULL;
+        return;
+    }
+    this->n_lines = line_count;
 }
 
 int IVP_Template_Surface::get_surface_index()
