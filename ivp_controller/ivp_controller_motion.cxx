@@ -167,7 +167,7 @@ void IVP_Controller_Motion::set_target_position_ws(const IVP_U_Point *position)
 
 void IVP_Controller_Motion::set_target_object_position_ws(IVP_Real_Object *ro, const IVP_U_Quat *desired_orientation, const IVP_U_Point *position_of_object_space_center_ws)
 {
-    if (!real_object->flags.shift_core_f_object_is_zero)
+    if (!ro->flags.shift_core_f_object_is_zero)
     {
         IVP_U_Matrix3 m;
         desired_orientation->set_matrix(&m);
@@ -188,10 +188,22 @@ void IVP_Controller_Motion::set_target_object_position_ws(IVP_Real_Object *ro, c
 
 void IVP_Controller_Motion::set_target_q_world_f_core(const IVP_U_Quat *orientation)
 {
-    if (IVP_Inline_Math::fabsd(orientation->acos_quat(&target_q_world_f_core) - 1.0f) < P_DOUBLE_EPS)
+    IVP_U_Quat normalized_orientation = *orientation;
+    IVP_DOUBLE square = normalized_orientation.x * normalized_orientation.x +
+                        normalized_orientation.y * normalized_orientation.y +
+                        normalized_orientation.z * normalized_orientation.z +
+                        normalized_orientation.w * normalized_orientation.w;
+    if (square <= P_DOUBLE_EPS)
+    {
+        IVP_ASSERT(0);
+        return;
+    }
+    normalized_orientation.normize_quat();
+
+    if (IVP_Inline_Math::fabsd(normalized_orientation.acos_quat(&target_q_world_f_core) - 1.0f) < P_DOUBLE_EPS)
         return;
 
-    target_q_world_f_core = *orientation;
+    target_q_world_f_core = normalized_orientation;
     l_environment->get_controller_manager()->ensure_core_in_simulation(core);
 }
 
