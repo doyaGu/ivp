@@ -1299,9 +1299,8 @@ void IVP_Buoyancy_Solver::compute_volumes_and_centers_for_one_pyramid(IVP_Real_O
         area_center_part_under.set(&area_center_total);
         area_center_part_under.subtract(&area_center_part_above);
         if ((1.0f - k) < buoyancy_eps)
-        { // both other vertices are exactly on the surface, so there is no volume under the surface
-            volume_under = 0.0f;
-            volume_center_under.set(0.0f, 0.0f, 0.0f);
+        {
+             // both other vertices are exactly on the surface, so there is no volume contribution
             return;
         }
         area_center_part_under.mult(1.0f / (1.0f - k));
@@ -1428,11 +1427,11 @@ void IVP_Buoyancy_Solver::compute_rotation_and_translation_values_for_one_triang
         area_center_part_under_os.set(&area_center_of_triangle_os);
         area_center_part_under_os.subtract(&area_center_part_above_os);
 
-        area_center_part_under_os.mult(1.0f / (1.0f - k));
         if ((1.0f - k) < buoyancy_eps)
         { // both other vertices are exactly on the surface, so there is nothing to damp
             return;
         }
+        area_center_part_under_os.mult(1.0f / (1.0f - k));
         triangle_surface_under_factor = 1.0f - k;
 
         break;
@@ -1516,7 +1515,7 @@ void IVP_Buoyancy_Solver::compute_rotation_and_translation_values_for_one_triang
         // calculate the pressure dampening
         impulse = (visible_surface_content_under * quad_length_of_speed * pressure_damp_factor);
         // calculate the friction dampening
-        impulse += (triangle_surface_content * quad_length_of_speed * friction_damp_factor);
+        impulse += (triangle_surface_under_factor * triangle_surface_content * quad_length_of_speed * friction_damp_factor);
         IVP_U_Float_Point impulse_vector;
 
         if (simulate_wing_behavior)
