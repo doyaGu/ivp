@@ -285,9 +285,9 @@ void ivp_debug_show_real_values(const IVP_Buoyancy_Input * /*b_input*/,
  *              'IVP_Multidimensional_Interpolator' instance
  *************************************************************************************/
 void IVP_Controller_Buoyancy::provide_new_input_solution_combination(Attacher_Interpolator *ai,
-																	 IVP_Template_Buoyancy *temp_buoyancy,
-																	 const IVP_MI_Vector *weighted_new_input,
-																	 const IVP_MI_Vector *solution_values,
+																		 IVP_Template_Buoyancy *temp_buoyancy,
+																		 const IVP_MI_Vector *weighted_new_input,
+																		 const IVP_MI_Vector *solution_values,
 																	 const IVP_DOUBLE d_time,
 																	 const IVP_Time current_time)
 {
@@ -391,7 +391,72 @@ void IVP_Controller_Buoyancy::provide_new_input_solution_combination(Attacher_In
 	//array of input vectors is already fully occupied, so a member has to be replaced by a new one
 	ai->mi->add_new_input_solution_combination_stochastic(new_input, solution_values);
     }
+	#endif
+}
+
+void IVP_Controller_Buoyancy::clear_attacher_interpolator()
+{
+	if (!attacher_interpolator)
+	{
+		attacher_interpolator_count = 0;
+		return;
+	}
+
+	for (int i = 0; i < attacher_interpolator_count; i++)
+	{
+#if !defined(IVP_NO_MD_INTERPOLATION)
+		P_DELETE(attacher_interpolator[i].mi);
+		P_FREE(attacher_interpolator[i].last_io_vectors.last_input_vector);
+		P_FREE(attacher_interpolator[i].last_io_vectors.last_solution_vector);
 #endif
+	}
+	P_DELETE_ARRAY(attacher_interpolator);
+	attacher_interpolator_count = 0;
+}
+
+void IVP_Controller_Buoyancy::rebuild_attacher_interpolator()
+{
+	clear_attacher_interpolator();
+
+	attacher_interpolator_count = core->objects.len();
+	if (attacher_interpolator_count <= 0)
+	{
+		attacher_interpolator = NULL;
+		return;
+	}
+
+	attacher_interpolator = new Attacher_Interpolator[attacher_interpolator_count];
+	for (int i = 0; i < attacher_interpolator_count; i++)
+	{
+		attacher_interpolator[i].object = core->objects.element_at(i);
+#if !defined(IVP_NO_MD_INTERPOLATION)
+		attacher_interpolator[i].mi = new IVP_Multidimensional_Interpolator(5, INPUT_VECTOR_LENGTH, SOLUTION_VECTOR_LENGTH);
+		attacher_interpolator[i].last_io_vectors.last_input_vector = IVP_MI_Vector::malloc_mi_vector(INPUT_VECTOR_LENGTH);
+		attacher_interpolator[i].last_io_vectors.last_solution_vector = IVP_MI_Vector::malloc_mi_vector(SOLUTION_VECTOR_LENGTH);
+#endif
+		attacher_interpolator[i].last_io_vectors.last_psi_time = 0;
+		attacher_interpolator[i].nr_interpolated = 0;
+		attacher_interpolator[i].nr_not_interpolated = 0;
+	}
+}
+
+void IVP_Controller_Buoyancy::sync_attacher_interpolator_with_core_objects()
+{
+	int nr_of_objects = core->objects.len();
+	if (nr_of_objects != attacher_interpolator_count)
+	{
+		rebuild_attacher_interpolator();
+		return;
+	}
+
+	for (int i = 0; i < attacher_interpolator_count; i++)
+	{
+		if (attacher_interpolator[i].object != core->objects.element_at(i))
+		{
+			rebuild_attacher_interpolator();
+			return;
+		}
+	}
 }
 
 /********************************************************************
@@ -433,10 +498,11 @@ void IVP_Controller_Buoyancy::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
 	rel_speed_of_current_ws.subtract(&resulting_speed_of_current_ws, &core->speed);
 
 	IVP_Template_Buoyancy *temp_buoyancy = attacher_buoyancy->get_parameters_per_core(core);
+	sync_attacher_interpolator_with_core_objects();
 
 	/*** calc buoyancy and dampening for every object in the core ***/
 
-	int nr_of_objects = core->objects.len();
+	int nr_of_objects = attacher_interpolator_count;
 
 	for (int i = 0; i < nr_of_objects; i++)
 	{
@@ -590,6 +656,14 @@ void IVP_Controller_Buoyancy::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
 
 #ifdef DAMPENING_WITH_PARTICLE_ACCELERATION
 	IVP_FLOAT inverse_viscosity = 1.0f - (temp_buoyancy->viscosity_factor * es->delta_time);
+	if (inverse_viscosity < 0.0f)
+	{
+		inverse_viscosity = 0.0f;
+	}
+	else if (inverse_viscosity > 1.0f)
+	{
+		inverse_viscosity = 1.0f;
+	}
 	IVP_U_Float_Point speed_of_object_relative_to_medium_ws;
 	speed_of_object_relative_to_medium_ws.set(&core->speed);
 	speed_of_object_relative_to_medium_ws.subtract(&resulting_speed_of_current_ws);
@@ -607,27 +681,14 @@ IVP_Controller_Buoyancy::IVP_Controller_Buoyancy(IVP_Attacher_To_Cores<IVP_Contr
 	attacher_buoyancy = (IVP_Attacher_To_Cores_Buoyancy *)attacher_buoyancy_;
 	core = core_;
 	core->environment->get_controller_manager()->add_controller_to_core(this, core);
+	attacher_interpolator = NULL;
+	attacher_interpolator_count = 0;
 
 	relative_speed_of_current_in_objects_vicinity_old.set(0.0f, 0.0f, 0.0f);
 	core_visible_surface_content_under_old = 0.0f;
 	core_visible_surface_content_under = 0.0f;
 
-	// initialize vector which applies a multidimensional interpolator to every object in the core
-	int nr_of_objects = core->objects.len();
-
-	attacher_interpolator = new Attacher_Interpolator[nr_of_objects];
-	for (int i = 0; i < nr_of_objects; i++)
-	{
-		attacher_interpolator[i].object = core->objects.element_at(i);
-#if !defined(IVP_NO_MD_INTERPOLATION)
-		attacher_interpolator[i].mi = new IVP_Multidimensional_Interpolator(5, INPUT_VECTOR_LENGTH, SOLUTION_VECTOR_LENGTH);
-		attacher_interpolator[i].last_io_vectors.last_input_vector = IVP_MI_Vector::malloc_mi_vector(INPUT_VECTOR_LENGTH);
-		attacher_interpolator[i].last_io_vectors.last_solution_vector = IVP_MI_Vector::malloc_mi_vector(SOLUTION_VECTOR_LENGTH);
-#endif
-		attacher_interpolator[i].last_io_vectors.last_psi_time = 0;
-		attacher_interpolator[i].nr_interpolated = 0;
-		attacher_interpolator[i].nr_not_interpolated = 0;
-	}
+	rebuild_attacher_interpolator();
 
 	interpolation_counter = 0; // initialize the counter
 
@@ -640,22 +701,7 @@ IVP_Controller_Buoyancy::IVP_Controller_Buoyancy(IVP_Attacher_To_Cores<IVP_Contr
  *********************/
 IVP_Controller_Buoyancy::~IVP_Controller_Buoyancy()
 {
-	int nr_of_objects = core->objects.len();
-	if (attacher_interpolator)
-	{
-		for (int i = 0; i < nr_of_objects; i++)
-		{
-#if !defined(IVP_NO_MD_INTERPOLATION)
-			P_DELETE(attacher_interpolator[i].mi);
-			// #if !defined(__MWERKS__) || !defined(__POWERPC__)
-#pragma message("this code should not be called")
-			P_DELETE_ARRAY(attacher_interpolator[i].last_io_vectors.last_input_vector);
-			P_DELETE_ARRAY(attacher_interpolator[i].last_io_vectors.last_solution_vector);
-			// #endif
-#endif
-		}
-		P_DELETE_ARRAY(attacher_interpolator); //@@CB was a P_DELETE, which was bad
-	}
+	clear_attacher_interpolator();
 
 	attacher_buoyancy->attachment_is_going_to_be_deleted(this, core);
 	core->environment->get_controller_manager()->remove_controller_from_core(this, core);

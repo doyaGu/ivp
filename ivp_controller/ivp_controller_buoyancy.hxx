@@ -195,6 +195,7 @@ private:
         int nr_not_interpolated;
     } Attacher_Interpolator;
     Attacher_Interpolator *attacher_interpolator;
+    int attacher_interpolator_count;
 
     // int max_interpolation_tries;  //defines how many interpolations will be tried before the computation of the forces via the buoyancy_solver will be forced
     int interpolation_counter; // the actual counter
@@ -267,6 +268,9 @@ private:
                                                 const IVP_MI_Vector *solution_values,
                                                 const IVP_DOUBLE d_time,
                                                 const IVP_Time current_time);
+    void clear_attacher_interpolator();
+    void rebuild_attacher_interpolator();
+    void sync_attacher_interpolator_with_core_objects();
 
     // for debugging
     int nr_not_interpolated;
