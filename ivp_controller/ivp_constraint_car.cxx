@@ -117,7 +117,13 @@ IVP_Constraint_Solver_Car::~IVP_Constraint_Solver_Car()
 		delete wheel_objects.element_at(app_nr);
 	}
 
-	for (int k = 0; k < wheel_objects.len(); k++)
+	int local_constraint_count = wheel_objects.len();
+	if (local_constraint_count > IVP_CONSTRAINT_CAR_MAX_WHEELS)
+	{
+		IVP_ASSERT(0);
+		local_constraint_count = IVP_CONSTRAINT_CAR_MAX_WHEELS;
+	}
+	for (int k = 0; k < local_constraint_count; k++)
 	{
 		P_DELETE(this->c_local_ballsocket[k]);
 	}
@@ -136,6 +142,20 @@ IVP_RETURN_TYPE IVP_Constraint_Solver_Car::init_constraint_system(IVP_Environmen
 																  IVP_U_Vector<IVP_Real_Object> &wheels,
 																  IVP_U_Vector<IVP_U_Float_Point> &p_Bos)
 {
+	if (wheels.len() != p_Bos.len())
+	{
+		ivp_message("IVP_Constraint_Solver_Car::init_constraint_system: wheels/hardpoint count mismatch (%d vs %d)\n",
+					wheels.len(), p_Bos.len());
+		return IVP_FAULT;
+	}
+
+	if (wheels.len() > IVP_CONSTRAINT_CAR_MAX_WHEELS)
+	{
+		ivp_message("IVP_Constraint_Solver_Car::init_constraint_system: wheel count %d exceeds max %d\n",
+					wheels.len(), IVP_CONSTRAINT_CAR_MAX_WHEELS);
+		return IVP_FAULT;
+	}
+
 	environment = env;
 
 	body_object = new IVP_Constraint_Car_Object(this, body, 0, NULL);
@@ -148,8 +168,6 @@ IVP_RETURN_TYPE IVP_Constraint_Solver_Car::init_constraint_system(IVP_Environmen
 		c_local_ballsocket[i] = NULL;
 	}
 
-	env->get_controller_manager()->announce_controller_to_environment(this);
-
 	IVP_Constraint_Solver_Car_Builder *builder;
 	builder = new IVP_Constraint_Solver_Car_Builder(this);
 
@@ -161,6 +179,27 @@ IVP_RETURN_TYPE IVP_Constraint_Solver_Car::init_constraint_system(IVP_Environmen
 	IVP_RETURN_TYPE res = builder->calc_constraint_matrix();
 
 	P_DELETE(builder);
+
+	if (res == IVP_OK)
+	{
+		env->get_controller_manager()->announce_controller_to_environment(this);
+	}
+	else
+	{
+		// Roll back partially initialized state if matrix creation failed.
+		for (int i = 0; i < wheel_objects.len(); i++)
+		{
+			delete wheel_objects.element_at(i);
+		}
+		wheel_objects.clear();
+
+		P_DELETE(body_object);
+		body_object = NULL;
+		cores_of_constraint_system.clear();
+		memset(c_local_ballsocket, 0, sizeof(c_local_ballsocket));
+		local_translation_in_use = IVP_FALSE;
+		psis_left_for_plan_B = 0;
+	}
 
 	return res;
 }
@@ -357,7 +396,13 @@ void IVP_Constraint_Solver_Car::do_simulation_controller(IVP_Event_Sim *es,
 		if (psis_left_for_plan_B < 0)
 		{
 			int app_nr;
-			for (app_nr = 0; app_nr < wheel_objects.len(); app_nr++)
+			int local_constraint_count = wheel_objects.len();
+			if (local_constraint_count > IVP_CONSTRAINT_CAR_MAX_WHEELS)
+			{
+				IVP_ASSERT(0);
+				local_constraint_count = IVP_CONSTRAINT_CAR_MAX_WHEELS;
+			}
+			for (app_nr = 0; app_nr < local_constraint_count; app_nr++)
 			{
 				P_DELETE(this->c_local_ballsocket[app_nr]);
 				this->c_local_ballsocket[app_nr] = NULL;
@@ -381,7 +426,13 @@ void IVP_Constraint_Solver_Car::do_simulation_controller(IVP_Event_Sim *es,
 		// appendices are too far away -> start plan B (solve problem with local constraints)
 		init_local_translation = 0;
 		int app_nr;
-		for (app_nr = 0; app_nr < wheel_objects.len(); app_nr++)
+		int local_constraint_count = wheel_objects.len();
+		if (local_constraint_count > IVP_CONSTRAINT_CAR_MAX_WHEELS)
+		{
+			IVP_ASSERT(0);
+			local_constraint_count = IVP_CONSTRAINT_CAR_MAX_WHEELS;
+		}
+		for (app_nr = 0; app_nr < local_constraint_count; app_nr++)
 		{
 			IVP_Constraint_Car_Object *app = wheel_objects.element_at(app_nr);
 
