@@ -424,7 +424,7 @@ void IVP_Constraint_Local::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vec
 			diff_axis += 2.0f * IVP_PI;
 		// IVP_DOUBLE qlen_rsx = rsx_Rcs.quad_length();  // 0 .. 4
 		// if (qlen_rsx > 3 ) qlen_rsx = 3;
-		drRA_now_rs.k[mapping_uRrs_f_Rrs[IVP_INDEX_X]] = diff_axis; // hängt von known_axis ab
+		drRA_now_rs.k[mapping_uRrs_f_Rrs[IVP_INDEX_X]] = diff_axis; // hangt von known_axis ab
 		drRA_now_rs.k[mapping_uRrs_f_Rrs[IVP_INDEX_Y]] = 0.0f;
 		drRA_now_rs.k[mapping_uRrs_f_Rrs[IVP_INDEX_Z]] = 0.0f;
 	}
@@ -506,14 +506,14 @@ void IVP_Constraint_Local::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vec
 	IVP_U_Point dvRA_fs; // desired differences of speed
 	IVP_U_Point drRA_rs; // desired differences of angular velocity
 	{					 // Calc desired velocity difference
-		// Wie siehts im nächsten PSI aus?
+		// Wie siehts im nachsten PSI aus?
 
 		// Echte Kurvenberechnung ginge so:
 		// aktuelle Position += coreX->speed * d_time
 		// aktuelle Position += ... hmm, mueszte mit quaternions gehen, die man aufeinander addiert
 		// oder indem man die Achse bestimmt, um die sich das Objekt dreht, und dann in der Rotationsebene
 		// den neuen Punkt bestimmt
-		// Statt echter Kurvenberechnung mache ich nur eine lineare Annäherung.
+		// Statt echter Kurvenberechnung mache ich nur eine lineare Annaherung.
 
 		// Position:
 		IVP_U_Float_Point v_pointR_ws, v_pointA_ws;
