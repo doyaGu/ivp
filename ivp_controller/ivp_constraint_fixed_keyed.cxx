@@ -169,6 +169,22 @@ void IVP_Constraint_Fixed_Keyframed::do_simulation_controller(IVP_Event_Sim *es,
 
 		IVP_U_Float_Point rot_impulse_ws;
 		tpm.vmult3(&delta_angles, &rot_impulse_ws);
+
+		// limit angular impulse so per-axis torque does not exceed the configured cap
+		for (int i = 2; i >= 0; i--)
+		{
+			const IVP_FLOAT max_torque_axis = IVP_Inline_Math::fabsd(max_torque.k[i]);
+			const IVP_FLOAT max_impulse_axis = max_torque_axis * es->delta_time;
+			if (rot_impulse_ws.k[i] > max_impulse_axis)
+			{
+				rot_impulse_ws.k[i] = max_impulse_axis;
+			}
+			else if (rot_impulse_ws.k[i] < -max_impulse_axis)
+			{
+				rot_impulse_ws.k[i] = -max_impulse_axis;
+			}
+		}
+
 		tcb.exert_angular_impulse_dim3(core_B, core_A, rot_impulse_ws);
 	}
 
@@ -204,6 +220,22 @@ void IVP_Constraint_Fixed_Keyframed::do_simulation_controller(IVP_Event_Sim *es,
 		IVP_U_Matrix3 &tpm = tcb.m_velocity_ds_f_impulse_ds;
 		IVP_U_Float_Point impulse_ws;
 		tpm.vmult3(&delta_position_ws, &impulse_ws);
+
+		// limit linear impulse so per-axis force does not exceed the configured cap
+		for (int i = 2; i >= 0; i--)
+		{
+			const IVP_FLOAT max_force_axis = IVP_Inline_Math::fabsd(max_translation_force.k[i]);
+			const IVP_FLOAT max_impulse_axis = max_force_axis * es->delta_time;
+			if (impulse_ws.k[i] > max_impulse_axis)
+			{
+				impulse_ws.k[i] = max_impulse_axis;
+			}
+			else if (impulse_ws.k[i] < -max_impulse_axis)
+			{
+				impulse_ws.k[i] = -max_impulse_axis;
+			}
+		}
+
 		tcb.exert_impulse_dim3(core_B, core_A, impulse_ws);
 	}
 }
@@ -224,8 +256,16 @@ void IVP_Constraint_Fixed_Keyframed::set_prime_orientation_Ros(const IVP_U_Quat 
 	if (orientation1)
 	{
 		prime_orientation_1 = *orientation1;
-		i_delta_prime_orientation_time = 1.0f / (dt);
-		angular_velocity_set = IVP_TRUE;
+		if (dt > P_FLOAT_EPS)
+		{
+			i_delta_prime_orientation_time = 1.0f / dt;
+			angular_velocity_set = IVP_TRUE;
+		}
+		else
+		{
+			i_delta_prime_orientation_time = 0.0f;
+			angular_velocity_set = IVP_FALSE;
+		}
 	}
 	else
 	{
