@@ -23,6 +23,8 @@ class IVP_Forcefield : protected IVP_Listener_Set_Active<IVP_Core>, protected IV
 protected:
     IVP_U_Set_Active<IVP_Core> *set_of_cores;
     IVP_BOOL i_am_owner_of_set_of_cores; // default: IVP_TRUE; if IVP_FALSE, set_of_cores will not be deleted by deconstructor!
+    IVP_BOOL set_is_going_to_be_deleted;
+    IVP_U_Vector<IVP_Core> attached_cores;
 
     // IVP_Listener_Set_Active implementations
     virtual void element_added(IVP_U_Set_Active<IVP_Core> *set, IVP_Core *elem);
