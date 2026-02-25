@@ -9,6 +9,7 @@
 #include <ivp_surbuild_pointsoup.hxx>
 
 #include <ivp_halfspacesoup.hxx>
+#include <ivp_template_surbuild.hxx>
 #include <ivp_surbuild_ledge_soup.hxx>
 #include <ivp_surbuild_halfspacesoup.hxx>
 
@@ -61,7 +62,13 @@ int IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_points(IVP_Halfsp
 																	  IVP_DOUBLE pointmerge_threshold,
 																	  IVP_U_Vector<IVP_U_Point> *points)
 {
+	if (!halfspaces || !points)
+	{
+		return 0;
+	}
+
 	int i;
+	int initial_point_count = points->len();
 
 	IVP_DOUBLE threshold = pointmerge_threshold * pointmerge_threshold;
 
@@ -142,19 +149,19 @@ int IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_points(IVP_Halfsp
 						insert_point_into_list(new IVP_U_Point(point), points, threshold);
 					}
 				}
-				else
-				{
-#ifdef P_LANES_TO_POINT_DEBUG
+					else
+					{
+#ifdef PLANES_TO_POINT_DEBUG
+						if (debug_plane)
+						{
+							printf(" --> no intersection\n");
+						}
+#endif
+					}
+#ifdef PLANES_TO_POINT_DEBUG
 					if (debug_plane)
 					{
-						printf(" --> no intersection\n");
-					}
-#endif
-				}
-#ifdef PLANES_TO_POINT_DEBUG
-				if (debug_plane)
-				{
-					printf("\n");
+						printf("\n");
 				}
 #endif
 			}
@@ -165,7 +172,7 @@ int IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_points(IVP_Halfsp
 	// to avoid numerical problems when triangularizing the object we merge any points
 	// that are closer than a user-defined threshold
 	// -------------------------------------------------------------------------------
-	for (i = 0; i < points->len(); i++)
+	for (i = initial_point_count; i < points->len(); i++)
 	{
 		IVP_U_Point *p1 = points->element_at(i);
 		int j;
@@ -189,8 +196,13 @@ int IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_points(IVP_Halfsp
 }
 
 IVP_Compact_Ledge *IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_compact_ledge(IVP_Halfspacesoup *halfspaces,
-																							IVP_DOUBLE pointmerge_threshold)
+																								IVP_DOUBLE pointmerge_threshold)
 {
+	if (!halfspaces)
+	{
+		return NULL;
+	}
+
 	IVP_U_Vector<IVP_U_Point> points;
 
 	IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_points(halfspaces, pointmerge_threshold, &points);
@@ -206,14 +218,24 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_co
 IVP_Compact_Surface *IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_compact_surface(IVP_Halfspacesoup *halfspaces,
 																								IVP_DOUBLE pointmerge_threshold)
 {
+	if (!halfspaces)
+	{
+		return NULL;
+	}
+
 	IVP_SurfaceBuilder_Ledge_Soup ledge_soup;
 	IVP_Compact_Surface *cs = NULL;
 
 	IVP_Compact_Ledge *ledge = IVP_SurfaceBuilder_Halfspacesoup::convert_halfspacesoup_to_compact_ledge(halfspaces, pointmerge_threshold);
 	if (ledge)
 	{
+		IVP_Template_Surbuild_LedgeSoup templ;
+		templ.free_input_compact_ledges = IVP_FALSE;
+		templ.link_to_input_compact_ledges = IVP_FALSE;
+
 		ledge_soup.insert_ledge(ledge);
-		cs = ledge_soup.compile();
+		cs = ledge_soup.compile(&templ);
+		P_FREE_ALIGNED(ledge);
 	}
 	else
 	{
