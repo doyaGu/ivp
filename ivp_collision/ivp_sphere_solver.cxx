@@ -44,27 +44,24 @@ static inline IVP_BOOL sphere_overlaps_sphere_d(IVP_U_Point *pos1,
         return IVP_TRUE;
 }
 
-static IVP_BOOL found_valid_sphere_node = IVP_FALSE;
-
-static inline void sphere_against_ledgetree_node(const IVP_Compact_Ledgetree_Node *cln, IVP_U_Point *query_pos, IVP_DOUBLE query_rad, int current_depth, int max_depth)
+static inline IVP_BOOL sphere_against_ledgetree_node(const IVP_Compact_Ledgetree_Node *cln, IVP_U_Point *query_pos, IVP_DOUBLE query_rad, int current_depth, int max_depth)
 {
     IVP_U_Point node_pos(cln->center.k[0], cln->center.k[1], cln->center.k[2]);
     IVP_FLOAT node_rad = cln->radius;
 
-    if (sphere_overlaps_sphere_d(query_pos, query_rad, &node_pos, node_rad))
+    if (!sphere_overlaps_sphere_d(query_pos, query_rad, &node_pos, node_rad))
     {
-        if (current_depth < max_depth && !cln->is_terminal())
-        {
-            sphere_against_ledgetree_node(cln->left_son(), query_pos, query_rad, current_depth + 1, max_depth);
-            sphere_against_ledgetree_node(cln->right_son(), query_pos, query_rad, current_depth + 1, max_depth);
-        }
-        else
-        {
-            found_valid_sphere_node = IVP_TRUE;
-        }
+        return IVP_FALSE;
     }
 
-    return;
+    if (current_depth < max_depth && !cln->is_terminal())
+    {
+        if (sphere_against_ledgetree_node(cln->left_son(), query_pos, query_rad, current_depth + 1, max_depth))
+            return IVP_TRUE;
+        return sphere_against_ledgetree_node(cln->right_son(), query_pos, query_rad, current_depth + 1, max_depth);
+    }
+
+    return IVP_TRUE;
 }
 
 /**
@@ -76,16 +73,12 @@ static inline void sphere_against_ledgetree_node(const IVP_Compact_Ledgetree_Nod
  */
 static inline IVP_BOOL sphere_against_object(IVP_Real_Object *obj, IVP_U_Point *query_pos, IVP_DOUBLE query_rad, int max_depth)
 {
-    found_valid_sphere_node = IVP_FALSE;
-
     if (obj->get_type() == IVP_POLYGON)
     {
         const IVP_Compact_Surface *cs = static_cast<IVP_SurfaceManager_Polygon *>(obj->get_surface_manager())->get_compact_surface();
         const IVP_Compact_Ledgetree_Node *cln = cs->get_compact_ledge_tree_root();
 
-        sphere_against_ledgetree_node(cln, query_pos, query_rad, 0, max_depth);
-
-        return found_valid_sphere_node;
+        return sphere_against_ledgetree_node(cln, query_pos, query_rad, 0, max_depth);
     }
     else if (obj->get_type() == IVP_BALL)
     {
@@ -120,12 +113,19 @@ IVP_BOOL IVP_Sphere_Solver::check_sphere_against_object(const IVP_Sphere_Solver_
 
 void IVP_Sphere_Solver::check_sphere_against_environment(const IVP_Sphere_Solver_Template *tmpl, IVP_Environment *env)
 {
+    m_intruding_objects.remove_all();
+
     m_center.set(&tmpl->center);
     m_radius = tmpl->radius;
     m_max_traversal_depth = tmpl->max_traversal_depth;
 
     m_tree_manager = env->get_ov_tree_manager();
+    if (!m_tree_manager)
+        return;
+
     IVP_OV_Node *root = m_tree_manager->root;
+    if (!root)
+        return;
 
     IVP_U_Float_Point sphere_bb_rlb, sphere_bb_pos;
 
