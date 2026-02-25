@@ -48,7 +48,7 @@ int IVP_SurfaceBuilder_Pointsoup::get_offset_from_pointlist(IVP_Template_Point *
         }
     }
 
-    return (0);
+    return (-1);
 }
 
 int IVP_SurfaceBuilder_Pointsoup::get_offset_from_lineslist(IVP_Template_Line *lines,
@@ -75,7 +75,7 @@ int IVP_SurfaceBuilder_Pointsoup::get_offset_from_lineslist(IVP_Template_Line *l
         }
     }
 
-    return (0);
+    return (-1);
 }
 
 struct point_hash_key2
@@ -88,6 +88,7 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
                                                                        IVP_U_Vector<IVP_SurMan_PS_Plane> *planes)
 {
     IVP_Template_Polygon *templ = new IVP_Template_Polygon();
+    IVP_BOOL build_failed = IVP_FALSE;
 
     // ------------------------------------------------------------------------
     // Build Pointlist:
@@ -107,7 +108,7 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
         IVP_U_Point *point = points->element_at(x);
 
         // check if point (or at least one extremely close to it) is already in list
-        if (get_offset_from_pointlist(templ->points, templ->n_points, point) == 0)
+        if (get_offset_from_pointlist(templ->points, templ->n_points, point) < 0)
         {
 
             // if not, insert it into our point list
@@ -147,7 +148,7 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
 
             IVP_U_Point *point;
 
-            ushort offset_point1, offset_point2;
+            int offset_point1, offset_point2;
 
             point = plane->points.element_at(pointnr);
             offset_point1 = get_offset_from_pointlist(templ->points, templ->n_points, point);
@@ -161,6 +162,12 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
                 point = plane->points.element_at(pointnr + 1);
             }
             offset_point2 = get_offset_from_pointlist(templ->points, templ->n_points, point);
+
+            if (offset_point1 < 0 || offset_point2 < 0)
+            {
+                build_failed = IVP_TRUE;
+                break;
+            }
 
             // in 'offset_point1/2' we now have the points that build the current line...
 
@@ -183,16 +190,31 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
                 lines_hash->add((char *)&phk, (void *)1);
 
                 struct point_hash_key2 *nphk = (struct point_hash_key2 *)p_calloc(1, sizeof(struct point_hash_key2));
-                nphk->offset_point1 = offset_point1;
-                nphk->offset_point2 = offset_point2;
+                nphk->offset_point1 = (ushort)offset_point1;
+                nphk->offset_point2 = (ushort)offset_point2;
                 lines_vector.add(nphk);
 
                 templ->n_lines++;
             }
         }
+        if (build_failed)
+        {
+            break;
+        }
     }
 
     P_DELETE(lines_hash);
+
+    if (build_failed)
+    {
+        for (x = 0; x < lines_vector.len(); x++)
+        {
+            struct point_hash_key2 *pphk = lines_vector.element_at(x);
+            P_FREE(pphk);
+        }
+        P_DELETE(templ);
+        return NULL;
+    }
 
     // now we have all lines (without duplicates) in our 'lines_vector' list and just
     // need to copy the data to the IVP_Template_Line structure.
@@ -227,7 +249,7 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
         templ->surfaces[x].revert_line = new char[templ->surfaces[x].n_lines];
 
         int punktezahl = templ->surfaces[x].n_lines;
-        ushort *offset_points = (ushort *)p_calloc(punktezahl + 1, sizeof(ushort));
+        int *offset_points = (int *)p_calloc(punktezahl + 1, sizeof(int));
 
         int y;
         for (y = 0; y < punktezahl; y++)
@@ -237,6 +259,16 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
 
             point = plane->points.element_at(y);
             offset_points[y] = get_offset_from_pointlist(templ->points, templ->n_points, point);
+            if (offset_points[y] < 0)
+            {
+                build_failed = IVP_TRUE;
+                break;
+            }
+        }
+        if (build_failed)
+        {
+            P_FREE(offset_points);
+            break;
         }
         offset_points[y] = offset_points[0];
 
@@ -247,11 +279,26 @@ IVP_Template_Polygon *IVP_SurfaceBuilder_Pointsoup::planes_to_template(IVP_U_Vec
             char reverse;
             int line_index = get_offset_from_lineslist(templ->lines, templ->n_lines,
                                                        offset_points[pointnr], offset_points[pointnr + 1], &reverse);
+            if (line_index < 0)
+            {
+                build_failed = IVP_TRUE;
+                break;
+            }
             templ->surfaces[x].lines[pointnr] = line_index;
             templ->surfaces[x].revert_line[pointnr] = ((reverse * (-1)) + 1);
         }
 
         P_FREE(offset_points);
+        if (build_failed)
+        {
+            break;
+        }
+    }
+
+    if (build_failed)
+    {
+        P_DELETE(templ);
+        return NULL;
     }
 
     return (templ);
@@ -316,7 +363,7 @@ class IVP_SB_PS_DUMMY
     int dummy;
 };
 
-IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_qhull_result(IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, char *skip_list, char *use_list)
+IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_qhull_result(IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list)
 {
     *skip_point = IVP_FALSE;
     // DEBUG: Print all vertices of convex hull
@@ -445,18 +492,21 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
     if (*skip_point == IVP_FALSE)
     {
         IVP_Template_Polygon *templ = planes_to_template(points, &planes);
-        // -----------------------------------------
-        // convert polygon template to compact ledge
-        // -----------------------------------------
-        compact_ledge = IVP_SurfaceBuilder_Polygon_Convex::convert_template_to_ledge(templ);
-        IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
+        if (templ)
         {
-            if (!compact_ledge)
+            // -----------------------------------------
+            // convert polygon template to compact ledge
+            // -----------------------------------------
+            compact_ledge = IVP_SurfaceBuilder_Polygon_Convex::convert_template_to_ledge(templ);
+            IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
             {
-                error_output(templ);
+                if (!compact_ledge)
+                {
+                    error_output(templ);
+                }
             }
+            P_DELETE(templ);
         }
-        P_DELETE(templ);
     }
 
     // --------------------
@@ -511,8 +561,8 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
     }
 
     int numpoints = points.len();
-    char *skip_list = (char *)p_calloc(numpoints, sizeof(char));
-    char *use_list = (char *)p_calloc(numpoints, sizeof(char));
+    unsigned int *skip_list = (unsigned int *)p_calloc(numpoints, sizeof(unsigned int));
+    unsigned int *use_list = (unsigned int *)p_calloc(numpoints, sizeof(unsigned int));
 
     // --------------
     // starting qhull
@@ -568,8 +618,8 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
 
         IVP_BOOL skip_point = IVP_FALSE;
 
-        memset(use_list, 0, numpoints);	 // reset list
-        memset(skip_list, 0, numpoints); // reset list
+        memset(use_list, 0, numpoints * sizeof(unsigned int));	 // reset list
+        memset(skip_list, 0, numpoints * sizeof(unsigned int)); // reset list
         res = try_to_build_convex_ledge_from_qhull_result(&points, &skip_point, skip_list, use_list);
 
         if (res) //@@CB
