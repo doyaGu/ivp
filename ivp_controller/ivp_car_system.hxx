@@ -93,19 +93,36 @@ public:
     {
         P_MEM_CLEAR(this);
 
+        if (n_wheels_ < 0)
+        {
+            n_wheels_ = 0;
+        }
+        if (n_wheels_ > IVP_CAR_SYSTEM_MAX_WHEELS)
+        {
+            n_wheels_ = IVP_CAR_SYSTEM_MAX_WHEELS;
+        }
         n_wheels = n_wheels_;
+
+        if (n_axis_ < 1)
+        {
+            n_axis_ = 1;
+        }
+        if (n_axis_ > n_wheels)
+        {
+            n_axis_ = (n_wheels > 0) ? n_wheels : 1;
+        }
         n_axis = n_axis_;
+
+        // Default coordinate system definition.
+        index_x = IVP_INDEX_X;
+        index_y = IVP_INDEX_Y;
+        index_z = IVP_INDEX_Z;
+        is_left_handed = IVP_FALSE;
 
         for (int i = 0; i < n_wheels; i++)
         {
             // not reversed by default
             this->wheel_reversed_sign[i] = 1.0f;
-
-            // default coordinate system definition
-            index_x = IVP_INDEX_X;
-            index_y = IVP_INDEX_Y;
-            index_z = IVP_INDEX_Z;
-            is_left_handed = IVP_FALSE;
         }
 
         fast_turn_factor = 1.0f;
