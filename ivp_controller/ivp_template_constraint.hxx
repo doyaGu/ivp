@@ -105,7 +105,7 @@ public:
     // if force_factor > damp_factor you get a springy behaviour
     // if force_factor < damp_factor ->smooth movement
     // --------------------------------------------------------
-    IVP_FLOAT force_factor; // force factor   [ 0.. 1.0 .. 1.5f ]     default: 1.0
+    IVP_FLOAT force_factor; // force factor   [ >0 .. 1.0 .. 1.5f ]    default: 1.0
     IVP_FLOAT damp_factor;  // damp:   [ 0 ...1.0f ..1.5f ]		default: 1.0
 
     /******************************************************************************
