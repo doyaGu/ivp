@@ -339,6 +339,7 @@ void IVP_Mindist_Event_Solver::calc_next_event_BF(const IVP_Compact_Edge *F,
 
     IVP_U_Matrix_Cache cache_P(m_cache_B);
     IVP_U_Matrix_Cache cache_F(m_cache_F->clp_cache_object);
+    event_time_out = t_max; // default: no event in this time slice
 
     IVP_3D_Solver_PF_COLL pf_coll_solver;
     {
