@@ -129,6 +129,9 @@ protected:
 
     IVP_Raycast_Car_Wheel *get_wheel(IVP_POS_WHEEL i) { return &wheels_of_car[i]; };
     IVP_Raycast_Car_Axis *get_axis(IVP_POS_AXIS i) { return &axis_of_car[i]; };
+    int GetAxisForWheelIndex(int iWheel) const;
+    void BuildAxisWheelBounds(int *pFirstWheelPerAxis, int *pLastWheelPerAxis) const;
+    IVP_BOOL GetFrontAndRearAxes(int *pFrontAxisOut, int *pRearAxisOut, int *pFirstWheelPerAxis, int *pLastWheelPerAxis) const;
 
     virtual void core_is_going_to_be_deleted_event(IVP_Core *) { P_DELETE_THIS(this); };
     virtual IVP_U_Vector<IVP_Core> *get_associated_controlled_cores() { return &vector_of_cores; };
