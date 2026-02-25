@@ -114,6 +114,16 @@ void IVP_Actuator_Spring::set_rel_pos_damp(IVP_DOUBLE c)
 	this->ensure_actuator_in_simulation();
 }
 
+void IVP_Actuator_Spring::add_listener_spring(IVP_Listener_Spring *listener)
+{
+	listeners_spring.add(listener);
+}
+
+void IVP_Actuator_Spring::remove_listener_spring(IVP_Listener_Spring *listener)
+{
+	listeners_spring.remove(listener);
+}
+
 IVP_Actuator_Spring::~IVP_Actuator_Spring() {}
 
 void IVP_Actuator_Spring_Active::active_float_changed(IVP_U_Active_Float *af)
@@ -152,22 +162,22 @@ IVP_Actuator_Spring_Active::IVP_Actuator_Spring_Active(IVP_Environment *env, IVP
 	if (active_float_spring_len)
 	{
 		active_float_spring_len->add_dependency(this);
-		spring_len = active_float_spring_len->get_float_value();
+		set_len(active_float_spring_len->get_float_value());
 	}
 	if (active_float_spring_constant)
 	{
 		active_float_spring_constant->add_dependency(this);
-		spring_constant = active_float_spring_constant->get_float_value();
+		set_constant(active_float_spring_constant->get_float_value());
 	}
 	if (active_float_spring_damp)
 	{
 		active_float_spring_damp->add_dependency(this);
-		spring_damp = active_float_spring_damp->get_float_value();
+		set_damp(active_float_spring_damp->get_float_value());
 	}
 	if (active_float_spring_rel_pos_damp)
 	{
 		active_float_spring_rel_pos_damp->add_dependency(this);
-		rel_pos_damp = active_float_spring_rel_pos_damp->get_float_value();
+		set_rel_pos_damp(active_float_spring_rel_pos_damp->get_float_value());
 	}
 }
 

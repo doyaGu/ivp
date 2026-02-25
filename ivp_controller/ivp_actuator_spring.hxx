@@ -78,6 +78,7 @@ public:
 class IVP_Listener_Spring
 {
 public:
+    virtual ~IVP_Listener_Spring() {}
     virtual void event_spring_broken(IVP_Actuator_Spring *spring) = 0;
 };
 
@@ -127,8 +128,8 @@ public:
 
     IVP_BOOL get_only_stretch() { return spring_force_only_on_stretch; }
 
-    void add_listener_spring(IVP_Listener_Spring *listener);    // NOT_IMPLEMENTED_YET
-    void remove_listener_spring(IVP_Listener_Spring *listener); // NOT_IMPLEMENTED_YET
+    void add_listener_spring(IVP_Listener_Spring *listener);
+    void remove_listener_spring(IVP_Listener_Spring *listener);
 
     virtual void do_simulation_controller(IVP_Event_Sim *, IVP_U_Vector<IVP_Core> *core_list);
 
