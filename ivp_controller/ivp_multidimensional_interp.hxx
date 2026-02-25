@@ -85,6 +85,11 @@ public:
      ***********************************************************************************/
     static IVP_MI_Vector *malloc_mi_vector(int size)
     {
+        if (size < 1)
+        {
+            IVP_ASSERT(size > 0);
+            size = 1;
+        }
         IVP_MI_Vector *result = (IVP_MI_Vector *)p_malloc(sizeof(IVP_MI_Vector) + sizeof(IVP_FLOAT) * (size - 1));
         result->nr_of_elements = size;
         for (int i = 0; i < size; i++)
@@ -102,6 +107,11 @@ public:
      *****************************************************************************************/
     static IVP_MI_Vector *malloc_and_set_mi_vector(int size, IVP_FLOAT *values)
     {
+        if (size < 1)
+        {
+            IVP_ASSERT(size > 0);
+            size = 1;
+        }
         IVP_MI_Vector *result = (IVP_MI_Vector *)p_malloc(sizeof(IVP_MI_Vector) + sizeof(IVP_FLOAT) * (size - 1));
         result->nr_of_elements = size;
         for (int i = 0; i < size; i++)
@@ -157,9 +167,9 @@ private:
     IVP_MI_Vector **previous_inputs;
     IVP_MI_Vector **previous_solutions;
 
-    int nr_of_vectors : 8;           // denotes the length of the arrays of vectors 'previous_inputs' and 'previous_solutions' stored for the interpolation
-    int nr_of_elements_input : 8;    // denotes the number of elements within an input vector
-    int nr_of_elements_solution : 8; // denotes the number of elements within a sulution vector
+    int nr_of_vectors;           // denotes the length of the arrays of vectors 'previous_inputs' and 'previous_solutions' stored for the interpolation
+    int nr_of_elements_input;    // denotes the number of elements within an input vector
+    int nr_of_elements_solution; // denotes the number of elements within a sulution vector
 
     IVP_FLOAT MI_eps; // epsilon value used internally
     // IVP_FLOAT max_res;  //maximum value the residuum of the LINFIT algortihm is allowed to have; It describes the maximum deviation of LINFIT's result from the optimum
