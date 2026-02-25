@@ -230,7 +230,7 @@ IVP_Actuator_Four_Point::IVP_Actuator_Four_Point(IVP_Environment *env,
         anch->init_anchor(this, four_point_templ->anchors[i]);
 
         IVP_Core *core = anch->l_anchor_object->get_core();
-        if (core->physical_unmoveable)
+        if (!core->physical_unmoveable)
         {
             actuator_controlled_cores.install(core);
         }

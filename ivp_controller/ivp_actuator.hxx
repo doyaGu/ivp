@@ -288,7 +288,15 @@ public:
     IVP_Actuator_Two_Point(IVP_Environment *, IVP_Template_Two_Point *two_point_templ, IVP_ACTUATOR_TYPE ac_type);
     virtual ~IVP_Actuator_Two_Point();
 
-    IVP_Anchor *get_actuator_anchor(int i) { return &anchors[i]; }
+    IVP_Anchor *get_actuator_anchor(int i)
+    {
+        if ((unsigned)i >= 2)
+        {
+            IVP_ASSERT(0);
+            return NULL;
+        }
+        return &anchors[i];
+    }
 
     void *client_data;
     void ensure_actuator_in_simulation();
@@ -310,7 +318,15 @@ public:
                             IVP_ACTUATOR_TYPE ac_type);
     virtual ~IVP_Actuator_Four_Point();
 
-    IVP_Anchor *get_actuator_anchor(int i) { return &anchors[i]; }
+    IVP_Anchor *get_actuator_anchor(int i)
+    {
+        if ((unsigned)i >= 4)
+        {
+            IVP_ASSERT(0);
+            return NULL;
+        }
+        return &anchors[i];
+    }
 };
 
 /********************************************************************************
@@ -458,6 +474,7 @@ class IVP_Actuator_Check_Dist;
 class IVP_Listener_Check_Dist_Event
 {
 public:
+    virtual ~IVP_Listener_Check_Dist_Event() {}
     virtual void check_dist_event(IVP_Actuator_Check_Dist *, IVP_BOOL distance_shorter_than_range) = 0;
     virtual void check_dist_is_going_to_be_deleted_event(IVP_Actuator_Check_Dist *) = 0; // has to remove itself from IVP_Actuator_Check_Dist
 };
