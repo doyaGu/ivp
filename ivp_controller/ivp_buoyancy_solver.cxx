@@ -219,7 +219,7 @@ void IVP_Buoyancy_Solver::compute_dampening_values_for_one_ball(const int &decis
     speed_plane_os.set(speed_plane_os_);
     speed_plane_os.hesse_val = speed_plane_os_->hesse_val;
 
-    // will hold the content of the projected surface that�s under the water surface
+    // will hold the content of the projected surface that is under the water surface
     IVP_DOUBLE ball_projected_surface_content_under = 0.0f;
 
     switch (decision)
