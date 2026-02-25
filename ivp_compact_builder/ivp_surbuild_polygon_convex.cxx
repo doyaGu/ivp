@@ -37,6 +37,15 @@ IVP_SurfaceBuilder_Polygon_Convex::IVP_SurfaceBuilder_Polygon_Convex(IVP_Templat
 
     if (!templ_ledge)
         return;
+    if (templ_ledge->ledge_is_open != IVP_FALSE ||
+        templ_ledge->n_templ_triangles != 2 ||
+        !templ_ledge->templ_triangles_array)
+    {
+        IVP_ASSERT(templ_ledge->ledge_is_open == IVP_FALSE);
+        IVP_ASSERT(templ_ledge->n_templ_triangles == 2);
+        IVP_ASSERT(templ_ledge->templ_triangles_array);
+        return;
+    }
     IVP_ASSERT(templ_ledge->ledge_is_open == IVP_FALSE);
     IVP_ASSERT(templ_ledge->n_templ_triangles == 2);
 
@@ -102,8 +111,11 @@ IVP_SurfaceBuilder_Polygon_Convex::IVP_SurfaceBuilder_Polygon_Convex(IVP_Templat
 
             // printf("Compact ledge size: '%d'\n", size);
             mem = (uchar *)ivp_malloc_aligned(size, 16); // 16 should be enough, but ...
-            memset(mem, 0, size);
-            ledge_gen.generate_compact_ledge(mem);
+            if (mem)
+            {
+                memset(mem, 0, size);
+                ledge_gen.generate_compact_ledge(mem);
+            }
         }
 #ifdef DEBUG
         if (mem && ledge_gen.validate() != IVP_OK)
@@ -155,7 +167,7 @@ void IVP_SurfaceBuilder_Polygon_Convex::init_surface_manager_polygon()
 
     if (error)
     {
-        this->tetras = NULL;
+        P_DELETE(this->tetras);
         this->c_ledge = NULL;
         return;
     }
@@ -185,7 +197,10 @@ void IVP_SurfaceBuilder_Polygon_Convex::init_surface_manager_polygon()
 
                 // printf("Compact ledge size: '%d'\n", size);
                 mem = (uchar *)ivp_malloc_aligned(size, 16); // @@@ 16 should be enough, but ...
-                ledge_gen.generate_compact_ledge(mem);
+                if (mem)
+                {
+                    ledge_gen.generate_compact_ledge(mem);
+                }
             }
 #ifdef DEBUG
             if (mem && ledge_gen.validate() != IVP_OK)
