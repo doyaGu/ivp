@@ -27,7 +27,14 @@ void IVP_Template_Controller_Floating::set_ray_direction_ws(IVP_Real_Object *, c
     // IVP_Cache_Object *co = obj->get_cache_object();
     // co->remove_reference();
     // co->transform_vector_to_object_coords( dir_ws, &ray_direction_os );
-    ray_direction_ws.set(dir_ws);
+    IVP_U_Float_Point new_dir;
+    new_dir.set(dir_ws);
+    if (new_dir.real_length_plus_normize() < P_FLOAT_EPS)
+    {
+        IVP_ASSERT(0);
+        return;
+    }
+    ray_direction_ws.set(&new_dir);
 }
 
 IVP_Controller_Floating::IVP_Controller_Floating(IVP_Real_Object *obj, const IVP_Template_Controller_Floating *templ)
@@ -51,7 +58,14 @@ void IVP_Controller_Floating::set_target_distance(IVP_DOUBLE td) { target_distan
 
 void IVP_Controller_Floating::set_ray_direction_ws(const IVP_U_Float_Point *new_dir)
 {
-    ray_direction_ws.set(new_dir);
+    IVP_U_Float_Point normalized_dir;
+    normalized_dir.set(new_dir);
+    if (normalized_dir.real_length_plus_normize() < P_FLOAT_EPS)
+    {
+        IVP_ASSERT(0);
+        return;
+    }
+    ray_direction_ws.set(&normalized_dir);
 }
 
 const IVP_U_Float_Point *IVP_Controller_Floating::get_ray_direction_ws()
@@ -82,7 +96,13 @@ void IVP_Controller_Floating::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
     IVP_Solver_Core_Reaction tcb;
     tcb.init_reaction_solver_translation_ws(object->get_core(), NULL, position_ws, &ray_direction_ws, NULL, NULL);
     IVP_DOUBLE a = (current_distance - target_distance) * es->i_delta_time - tcb.delta_velocity_ds.k[0];
-    IVP_DOUBLE impulse = a / tcb.get_m_velocity_ds_f_impulse_ds()->get_elem(0, 0);
+    const IVP_DOUBLE tpm00 = tcb.get_m_velocity_ds_f_impulse_ds()->get_elem(0, 0);
+    if (tpm00 < P_FLOAT_EPS && tpm00 > -P_FLOAT_EPS)
+    {
+        co->remove_reference();
+        return;
+    }
+    IVP_DOUBLE impulse = a / tpm00;
     if (impulse * es->i_delta_time > max_adhesive_force)
     {
         impulse = max_adhesive_force * es->delta_time;
