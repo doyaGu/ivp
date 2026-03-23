@@ -28,12 +28,20 @@ void IVP_Cache_Object_Manager::invalid_cache_object(IVP_Real_Object *object)
 IVP_Cache_Object *IVP_Cache_Object_Manager::get_cache_object(IVP_Real_Object *object)
 {
     IVP_Cache_Object *co;
+    int attempts = 0;
     while ((co = cache_object_at(reuse_loop_index))->reference_count)
     {
         reuse_loop_index++;
         if (reuse_loop_index >= n_cache_objects)
         {
             reuse_loop_index = 0;
+        }
+        if (++attempts >= n_cache_objects)
+        {
+            IVP_ASSERT(0 && "All cache objects are referenced - cannot evict");
+            // Force eviction to prevent infinite loop
+            co->reference_count = 0;
+            break;
         }
     }
     reuse_loop_index++;
