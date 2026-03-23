@@ -466,6 +466,20 @@ IVP_Environment_Manager *IVP_Environment_Manager::get_environment_manager()
 
 void IVP_Environment::simulate_until(IVP_Time until_time)
 {
+    IVP_DOUBLE delta_time = until_time - get_current_time();
+    if (delta_time < -P_FLOAT_RES)
+    {
+        IVP_ASSERT(delta_time >= -P_FLOAT_RES);
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
+    if (delta_time <= P_FLOAT_RES)
+    {
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
     this->get_betterstatisticsmanager()->set_simulation_time(until_time.get_time());
     time_manager->event_loop(this, until_time);
     // time_manager->simulate_variable_time_step(this,until_time - get_current_time());
@@ -473,6 +487,16 @@ void IVP_Environment::simulate_until(IVP_Time until_time)
 
 void IVP_Environment::simulate_variable_time_step(IVP_FLOAT delta_time)
 {
+    if (delta_time < IVP_MIN_DELTA_PSI_TIME)
+    {
+        delta_time = IVP_MIN_DELTA_PSI_TIME;
+    }
+
+    if (delta_time > IVP_MAX_DELTA_PSI_TIME)
+    {
+        delta_time = IVP_MAX_DELTA_PSI_TIME;
+    }
+
     this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time() + delta_time);
     time_manager->simulate_variable_time_step(this, delta_time);
 }
@@ -489,8 +513,22 @@ void IVP_Environment::reset_time()
 
 void IVP_Environment::simulate_dtime(IVP_DOUBLE dtime)
 {
+    if (dtime < -P_FLOAT_RES)
+    {
+        IVP_ASSERT(dtime >= -P_FLOAT_RES);
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
+    if (dtime <= P_FLOAT_RES)
+    {
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
     IVP_Time new_time = get_current_time();
     new_time += dtime;
+    this->get_betterstatisticsmanager()->set_simulation_time(new_time.get_time());
     time_manager->event_loop(this, new_time);
 }
 
@@ -498,6 +536,22 @@ void IVP_Environment::simulate_time_step(IVP_FLOAT sub_psi_time)
 {
     IVP_Time new_time = get_old_time_of_last_PSI();
     new_time += get_delta_PSI_time() * sub_psi_time;
+
+    IVP_DOUBLE delta_time = new_time - get_current_time();
+    if (delta_time < -P_FLOAT_RES)
+    {
+        IVP_ASSERT(delta_time >= -P_FLOAT_RES);
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
+    if (delta_time <= P_FLOAT_RES)
+    {
+        this->get_betterstatisticsmanager()->set_simulation_time(get_current_time().get_time());
+        return;
+    }
+
+    this->get_betterstatisticsmanager()->set_simulation_time(new_time.get_time());
     time_manager->event_loop(this, new_time);
 }
 
@@ -1081,10 +1135,14 @@ void IVP_Environment::simulate_psi(IVP_Time /*psi_time*/)
     return;
 }
 
-void IVP_Environment::set_global_collision_tolerance(IVP_DOUBLE tolerance, IVP_DOUBLE gravity_length)
+void IVP_Environment::set_global_collision_tolerance(IVP_DOUBLE tolerance)
 {
     ivp_mindist_settings.set_collision_tolerance(tolerance);
-    // CRACK - lol. according to both IDA and Ghidra, nothing is done with gravity_length
+}
+
+void IVP_Environment::set_global_collision_tolerance(IVP_DOUBLE tolerance, IVP_DOUBLE)
+{
+    IVP_Environment::set_global_collision_tolerance(tolerance);
 }
 
 IVP_FLOAT IVP_Environment::get_global_collision_tolerance()
