@@ -69,6 +69,11 @@ void hk_Local_Constraint_System::entity_deletion_event(hk_Entity* entity)
 		actuator_controlled_cores.remove(entity->get_core());
 	}
 
+	if (m_is_active && !actuator_controlled_cores.len())
+	{
+		deactivate_silently();
+	}
+
 	//	HK_BREAK;
 }
 
@@ -149,7 +154,7 @@ void hk_Local_Constraint_System::add_constraint(hk_Constraint* constraint, int s
 
 void hk_Local_Constraint_System::activate()
 {
-	if (!m_is_active && m_bodies.length())
+	if (!m_is_active && m_bodies.length() && actuator_controlled_cores.len())
 	{
 		m_environment->get_controller_manager()->announce_controller_to_environment(this);
 		m_is_active = true;
@@ -158,7 +163,7 @@ void hk_Local_Constraint_System::activate()
 
 void hk_Local_Constraint_System::deactivate()
 {
-	if (m_is_active && actuator_controlled_cores.len())
+	if (m_is_active)
 	{
 		m_environment->get_controller_manager()->remove_controller_from_environment(this, IVP_FALSE);
 		m_is_active = false;
@@ -167,7 +172,7 @@ void hk_Local_Constraint_System::deactivate()
 
 void hk_Local_Constraint_System::deactivate_silently()
 {
-	if (m_is_active && actuator_controlled_cores.len())
+	if (m_is_active)
 	{
 		m_is_active = false;
 		m_environment->get_controller_manager()->remove_controller_from_environment(this, IVP_TRUE);
