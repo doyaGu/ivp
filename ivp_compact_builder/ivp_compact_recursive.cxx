@@ -71,7 +71,7 @@ void IVP_Compact_Recursive::set_rekursive_convex_hull(){
       // Fix sorting
       if (b<a){ int x = a;a=b;b=x; };
       if (c<a){ int x = a;a=c;c=x; };
-      if (b<a){ int x = a;a=b;b=x; };
+      if (c<b){ int x = b;b=c;c=x; };
       // now a < b < c
       point_index[0] = a; point_index[1] = b; point_index[2] = c;
     }

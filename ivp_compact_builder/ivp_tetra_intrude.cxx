@@ -303,7 +303,7 @@ void IVP_Tetra_Intrude::checkin_edge(IVP_Tri_Edge *edge)
 			IVP_Tetra_Edge *newmem = (IVP_Tetra_Edge *)p_calloc(
 				memsize_of_tetra_edges, sizeof(IVP_Tetra_Edge));
 			memcpy((char *)newmem, (char *)tetra_edges, sizeof(IVP_Tetra_Edge) * n_tetra_edges);
-			delete tetra_edges;
+			P_FREE(tetra_edges);
 			tetra_edges = newmem;
 		}
 		t_edge = &tetra_edges[n_tetra_edges++];
