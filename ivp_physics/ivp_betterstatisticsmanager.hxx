@@ -130,6 +130,7 @@ private:
     IVP_U_Vector<IVP_BetterStatisticsmanager_Callback_Interface> output_callbacks; // list of user-definable callbacks
     IVP_U_Vector<IVP_BetterStatisticsmanager_Data_Entity> data_entities;           // list of all statistical data
     IVP_DOUBLE simulation_time;
+    IVP_DOUBLE time_of_last_update;
 
     // temporary data
 

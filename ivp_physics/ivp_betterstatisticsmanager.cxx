@@ -269,14 +269,13 @@ void IVP_BetterStatisticsmanager::set_simulation_time(IVP_DOUBLE time)
 {
     this->simulation_time = time;
 
-    static IVP_DOUBLE time_of_last_update = 0.0;
-    if ((simulation_time - time_of_last_update) < this->update_interval)
+    if ((simulation_time - this->time_of_last_update) < this->update_interval)
     {
         this->update_delayed = IVP_TRUE;
         return;
     }
-    time_of_last_update = this->simulation_time;
-    // printf("Time: %f\n", time_of_last_update);
+    this->time_of_last_update = this->simulation_time;
+    // printf("Time: %f\n", this->time_of_last_update);
     this->update_delayed = IVP_FALSE;
 }
 
@@ -327,6 +326,7 @@ IVP_BetterStatisticsmanager::IVP_BetterStatisticsmanager()
     this->update_interval = 1.0;
     this->update_delayed = IVP_TRUE;
     this->simulation_time = 0;
+    this->time_of_last_update = 0;
 }
 
 IVP_BetterStatisticsmanager::~IVP_BetterStatisticsmanager() {}

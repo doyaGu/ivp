@@ -104,6 +104,7 @@ IVP_Time_Manager::IVP_Time_Manager()
     min_hash = new IVP_U_Min_List(16);
     psi_event = new IVP_Time_Event_PSI();
 
+    base_time = 0.0f;
     last_time = 0;
 
     this->insert_event(psi_event, 0.0f);
