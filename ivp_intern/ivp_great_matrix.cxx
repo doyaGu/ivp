@@ -806,7 +806,7 @@ void IVP_Great_Matrix_Many_Zero::set_value(IVP_DOUBLE val, int col, int row)
 	IVP_ASSERT(col >= 0 && col < columns);
 	IVP_ASSERT(row >= 0 && row < columns);
 
-	*(this->matrix_values + col + columns * row) = val;
+	*(this->matrix_values + col + aligned_row_len * row) = val;
 }
 
 IVP_DOUBLE IVP_Great_Matrix_Many_Zero::get_value(int col, int row) const
