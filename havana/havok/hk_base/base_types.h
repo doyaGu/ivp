@@ -35,10 +35,10 @@
 
 #define HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(a,b)
 
-#ifdef _LINUX
-#define HK_BREAKPOINT() raise(SIGINT)
-#else
+#if defined(_WIN32) || defined(WIN32)
 #define HK_BREAKPOINT() __debugbreak()
+#else
+#define HK_BREAKPOINT() raise(SIGINT)
 #endif
 
 
@@ -73,10 +73,14 @@ typedef size_t 			hk_size_t;  // CK: unsigned long int ..
 typedef unsigned int 	hk_size_t;
 #endif
 
-#ifdef _LINUX
-#define HK_BREAK raise(SIGINT)
-#else
+#if !defined(_WIN32) && !defined(WIN32)
+#include <signal.h>
+#endif
+
+#if defined(_WIN32) || defined(WIN32)
 #define HK_BREAK __debugbreak()
+#else
+#define HK_BREAK raise(SIGINT)
 #endif
 
 #define HK_PUBLIC public
