@@ -77,9 +77,15 @@ class IVP_U_Min_List
     {
         IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
         {
-            IVP_PREFETCH_BLOCK(&elems[first_element], 64);  // get at least 64 bytes
+            if (first_element != IVP_U_MINLIST_UNUSED)
+            {
+                IVP_PREFETCH_BLOCK(&elems[first_element], 64);  // get at least 64 bytes
+            }
 #ifdef IVP_U_MINLIST_USELONG
-            IVP_PREFETCH(&elems[first_long], 0);
+            if (first_long != IVP_U_MINLIST_UNUSED)
+            {
+                IVP_PREFETCH(&elems[first_long], 0);
+            }
 #endif
         }
     }

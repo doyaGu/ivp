@@ -42,7 +42,6 @@ IVP_U_MINLIST_INDEX IVP_U_Min_List::add(void *elem, IVP_U_MINLIST_FIXED_POINT va
     IVP_ASSERT(value <= P_FLOAT_MAX);
     IVP_U_Min_List_Element *e;
     IVP_U_MINLIST_INDEX return_index;
-    counter += 1;
 
     if (free_list != IVP_U_MINLIST_UNUSED)
     {
@@ -56,6 +55,13 @@ IVP_U_MINLIST_INDEX IVP_U_Min_List::add(void *elem, IVP_U_MINLIST_FIXED_POINT va
     {
         // If this assertion triggers, it's going to overflow...
         IVP_ASSERT(malloced_size != IVP_U_MINLIST_MAX_ALLOCATION);
+        if (malloced_size == IVP_U_MINLIST_MAX_ALLOCATION)
+        {
+            ivp_message("Fatal error: IVP_U_Min_List reached maximum capacity (%u)\n",
+                        (unsigned int)IVP_U_MINLIST_MAX_ALLOCATION);
+            CORE;
+            return IVP_U_MINLIST_UNUSED;
+        }
 
         // Clamp allocation to 65535
         int nNewMallocSize = malloced_size * 2 + 1;
@@ -99,11 +105,13 @@ IVP_U_MINLIST_INDEX IVP_U_Min_List::add(void *elem, IVP_U_MINLIST_FIXED_POINT va
         elems[malloced_size - 1].next = IVP_U_MINLIST_UNUSED;
     }
 
+    counter += 1;
     e->element = elem;
     e->value = value;
 
 #ifdef IVP_U_MINLIST_USELONG
     e->long_next = IVP_U_MINLIST_LONG_UNUSED;
+    e->long_prev = IVP_U_MINLIST_UNUSED;
 #endif
 
     if (value <= min_value)
