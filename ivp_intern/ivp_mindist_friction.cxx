@@ -516,7 +516,11 @@ void IVP_Contact_Point::recalc_friction_s_vals()
         }
         info->contact_core[1] = core1;
     }
-    info->virtual_mass = 1.0f / info->inv_virtual_mass;
+    if (info->inv_virtual_mass > P_DOUBLE_EPS) {
+        info->virtual_mass = 1.0f / info->inv_virtual_mass;
+    } else {
+        info->virtual_mass = 0.0f;
+    }
     {
         IVP_Time ctime = syn0->get_object()->environment->get_current_time();
         IVP_DOUBLE dt = ctime - this->last_time_of_recalc_friction_s_vals;
