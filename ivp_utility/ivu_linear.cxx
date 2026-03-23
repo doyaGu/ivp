@@ -213,7 +213,7 @@ void IVP_U_Point::solve_quadratic_equation_fast(const IVP_U_Point *p)
     if (IVP_Inline_Math::fabsd(p->k[0]) < P_DOUBLE_EPS)
     {  // linear equation
         k[0] = 0;
-        if (IVP_Inline_Math::fabsd(p->k[1]) > P_DOUBLE_EPS)
+        if (IVP_Inline_Math::fabsd(p->k[1]) < P_DOUBLE_EPS)
         {
             k[0] = -1.0f;  // no result
             return;
@@ -502,7 +502,7 @@ int IVP_U_Matrix3::calc_eigen_vector(IVP_DOUBLE eigen_value, IVP_U_Point *eigen_
 
         for (int row = 0; row < 3; row++)
         {
-            IVP_U_Point *current_row = &rows[row];
+            IVP_U_Point *current_row = &matrix.rows[row];
             for (int col = 0; col < 3; col++)
             {
                 IVP_DOUBLE v = current_row->k[col];
@@ -528,12 +528,14 @@ int IVP_U_Matrix3::calc_eigen_vector(IVP_DOUBLE eigen_value, IVP_U_Point *eigen_
         }
     }
 
-    {  // resort matrix
-        for (int i = 2; i >= 0; i--)
+    {  // copy reordered matrix into m[][] with row and column permutation
+        for (int i = 0; i < 3; i++)
         {
-            IVP_U_Point *dest_row = &rows[i];
-            IVP_U_Point *source = &rows[row_index[i]];
-            dest_row->set(source);
+            IVP_U_Point *source = &matrix.rows[row_index[i]];
+            for (int j = 0; j < 3; j++)
+            {
+                m[i][j] = source->k[col_index[j]];
+            }
         }
     }
 
