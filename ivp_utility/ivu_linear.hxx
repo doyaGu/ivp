@@ -6,6 +6,7 @@
 #define IVP_U_LINEAR_INCLUDED
 
 #include <math.h>
+#include <string.h>
 
 #include <ivu_types.hxx>
 
@@ -22,6 +23,16 @@ class IVP_U_Hesse;
 class IVP_U_Quat;
 class IVP_U_Point;
 class IVP_U_Float_Quat;
+
+template <class T>
+inline void ivp_byte_swap4_alias_safe(T *value)
+{
+    IVP_ASSERT(sizeof(T) == sizeof(uint));
+    uint swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap4(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
 
 /********************************************************************************
  *	Name:	      	IVP_COORDINATE_INDEX
@@ -50,9 +61,9 @@ public:
 
     inline void byte_swap()
     {
-        ivp_byte_swap4((uint &)k[0]);
-        ivp_byte_swap4((uint &)k[1]);
-        ivp_byte_swap4((uint &)k[2]);
+        ivp_byte_swap4_alias_safe(&k[0]);
+        ivp_byte_swap4_alias_safe(&k[1]);
+        ivp_byte_swap4_alias_safe(&k[2]);
     }
 };
 
@@ -154,11 +165,11 @@ public:
 
     inline void byte_swap()
     {
-        ivp_byte_swap4((uint &)k[0]);
-        ivp_byte_swap4((uint &)k[1]);
-        ivp_byte_swap4((uint &)k[2]);
+        ivp_byte_swap4_alias_safe(&k[0]);
+        ivp_byte_swap4_alias_safe(&k[1]);
+        ivp_byte_swap4_alias_safe(&k[2]);
 #ifdef IVP_VECTOR_UNIT_FLOAT
-        ivp_byte_swap4((uint &)hesse_val);
+        ivp_byte_swap4_alias_safe(&hesse_val);
 #endif
     }
 
@@ -479,7 +490,9 @@ public:
 
     void byte_swap()
     {
-        ivp_byte_swap4((uint &)hesse_val);
+#if defined(IVP_NO_DOUBLE)
+        ivp_byte_swap4_alias_safe(&hesse_val);
+#endif
         IVP_U_Point::byte_swap();
     }
 };
@@ -520,7 +533,7 @@ public:
 
     void byte_swap()
     {
-        ivp_byte_swap4((uint &)hesse_val);
+        ivp_byte_swap4_alias_safe(&hesse_val);
         IVP_U_Float_Point::byte_swap();
     }
 };
@@ -781,10 +794,10 @@ public:
     inline void byte_swap()
     {
 #if defined(IVP_NO_DOUBLE)
-        ivp_byte_swap4((uint &)x);
-        ivp_byte_swap4((uint &)y);
-        ivp_byte_swap4((uint &)z);
-        ivp_byte_swap4((uint &)w);
+        ivp_byte_swap4_alias_safe(&x);
+        ivp_byte_swap4_alias_safe(&y);
+        ivp_byte_swap4_alias_safe(&z);
+        ivp_byte_swap4_alias_safe(&w);
 #else
         IVP_ASSERT(0 && "No byte swap for double yet");
 #endif
@@ -807,10 +820,10 @@ public:
 
     inline void byte_swap()
     {
-        ivp_byte_swap4((uint &)x);
-        ivp_byte_swap4((uint &)y);
-        ivp_byte_swap4((uint &)z);
-        ivp_byte_swap4((uint &)w);
+        ivp_byte_swap4_alias_safe(&x);
+        ivp_byte_swap4_alias_safe(&y);
+        ivp_byte_swap4_alias_safe(&z);
+        ivp_byte_swap4_alias_safe(&w);
     }
 };
 
