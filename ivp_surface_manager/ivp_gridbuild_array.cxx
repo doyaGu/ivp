@@ -828,6 +828,7 @@ IVP_Compact_Grid *IVP_GridBuilder_Array::compile_ledges_into_compact_grid(const 
     intp buffer_size = offsetof(IVP_Compact_Grid, offset_compact_ledge_array);  // size for base compact ledge
 
     buffer_size += ledges->len() * sizeof(int);                                     // add buffersize for ledge index array
+    buffer_size += 15;                                                               // worst-case padding for 16-byte alignment of grid elements
     buffer_size += (n_rows - 1) * (n_cols - 1) * sizeof(IVP_Compact_Grid_Element);  // the grid referencing ledge index array
     buffer_size += n_compact_poly_points_used * sizeof(IVP_Compact_Poly_Point);
     buffer_size = (buffer_size + 15) & ~15;  // align compact ledges
