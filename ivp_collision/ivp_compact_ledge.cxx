@@ -16,6 +16,33 @@
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 
+namespace
+{
+inline void ivp_swap_float_field(IVP_FLOAT *value)
+{
+    uint swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap4(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
+
+inline void ivp_swap_int_field(int *value)
+{
+    uint swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap4(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
+
+inline void ivp_swap_short_field(short *value)
+{
+    ushort swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap2(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
+} // namespace
+
 int IVP_Compact_Edge::next_table[] = {0, 1 * int(sizeof(IVP_Compact_Edge)), 1 * int(sizeof(IVP_Compact_Edge)), -2 * int(sizeof(IVP_Compact_Edge))};
 int IVP_Compact_Edge::prev_table[] = {0, 2 * int(sizeof(IVP_Compact_Edge)), -1 * int(sizeof(IVP_Compact_Edge)), -1 * int(sizeof(IVP_Compact_Edge))};
 
@@ -151,11 +178,13 @@ void IVP_Compact_Ledge::byte_swap()
         short for_future_use;
     */
 
-    ivp_byte_swap4((uint &)c_point_offset);
-    ivp_byte_swap4((uint &)ledgetree_node_offset);
+    ivp_swap_int_field(&c_point_offset);
+    ivp_swap_int_field(&ledgetree_node_offset);
 
     uint bitfields;
-    memcpy(&bitfields, (&ledgetree_node_offset + 1), sizeof(bitfields)); // as can't get addr of bitfield member..
+    const char *bitfield_ptr =
+        reinterpret_cast<const char *>(&ledgetree_node_offset) + sizeof(ledgetree_node_offset);
+    memcpy(&bitfields, bitfield_ptr, sizeof(bitfields)); // as can't get addr of bitfield member..
 
 #if defined(__POWERPC__)
 
@@ -186,8 +215,8 @@ void IVP_Compact_Ledge::byte_swap()
     uchar d = dummy;
     uint sd = size_div_16;
 
-    ivp_byte_swap2((ushort &)n_triangles);
-    ivp_byte_swap2((ushort &)for_future_use);
+    ivp_swap_short_field(&n_triangles);
+    ivp_swap_short_field(&for_future_use);
 }
 
 static void ProcessPoint(IVP_Compact_Poly_Point &point, IVP_U_BigVector<IVP_Compact_Poly_Point> *pre_swapped_points)
@@ -217,7 +246,8 @@ static void ProcessPoint(IVP_Compact_Poly_Point &point, IVP_U_BigVector<IVP_Comp
 
 void IVP_Compact_Ledge::byte_swap_all(IVP_U_BigVector<IVP_Compact_Poly_Point> *pre_swapped_points)
 {
-#if defined(__POWERPC__)
+#if defined(__POWERPC__) || defined(WIN32)
+    // Swap header fields before following offsets or reading triangle metadata.
     byte_swap();
 #endif
 
@@ -228,7 +258,7 @@ void IVP_Compact_Ledge::byte_swap_all(IVP_U_BigVector<IVP_Compact_Poly_Point> *p
 
     for (int j = 0; j < n_triangles; ++j)
     {
-#if defined(__POWERPC__)
+#if defined(__POWERPC__) || defined(WIN32)
         triangles[j].byte_swap();
 #endif
 
@@ -240,14 +270,7 @@ void IVP_Compact_Ledge::byte_swap_all(IVP_U_BigVector<IVP_Compact_Poly_Point> *p
         ProcessPoint(points[i1], pre_swapped_points);
         ProcessPoint(points[i2], pre_swapped_points);
 
-#if defined(WIN32)
-        triangles[j].byte_swap();
-#endif
     }
-
-#if defined(WIN32)
-    byte_swap();
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -262,20 +285,18 @@ void IVP_Compact_Ledgetree_Node::byte_swap()
         uchar box_sizes[IVP_CLT_N_DIRECTIONS];
         uchar free_0;
     */
-    ivp_byte_swap4((uint &)offset_right_node);
-    ivp_byte_swap4((uint &)offset_compact_ledge);
+    ivp_swap_int_field(&offset_right_node);
+    ivp_swap_int_field(&offset_compact_ledge);
     center.byte_swap();
-    ivp_byte_swap4((uint &)radius);
+    ivp_swap_float_field(&radius);
 
     // uchars don't need to be byte swapped themselves
 }
 
 void IVP_Compact_Ledgetree_Node::byte_swap_all(IVP_U_BigVector<IVP_Compact_Poly_Point> *pre_swapped_points)
 {
-#if defined(__POWERPC__)
-    //
-    // swaps offsets and data, so we can recurse and not crash!!
-    //
+#if defined(__POWERPC__) || defined(WIN32)
+    // Swap offsets before traversing child pointers or hull offsets.
     byte_swap();
 #endif
 
@@ -293,10 +314,4 @@ void IVP_Compact_Ledgetree_Node::byte_swap_all(IVP_U_BigVector<IVP_Compact_Poly_
         const_cast<IVP_Compact_Ledgetree_Node *>(r)->byte_swap_all(pre_swapped_points);
     }
 
-#if defined WIN32
-    //
-    // just swaps data
-    //
-    byte_swap();
-#endif
 }

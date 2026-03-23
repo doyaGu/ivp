@@ -7,6 +7,25 @@
 
 #include <string.h>
 
+namespace
+{
+inline void ivp_swap_float_field(IVP_FLOAT *value)
+{
+    uint swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap4(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
+
+inline void ivp_swap_int_field(int *value)
+{
+    uint swapped;
+    memcpy(&swapped, value, sizeof(swapped));
+    ivp_byte_swap4(swapped);
+    memcpy(value, &swapped, sizeof(swapped));
+}
+} // namespace
+
 void IVP_Compact_Surface::byte_swap()
 {
     /*
@@ -21,11 +40,12 @@ void IVP_Compact_Surface::byte_swap()
     */
     mass_center.byte_swap();                       // 3 floats
     rotation_inertia.byte_swap();                  // 3 floats
-    ivp_byte_swap4((uint &)upper_limit_radius);    // 1 float
-    ivp_byte_swap4((uint &)offset_ledgetree_root); // 1 float
+    ivp_swap_float_field(&upper_limit_radius);     // 1 float
+    ivp_swap_int_field(&offset_ledgetree_root);    // 1 int
 
     uint bitfields;
-    memcpy(&bitfields, (&upper_limit_radius + 1), sizeof(bitfields));
+    const char *bitfield_ptr = reinterpret_cast<const char *>(&upper_limit_radius) + sizeof(upper_limit_radius);
+    memcpy(&bitfields, bitfield_ptr, sizeof(bitfields));
 
 #if defined(__POWERPC__)
 
@@ -49,7 +69,8 @@ void IVP_Compact_Surface::byte_swap()
 
 void IVP_Compact_Surface::byte_swap_all(IVP_BOOL swap_points, int point_estimate)
 {
-#if defined(__POWERPC__)
+#if defined(__POWERPC__) || defined(WIN32)
+    // Swap header fields before following offset-based pointers.
     byte_swap();
 #endif
 
@@ -82,7 +103,4 @@ void IVP_Compact_Surface::byte_swap_all(IVP_BOOL swap_points, int point_estimate
             const_cast<IVP_Compact_Ledgetree_Node *>(ltn)->byte_swap_all(NULL);
     }
 
-#if defined(WIN32)
-    byte_swap();
-#endif
 }
