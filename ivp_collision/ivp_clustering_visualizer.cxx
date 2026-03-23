@@ -558,20 +558,20 @@ void IVP_Clustering_Visualizer_Longrange::visualize()
         IVP_Real_Object *real_object = data->real_object;
 
         if (real_object->get_core()->physical_unmoveable && !this->visualize_unmoveable_objects)
-            return;
+            continue;
         if (!real_object->get_core()->physical_unmoveable && !this->visualize_moveable_objects)
-            return;
+            continue;
 
         if (this->use_accept_filter)
         {
             if (!this->accept_filter->find(real_object))
-                return;
+                continue;
         }
 
         if (this->use_reject_filter)
         {
             if (this->reject_filter->find(real_object))
-                return;
+                continue;
         }
 
         int i;
@@ -639,11 +639,6 @@ void IVP_Clustering_Visualizer_Longrange::install_visualize_callback(IVP_Cluster
 
 void IVP_Clustering_Visualizer_Longrange::remove_visualize_callback(IVP_Clustering_Visualizer_Longrange_Callback *callback)
 {
-
-    {
-        return;
-    }
-
     this->graphics_callbacks.remove(callback);
 }
 
