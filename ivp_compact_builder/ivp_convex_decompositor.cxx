@@ -5,7 +5,9 @@
 #include <ivp_betterdebugmanager.hxx>
 
 #include <ivp_convex_decompositor.hxx>
+#ifdef IVP_ENABLE_GEOMPACK
 #include <geompack.hxx>
+#endif
 
 
 
@@ -88,6 +90,18 @@ void IVP_Convex_Subpart_Work::add_offset(intp offset_in) {
 int IVP_Convex_Decompositor::perform_convex_decomposition_on_concave_polyhedron(IVP_Concave_Polyhedron *concave_polyhedron_in,
 										IVP_Convex_Decompositor_Parameters *params_in,
 										IVP_U_BigVector<IVP_Convex_Subpart> *convex_subparts_out) {
+#ifndef IVP_ENABLE_GEOMPACK
+    (void)concave_polyhedron_in;
+    (void)params_in;
+    (void)convex_subparts_out;
+
+    IVP_IFDEBUG(IVP_DEBUG_IPION_ERROR_MSG) {
+	ivp_debugmanager.dprint(IVP_DEBUG_IPION_ERROR_MSG,
+				"IVP_Convex_Decompositor::perform_convex_decomposition_on_concave_polyhedron()\n"
+				"GEOMPACK support is disabled at build time.\n");
+    }
+    return 0;
+#else
 
     int i;
 
@@ -317,4 +331,5 @@ fclose(fp);
 
 
     return(npolh_out); // return total number of convex subparts
+#endif
 }

@@ -3,7 +3,9 @@
 // IVP_EXPORT_PUBLIC
 #include <ivp_physics.hxx>
 
+#ifdef IVP_ENABLE_QHULL
 #include <qhull_a.hxx>
+#endif
 
 #include <ivp_betterdebugmanager.hxx>
 #include <ivp_templates_intern.hxx>
@@ -365,6 +367,13 @@ class IVP_SB_PS_DUMMY
 
 IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_qhull_result(IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list)
 {
+#ifndef IVP_ENABLE_QHULL
+    (void)points;
+    (void)skip_point;
+    (void)skip_list;
+    (void)use_list;
+    return NULL;
+#else
     *skip_point = IVP_FALSE;
     // DEBUG: Print all vertices of convex hull
     IVP_IF(1)
@@ -520,10 +529,21 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
     }
 
     return compact_ledge;
+#endif
 }
 
 IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge_internal(IVP_U_Vector<IVP_U_Point> *points_in)
 {
+#ifndef IVP_ENABLE_QHULL
+    (void)points_in;
+
+    IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
+    {
+        ivp_debugmanager.dprint(IVP_DM_SURBUILD_POINTSOUP, "*** Qhull support disabled at build time. Cannot build convex hull from pointsoup.\n");
+    }
+
+    return NULL;
+#else
     IVP_IF(1)
     {
         IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
@@ -717,6 +737,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
         ivp_debugmanager.dprint(IVP_DM_SURBUILD_POINTSOUP, "*** Done with convex pointsoup.\n\n");
     }
     return res;
+#endif
 }
 
 IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::single_tri_ledge = NULL;

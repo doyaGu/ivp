@@ -53,7 +53,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
 else()
     # GCC and Clang options
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fno-strict-aliasing")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 endif()
@@ -126,6 +126,12 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     endif()
 endfunction()
 
+function(ivp_suppress_duplicate_static_lib_warnings TARGET_NAME)
+    if(APPLE)
+        target_link_options(${TARGET_NAME} INTERFACE "LINKER:-no_warn_duplicate_libraries")
+    endif()
+endfunction()
+
 # ============================================================================
 # Library Definitions - One Library Per Directory
 # ============================================================================
@@ -148,7 +154,7 @@ set(IVP_UTILITY_SOURCES
     ${IVP_DIR}/ivp_utility/ivu_linear.hxx
     ${IVP_DIR}/ivp_utility/ivu_linear_double.hxx
     ${IVP_DIR}/ivp_utility/ivu_linear_macros.hxx
-    ${IVP_DIR}/ivp_utility/ivu_linear_PIII.hxx
+    ${IVP_DIR}/ivp_utility/ivu_linear_piii.hxx
     ${IVP_DIR}/ivp_utility/ivu_linear_ps2.hxx
     ${IVP_DIR}/ivp_utility/ivu_linear_software.hxx
     ${IVP_DIR}/ivp_utility/ivu_linear_willamette.hxx
@@ -199,6 +205,7 @@ set(IVP_SURFACEMANAGER_SOURCES
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.hxx
 )
 add_ivp_library(ivp_surface_manager "${IVP_DIR}/ivp_surface_manager" "ivp_utility" "${IVP_SURFACEMANAGER_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_surface_manager)
 # Add global include directories for all modules
 target_include_directories(ivp_surface_manager PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -254,6 +261,7 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_universe_manager.hxx
 )
 add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_utility;ivp_surface_manager" "${IVP_COLLISION_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_collision)
 # Add global include directories for all modules
 target_include_directories(ivp_collision PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -301,6 +309,7 @@ set(IVP_INTERN_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_time.cxx
 )
 add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_manager;ivp_collision" "${IVP_INTERN_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_intern)
 # Add global include directories for all modules
 target_include_directories(ivp_intern PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -360,6 +369,7 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
 )
 add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager;ivp_collision;ivp_intern" "${IVP_PHYSICS_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_physics)
 # Add global include directories for all modules
 target_include_directories(ivp_physics PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -419,6 +429,7 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_template_constraint.hxx
 )
 add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_utility;ivp_physics" "${IVP_CONTROLLER_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_controller)
 # Add global include directories for all modules
 target_include_directories(ivp_controller PRIVATE
     ${IVP_DIR}/ivp_utility
@@ -544,6 +555,7 @@ set(ALL_COMPACT_BUILDER_SOURCES ${COMPACT_BUILDER_MAIN_SOURCES} ${EXTERNAL_SOURC
 
 # Create the compact builder library
 add_library(ivp_compact_builder STATIC ${ALL_COMPACT_BUILDER_SOURCES})
+ivp_suppress_duplicate_static_lib_warnings(ivp_compact_builder)
 
 # Set include directories
 target_include_directories(ivp_compact_builder PUBLIC
@@ -553,6 +565,12 @@ target_include_directories(ivp_compact_builder PUBLIC
 
 # Set compile definitions
 target_compile_definitions(ivp_compact_builder PRIVATE IVP_VERSION_SDK)
+if(IVP_INCLUDE_GEOMPACK)
+    target_compile_definitions(ivp_compact_builder PRIVATE IVP_ENABLE_GEOMPACK)
+endif()
+if(IVP_INCLUDE_QHULL)
+    target_compile_definitions(ivp_compact_builder PRIVATE IVP_ENABLE_QHULL)
+endif()
 
 # Link with dependencies
 target_link_libraries(ivp_compact_builder PUBLIC 
@@ -608,6 +626,9 @@ if(IVP_IS_SUBPROJECT)
     mark_as_advanced(IVP_BUILD_HAVANA)
 endif()
 
+set(IVP_HAVANA_FUNCTIONAL FALSE)
+set(IVP_HAVANA_HEADER_TARGETS FALSE)
+
 # Check if Havana directory exists
 set(HAVANA_SOURCES_FOUND FALSE)
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/havana")
@@ -618,29 +639,41 @@ if(IVP_BUILD_HAVANA)
     # Add Havana subdirectory if it contains CMakeLists.txt
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/havana/CMakeLists.txt")
         add_subdirectory(havana)
-        # Link with Havana libraries
-        target_link_libraries(ivp_physics PUBLIC hk_base hk_math hk_physics)
-        target_include_directories(ivp_physics PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/havana
-            ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok
+        # Keep IVP self-contained; Havana builds against IVP instead of the reverse.
+        target_compile_definitions(ivp_intern PRIVATE HAVANA_CONSTRAINTS)
+        set(IVP_HAVANA_FUNCTIONAL TRUE)
+    elseif(HAVANA_SOURCES_FOUND)
+        message(WARNING
+            "IVP_BUILD_HAVANA=ON was requested, but this checkout does not provide "
+            "havana/CMakeLists.txt. Building IVP without Havana functionality and "
+            "exporting header-only compatibility targets only."
         )
+
+        if(NOT TARGET hk_base)
+            add_library(hk_base INTERFACE)
+            target_include_directories(hk_base INTERFACE
+                ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok
+            )
+        endif()
+        if(NOT TARGET hk_math)
+            add_library(hk_math INTERFACE)
+            target_include_directories(hk_math INTERFACE
+                ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok
+            )
+        endif()
+        if(NOT TARGET hk_physics)
+            add_library(hk_physics INTERFACE)
+            target_include_directories(hk_physics INTERFACE
+                ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok
+            )
+        endif()
+
+        set(IVP_HAVANA_HEADER_TARGETS TRUE)
     else()
-        # Create interface libraries for Havana if not built
-        add_library(hk_base INTERFACE)
-        add_library(hk_math INTERFACE)
-        add_library(hk_physics INTERFACE)
-
-        target_include_directories(hk_base INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok/hk_base
+        message(WARNING
+            "IVP_BUILD_HAVANA=ON was requested, but the havana sources are missing. "
+            "Building IVP without Havana functionality."
         )
-        target_include_directories(hk_math INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok/hk_math
-        )
-        target_include_directories(hk_physics INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/havana/havok/hk_physics
-        )
-
-        target_link_libraries(ivp_physics INTERFACE hk_base hk_math hk_physics)
     endif()
 endif()
 
@@ -667,6 +700,16 @@ if(IVP_INSTALL)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
+
+    if(IVP_HAVANA_FUNCTIONAL)
+        install(TARGETS hk_base hk_math hk_physics
+            EXPORT ivp_targets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+    endif()
 
     # Install header files
     install(DIRECTORY
@@ -745,6 +788,8 @@ if(NOT IVP_IS_SUBPROJECT)
     message(STATUS "  Build Havana: ${IVP_BUILD_HAVANA}")
     if(IVP_BUILD_HAVANA)
         message(STATUS "    Havana sources found: ${HAVANA_SOURCES_FOUND}")
+        message(STATUS "    Havana functionality enabled: ${IVP_HAVANA_FUNCTIONAL}")
+        message(STATUS "    Havana header-only compatibility targets: ${IVP_HAVANA_HEADER_TARGETS}")
     endif()
     message(STATUS "")
 else()

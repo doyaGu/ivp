@@ -2,12 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
-# Find dependencies
-find_dependency(hk_base)
-find_dependency(hk_math)
-find_dependency(hk_physics)
-
-# Include targets
+# Load the targets exported by this package, including hk_* when built.
 include("${CMAKE_CURRENT_LIST_DIR}/ivp_targets.cmake")
 
 # Set variables for compatibility
