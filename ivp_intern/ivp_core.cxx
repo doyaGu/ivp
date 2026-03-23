@@ -1047,7 +1047,10 @@ IVP_Core_Merged::IVP_Core_Merged(IVP_Real_Object *real_obj) : IVP_Core(real_obj)
 IVP_Core_Merged::IVP_Core_Merged(IVP_Core *core0, IVP_Core *core1) : IVP_Core(core0->objects.element_at(0))
 {
     // Core Merge Constructor
-    P_MEM_CLEAR(this); // warning: this is not so good (old values are destroyed, e.g. a vector object in IVP_Core)
+    // Clear objects added by base IVP_Core constructor; set_by_merge will re-populate.
+    // Note: P_MEM_CLEAR(this) was removed because it zeroes the vtable pointer and
+    // corrupts the objects vector, causing undefined behavior on subsequent virtual calls.
+    objects.clear();
     physical_unmoveable = (IVP_BOOL)(core0->physical_unmoveable | core1->physical_unmoveable);
     environment = core0->environment;
 
@@ -1271,7 +1274,7 @@ void IVP_Core::set_matrizes_and_speed(IVP_Core_Merged *template_core, IVP_U_Matr
     /// set speed + rot_speed
     this->speed.set(&template_core->speed);
     IVP_U_Float_Point rot_speed_world;
-    template_core->m_world_f_core_last_psi.vmult3(&template_core->speed, &rot_speed_world);
+    template_core->m_world_f_core_last_psi.vmult3(&template_core->rot_speed, &rot_speed_world);
     this->m_world_f_core_last_psi.vimult3(&rot_speed_world, &this->rot_speed);
 }
 
