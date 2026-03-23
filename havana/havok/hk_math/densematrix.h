@@ -110,14 +110,14 @@ class hk_Dense_Matrix_3x3 : public hk_Dense_Matrix
 {
 	public:
 
-		HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_CONSTRAINT, hk_Dense_Matrix_3x3 )
+			HK_DECLARE_NONVIRTUAL_CLASS_ALLOCATOR(HK_MEMORY_CLASS_CONSTRAINT, hk_Dense_Matrix_3x3 )
 
-		inline	hk_Dense_Matrix_3x3 ()
-			: hk_Dense_Matrix( nullptr, 3, 3, 4 ), m_elt_buffer{}
-		{
-			// Fix UB during access of uninitialized m_elt_buffer.
-			set_real_pointer( m_elt_buffer.get_elem_address(0, 0) );
-		}
+			inline	hk_Dense_Matrix_3x3 ()
+				: hk_Dense_Matrix( 0, 3, 3, 4 )
+			{
+				// Fix UB during access of uninitialized m_elt_buffer.
+				set_real_pointer( m_elt_buffer.get_elem_address(0, 0) );
+			}
 
 		inline hk_Matrix3& get_matrix3();
 		inline void makeZero();
