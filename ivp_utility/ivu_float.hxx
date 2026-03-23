@@ -1,8 +1,19 @@
 #ifndef IVP_U_FLOAT_INCLUDED
 #define IVP_U_FLOAT_INCLUDED
 
+#include <string.h>
+
 #include <ivu_types.hxx>
 #include <ivu_linear.hxx>
+
+template <class TBitLayout, class TValue>
+inline TBitLayout ivp_bit_cast_layout(const TValue &value)
+{
+    IVP_ASSERT(sizeof(TBitLayout) == sizeof(TValue));
+    TBitLayout layout;
+    memcpy(&layout, &value, sizeof(layout));
+    return layout;
+}
 
 #ifdef WIN32
 #include <float.h>
@@ -35,7 +46,8 @@ union p_float_ieee
 #define IVP_EXP_FOR_ONE 0x7f
 inline int PFM_LD(float a)
 {
-    return ((p_float_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
+    p_float_ieee ieee = ivp_bit_cast_layout<p_float_ieee>(a);
+    return ieee.ln.exp - IVP_EXP_FOR_ONE;
 }
 #else
 #if (defined(POSIX) || defined(WIN32) || defined(__APPLE__) || defined(__unix__)) && \
@@ -60,7 +72,8 @@ union p_double_ieee
 #define IVP_EXP_FOR_ONE 0x3ff
 inline int PFM_LD(double a)
 {
-    return ((p_double_ieee *)&(a))->ln.exp - IVP_EXP_FOR_ONE;
+    p_double_ieee ieee = ivp_bit_cast_layout<p_double_ieee>(a);
+    return ieee.ln.exp - IVP_EXP_FOR_ONE;
 };
 #endif
 
@@ -85,7 +98,8 @@ union p_double_ieee
 #define P_EXP_FOR_ONE 0x3ff
 inline int PFM_LD(double a)
 {
-    return ((p_double_ieee *)&(a))->ln.exp - P_EXP_FOR_ONE;
+    p_double_ieee ieee = ivp_bit_cast_layout<p_double_ieee>(a);
+    return ieee.ln.exp - P_EXP_FOR_ONE;
 };
 #endif
 #endif
@@ -138,11 +152,11 @@ public:
     // 3 -> 1e-16
     static double isqrt(double square, int resolution_steps)
     {
-        p_double_ieee *ie = (p_double_ieee *)&square;
         IVP_ASSERT(IVP_Inline_Math::fabsd(square) > 0.0f);
+        p_double_ieee ie = ivp_bit_cast_layout<p_double_ieee>(square);
         p_double_ieee h;
         h.val = 1.0f;
-        h.ln2.h = ((0x07ff00000 - ie->ln2.h) >> 1) + 0x1ff00000;
+        h.ln2.h = ((0x07ff00000 - ie.ln2.h) >> 1) + 0x1ff00000;
         IVP_DOUBLE squareh = square * 0.5f;
         IVP_DOUBLE inv_sqrt = h.val;
 
