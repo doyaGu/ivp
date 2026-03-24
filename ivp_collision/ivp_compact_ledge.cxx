@@ -87,9 +87,6 @@ void IVP_Compact_Edge::byte_swap()
     opposite_index = (bitfields & 0x7FFF0000) >> 16;
     is_virtual = (bitfields & 0x80000000) >> 31;
 
-    uint sp = start_point_index;
-    int oi = opposite_index;
-    uint isv = is_virtual;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -135,11 +132,6 @@ void IVP_Compact_Triangle::byte_swap()
     pierce_index = (bitfields & 0x0FFF000) >> 12;
     material_index = (bitfields & 0x7F000000) >> 24;
     is_virtual = (bitfields & 0x80000000) >> 31;
-
-    uint ti = tri_index;
-    uint pi = pierce_index;
-    uint mi = material_index;
-    uint iv = is_virtual;
 
     c_three_edges[0].byte_swap();
     c_three_edges[1].byte_swap();
@@ -209,11 +201,6 @@ void IVP_Compact_Ledge::byte_swap()
     is_compact_flag = (IVP_BOOL)((bitfields & 0x0C) >> 2);
     dummy = (uchar)(bitfields & 0x0F0) >> 4;
     size_div_16 = (bitfields & 0xFFFFFF00) >> 8;
-
-    uchar hasc = has_chilren_flag;
-    uchar ic = is_compact_flag;
-    uchar d = dummy;
-    uint sd = size_div_16;
 
     ivp_swap_short_field(&n_triangles);
     ivp_swap_short_field(&for_future_use);

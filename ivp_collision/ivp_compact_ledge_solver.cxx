@@ -378,7 +378,7 @@ void IVP_Compact_Ledge_Solver::calc_qr_vals(const IVP_Compact_Edge *e_tri,
            tp, tp_next, tp_prv 0 epsilon
  */
 
-static char ivp_uqr_mod_table[] = {0, 2 * sizeof(IVP_FLOAT), 1 * sizeof(IVP_FLOAT), 0, 2 * sizeof(IVP_FLOAT)};
+static const char ivp_uqr_mod_table[] = {0, 2 * sizeof(IVP_FLOAT), 1 * sizeof(IVP_FLOAT), 0, 2 * sizeof(IVP_FLOAT)};
 
 void IVP_Compact_Ledge_Solver::calc_unscaled_qr_vals_F_space(const IVP_Compact_Ledge *c_ledge,
                                                              const IVP_Compact_Edge *tri,
