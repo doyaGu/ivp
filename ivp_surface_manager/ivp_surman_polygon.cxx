@@ -157,6 +157,8 @@ void IVP_SurfaceManager_Polygon::get_all_ledges_within_radius(
     {
         const IVP_Compact_Ledgetree_Node *root_node =
             compact_surface->get_compact_ledge_tree_root();
+        if (!root_node)
+            return;
         sps.traverse_cluster(root_node, visitor_position_object_space, radius, resulting_ledges);
     }
     else
@@ -227,6 +229,8 @@ void IVP_SurfaceManager_Polygon::get_radius_and_radius_dev_to_given_center(
 const IVP_Compact_Ledge *IVP_SurfaceManager_Polygon::get_single_convex() const
 {
     const IVP_Compact_Ledgetree_Node *root = compact_surface->get_compact_ledge_tree_root();
+    if (!root)
+        return NULL;
     if (root->is_terminal())
         return root->get_compact_ledge();
     return root->get_compact_hull();
