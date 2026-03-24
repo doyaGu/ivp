@@ -658,7 +658,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
             }
 
             // number of points in the compact ledge
-            int compact_ledge_num_points = (res->get_size() / 16) - (res->get_n_triangles()) - 1;
+            int compact_ledge_num_points = (int)((res->get_size() - sizeof(IVP_Compact_Ledge) - res->get_n_triangles() * sizeof(IVP_Compact_Triangle)) / sizeof(IVP_Compact_Poly_Point));
 
             {
                 // cycle through the compact ledge points, find the corresponding point

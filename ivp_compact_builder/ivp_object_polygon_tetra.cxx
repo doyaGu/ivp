@@ -2446,7 +2446,8 @@ char *p_mergesort(void **array, IVP_INT32 start, IVP_INT32 end, IVP_INT32 (*comp
     }
     mid = (start + end) / 2;
     error = p_mergesort(array, start, mid, compare, client_data);
-    error = p_mergesort(array, mid, end, compare, client_data);
+    if (!error)
+        error = p_mergesort(array, mid, end, compare, client_data);
     if (size < 256)
     {
         buffer = ibuf;
