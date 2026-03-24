@@ -35,7 +35,8 @@ void IVP_U_Quat::set_very_fast_multiple(const IVP_U_Float_Point *angles, IVP_DOU
     x = ivp_very_fast_sin(angles->k[0] * f);
     y = ivp_very_fast_sin(angles->k[1] * f);
     z = ivp_very_fast_sin(angles->k[2] * f);
-    w = IVP_Inline_Math::sqrtd(1.0f - (x * x + y * y + z * z));
+    IVP_DOUBLE qlen = x * x + y * y + z * z;
+    w = (qlen < 1.0f) ? IVP_Inline_Math::sqrtd(1.0f - qlen) : 0.0f;
 }
 
 void IVP_U_Quat::set_fast_multiple_with_clip(const IVP_U_Float_Point *angles, IVP_DOUBLE factor)
@@ -63,7 +64,8 @@ void IVP_U_Quat::set(IVP_DOUBLE rot_x, IVP_DOUBLE rot_y, IVP_DOUBLE rot_z)
     x = IVP_Inline_Math::sind(rot_x * f);
     y = IVP_Inline_Math::sind(rot_y * f);
     z = IVP_Inline_Math::sind(rot_z * f);
-    w = IVP_Inline_Math::sqrtd(1.0f - (x * x + y * y + z * z));
+    IVP_DOUBLE qlen_set = x * x + y * y + z * z;
+    w = (qlen_set < 1.0f) ? IVP_Inline_Math::sqrtd(1.0f - qlen_set) : 0.0f;
 }
 
 void IVP_U_Quat::set_matrix(IVP_DOUBLE m[4][4]) const
