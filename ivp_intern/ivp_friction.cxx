@@ -99,7 +99,8 @@ IVP_Contact_Point::IVP_Contact_Point(IVP_Mindist *md)
 		const IVP_Compact_Edge *e1 = syn1->edge;
 		IVP_U_Point wHesse_vecF_Fos;
 		IVP_CLS.calc_hesse_vec_object_not_normized(e1, e1->get_compact_ledge(), &wHesse_vecF_Fos);
-		inv_triangle_det = 1.0f / wHesse_vecF_Fos.real_length();
+		IVP_DOUBLE hesse_len = wHesse_vecF_Fos.real_length();
+		inv_triangle_det = (hesse_len > P_DOUBLE_EPS) ? (1.0f / hesse_len) : 0.0f;
 	}
 
 	this->old_energy_dynamic_fr = 0.0f;
@@ -1980,7 +1981,7 @@ void IVP_Contact_Point::calc_virtual_mass_of_mindist()
 			virt_mass_mindist_no_dir = (vmass_no_dir[0] * vmass_no_dir[1]) / (vmass_no_dir[0] + vmass_no_dir[1]);
 		}
 	}
-	this->inv_virt_mass_mindist_no_dir = 1.0f / virt_mass_mindist_no_dir;
+	this->inv_virt_mass_mindist_no_dir = (virt_mass_mindist_no_dir > P_DOUBLE_EPS) ? (1.0f / virt_mass_mindist_no_dir) : 0.0f;
 	IVP_ASSERT(virt_mass_mindist_no_dir < 1e30f); // test for NaN
 }
 
