@@ -79,7 +79,7 @@ void IVP_BetterStatisticsmanager_Data_Entity::set_array_size(int array_size)
 
 void IVP_BetterStatisticsmanager_Data_Entity::set_int_array_latest_value(int value)
 {
-    if (!this->data.int_array.array)
+    if (!this->data.int_array.array || this->data.int_array.size <= 0)
         return;
 
     int x;
@@ -93,7 +93,7 @@ void IVP_BetterStatisticsmanager_Data_Entity::set_int_array_latest_value(int val
 
 void IVP_BetterStatisticsmanager_Data_Entity::set_double_array_latest_value(IVP_DOUBLE value)
 {
-    if (!this->data.double_array.array)
+    if (!this->data.double_array.array || this->data.double_array.size <= 0)
         return;
 
     int x;
