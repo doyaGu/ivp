@@ -851,7 +851,7 @@ IVP_RETURN_TYPE IVP_U_Matrix::real_invert(const IVP_U_Matrix *m, IVP_DOUBLE epsi
 
 void IVP_U_Matrix::rotate(IVP_COORDINATE_INDEX axis, IVP_FLOAT angle, IVP_U_Matrix *m_out)
 {
-    static int pm[5] = {1, 2, 0, 1, 2};
+    static const int pm[5] = {1, 2, 0, 1, 2};
     const int *p = &pm[axis];
 
     IVP_DOUBLE SA = IVP_Inline_Math::sind(angle);
@@ -885,7 +885,7 @@ void IVP_U_Matrix::rotate_invers(IVP_COORDINATE_INDEX axis, IVP_FLOAT angle, IVP
 
 void IVP_U_Matrix3::init_rotated3(IVP_COORDINATE_INDEX axis, IVP_FLOAT angle)
 {
-    static int pm[5] = {1, 2, 0, 1, 2};
+    static const int pm[5] = {1, 2, 0, 1, 2};
     const int *p = &pm[axis];
 
     IVP_DOUBLE SA = IVP_Inline_Math::sind(angle);
