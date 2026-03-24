@@ -93,6 +93,7 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
         # IVP modules have intentional cyclic references; increase repeat count
         # for static link interfaces so consumers resolve all symbols without
         # target-specific linker flags.
+        LINK_INTERFACE_MULTIPLICITY 4
     )
     
     # Platform-specific configurations
@@ -413,6 +414,7 @@ target_include_directories(ivp_controller PRIVATE
 
 # Cross-module links (ivp_intern + ivp_collision merged into ivp_physics)
 target_link_libraries(ivp_surface_manager PUBLIC ivp_physics)
+target_link_libraries(ivp_physics PUBLIC ivp_controller)
 target_link_libraries(ivp_controller PUBLIC ivp_physics)
 
 # ivp_compact_builder - Geometry building tools, depends on core modules
@@ -549,6 +551,7 @@ target_link_libraries(ivp_compact_builder PUBLIC
 # Set target properties
 set_target_properties(ivp_compact_builder PROPERTIES
     POSITION_INDEPENDENT_CODE ON
+    LINK_INTERFACE_MULTIPLICITY 4
 )
 
 # Platform-specific configurations for compact builder
