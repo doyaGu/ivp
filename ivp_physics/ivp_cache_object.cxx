@@ -11,6 +11,7 @@
 #include <ivp_core.hxx>
 #include <ivp_core_macros.hxx>
 #include <ivp_physics.hxx>
+#include <ivu_string.hxx>
 #include <ivu_matrix_macros.hxx>
 
 void IVP_Cache_Object_Manager::invalid_cache_object(IVP_Real_Object *object)
@@ -39,9 +40,10 @@ IVP_Cache_Object *IVP_Cache_Object_Manager::get_cache_object(IVP_Real_Object *ob
         if (++attempts >= n_cache_objects)
         {
             IVP_ASSERT(0 && "All cache objects are referenced - cannot evict");
-            // Force eviction to prevent infinite loop
-            co->reference_count = 0;
-            break;
+            ivp_message("IVP_Cache_Object_Manager::get_cache_object: all %d cache objects are referenced\n",
+                        n_cache_objects);
+            CORE;
+            return NULL;
         }
     }
     reuse_loop_index++;
