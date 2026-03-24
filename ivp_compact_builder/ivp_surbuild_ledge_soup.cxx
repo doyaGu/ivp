@@ -869,7 +869,7 @@ void IVP_SurfaceBuilder_Ledge_Soup::remove_all_further_spherecombinations_from_h
 IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::build_minimal_sphere(IVV_Sphere *sphere_1, IVV_Sphere *sphere_2)
 {
 
-    static IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
+    const IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
     IVP_DOUBLE new_radius;
     IVP_U_Point new_center;
 
@@ -1026,7 +1026,7 @@ void IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut(IVP_DOUBLE
 void IVP_SurfaceBuilder_Ledge_Soup::calculate_boundingbox(IVP_U_Vector<IVV_Sphere> *terminals, IVP_U_Float_Point *ext_min, IVP_U_Float_Point *ext_max)
 {
 
-    static IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
+    const IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
 
     ext_min->set(1000000.0f, 1000000.0f, 1000000.0f);
     ext_max->set(-1000000.0f, -1000000.0f, -1000000.0f);
@@ -1081,7 +1081,7 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
     // calculate the bounding box for the supplied set of terminals
     this->calculate_boundingbox(terminals, &this->extents_min, &this->extents_max);
 
-    static IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
+    const IVP_DOUBLE dimension_steps = IVP_COMPACT_BOUNDINGBOX_STEP_SIZE;
     IVP_U_Point rad;
     IVP_U_Point new_center;
     IVP_DOUBLE new_radius;

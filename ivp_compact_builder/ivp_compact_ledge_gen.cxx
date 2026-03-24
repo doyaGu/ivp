@@ -89,7 +89,7 @@ int IVP_Compact_Ledge_Generator::prepare_compact_ledge(IVP_U_Vector<IVP_Triangle
 	if(tri->pierced_triangle){
 	    c_tri->set_pierce_index(tri->pierced_triangle->index);
 	}else{
-	    printf("no valid pierce index!? Probably a backside triangle...\n");
+	    c_tri->set_pierce_index(0);
 	}
 
 	// material info
