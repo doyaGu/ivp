@@ -1090,10 +1090,10 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
         }
     }
 
-    if (union_find_needed_for_sim_unit)
-    {
-        do_sim_unit_union_find();
-    }
+    // Union-find splits are deferred to after the simulate_sim_units_psi loop
+    // completes.  Splitting here would mutate the linked list of sim units while
+    // the prefetch-unrolled iteration in simulate_sim_units_psi is traversing it,
+    // causing newly created sim units to be missed for the current PSI.
     es->environment->sim_unit_mem->end_memory_transaction();
 }
 
@@ -1176,7 +1176,16 @@ sim_units_1:
     s_u->simulate_single_sim_unit_psi(&es, touched_cores);
 sim_units_0:
 
-    ;
+    // Process deferred union-find splits.  These were postponed from
+    // simulate_single_sim_unit_psi to avoid mutating the linked list
+    // during the prefetch-unrolled traversal above.
+    for (s_u = sman->sim_units_slots[0]; s_u; s_u = s_u->next_sim_unit)
+    {
+        if (s_u->union_find_needed_for_sim_unit)
+        {
+            s_u->do_sim_unit_union_find();
+        }
+    }
 
 #if 0 && defined(WIN32)
     unsigned long time = p_get_time();
