@@ -297,6 +297,27 @@ IVP_Environment::~IVP_Environment()
             lis->environment_will_be_deleted(this);
         }
     }
+    {
+        for (int i = global_object_listeners.len() - 1; i >= 0; i--)
+        {
+            IVP_Listener_Object *lis = global_object_listeners.element_at(i);
+            lis->event_environment_deleted(this);
+        }
+    }
+    {
+        for (int i = collision_listeners.len() - 1; i >= 0; i--)
+        {
+            IVP_Listener_Collision *lis = collision_listeners.element_at(i);
+            lis->event_environment_deleted(this);
+        }
+    }
+    {
+        for (int i = constraint_listeners.len() - 1; i >= 0; i--)
+        {
+            IVP_Listener_Constraint *lis = constraint_listeners.element_at(i);
+            lis->event_environment_deleted(this);
+        }
+    }
 
     static_object->delete_silently();
     static_object = NULL;

@@ -137,6 +137,8 @@ public:
         enabled_callbacks = enable_callbacks; // set flags for implemented callbacks
     };
 
+    virtual void event_environment_deleted(IVP_Environment *) {}
+
     // virtual destructor: @@CB
     virtual ~IVP_Listener_Collision() {}
 };
