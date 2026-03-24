@@ -158,7 +158,9 @@ void IVP_Compact_Ledge_Solver::calc_radius_to_given_center(const IVP_Compact_Led
         const IVP_Compact_Edge *e = tri->get_first_edge();
         IVP_U_Point hesse_vec;
         IVP_CLS.calc_hesse_vec_object_not_normized(e, ledge, &hesse_vec);
-        IVP_DOUBLE i_hv_len_squared = 1.0f / hesse_vec.quad_length();
+        IVP_DOUBLE hv_ql = hesse_vec.quad_length();
+        if (hv_ql < P_DOUBLE_EPS) continue;
+        IVP_DOUBLE i_hv_len_squared = 1.0f / hv_ql;
 
         int j;
         for (j = 0; j < 3; j++, e++)
@@ -286,9 +288,10 @@ IVP_DOUBLE IVP_Compact_Ledge_Solver::calc_s_val(const IVP_Compact_Edge *edge,
     IVP_U_Point vec1, vec2;
     vec1.subtract(&tp_next, &tp);
     vec2.subtract(p_world, &tp);
-    IVP_DOUBLE i_qlen = 1.0f / vec1.quad_length();
+    IVP_DOUBLE v1_ql = vec1.quad_length();
+    if (v1_ql < P_DOUBLE_EPS) return 0.0;
     IVP_DOUBLE s = vec1.dot_product(&vec2);
-    s *= i_qlen;
+    s /= v1_ql;
     return s;
 }
 #endif
@@ -348,7 +351,9 @@ void IVP_Compact_Ledge_Solver::calc_qr_vals(const IVP_Compact_Edge *e_tri,
 
     IVP_DOUBLE QQRR = QQ * RR;
     IVP_DOUBLE QRQR = QR * QR;
-    IVP_DOUBLE i_det = 1.0f / (QQRR - QRQR);
+    IVP_DOUBLE det = QQRR - QRQR;
+    if (IVP_Inline_Math::fabsd(det) < P_DOUBLE_EPS) return IVP_FAULT;
+    IVP_DOUBLE i_det = 1.0f / det;
 
     Pvec.subtract(p_world, &tp_next);
     IVP_DOUBLE sq = Pvec.dot_product(&Q);
@@ -607,8 +612,9 @@ IVP_DOUBLE IVP_Compact_Ledge_Solver::quad_dist_edge_to_point_K_space(const IVP_C
     IVP_U_Point vec_world;
     vec_world.inline_set_vert_to_area_defined_by_three_points(p0, p1, object_pos);
 
-    IVP_DOUBLE iqlen = 1.0f / p0->quad_distance_to(p1);
-    return vec_world.quad_length() * iqlen;
+    IVP_DOUBLE edge_ql = p0->quad_distance_to(p1);
+    if (edge_ql < P_DOUBLE_EPS) return 0.0;
+    return vec_world.quad_length() / edge_ql;
 }
 
 IVP_DOUBLE IVP_Compact_Ledge_Solver::calc_qlen_PF_F_space(const IVP_Compact_Ledge *ledge, const IVP_Compact_Triangle *tri, const IVP_U_Point *object_pos)
@@ -625,9 +631,10 @@ IVP_DOUBLE IVP_Compact_Ledge_Solver::calc_qlen_PF_F_space(const IVP_Compact_Ledg
         IVP_U_Point normal;
         const IVP_U_Float_Point *start_point = give_object_coords(e, ledge);
         IVP_CLS.calc_hesse_vec_object_not_normized(e, ledge, &normal);
-        IVP_DOUBLE inv_qlen = 1.0f / normal.quad_length();
+        IVP_DOUBLE n_ql = normal.quad_length();
+        if (n_ql < P_DOUBLE_EPS) return P_DOUBLE_MAX;
         IVP_DOUBLE res = normal.dot_product(object_pos) - normal.dot_product(start_point);
-        return res * res * inv_qlen;
+        return res * res / n_ql;
     }
     IVP_DOUBLE qres = P_DOUBLE_MAX;
     for (int i = 2; i >= 0; i--)

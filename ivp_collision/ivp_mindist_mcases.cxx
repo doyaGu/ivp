@@ -1001,7 +1001,9 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     IVP_U_Point Lot2; // unnormized Lot
     Lot2.calc_cross_product(&vec_K_ks, &vec_K_P);
 
-    IVP_DOUBLE iqK_len = 1.0f / vec_K_ks.quad_length();
+    IVP_DOUBLE K_ql = vec_K_ks.quad_length();
+    if (K_ql < P_DOUBLE_EPS) return IVP_MRC_BACKSIDE;
+    IVP_DOUBLE iqK_len = 1.0f / K_ql;
     IVP_DOUBLE qdist = Lot2.quad_length() * iqK_len;
     IVP_DOUBLE inv_len = IVP_Inline_Math::isqrt_double(qdist);
     mindist->len_numerator = qdist * inv_len - mindist->sum_extra_radius;
@@ -1148,7 +1150,9 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
 
         Lot2.calc_cross_product(&vec_K_ks, &vec_K_P);
 
-        IVP_DOUBLE iqK_len = 1.0f / vec_K_ks.quad_length();
+        IVP_DOUBLE K_ql2 = vec_K_ks.quad_length();
+        if (K_ql2 < P_DOUBLE_EPS) return IVP_MRC_BACKSIDE;
+        IVP_DOUBLE iqK_len = 1.0f / K_ql2;
         qlen = Lot2.quad_length() * iqK_len;
         if (qlen > P_DOUBLE_EPS)
         {
