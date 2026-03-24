@@ -74,8 +74,9 @@ void IVP_Range_Manager::get_coll_range_intra_objects(const IVP_Real_Object *obj0
         max_dist = look_ahead_min_seconds_intra * sum_speed;
     }
 
+    IVP_DOUBLE orig_speed0 = speed0;
     speed0 += 0.2f * speed1;
-    speed1 += 0.18f * speed0;
+    speed1 += 0.18f * orig_speed0;
 
     IVP_DOUBLE sum = speed0 + speed1;
     IVP_DOUBLE inv_sum = 1.0f / sum;
