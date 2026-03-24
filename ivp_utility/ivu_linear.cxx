@@ -622,8 +622,9 @@ int IVP_U_Matrix3::calc_eigen_vector(IVP_DOUBLE eigen_value, IVP_U_Point *eigen_
 
 void IVP_U_Hesse::proj_on_plane(const IVP_U_Point *p, IVP_U_Point *result) const
 {
-    result->add_multiple(p, this, -get_dist(p) / quad_length());
-    // div unnecessary, if hesse is normized
+    IVP_DOUBLE ql = quad_length();
+    if (ql < P_DOUBLE_EPS) { result->set(p); return; }
+    result->add_multiple(p, this, -get_dist(p) / ql);
 }
 
 void IVP_U_Hesse::calc_hesse_val(const IVP_U_Point *p0)
@@ -693,7 +694,9 @@ void IVP_U_Hesse::calc_hesse(const IVP_U_Float_Point *tp0,
 
 void IVP_U_Hesse::normize()
 {
-    IVP_DOUBLE l = 1.0f / this->real_length();
+    IVP_DOUBLE len = this->real_length();
+    if (len < P_DOUBLE_EPS) return;
+    IVP_DOUBLE l = 1.0f / len;
     this->mult(l);
     hesse_val *= l;
 }
@@ -706,8 +709,9 @@ void IVP_U_Float_Hesse::mult_hesse(IVP_DOUBLE factor)
 
 void IVP_U_Float_Hesse::proj_on_plane(const IVP_U_Float_Point *p, IVP_U_Float_Point *result) const
 {
-    result->add_multiple(p, this, -get_dist(p) / quad_length());
-    // div unnecessary, if hesse is normized
+    IVP_DOUBLE ql = quad_length();
+    if (ql < P_DOUBLE_EPS) { result->set(p); return; }
+    result->add_multiple(p, this, -get_dist(p) / ql);
 }
 
 void IVP_U_Float_Hesse::calc_hesse(const IVP_U_Float_Point *tp0, const IVP_U_Float_Point *tp1, const IVP_U_Float_Point *tp2)
@@ -743,7 +747,9 @@ void IVP_U_Float_Hesse::calc_hesse_val(const IVP_U_Float_Point *p0)
 
 void IVP_U_Float_Hesse::normize()
 {
-    IVP_DOUBLE l = 1.0f / this->real_length();
+    IVP_DOUBLE len = this->real_length();
+    if (len < P_DOUBLE_EPS) return;
+    IVP_DOUBLE l = 1.0f / len;
     this->mult(l);
     hesse_val *= l;
 }
