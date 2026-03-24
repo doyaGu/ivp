@@ -219,7 +219,7 @@ IVP_Merge_Core::~IVP_Merge_Core()
 {
     if (cores != &core_stack[0])
     {
-        delete cores;
+        P_FREE(cores);
     }
 }
 

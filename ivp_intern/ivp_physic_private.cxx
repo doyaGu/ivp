@@ -299,6 +299,8 @@ IVP_Real_Object *IVP_Cluster_Manager::get_next_real_object_in_cluster_tree(IVP_O
 void IVP_Cluster_Manager::check_for_unused_objects(IVP_Universe_Manager *um)
 {
 	const IVP_Universe_Manager_Settings *ums = um->provide_universe_settings();
+	if (!ums)
+		return;
 
 	if (number_of_real_objects < ums->num_objects_in_environment_threshold_0)
 		return;
