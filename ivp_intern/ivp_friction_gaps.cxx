@@ -560,7 +560,7 @@ int IVP_Friction_Solver::do_resulting_pushes(IVP_Friction_System *fs)
             {
                 // inactive
                 my_dist->has_negative_pull_since = 0;
-                impulse_now = my_dist->now_friction_pressure * 0.0f * this->es->delta_time;
+                impulse_now = 0.0f;
                 goto cont_for_next;
             }
             else
