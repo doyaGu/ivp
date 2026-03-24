@@ -58,6 +58,7 @@ void IVP_BetterStatisticsmanager_Data_Entity::set_double_value(IVP_DOUBLE value)
 
 void IVP_BetterStatisticsmanager_Data_Entity::set_array_size(int array_size)
 {
+    if (array_size < 0) array_size = 0;
     switch (this->type)
     {
     case INT_ARRAY:
