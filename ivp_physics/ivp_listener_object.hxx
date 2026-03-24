@@ -22,6 +22,7 @@ public:
     virtual void event_object_created(IVP_Event_Object *) = 0;
     virtual void event_object_revived(IVP_Event_Object *) = 0;
     virtual void event_object_frozen(IVP_Event_Object *) = 0;
+    virtual void event_environment_deleted(IVP_Environment *) {}
 
     virtual ~IVP_Listener_Object() {};
 };

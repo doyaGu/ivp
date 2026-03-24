@@ -135,6 +135,8 @@ public:
 #ifdef HAVANA_CONSTRAINTS
     virtual void event_constraint_broken(class hk_Breakable_Constraint *) = 0;
 #endif // HAVANA_CONSTRAINTS
+    virtual void event_environment_deleted(IVP_Environment *) {}
+    virtual ~IVP_Listener_Constraint() {}
 };
 
 class IVP_Cluster_Manager;
