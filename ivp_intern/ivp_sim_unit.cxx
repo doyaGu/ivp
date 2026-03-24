@@ -1179,12 +1179,26 @@ sim_units_0:
     // Process deferred union-find splits.  These were postponed from
     // simulate_single_sim_unit_psi to avoid mutating the linked list
     // during the prefetch-unrolled traversal above.
-    for (s_u = sman->sim_units_slots[0]; s_u; s_u = s_u->next_sim_unit)
+    //
+    // Scan both the moving slot and the still slot: a sim unit can request a
+    // split and then transition to IVP_MT_NOT_SIM during the same PSI.
+    for (s_u = sman->sim_units_slots[0]; s_u;)
     {
+        IVP_Simulation_Unit *next_su = s_u->next_sim_unit;
         if (s_u->union_find_needed_for_sim_unit)
         {
             s_u->do_sim_unit_union_find();
         }
+        s_u = next_su;
+    }
+    for (s_u = sman->still_slot; s_u;)
+    {
+        IVP_Simulation_Unit *next_su = s_u->next_sim_unit;
+        if (s_u->union_find_needed_for_sim_unit)
+        {
+            s_u->do_sim_unit_union_find();
+        }
+        s_u = next_su;
     }
 
 #if 0 && defined(WIN32)
