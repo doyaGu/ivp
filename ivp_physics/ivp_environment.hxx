@@ -12,6 +12,7 @@
 #define IVP_ENVIRONMENT_INCLUDED
 
 #include <ivu_types.hxx>
+#include <ivu_vector.hxx>
 #include <ivu_linear.hxx>
 #include <ivp_listener_collision.hxx>
 #include <ivp_listener_psi.hxx>

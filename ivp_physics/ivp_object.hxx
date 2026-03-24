@@ -13,6 +13,7 @@
 class IVP_Environment;
 class IVP_Template_Object;
 class IVP_Template_Cluster;
+class IVP_Real_Object;
 class IVP_Polygon;
 class IVP_Ball;
 
