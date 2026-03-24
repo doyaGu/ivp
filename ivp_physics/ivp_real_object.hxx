@@ -10,10 +10,14 @@
 #ifndef IVP_REAL_OBJECT_INCLUDED
 #define IVP_REAL_OBJECT_INCLUDED
 
+#include <ivu_linear.hxx>
 #include <ivu_min_list.hxx>
-#include <ivp_actuator.hxx>
+#include <ivp_object.hxx>
 
 // resolve forward references
+class IVP_Anchor;
+class IVP_Core;
+class IVP_Environment;
 class IVP_Template_Phantom;
 class IVP_SurfaceManager;
 class IVP_Template_Real_Object;

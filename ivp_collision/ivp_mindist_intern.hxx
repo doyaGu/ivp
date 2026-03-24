@@ -35,6 +35,8 @@ class IVP_Compact_Ledge;
 class IVP_Mindist_OO_Watcher;
 class IVP_Mindist;
 class IVP_Friction_System;
+class IVP_Mindist_Manager;
+class IVP_Simulation_Unit;
 
 #define IVP_MAX_STEPS_FOR_COLLDIST_DECREASE 64
 
