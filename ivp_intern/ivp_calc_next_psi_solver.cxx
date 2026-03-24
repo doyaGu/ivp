@@ -7,7 +7,6 @@
 #endif
 #include <ivp_cache_object.hxx>
 #include <ivp_calc_next_psi_solver.hxx>
-#include <ivp_constraint_car.hxx>
 #include <ivp_controller.hxx>
 #include <ivp_core_macros.hxx>
 #include <ivp_debug_manager.hxx>
@@ -39,27 +38,7 @@ inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_FLOAT delta_sim_t
 #ifdef IVP_FAST_WHEELS_ENABLED // @@@OSP
         if (pc->car_wheel && (pc->max_surface_deviation == 0.0f))
         {
-            int axis = pc->car_wheel->solver_car->x_idx;
-            IVP_DOUBLE rot_speed_wheel_axis = pc->rot_speed.k[axis];
-            IVP_U_Float_Point p(pc->rot_speed);
-            p.k[axis] = 0.0f;
-
-            IVP_U_Quat gyro_rotation;
-            gyro_rotation.set_fast_multiple_with_clip(&p, delta_sim_time);
-
-            IVP_U_Quat wheel_rotation;
-
-            p.set_to_zero();
-            IVP_DOUBLE sinus = IVP_Inline_Math::sind(rot_speed_wheel_axis * 0.5f * delta_sim_time);
-            p.k[axis] = sinus;
-
-            wheel_rotation.x = p.k[0];
-            wheel_rotation.y = p.k[1];
-            wheel_rotation.z = p.k[2];
-
-            wheel_rotation.w = IVP_Inline_Math::sqrtd(1.0f - sinus * sinus);
-
-            q_core_f_core->inline_set_mult_quat(&gyro_rotation, &wheel_rotation);
+            calc_fast_wheel_rotation(delta_sim_time, q_core_f_core);
         }
         else
 #endif

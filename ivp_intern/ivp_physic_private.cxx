@@ -17,7 +17,6 @@
 #include <ivp_mindist_intern.hxx> //because of Mindist
 #include <ivp_friction.hxx>
 #include <ivu_active_value.hxx>
-#include <ivp_actuator.hxx>
 
 #include <ivp_debug_manager.hxx> //because of debug psi_synchrone
 #include <ivp_merge_core.hxx>
