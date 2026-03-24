@@ -339,7 +339,12 @@ int IVP_SurfaceBuilder_Q12::load_q12bsp_file(char *filename)
     int length = q12_get_length_of_file(fp);
     this->header = (dheader_t *)p_malloc(length + 1);
     ((char *)this->header)[length] = 0;
-    fread((char *)this->header, 1, length, fp);
+    if ((int)fread((char *)this->header, 1, length, fp) != length) {
+        P_FREE(this->header);
+        this->header = NULL;
+        fclose(fp);
+        return 0;
+    }
     fclose(fp);
 
     // swap the header

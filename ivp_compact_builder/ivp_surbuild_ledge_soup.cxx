@@ -522,9 +522,13 @@ void IVP_SurfaceBuilder_Ledge_Soup::ledges_to_boxes_and_spheres()
 
         // @@CB - scaling
         IVP_DOUBLE work = sphere->radius * dimension_steps;                      // dimension_steps is constanct, 1/250 @@CB
-        sphere->box_sizes[0] = int((max.k[0] - sphere->center.k[0]) / work) + 1; // translate to origin, scale by 250, divide
-        sphere->box_sizes[1] = int((max.k[1] - sphere->center.k[1]) / work) + 1; // by radius, add 1
-        sphere->box_sizes[2] = int((max.k[2] - sphere->center.k[2]) / work) + 1;
+        if (work < P_DOUBLE_EPS) work = P_DOUBLE_EPS;
+        int bs0 = int((max.k[0] - sphere->center.k[0]) / work) + 1;
+        int bs1 = int((max.k[1] - sphere->center.k[1]) / work) + 1;
+        int bs2 = int((max.k[2] - sphere->center.k[2]) / work) + 1;
+        sphere->box_sizes[0] = (bs0 > 255) ? 255 : bs0;
+        sphere->box_sizes[1] = (bs1 > 255) ? 255 : bs1;
+        sphere->box_sizes[2] = (bs2 > 255) ? 255 : bs2;
 
         this->size_of_tree_in_bytes += sizeof(IVV_Sphere); // debugging
 
@@ -942,9 +946,13 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::build_minimal_sphere(IVV_Sphere *sphe
     new_radius = rad.real_length(); // calculate radius of box-enclosing sphere
 
     IVP_DOUBLE work = new_radius * dimension_steps;
-    new_sphere->box_sizes[0] = int((max.k[0] - new_center.k[0]) / work) + 1;
-    new_sphere->box_sizes[1] = int((max.k[1] - new_center.k[1]) / work) + 1;
-    new_sphere->box_sizes[2] = int((max.k[2] - new_center.k[2]) / work) + 1;
+    if (work < P_DOUBLE_EPS) work = P_DOUBLE_EPS;
+    { int bs0 = int((max.k[0] - new_center.k[0]) / work) + 1;
+      int bs1 = int((max.k[1] - new_center.k[1]) / work) + 1;
+      int bs2 = int((max.k[2] - new_center.k[2]) / work) + 1;
+      new_sphere->box_sizes[0] = (bs0 > 255) ? 255 : bs0;
+      new_sphere->box_sizes[1] = (bs1 > 255) ? 255 : bs1;
+      new_sphere->box_sizes[2] = (bs2 > 255) ? 255 : bs2; }
 #endif
 
     // initialize new mothersphere
@@ -1081,6 +1089,7 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
     rad.subtract(&this->extents_max, &new_center);
     new_radius = rad.real_length(); // calculate radius of box-enclosing sphere
     IVP_DOUBLE work = new_radius * dimension_steps;
+    if (work < P_DOUBLE_EPS) work = P_DOUBLE_EPS;
 
     // initialize new mothersphere
     IVV_Sphere *new_sphere = new IVV_Sphere();
@@ -1089,9 +1098,12 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
     new_sphere->radius = new_radius;
     new_sphere->center = new_center;
     new_sphere->compact_ledge = NULL;
-    new_sphere->box_sizes[0] = int((this->extents_max.k[0] - new_center.k[0]) / work) + 1;
-    new_sphere->box_sizes[1] = int((this->extents_max.k[1] - new_center.k[1]) / work) + 1;
-    new_sphere->box_sizes[2] = int((this->extents_max.k[2] - new_center.k[2]) / work) + 1;
+    { int bs0 = int((this->extents_max.k[0] - new_center.k[0]) / work) + 1;
+      int bs1 = int((this->extents_max.k[1] - new_center.k[1]) / work) + 1;
+      int bs2 = int((this->extents_max.k[2] - new_center.k[2]) / work) + 1;
+      new_sphere->box_sizes[0] = (bs0 > 255) ? 255 : bs0;
+      new_sphere->box_sizes[1] = (bs1 > 255) ? 255 : bs1;
+      new_sphere->box_sizes[2] = (bs2 > 255) ? 255 : bs2; }
 
     // special case: "two spheres left in branch"
     // independent of the spheres' position we simply assign one of them to the left branch and one to the right branch.
@@ -1316,9 +1328,10 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
             if (difference_in_boundingbox_volumes[i] < max_diff)
             {
                 if ((lefthand_terminals[i]->len() != 0) && (righthand_terminals[i]->len() != 0))
+                {
                     chosen_axis = i;
-
-                max_diff = difference_in_boundingbox_volumes[i];
+                    max_diff = difference_in_boundingbox_volumes[i];
+                }
             }
         }
     }
