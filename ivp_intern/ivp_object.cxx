@@ -19,7 +19,7 @@
 #include <ivp_hull_manager.hxx>
 #include <ivp_mindist_intern.hxx>
 #include <ivp_friction.hxx>
-#include <ivp_actuator.hxx>
+#include <ivp_anchor.hxx>
 #include <ivp_cache_object.hxx>
 #include <ivp_debug_manager.hxx>
 #include <ivp_i_friction_hash.hxx>
