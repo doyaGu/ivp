@@ -79,7 +79,47 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
     IVP_ASSERT(sizeof(IVP_Compact_Edge) == 4);
     IVP_ASSERT(sizeof(IVP_Compact_Triangle) == 16);
 
-    P_MEM_CLEAR(this);
+    // Zero all pointer and scalar members explicitly instead of P_MEM_CLEAR(this),
+    // which would corrupt IVP_U_Vector members and IVP_Statistic_Manager/IVP_Freeze_Manager.
+    standard_gravity_controller = NULL;
+    time_manager = NULL;
+    sim_units_manager = NULL;
+    cluster_manager = NULL;
+    mindist_manager = NULL;
+    ov_tree_manager = NULL;
+    collision_filter = NULL;
+    range_manager = NULL;
+    anomaly_manager = NULL;
+    anomaly_limits = NULL;
+    performancecounter = NULL;
+    universe_manager = NULL;
+    static_object = NULL;
+    better_statisticsmanager = NULL;
+    controller_manager = NULL;
+    cache_object_manager = NULL;
+    l_active_value_manager = NULL;
+    l_material_manager = NULL;
+    short_term_mem = NULL;
+    sim_unit_mem = NULL;
+    time_since_last_blocking = 0.0;
+    delta_PSI_time = 0.0;
+    inv_delta_PSI_time = 0.0;
+    gravity.set_to_zero();
+    gravity_scalar = 0.0f;
+    auth_costumer_name = NULL;
+    auth_costumer_code = 0;
+    pw_count = 0;
+    environment_manager = NULL;
+    current_time = IVP_Time(0.0);
+    time_of_next_psi = IVP_Time(0.0);
+    time_of_last_psi = IVP_Time(0.0);
+    current_time_code = 0;
+    mindist_event_timestamp_reference = 0;
+    next_movement_check = 0;
+    debug_information = NULL;
+    draw_vectors = NULL;
+    integrated_energy_damp = 0.0;
+
     get_freeze_manager()->init_freeze_manager();
 
     state = IVP_ES_AT;

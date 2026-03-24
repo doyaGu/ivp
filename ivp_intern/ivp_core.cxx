@@ -969,8 +969,12 @@ void IVP_Core::transform_PSI_matrizes_core(const IVP_U_Matrix *m_core_f_core)
 
 void IVP_Core::init(IVP_Real_Object *io)
 {
+    // P_MEM_CLEAR zeroes all members including non-POD vectors.
+    // The zero state coincidentally matches IVP_U_Vector's default, but
+    // objects.reset() and controllers_of_core reinit provide explicit safety.
     P_MEM_CLEAR(this);
     objects.reset();
+    controllers_of_core.clear();
     objects.add(io);
     environment = io->get_environment();
 
