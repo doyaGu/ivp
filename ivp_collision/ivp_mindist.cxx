@@ -1784,7 +1784,7 @@ void IVP_Mindist_Manager::recalc_exact_mindist(IVP_Mindist *mdist)
     {
         uncertanty += obj0->get_controller_phantom()->exit_policy_extra_radius;
     }
-    else
+    else if (obj1->get_controller_phantom())
     {
         uncertanty += obj1->get_controller_phantom()->exit_policy_extra_radius;
     }
