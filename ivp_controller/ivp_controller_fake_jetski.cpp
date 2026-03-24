@@ -888,7 +888,8 @@ void IVP_Controller_Raycast_Fake_Jetski::InitRaycastCarWheels(const IVP_Template
 		// Wheel data.
 		pRaycastWheel->friction_of_wheel = 1.0f; // pCarSystemTemplate->friction_of_wheel[iWheel];
 		pRaycastWheel->wheel_radius = pCarSystemTemplate->wheel_radius[iWheel];
-		pRaycastWheel->inv_wheel_radius = 1.0f / pCarSystemTemplate->wheel_radius[iWheel];
+		{ IVP_FLOAT wr = pCarSystemTemplate->wheel_radius[iWheel];
+		  pRaycastWheel->inv_wheel_radius = (wr > P_FLOAT_EPS) ? (1.0f / wr) : (1.0f / P_FLOAT_EPS); }
 
 		do_steering_wheel(IVP_POS_WHEEL(iWheel), 0.0f);
 

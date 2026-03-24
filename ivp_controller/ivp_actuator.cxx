@@ -858,6 +858,7 @@ void IVP_Actuator_Force::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vecto
     pc1->get_m_world_f_core_PSI()->vmult4(&anch1->core_pos, &pos1_ws);
     dir_ws.subtract(&pos0_ws, &pos1_ws); // force direction world coords
 
+    if (dir_ws.quad_length() < P_DOUBLE_EPS) return;
     dir_ws.fast_normize();
 
     IVP_U_Float_Point force_dir;
