@@ -22,6 +22,7 @@ class IVP_Calc_Next_PSI_Solver
     class IVP_Core *core;
 
     inline void calc_rotation_matrix(IVP_FLOAT delta_sim_time, IVP_U_Quat *q_core_f_core_out); // calc q_core_f_core
+    void calc_fast_wheel_rotation(IVP_FLOAT delta_sim_time, IVP_U_Quat *q_core_f_core_out); // defined in ivp_controller/ivp_car_wheel_physics.cxx
     IVP_DOUBLE get_longest_time_step_dependent_on_rot();
 
     // void reduce_energy_by_damping(IVP_DOUBLE remove_energy); //not used at moment
