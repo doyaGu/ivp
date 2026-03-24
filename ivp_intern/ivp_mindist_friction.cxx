@@ -109,12 +109,12 @@ void IVP_Contact_Point::p_calc_friction_qr_PF(const IVP_U_Point *pp,
     info->surf_normal.calc_cross_product(&Q, &R); // @@@OS optimization: store surf_normal in CS coords, or at least 1.0f/sqrt(len)
     info->surf_normal.fast_normize();
 
-    IVP_DOUBLE iQ = sqrtf(1.0f / QQ);
+    IVP_DOUBLE iQ = (QQ > P_DOUBLE_EPS) ? sqrtf(1.0f / QQ) : 0.0f;
     info->span_friction_v[0].set_multiple(&Q, iQ);
 
     info->gap_distance = info->surf_normal.dot_product(&tp) - info->surf_normal.dot_product(pp);
 
-    IVP_DOUBLE iDet = 1.0f / Det;
+    IVP_DOUBLE iDet = (IVP_Inline_Math::fabsd(Det) > P_DOUBLE_EPS) ? (1.0f / Det) : 0.0f;
     IVP_DOUBLE q = unscaled_q * iDet;
     IVP_DOUBLE r = unscaled_r * iDet;
 
@@ -266,13 +266,15 @@ void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const I
         IVP_DOUBLE a, b, x;
         a = K_area.dot_product(&Lp);
         b = K_area.dot_product(&Lp_next);
-        IVP_DOUBLE inv_a_b = 1.0f / (a - b);
+        IVP_DOUBLE ab_diff = a - b;
+        IVP_DOUBLE inv_a_b = (IVP_Inline_Math::fabsd(ab_diff) > P_DOUBLE_EPS) ? (1.0f / ab_diff) : 0.0f;
         x = K_area.dot_product(&Kp);
         sl = (a - x) * inv_a_b;
 
         a = L_area.dot_product(&Kp);
         b = L_area.dot_product(&Kp_next);
-        inv_a_b = 1.0f / (a - b);
+        ab_diff = a - b;
+        inv_a_b = (IVP_Inline_Math::fabsd(ab_diff) > P_DOUBLE_EPS) ? (1.0f / ab_diff) : 0.0f;
         x = L_area.dot_product(&Lp);
         sk = (a - x) * inv_a_b;
 
@@ -298,7 +300,11 @@ void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const I
         else
         {
             last_gap_len = 0.0f;
-            info->surf_normal.set_multiple(&norm, 1.0f / IVP_Inline_Math::ivp_sqrtf(quad_dist));
+            IVP_DOUBLE sqrt_qd = IVP_Inline_Math::ivp_sqrtf(quad_dist);
+            if (sqrt_qd > P_DOUBLE_EPS)
+                info->surf_normal.set_multiple(&norm, 1.0f / sqrt_qd);
+            else
+                info->surf_normal.set(1.0f, 0.0f, 0.0f);
         }
 
         info->span_friction_v[0].set(&Kvec);
