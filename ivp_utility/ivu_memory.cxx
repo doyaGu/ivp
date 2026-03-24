@@ -101,6 +101,8 @@ void *p_malloc(size_t size)
 
 char *p_calloc(size_t nelem, size_t size)
 {
+    if (nelem != 0 && size > (size_t)-1 / nelem)
+        return NULL;
     size_t s = nelem * size;
 
 #ifndef GEKKO

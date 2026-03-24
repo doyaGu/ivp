@@ -55,6 +55,8 @@ class IVP_U_Min_Hash
     };
     IVP_DOUBLE find_min_value()
     {
+        if (!stadel[1])
+            return 0.0;
         return stadel[1]->value;
     };
     int is_elem(void *elem) const;

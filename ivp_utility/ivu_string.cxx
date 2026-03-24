@@ -468,7 +468,10 @@ char *p_get_next_token()
 
 int p_get_num()
 {
-    return atoi(p_str_tok(NULL, IVP_WHITESPACE));
+    char *str = p_str_tok(NULL, IVP_WHITESPACE);
+    if (!str)
+        return 0;
+    return atoi(str);
 }
 
 IVP_DOUBLE p_get_float()
