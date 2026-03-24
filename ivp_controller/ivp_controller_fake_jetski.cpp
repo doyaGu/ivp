@@ -372,7 +372,7 @@ void IVP_Controller_Raycast_Fake_Jetski::CalcSteeringForces(IVP_Raycast_Fake_Jet
 	const IVP_DOUBLE mtx2x2_10 = front_back;
 	const IVP_DOUBLE mtx2x2_11 = coreReactionSolver[1].m_velocity_ds_f_impulse_ds.get_elem(0, 0);
 
-	IVP_RETURN_TYPE retValue = IVP_Inline_Math::invert_2x2_matrix(mtx2x2_00, mtx2x2_01, mtx2x2_01, mtx2x2_11, &inv_mat2x2[0], &inv_mat2x2[1], &inv_mat2x2[2], &inv_mat2x2[3]);
+	IVP_RETURN_TYPE retValue = IVP_Inline_Math::invert_2x2_matrix(mtx2x2_00, mtx2x2_01, mtx2x2_10, mtx2x2_11, &inv_mat2x2[0], &inv_mat2x2[1], &inv_mat2x2[2], &inv_mat2x2[3]);
 	if (retValue == IVP_OK)
 	{
 		pForcesNeededToDriveStraight[0] = inv_mat2x2[0] * a + inv_mat2x2[1] * b;

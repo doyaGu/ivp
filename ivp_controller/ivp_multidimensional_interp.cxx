@@ -500,7 +500,8 @@ void IVP_Multidimensional_Interpolator::add_new_input_solution_combination_stoch
 	}
 
 	// define the location of the new pair of values by stochastic means
-	int solution_slot = (counter_vector_replacement-- * 101) % nr_of_vectors;
+	int solution_slot = ((counter_vector_replacement < 0 ? -counter_vector_replacement : counter_vector_replacement) * 101) % nr_of_vectors;
+	counter_vector_replacement--;
 
 	previous_inputs[solution_slot]->set(new_input);
 	previous_solutions[solution_slot]->set(new_solution);

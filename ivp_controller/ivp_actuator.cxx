@@ -436,6 +436,8 @@ IVP_Actuator_Force_Active::~IVP_Actuator_Force_Active()
 
 IVP_DOUBLE IVP_Actuator_Extra::get_force()
 {
+    if (!info.active_float_force)
+        return 0.0f;
     return info.active_float_force->give_double_value();
 }
 
@@ -470,10 +472,10 @@ IVP_Actuator_Extra::IVP_Actuator_Extra(IVP_Environment *env, IVP_Template_Extra 
 IVP_U_Point *IVP_Actuator_Extra::get_float_cam_props(IVP_DOUBLE *fc_height_out, IVP_DOUBLE *fc_target_height_out, IVP_DOUBLE *fc_dist_out, IVP_DOUBLE *fc_speed_out)
 {
     // returns current IVP_FLOAT cam position
-    *fc_height_out = info.mod_fc_height->give_double_value();
-    *fc_target_height_out = info.mod_fc_target_height->give_double_value();
-    *fc_dist_out = info.mod_fc_dist->give_double_value();
-    *fc_speed_out = info.mod_fc_speed->give_double_value();
+    *fc_height_out = info.mod_fc_height ? info.mod_fc_height->give_double_value() : 0.0;
+    *fc_target_height_out = info.mod_fc_target_height ? info.mod_fc_target_height->give_double_value() : 0.0;
+    *fc_dist_out = info.mod_fc_dist ? info.mod_fc_dist->give_double_value() : 0.0;
+    *fc_speed_out = info.mod_fc_speed ? info.mod_fc_speed->give_double_value() : 0.0;
 
     return &this->current_float_cam_pos;
 }

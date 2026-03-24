@@ -1004,7 +1004,7 @@ void IVP_Constraint_Local::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vec
 					case IVP_CFE_NONE:;
 					}
 				}
-				if (maxforce->halfimpulse[i + 3] / simplenorm_rotdir < 1.0f)
+				if (simplenorm_rotdir > P_DOUBLE_EPS && maxforce->halfimpulse[i + 3] / simplenorm_rotdir < 1.0f)
 				{
 					switch (maxforce->type[i + 3])
 					{
