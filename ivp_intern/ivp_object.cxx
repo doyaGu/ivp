@@ -414,7 +414,7 @@ IVP_Real_Object::IVP_Real_Object(IVP_Cluster *cluster, IVP_SurfaceManager *surfa
     surface_manager = surface_manager_;
     anchors = NULL;
     ov_element = NULL; // will be set by IVP_Mindist_Manager::enable_collision_detection
-    ((int *)&flags)[0] = 0;
+    memset(&flags, 0, sizeof(flags));
     q_core_f_object = NULL;
     shift_core_f_object.set_to_zero();
     cache_object = NULL;

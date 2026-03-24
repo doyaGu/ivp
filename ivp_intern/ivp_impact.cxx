@@ -25,10 +25,10 @@
 #include <ivp_anomaly_manager.hxx>
 
 #define IVP_SAFETY_FACTOR_FOR_DELAY 1.2f
-#define IVP_INV_SAFETY_FACTOR_FOR_DELAY 1.0f / IVP_SAFETY_FACTOR_FOR_DELAY
+#define IVP_INV_SAFETY_FACTOR_FOR_DELAY (1.0f / IVP_SAFETY_FACTOR_FOR_DELAY)
 #define IVP_ROT_MAX_UNCERTAINTY 0.5f		// max rot degree speed uncertainty for rescue_speed
 #define IVP_COLL_DETECT_MIN_INV_TIME 200.0f // inverse time we have to make sure no collision occurs
-#define IVP_COLL_DETECT_MIN_TIME 1.0f / IVP_COLL_DETECT_MIN_INV_TIME
+#define IVP_COLL_DETECT_MIN_TIME (1.0f / IVP_COLL_DETECT_MIN_INV_TIME)
 #define IVP_SPEED_ADDON_SYSTEM_IMPACT 0.01f
 #define IVP_INV_HALF_CONSERVATION_STEPS 0.5f // elasticity is raised with number of impacts in system, at 1.0f/IVP_INV_HALF_CONSERVATION_STEPS the elasticity is at least 0.5
 #define MAXIMUM_SYSTEM_PUSH_NUMBER 5000

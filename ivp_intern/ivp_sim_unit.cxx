@@ -980,11 +980,8 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
 
     int fast_moving_flag = 0;
 
-    union
-    {
-        int fast_moving_core;
-        float fast_moving_core_p;
-    }; // warning: 4 Byte of memory are used to store an integer and a float value to get access to sign bit
+    int fast_moving_core;
+    float fast_moving_core_p;
 
     for (int d = sim_unit_cores.len() - 1; d >= 1; d--)
     {
@@ -1005,6 +1002,7 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
         my_core->commit_all_async_pushes(); // @@@OS this happens very seldomly !!!!, remove !!!!this necessary as it may happen that core was temporarily_unmovable
                                             // TL: it is also used for delayed pushes and async_pushes
         fast_moving_core_p = IVP_OBJECT_MOVING_FAST * IVP_OBJECT_MOVING_FAST - my_core->speed.quad_length();
+        memcpy(&fast_moving_core, &fast_moving_core_p, sizeof(int));
         my_core->temporarily_unmovable = IVP_FALSE;
         my_core->impacts_since_last_PSI = 0;
         fast_moving_flag |= fast_moving_core;
@@ -1022,6 +1020,7 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
         }
         my_core->commit_all_async_pushes(); // @@@OS this happens very seldomly !!!!, remove !!!!this necessary as it may happen that core was temporarily_unmovable
         fast_moving_core_p = IVP_OBJECT_MOVING_FAST * IVP_OBJECT_MOVING_FAST - my_core->speed.quad_length();
+        memcpy(&fast_moving_core, &fast_moving_core_p, sizeof(int));
         my_core->temporarily_unmovable = IVP_FALSE;
         my_core->impacts_since_last_PSI = 0;
         fast_moving_flag |= fast_moving_core;
