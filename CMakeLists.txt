@@ -66,16 +66,11 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
     
-    # Set include directories - include all IVP modules for cross-module includes
+    # Public interface should only expose the target's own headers plus the
+    # shared utility headers. Cross-module includes remain a private build detail.
     target_include_directories(${LIBRARY_NAME} PUBLIC
         $<BUILD_INTERFACE:${SOURCE_DIR}>
         $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_surface_manager>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_collision>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_intern>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_physics>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_controller>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_compact_builder>
         $<INSTALL_INTERFACE:include>
     )
     
@@ -182,23 +177,18 @@ set(IVP_UTILITY_SOURCES
     ${IVP_DIR}/ivp_utility/ivu_vhash.hxx
 )
 add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
-# Add global include directories for all modules
-target_include_directories(ivp_utility PRIVATE
-    ${IVP_DIR}/ivp_surface_manager
-    ${IVP_DIR}/ivp_collision
-    ${IVP_DIR}/ivp_intern
-    ${IVP_DIR}/ivp_physics
-    ${IVP_DIR}/ivp_controller
-    ${IVP_DIR}/ivp_compact_builder
-)
 
 # ivp_surface_manager - Depends on utility
 set(IVP_SURFACEMANAGER_SOURCES
     ${IVP_DIR}/ivp_surface_manager/ivp_compact_grid.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_compact_ledge.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_compact_ledge_solver.hxx
     ${IVP_DIR}/ivp_surface_manager/ivp_compact_surface.cxx
     ${IVP_DIR}/ivp_surface_manager/ivp_compact_surface.hxx
     ${IVP_DIR}/ivp_surface_manager/ivp_gridbuild_array.cxx
     ${IVP_DIR}/ivp_surface_manager/ivp_gridbuild_array.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_ray_solver.hxx
+    ${IVP_DIR}/ivp_surface_manager/ivp_surface_manager.hxx
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_grid.cxx
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_grid.hxx
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.cxx
@@ -206,78 +196,23 @@ set(IVP_SURFACEMANAGER_SOURCES
 )
 add_ivp_library(ivp_surface_manager "${IVP_DIR}/ivp_surface_manager" "ivp_utility" "${IVP_SURFACEMANAGER_SOURCES}")
 ivp_suppress_duplicate_static_lib_warnings(ivp_surface_manager)
-# Add global include directories for all modules
-target_include_directories(ivp_surface_manager PRIVATE
-    ${IVP_DIR}/ivp_utility
-    ${IVP_DIR}/ivp_surface_manager
-    ${IVP_DIR}/ivp_collision
-    ${IVP_DIR}/ivp_intern
-    ${IVP_DIR}/ivp_physics
-    ${IVP_DIR}/ivp_controller
-    ${IVP_DIR}/ivp_compact_builder
-)
 
-# ivp_physics - Main physics API + collision + internal implementation
-set(IVP_PHYSICS_SOURCES
-    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.cxx
-    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_authenticity.hxx
-    ${IVP_DIR}/ivp_physics/ivp_ball.hxx
-    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.cxx
-    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.cxx
-    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_cache_object.cxx
-    ${IVP_DIR}/ivp_physics/ivp_cache_object.hxx
-    ${IVP_DIR}/ivp_physics/ivp_contact_situation.hxx
-    ${IVP_DIR}/ivp_physics/ivp_core.hxx
-    ${IVP_DIR}/ivp_physics/ivp_core_macros.hxx
-    ${IVP_DIR}/ivp_physics/ivp_debug.hxx
-    ${IVP_DIR}/ivp_physics/ivp_debug_manager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_environment.hxx
-    ${IVP_DIR}/ivp_physics/ivp_great_matrix.hxx
-    ${IVP_DIR}/ivp_physics/ivp_hull_manager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.cxx
-    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.hxx
-    ${IVP_DIR}/ivp_physics/ivp_listener_hull.hxx
-    ${IVP_DIR}/ivp_physics/ivp_listener_object.hxx
-    ${IVP_DIR}/ivp_physics/ivp_listener_psi.hxx
-    ${IVP_DIR}/ivp_physics/ivp_material.cxx
-    ${IVP_DIR}/ivp_physics/ivp_material.hxx
-    ${IVP_DIR}/ivp_physics/ivp_object.hxx
-    ${IVP_DIR}/ivp_physics/ivp_object_attach.hxx
-    ${IVP_DIR}/ivp_physics/ivp_performancecounter.cxx
-    ${IVP_DIR}/ivp_physics/ivp_performancecounter.hxx
-    ${IVP_DIR}/ivp_physics/ivp_phantom.cxx
-    ${IVP_DIR}/ivp_physics/ivp_phantom.hxx
-    ${IVP_DIR}/ivp_physics/ivp_physics.hxx
-    ${IVP_DIR}/ivp_physics/ivp_polygon.hxx
-    ${IVP_DIR}/ivp_physics/ivp_radar.hxx
-    ${IVP_DIR}/ivp_physics/ivp_real_object.hxx
-    ${IVP_DIR}/ivp_physics/ivp_solver_core_reaction.hxx
-    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.cxx
-    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.hxx
-    ${IVP_DIR}/ivp_physics/ivp_surface_manager.cxx
-    ${IVP_DIR}/ivp_physics/ivp_surface_manager.hxx
-    ${IVP_DIR}/ivp_physics/ivp_templates.cxx
-    ${IVP_DIR}/ivp_physics/ivp_templates.hxx
-    ${IVP_DIR}/ivp_physics/ivp_time.hxx
-    ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
-    ${IVP_DIR}/ivp_physics/ivp_controller.cxx
-    ${IVP_DIR}/ivp_physics/ivp_controller.hxx
-    # --- merged from ivp_intern ---
-    ${IVP_DIR}/ivp_intern/ivp_ball.cxx
+# ivp_intern - Runtime implementation behind the public physics API
+set(IVP_INTERN_SOURCES
+    ${IVP_DIR}/ivp_intern/ivp_cache_ledge_point.hxx
+    ${IVP_DIR}/ivp_intern/ivp_cache_object.cxx
+    ${IVP_DIR}/ivp_intern/ivp_cache_object.hxx
     ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.cxx
     ${IVP_DIR}/ivp_intern/ivp_calc_next_psi_solver.hxx
-    ${IVP_DIR}/ivp_intern/ivp_core.cxx
-    ${IVP_DIR}/ivp_intern/ivp_environment.cxx
+    ${IVP_DIR}/ivp_intern/ivp_clustering_longrange.hxx
     ${IVP_DIR}/ivp_intern/ivp_friction.cxx
     ${IVP_DIR}/ivp_intern/ivp_friction.hxx
     ${IVP_DIR}/ivp_intern/ivp_friction_gaps.cxx
     ${IVP_DIR}/ivp_intern/ivp_friction_solver.hxx
-    ${IVP_DIR}/ivp_intern/ivp_great_matrix.cxx
     ${IVP_DIR}/ivp_intern/ivp_hull_manager.cxx
+    ${IVP_DIR}/ivp_intern/ivp_hull_manager.hxx
     ${IVP_DIR}/ivp_intern/ivp_hull_manager_macros.hxx
+    ${IVP_DIR}/ivp_intern/ivp_i_collision_vhash.hxx
     ${IVP_DIR}/ivp_intern/ivp_i_controller_vhash.hxx
     ${IVP_DIR}/ivp_intern/ivp_i_friction_hash.cxx
     ${IVP_DIR}/ivp_intern/ivp_i_friction_hash.hxx
@@ -288,70 +223,117 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_merge_core.cxx
     ${IVP_DIR}/ivp_intern/ivp_merge_core.hxx
     ${IVP_DIR}/ivp_intern/ivp_mindist_friction.cxx
-    ${IVP_DIR}/ivp_intern/ivp_object.cxx
-    ${IVP_DIR}/ivp_intern/ivp_object_attach.cxx
-    ${IVP_DIR}/ivp_intern/ivp_physic.cxx
     ${IVP_DIR}/ivp_intern/ivp_physic_private.cxx
     ${IVP_DIR}/ivp_intern/ivp_physic_private.hxx
-    ${IVP_DIR}/ivp_intern/ivp_polygon.cxx
     ${IVP_DIR}/ivp_intern/ivp_sim_unit.cxx
     ${IVP_DIR}/ivp_intern/ivp_sim_unit.hxx
-    ${IVP_DIR}/ivp_intern/ivp_solver_core_reaction.cxx
-    ${IVP_DIR}/ivp_intern/ivp_time.cxx
-    # --- merged from ivp_collision ---
-    ${IVP_DIR}/ivp_collision/ivp_3d_solver.cxx
-    ${IVP_DIR}/ivp_collision/ivp_3d_solver.hxx
-    ${IVP_DIR}/ivp_collision/ivp_cache_ledge_point.hxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_longrange.cxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_longrange.hxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.cxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.hxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_visual_hash.cxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_visual_hash.hxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_visualizer.cxx
-    ${IVP_DIR}/ivp_collision/ivp_clustering_visualizer.hxx
-    ${IVP_DIR}/ivp_collision/ivp_coll_del_root_mindist.cxx
-    ${IVP_DIR}/ivp_collision/ivp_collision.hxx
-    ${IVP_DIR}/ivp_collision/ivp_collision_filter.cxx
-    ${IVP_DIR}/ivp_collision/ivp_collision_filter.hxx
-    ${IVP_DIR}/ivp_collision/ivp_compact_ledge.cxx
-    ${IVP_DIR}/ivp_collision/ivp_compact_ledge.hxx
-    ${IVP_DIR}/ivp_collision/ivp_compact_ledge_solver.cxx
-    ${IVP_DIR}/ivp_collision/ivp_compact_ledge_solver.hxx
-    ${IVP_DIR}/ivp_collision/ivp_i_collision_vhash.cxx
-    ${IVP_DIR}/ivp_collision/ivp_i_collision_vhash.hxx
-    ${IVP_DIR}/ivp_collision/ivp_listener_collision.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist.cxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_debug.cxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_event.cxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_event.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_intern.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_macros.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_mcases.cxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_minimize.cxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_minimize.hxx
-    ${IVP_DIR}/ivp_collision/ivp_mindist_recursive.cxx
-    ${IVP_DIR}/ivp_collision/ivp_oo_watcher.cxx
-    ${IVP_DIR}/ivp_collision/ivp_range_manager.cxx
-    ${IVP_DIR}/ivp_collision/ivp_range_manager.hxx
-    ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
-    ${IVP_DIR}/ivp_collision/ivp_ray_solver.hxx
-    ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
-    ${IVP_DIR}/ivp_collision/ivp_universe_manager.hxx
+)
+add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_manager" "${IVP_INTERN_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_intern)
+target_include_directories(ivp_intern PRIVATE
+    ${IVP_DIR}/ivp_physics
+)
+
+# ivp_physics - Main physics API
+set(IVP_PHYSICS_SOURCES
+    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_anomaly_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_3d_solver.cxx
+    ${IVP_DIR}/ivp_physics/ivp_3d_solver.hxx
+    ${IVP_DIR}/ivp_physics/ivp_authenticity.hxx
+    ${IVP_DIR}/ivp_physics/ivp_ball.cxx
+    ${IVP_DIR}/ivp_physics/ivp_ball.hxx
+    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_betterdebugmanager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_betterstatisticsmanager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_collision.hxx
+    ${IVP_DIR}/ivp_physics/ivp_collision_filter.cxx
+    ${IVP_DIR}/ivp_physics/ivp_collision_filter.hxx
+    ${IVP_DIR}/ivp_physics/ivp_contact_situation.hxx
+    ${IVP_DIR}/ivp_physics/ivp_core.cxx
+    ${IVP_DIR}/ivp_physics/ivp_core.hxx
+    ${IVP_DIR}/ivp_physics/ivp_core_macros.hxx
+    ${IVP_DIR}/ivp_physics/ivp_debug.hxx
+    ${IVP_DIR}/ivp_physics/ivp_debug_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_environment.cxx
+    ${IVP_DIR}/ivp_physics/ivp_environment.hxx
+    ${IVP_DIR}/ivp_physics/ivp_great_matrix.cxx
+    ${IVP_DIR}/ivp_physics/ivp_great_matrix.hxx
+    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.cxx
+    ${IVP_DIR}/ivp_physics/ivp_liquid_surface_descript.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_collision.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_hull.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_listener_psi.hxx
+    ${IVP_DIR}/ivp_physics/ivp_material.cxx
+    ${IVP_DIR}/ivp_physics/ivp_material.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_debug.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_event.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_event.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_impact.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_internal.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_macros.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_mcases.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_minimize.cxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_minimize.hxx
+    ${IVP_DIR}/ivp_physics/ivp_mindist_recursive.cxx
+    ${IVP_DIR}/ivp_physics/ivp_object.cxx
+    ${IVP_DIR}/ivp_physics/ivp_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_object_attach.cxx
+    ${IVP_DIR}/ivp_physics/ivp_object_attach.hxx
+    ${IVP_DIR}/ivp_physics/ivp_performancecounter.cxx
+    ${IVP_DIR}/ivp_physics/ivp_performancecounter.hxx
+    ${IVP_DIR}/ivp_physics/ivp_phantom.hxx
+    ${IVP_DIR}/ivp_physics/ivp_phantom.cxx
+    ${IVP_DIR}/ivp_physics/ivp_physic.cxx
+    ${IVP_DIR}/ivp_physics/ivp_physics.hxx
+    ${IVP_DIR}/ivp_physics/ivp_polygon.cxx
+    ${IVP_DIR}/ivp_physics/ivp_polygon.hxx
+    ${IVP_DIR}/ivp_physics/ivp_radar.hxx
+    ${IVP_DIR}/ivp_physics/ivp_range_manager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_range_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_real_object.hxx
+    ${IVP_DIR}/ivp_physics/ivp_solver_core_reaction.cxx
+    ${IVP_DIR}/ivp_physics/ivp_solver_core_reaction.hxx
+    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.cxx
+    ${IVP_DIR}/ivp_physics/ivp_stat_manager_cback_con.hxx
+    ${IVP_DIR}/ivp_physics/ivp_surface_manager.cxx
+    ${IVP_DIR}/ivp_physics/ivp_templates.cxx
+    ${IVP_DIR}/ivp_physics/ivp_templates.hxx
+    ${IVP_DIR}/ivp_physics/ivp_time.cxx
+    ${IVP_DIR}/ivp_physics/ivp_time.hxx
+    ${IVP_DIR}/ivp_physics/ivp_time_event.hxx
+    ${IVP_DIR}/ivp_physics/ivp_universe_manager.hxx
+    ${IVP_DIR}/ivp_physics/ivp_coll_del_root_mindist.cxx
+    ${IVP_DIR}/ivp_physics/ivp_clustering_visualizer.cxx
+    ${IVP_DIR}/ivp_physics/ivp_clustering_visual_hash.cxx
+    ${IVP_DIR}/ivp_physics/ivp_clustering_visual_hash.hxx
+    ${IVP_DIR}/ivp_physics/ivp_clustering_visualizer.hxx
+    ${IVP_DIR}/ivp_physics/ivp_controller.cxx
+    ${IVP_DIR}/ivp_physics/ivp_controller.hxx
+    ${IVP_DIR}/ivp_physics/ivp_oo_watcher.cxx
 )
 add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager" "${IVP_PHYSICS_SOURCES}")
 ivp_suppress_duplicate_static_lib_warnings(ivp_physics)
-# Add global include directories for all modules
-target_include_directories(ivp_physics PRIVATE
-    ${IVP_DIR}/ivp_utility
-    ${IVP_DIR}/ivp_surface_manager
-    ${IVP_DIR}/ivp_collision
-    ${IVP_DIR}/ivp_intern
-    ${IVP_DIR}/ivp_physics
-    ${IVP_DIR}/ivp_controller
-    ${IVP_DIR}/ivp_compact_builder
+target_link_libraries(ivp_physics PRIVATE ivp_intern)
+
+# ivp_collision - collision implementation, depends on physics API/runtime
+set(IVP_COLLISION_SOURCES
+    ${IVP_DIR}/ivp_collision/ivp_clustering_longrange.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.cxx
+    ${IVP_DIR}/ivp_collision/ivp_clustering_lrange_hash.hxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge.cxx
+    ${IVP_DIR}/ivp_collision/ivp_compact_ledge_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_i_collision_vhash.cxx
+    ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
+    ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
 )
+add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_physics" "${IVP_COLLISION_SOURCES}")
+ivp_suppress_duplicate_static_lib_warnings(ivp_collision)
+target_link_libraries(ivp_collision PRIVATE ivp_intern)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
@@ -373,6 +355,7 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_constraint_local.cxx
     ${IVP_DIR}/ivp_controller/ivp_constraint_local.hxx
     ${IVP_DIR}/ivp_controller/ivp_constraint_types.hxx
+    ${IVP_DIR}/ivp_controller/ivp_controller_factory.hxx
     ${IVP_DIR}/ivp_controller/ivp_environment_factories.cxx
     ${IVP_DIR}/ivp_controller/ivp_car_wheel_physics.cxx
     ${IVP_DIR}/ivp_controller/ivp_controller_airboat.cpp
@@ -399,23 +382,9 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_template_constraint.cxx
     ${IVP_DIR}/ivp_controller/ivp_template_constraint.hxx
 )
-add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_utility;ivp_physics" "${IVP_CONTROLLER_SOURCES}")
+add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_physics" "${IVP_CONTROLLER_SOURCES}")
 ivp_suppress_duplicate_static_lib_warnings(ivp_controller)
-# Add global include directories for all modules
-target_include_directories(ivp_controller PRIVATE
-    ${IVP_DIR}/ivp_utility
-    ${IVP_DIR}/ivp_surface_manager
-    ${IVP_DIR}/ivp_collision
-    ${IVP_DIR}/ivp_intern
-    ${IVP_DIR}/ivp_physics
-    ${IVP_DIR}/ivp_controller
-    ${IVP_DIR}/ivp_compact_builder
-)
-
-# Cross-module links (ivp_intern + ivp_collision merged into ivp_physics)
-target_link_libraries(ivp_surface_manager PUBLIC ivp_physics)
-target_link_libraries(ivp_physics PUBLIC ivp_controller)
-target_link_libraries(ivp_controller PUBLIC ivp_physics)
+target_link_libraries(ivp_controller PRIVATE ivp_intern)
 
 # ivp_compact_builder - Geometry building tools, depends on core modules
 set(IVP_COMPACT_BUILDER_DIR ${IVP_DIR}/ivp_compact_builder)
@@ -543,9 +512,8 @@ endif()
 
 # Link with dependencies
 target_link_libraries(ivp_compact_builder PUBLIC
-    ivp_utility
-    ivp_surface_manager
     ivp_physics
+    ivp_collision
 )
 
 # Set target properties
@@ -660,7 +628,7 @@ if(IVP_INSTALL)
     include(GNUInstallDirs)
 
     # Install libraries
-    install(TARGETS ivp_utility ivp_surface_manager ivp_physics ivp_controller ivp_compact_builder
+    install(TARGETS ivp_utility ivp_surface_manager ivp_intern ivp_physics ivp_collision ivp_controller ivp_compact_builder
         EXPORT ivp_targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
