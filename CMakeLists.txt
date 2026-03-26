@@ -85,10 +85,6 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Set target properties
     set_target_properties(${LIBRARY_NAME} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        # IVP modules have intentional cyclic references; increase repeat count
-        # for static link interfaces so consumers resolve all symbols without
-        # target-specific linker flags.
-        LINK_INTERFACE_MULTIPLICITY 4
     )
     
     # Platform-specific configurations
