@@ -37,7 +37,6 @@ function(hk_setup_target TARGET_NAME)
 
     set_target_properties(${TARGET_NAME} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        LINK_INTERFACE_MULTIPLICITY 4
     )
 
     if(MSVC)
