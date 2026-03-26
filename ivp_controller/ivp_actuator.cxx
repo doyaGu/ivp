@@ -5,9 +5,6 @@
 #endif
 #include <ivp_physics.hxx>
 
-#include <ivp_cache_object.hxx>
-#include <ivp_solver_core_reaction.hxx>
-
 #include <ivu_active_value.hxx>
 #include <ivp_actuator.hxx>
 #include <ivp_hull_manager.hxx>
@@ -102,8 +99,7 @@ void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP
 {
     this->object = obj;
 
-    IVP_Cache_Object *cache = obj->get_cache_object_no_lock();
-    cache->transform_position_to_world_coords(coords_os, &this->coords_world);
+    obj->transform_position_to_world_coords(coords_os, &this->coords_world);
 }
 
 void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP_DOUBLE x, const IVP_DOUBLE y, const IVP_DOUBLE z)
@@ -111,8 +107,7 @@ void IVP_Template_Anchor::set_anchor_position_os(IVP_Real_Object *obj, const IVP
     this->object = obj;
     IVP_U_Float_Point coords_os(x, y, z);
 
-    IVP_Cache_Object *cache = obj->get_cache_object_no_lock();
-    cache->transform_position_to_world_coords(&coords_os, &this->coords_world);
+    obj->transform_position_to_world_coords(&coords_os, &this->coords_world);
 }
 
 #if 1
@@ -152,9 +147,8 @@ void IVP_Anchor::init_anchor(IVP_Actuator *ac, IVP_Template_Anchor *ta)
     IVP_U_Matrix m_core_f_object;
     l_anchor_object->calc_m_core_f_object(&m_core_f_object);
 
-    IVP_Cache_Object *co = ta->object->get_cache_object_no_lock();
     IVP_U_Point obj_pos;
-    co->transform_position_to_object_coords(&ta->coords_world, &obj_pos);
+    ta->object->transform_position_to_object_coords(&ta->coords_world, &obj_pos);
     this->object_pos.set(&obj_pos);
     m_core_f_object.vmult4(&object_pos, &core_pos);
     l_anchor_object->insert_anchor(this);

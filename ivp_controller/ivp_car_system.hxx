@@ -24,6 +24,10 @@ enum IVP_POS_AXIS
 };
 
 class IVP_Real_Object;
+class IVP_Actuator_Force;
+class IVP_Actuator_Spring;
+class IVP_Actuator_Suspension;
+class IVP_Actuator_Stabilizer;
 class IVP_Actuator_Torque;
 class IVP_Constraint_Solver_Car;
 

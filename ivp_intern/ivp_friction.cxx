@@ -16,7 +16,7 @@
 #include <ivp_material.hxx>
 #include <ivp_impact.hxx>
 
-#include <ivp_mindist_intern.hxx> // because of Mindist
+#include <ivp_mindist_internal.hxx> // because of Mindist
 
 #include <ivp_friction.hxx>
 #include <ivp_friction_solver.hxx>

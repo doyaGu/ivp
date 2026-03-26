@@ -8,6 +8,7 @@
  ********************************************************************************/
 // includes for API
 #include <ivp_physics.hxx>
+#include <ivp_controller_factory.hxx>
 
 #ifndef WIN32
 #pragma implementation "ivp_car_system.hxx"
@@ -359,7 +360,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 		spring_template.anchors[1] = &anchor_wheel_template[wheel_nr];
 
 		spring_template.spring_len -= templ->spring_pre_tension[wheel_nr];
-		this->car_spring[wheel_nr] = environment->create_suspension(&spring_template);
+		this->car_spring[wheel_nr] = IVP_Controller_Factory::create_suspension(environment, &spring_template);
 
 		///////////////////////////////////////////////////////////////////
 		////////   ROTATION MOTORS (some wheel drive)   //////////////////////
@@ -385,7 +386,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 		torque_template.anchors[1] = &anchor_right_template;
 		torque_template.torque = 0.0f; // This wasn't here, is this why we started with force?
 
-		this->car_act_torque[wheel_nr] = environment->create_torque(&torque_template);
+		this->car_act_torque[wheel_nr] = IVP_Controller_Factory::create_torque(environment, &torque_template);
 		this->fix_wheel_constraint[wheel_nr] = NULL;
 	}
 
@@ -410,7 +411,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	torque_template.anchors[1] = &anchor_right_template;
 	torque_template.torque = 0.0f;
 
-	this->car_act_torque_body = environment->create_torque(&torque_template);
+	this->car_act_torque_body = IVP_Controller_Factory::create_torque(environment, &torque_template);
 	this->body_counter_torque_factor = templ->body_counter_torque_factor;
 
 	///////////////////////////////////////////////////////////////////
@@ -445,7 +446,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 			stabi_template.anchors[1] = &anchor_wheel_template[wheel0];
 			stabi_template.anchors[2] = &anchor_body_template[wheel1];
 			stabi_template.anchors[3] = &anchor_wheel_template[wheel1];
-			this->car_stabilizer[i] = environment->create_stabilizer(&stabi_template);
+			this->car_stabilizer[i] = IVP_Controller_Factory::create_stabilizer(environment, &stabi_template);
 		}
 	}
 
@@ -483,7 +484,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	force_template.push_first_object = IVP_TRUE;
 	force_template.push_second_object = IVP_FALSE;
 
-	this->car_act_down_force = environment->create_force(&force_template);
+	this->car_act_down_force = IVP_Controller_Factory::create_force(environment, &force_template);
 
 	///////////////////////////////////////////////////////////////////
 	////////             EXTRA GRAVITY               //////////////////
@@ -518,7 +519,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	force_template.push_first_object = IVP_TRUE;
 	force_template.push_second_object = IVP_FALSE;
 
-	this->car_act_extra_gravity = environment->create_force(&force_template);
+	this->car_act_extra_gravity = IVP_Controller_Factory::create_force(environment, &force_template);
 
 	///////////////////////////////////////////////////////////////////
 	////////             POWERSLIDES                 //////////////////
@@ -541,7 +542,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	force_powerslide_template.anchors[1] = &anchor_right_template;
 	force_powerslide_template.force = 0.0f;
 
-	this->car_act_powerslide_back = environment->create_force(&force_powerslide_template);
+	this->car_act_powerslide_back = IVP_Controller_Factory::create_force(environment, &force_powerslide_template);
 
 	hp.k[cs_car->x_idx] = -1.0f;
 	hp.k[cs_car->z_idx] = -2.0f;
@@ -557,7 +558,7 @@ IVP_Car_System_Real_Wheels::IVP_Car_System_Real_Wheels(IVP_Environment *env, IVP
 	force_powerslide_template.anchors[1] = &anchor_right_template;
 	force_powerslide_template.force = 0.0f;
 
-	this->car_act_powerslide_front = environment->create_force(&force_powerslide_template);
+	this->car_act_powerslide_front = IVP_Controller_Factory::create_force(environment, &force_powerslide_template);
 
 	////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////
@@ -634,7 +635,7 @@ void IVP_Car_System_Real_Wheels::fix_wheel(IVP_POS_WHEEL wheel_nr, IVP_BOOL stop
 	//    wheel_core->rot_speed = car_body->get_core()->rot_speed;
 
 	IVP_Environment *env = this->environment;
-	this->fix_wheel_constraint[wheel_nr] = env->create_constraint(&constraint);
+	this->fix_wheel_constraint[wheel_nr] = IVP_Controller_Factory::create_constraint(env, &constraint);
 	cs_car->wheel_objects.element_at(wheel_nr)->fix_wheel_constraint = this->fix_wheel_constraint[wheel_nr];
 }
 
@@ -708,8 +709,8 @@ void IVP_Car_System_Real_Wheels::set_booster_acceleration(IVP_FLOAT acceleration
 			forceTempUp.push_second_object = IVP_FALSE;
 			forceTempUp.force = -1.0f * pCarBody->get_core()->get_mass() * environment->get_gravity()->k[pCarConstraint->y_idx];
 
-			booster_actuator[0] = environment->create_force(&forceTempForward);
-			booster_actuator[1] = environment->create_force(&forceTempUp);
+			booster_actuator[0] = IVP_Controller_Factory::create_force(environment, &forceTempForward);
+			booster_actuator[1] = IVP_Controller_Factory::create_force(environment, &forceTempUp);
 		}
 		else
 		{

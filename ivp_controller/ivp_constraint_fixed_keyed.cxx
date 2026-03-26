@@ -3,7 +3,6 @@
 // IVP_EXPORT_PROTECTED
 
 #include <ivp_physics.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_template_constraint.hxx>
 #include <ivp_solver_core_reaction.hxx>
 #ifndef WIN32
@@ -82,11 +81,11 @@ IVP_Constraint_Fixed_Keyframed::IVP_Constraint_Fixed_Keyframed(IVP_Real_Object *
 	velocity_Ros.set_to_zero();
 
 	IVP_U_Matrix m_Ros_f_Aos;
-	IVP_Cache_Object *co_attached = attached_object->get_cache_object();
-	IVP_Cache_Object *co_reference = reference_object->get_cache_object();
-	co_reference->m_world_f_object.mimult4(&co_attached->m_world_f_object, &m_Ros_f_Aos);
-	co_attached->remove_reference();
-	co_reference->remove_reference();
+	IVP_U_Matrix m_reference_world_f_object;
+	IVP_U_Matrix m_attached_world_f_object;
+	reference_object->get_m_world_f_object_AT(&m_reference_world_f_object);
+	attached_object->get_m_world_f_object_AT(&m_attached_world_f_object);
+	m_reference_world_f_object.mimult4(&m_attached_world_f_object, &m_Ros_f_Aos);
 
 	// if (int(this) == WATCHPOINT){
 	// IVP_DOUBLE x = velocity_Ros.quad_length();
@@ -105,11 +104,13 @@ void IVP_Constraint_Fixed_Keyframed::do_simulation_controller(IVP_Event_Sim *es,
 	// if (int(this) == WATCHPOINT)
 	//	IVP_DOUBLE x = current_time.get_time();
 
-	IVP_Cache_Object *co_Ref = reference_obj->get_cache_object();
-	IVP_Cache_Object *co_Att = attached_obj->get_cache_object();
+	IVP_U_Matrix m_Rws_f_Ros_buf;
+	IVP_U_Matrix m_Aws_f_Aos_buf;
+	reference_obj->get_m_world_f_object_AT(&m_Rws_f_Ros_buf);
+	attached_obj->get_m_world_f_object_AT(&m_Aws_f_Aos_buf);
 
-	const IVP_U_Matrix *m_Rws_f_Ros = &co_Ref->m_world_f_object;
-	const IVP_U_Matrix *m_Aws_f_Aos = &co_Att->m_world_f_object;
+	const IVP_U_Matrix *m_Rws_f_Ros = &m_Rws_f_Ros_buf;
+	const IVP_U_Matrix *m_Aws_f_Aos = &m_Aws_f_Aos_buf;
 
 	IVP_U_Float_Point x_rot_axis_world(1, 0, 0);
 	IVP_U_Float_Point y_rot_axis_world(0, 1, 0);
@@ -158,8 +159,6 @@ void IVP_Constraint_Fixed_Keyframed::do_simulation_controller(IVP_Event_Sim *es,
 		if (r == IVP_FAULT)
 		{
 			printf("do_constraint_system: Couldn't invert rot matrix!\n");
-			co_Ref->remove_reference();
-			co_Att->remove_reference();
 			return;
 		}
 		IVP_U_Matrix3 &tpm = tcb.m_velocity_ds_f_impulse_ds;
@@ -203,9 +202,6 @@ void IVP_Constraint_Fixed_Keyframed::do_simulation_controller(IVP_Event_Sim *es,
 
 		delta_position_ws.add_multiple(&reference_obj->get_core()->speed, damp_factor);
 		delta_position_ws.add_multiple(&attached_obj->get_core()->speed, -damp_factor);
-
-		co_Ref->remove_reference();
-		co_Att->remove_reference();
 
 		IVP_Solver_Core_Reaction tcb;
 		tcb.init_reaction_solver_translation_ws(core_B, core_A, target_pos_Ws, &x_rot_axis_world, &y_rot_axis_world, &z_rot_axis_world);

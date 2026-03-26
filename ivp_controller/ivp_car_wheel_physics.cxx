@@ -3,7 +3,6 @@
 // ivp_calc_next_psi_solver.cxx to break ivp_physics → ivp_controller cycle.
 
 #include <ivp_physics.hxx>
-#include <ivp_mindist_intern.hxx>
 #include <ivp_constraint_car.hxx>
 #include <ivp_friction.hxx>
 #include <ivp_solver_core_reaction.hxx>

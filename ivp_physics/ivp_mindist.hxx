@@ -12,7 +12,7 @@ class IVP_Compact_Edge;
 #include <ivp_listener_hull.hxx>
 #include <ivp_collision.hxx>
 
-// #include "ivp_mindist_intern.hxx"
+// #include "ivp_mindist_internal.hxx"
 
 // #define IVP_MINDIST_BEHAVIOUR_DEBUG	// do core as soon as possible
 

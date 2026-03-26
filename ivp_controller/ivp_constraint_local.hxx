@@ -36,6 +36,7 @@
 class IVP_Real_Object;
 class IVP_Core;
 class IVP_Template_Constraint_Anchor;
+class IVP_Template_Constraint;
 
 // The Anchor is stored in a certain coords system and it describes from its view the axles and the center (fs)
 // vv of m_as_f_bs is the origin of as, stored in bs

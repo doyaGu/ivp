@@ -11,6 +11,7 @@
 class IVP_Real_Object;
 class IVP_Core;
 class IVP_Environment;
+class IVP_Template_Constraint;
 
 enum IVP_TRANSROT_INDEX
 {

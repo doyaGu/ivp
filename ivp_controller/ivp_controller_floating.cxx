@@ -4,7 +4,6 @@
 #ifndef WIN32
 #pragma implementation "ivp_controller_floating.hxx"
 #endif
-#include <ivp_cache_object.hxx>
 #include <ivp_solver_core_reaction.hxx>
 #include <ivp_controller_floating.hxx>
 
@@ -18,8 +17,7 @@ IVP_Template_Controller_Floating::IVP_Template_Controller_Floating()
 
 void IVP_Template_Controller_Floating::set_position_ws(IVP_Real_Object *obj, const IVP_U_Point *pos_ws)
 {
-    IVP_Cache_Object *co = obj->get_cache_object_no_lock();
-    co->transform_position_to_object_coords(pos_ws, &position_os);
+    obj->transform_position_to_object_coords(pos_ws, &position_os);
 }
 
 void IVP_Template_Controller_Floating::set_ray_direction_ws(IVP_Real_Object *, const IVP_U_Point *dir_ws)
@@ -89,9 +87,8 @@ void IVP_Controller_Floating::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
         return;
     }
 
-    class IVP_Cache_Object *co = object->get_cache_object();
     IVP_U_Point position_ws;
-    co->transform_position_to_world_coords(&position_os, &position_ws);
+    object->transform_position_to_world_coords(&position_os, &position_ws);
 
     IVP_Solver_Core_Reaction tcb;
     tcb.init_reaction_solver_translation_ws(object->get_core(), NULL, position_ws, &ray_direction_ws, NULL, NULL);
@@ -99,7 +96,6 @@ void IVP_Controller_Floating::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
     const IVP_DOUBLE tpm00 = tcb.get_m_velocity_ds_f_impulse_ds()->get_elem(0, 0);
     if (tpm00 < P_FLOAT_EPS && tpm00 > -P_FLOAT_EPS)
     {
-        co->remove_reference();
         return;
     }
     IVP_DOUBLE impulse = a / tpm00;
@@ -111,8 +107,6 @@ void IVP_Controller_Floating::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
     {
         impulse = -max_repulsive_force * es->delta_time;
     }
-    co->remove_reference();
-
     IVP_U_Float_Point impulse_ds(impulse, 0, 0);
     tcb.exert_impulse_dim1(object->get_core(), NULL, impulse_ds);
 }

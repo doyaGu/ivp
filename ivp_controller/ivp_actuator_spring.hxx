@@ -111,6 +111,7 @@ protected:
     void fire_event_spring_broken();
 
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
 
     IVP_Actuator_Spring(IVP_Environment *, IVP_Template_Spring *, IVP_ACTUATOR_TYPE);
 
@@ -148,6 +149,7 @@ protected:
     void active_float_changed(IVP_U_Active_Float *af);
 
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
     IVP_Actuator_Spring_Active(IVP_Environment *env, IVP_Template_Spring *spring); // constructor of the spring
 public:
     virtual ~IVP_Actuator_Spring_Active();
@@ -171,7 +173,7 @@ public:
     void do_simulation_controller(IVP_Event_Sim *, IVP_U_Vector<IVP_Core> *core_list);
     ~IVP_Actuator_Suspension();
 
-    // To create a new suapension, use IVP_Environment->create_suspension
+    // To create a new suspension, use IVP_Controller_Factory::create_suspension(...)
     IVP_Actuator_Suspension(IVP_Environment *env, IVP_Template_Suspension *templ);
 };
 

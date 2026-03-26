@@ -249,6 +249,16 @@ public:
      *	Note:		Include ivp_cache_object.hxx to use this method.
      ********************************************************************************/
     inline IVP_Cache_Object *get_cache_object();
+    void invalidate_cache_object();
+
+    void transform_vector_to_world_coords(const IVP_U_Point *object_vec, IVP_U_Point *world_vec_out);
+    void transform_vector_to_world_coords(const IVP_U_Float_Point *object_vec, IVP_U_Float_Point *world_vec_out);
+    void transform_vector_to_object_coords(const IVP_U_Point *world_vec, IVP_U_Point *object_vec_out);
+    void transform_vector_to_object_coords(const IVP_U_Float_Point *world_vec, IVP_U_Float_Point *object_vec_out);
+
+    void transform_position_to_world_coords(const IVP_U_Float_Point *object_pos, IVP_U_Point *world_pos_out);
+    void transform_position_to_object_coords(const IVP_U_Point *world_pos, IVP_U_Float_Point *object_pos_out);
+    void transform_position_to_object_coords(const IVP_U_Point *world_pos, IVP_U_Point *object_pos_out);
 
     /*************************************************************************************
      *	Name:	    	set_new_surface_manager

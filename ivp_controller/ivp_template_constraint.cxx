@@ -1,6 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #include <ivp_physics.hxx>
+#include <ivp_controller_factory.hxx>
 #include <ivp_template_constraint.hxx>
 #include <ivp_constraint_local.hxx>
 
@@ -444,7 +445,7 @@ void IVP_Template_Constraint::set_constraint_is_relaxed()
 	m_Aos_f_Afs = NULL;
 }
 
-IVP_Constraint *IVP_Environment::create_constraint(const IVP_Template_Constraint *tmpl)
+IVP_Constraint *IVP_Controller_Factory::create_constraint(IVP_Environment *, const IVP_Template_Constraint *tmpl)
 {
 	if (!tmpl->objectR && !tmpl->objectA)
 		return NULL;

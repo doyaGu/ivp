@@ -7,14 +7,14 @@
 
 #ifndef WIN32
 #pragma implementation "ivp_mindist.hxx"
-#pragma implementation "ivp_mindist_intern.hxx"
+#pragma implementation "ivp_mindist_internal.hxx"
 #endif
 
 #include <ivp_hull_manager.hxx>
 #include <ivu_memory.hxx>
 
 #include <ivp_mindist_event.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 #include <ivp_mindist_macros.hxx>
 
 #include <ivp_debug.hxx>

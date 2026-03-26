@@ -19,7 +19,7 @@
 #include <ivp_clustering_visualizer.hxx>
 #include <ivp_hull_manager.hxx>
 #include <ivp_mindist.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 #include <ivu_vhash.hxx>
 
 int ivp_debug_indent = 0;

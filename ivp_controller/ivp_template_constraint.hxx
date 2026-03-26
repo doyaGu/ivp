@@ -400,7 +400,7 @@ public: // other functions
  *
  * After you have defined your IVP_Environment *environment and filled up a
  * IVP_Template_Constraint template_constraint with values, do:
- * IVP_Constraint *constraint = environment->create_constraint(&template_constraint);
+ * IVP_Constraint *constraint = IVP_Controller_Factory::create_constraint(environment, &template_constraint);
  * This will copy all values of template_constraint into the constraint. You can
  * reuse the template and change any values after you created a constraint from it;
  * these changes will not have any effect on the created constraint.

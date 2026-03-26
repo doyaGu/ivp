@@ -1,6 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #include <ivp_physics.hxx>
+#include <ivp_controller_factory.hxx>
 #include <ivp_solver_core_reaction.hxx>
 #include <ivp_great_matrix.hxx>
 #include <math.h>
@@ -455,7 +456,7 @@ void IVP_Constraint_Solver_Car::do_simulation_controller(IVP_Event_Sim *es,
 			templ.set_ballsocket_tense_Ros(app->real_object, &anchorA_Aos, body->real_object, &anchorB_Aos);
 
 			IVP_Environment *env = core_B->get_environment();
-			this->c_local_ballsocket[app_nr] = env->create_constraint(&templ);
+			this->c_local_ballsocket[app_nr] = IVP_Controller_Factory::create_constraint(env, &templ);
 		}
 		this->local_translation_in_use = IVP_TRUE;
 #endif

@@ -8,7 +8,7 @@
 #include <ivp_phantom.hxx>
 
 #include <ivp_hull_manager.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 #include <ivu_min_hash.hxx>
 
 IVP_Template_Phantom::IVP_Template_Phantom()
