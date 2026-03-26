@@ -10,7 +10,6 @@
 #pragma implementation "ivp_controller_buoyancy.hxx"
 #endif
 
-#include <ivp_cache_object.hxx>
 #include <ivp_controller_buoyancy.hxx>
 #include <ivp_liquid_surface_descript.hxx>
 #include <ivp_buoyancy_solver.hxx>
@@ -128,10 +127,9 @@ void IVP_Controller_Buoyancy::apply_dampening(IVP_Real_Object *object,
 	// convert sum_impulse into world coordinate system
 	IVP_U_Float_Point sum_impulse_ws;
 	{
-		IVP_Cache_Object *cache_object = object->get_cache_object_no_lock();
 		IVP_U_Float_Point imp;
 		imp.set(sum_impulse);
-		cache_object->transform_vector_to_world_coords(&imp, &sum_impulse_ws);
+		object->transform_vector_to_world_coords(&imp, &sum_impulse_ws);
 	}
 
 	IVP_U_Matrix m_core_f_object;
@@ -140,8 +138,9 @@ void IVP_Controller_Buoyancy::apply_dampening(IVP_Real_Object *object,
 	// get the core center
 	IVP_U_Point object_center_ws;
 	{
-		IVP_Cache_Object *co = object->get_cache_object_no_lock();
-		object_center_ws.set(co->m_world_f_object.get_position());
+		IVP_U_Matrix m_world_f_object;
+		object->get_m_world_f_object_AT(&m_world_f_object);
+		object_center_ws.set(m_world_f_object.get_position());
 	}
 
 	// push the core center with the sum of impulses => translation (and a rotation component if the object center is not the same as the core system)
@@ -229,8 +228,7 @@ void IVP_Controller_Buoyancy::apply_buoyancy_impulse(IVP_Real_Object *object,
 		// to preserve precision in the world system
 		IVP_U_Point volume_center_under_ws;
 		{
-			IVP_Cache_Object *cache_object = object->get_cache_object_no_lock(); // needed to transform coordinates into other coord. systems
-			cache_object->transform_position_to_world_coords(volume_center_under, &volume_center_under_ws);
+			object->transform_position_to_world_coords(volume_center_under, &volume_center_under_ws);
 		}
 
 		IVP_DOUBLE force_under = volume_under * (-temp_buoyancy->medium_density) * (delta_time);
@@ -512,9 +510,8 @@ void IVP_Controller_Buoyancy::do_simulation_controller(IVP_Event_Sim *es, IVP_U_
 		{
 			// calc surface_os
 			// translate resulting_speed_of_current_ws into object coordinate system
-			IVP_Cache_Object *cache_object = attacher_interpolator[i].object->get_cache_object_no_lock();
-			cache_object->transform_vector_to_object_coords(&rel_speed_of_current_ws, &rel_speed_of_current_os);
-			cache_object->transform_vector_to_object_coords(&surface_hesse_ws, &surface_os);
+			attacher_interpolator[i].object->transform_vector_to_object_coords(&rel_speed_of_current_ws, &rel_speed_of_current_os);
+			attacher_interpolator[i].object->transform_vector_to_object_coords(&surface_hesse_ws, &surface_os);
 			IVP_U_Matrix m_world_f_object;
 			attacher_interpolator[i].object->get_m_world_f_object_AT(&m_world_f_object);
 			IVP_DOUBLE dist = m_world_f_object.get_position()->dot_product(&surface_hesse_ws);

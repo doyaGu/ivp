@@ -8,15 +8,10 @@
 #include <string.h>
 
 #include <ivp_templates.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_controller.hxx>
 #include <ivp_calc_next_psi_solver.hxx>
 #include <ivp_object_attach.hxx>
 #include <ivp_hull_manager.hxx>
-#include <ivp_hull_manager_macros.hxx>
-#include <ivp_core_macros.hxx>
-#include <ivp_mindist_intern.hxx>
-#include <ivp_friction.hxx>
 
 void IVP_Object_Attach::attach_object(IVP_Real_Object *parent, IVP_Real_Object *attached_object,
                                       IVP_DOUBLE max_distance_attached_object_to_parent)
@@ -53,9 +48,9 @@ void IVP_Object_Attach::attach_object(IVP_Real_Object *parent, IVP_Real_Object *
 
     IVP_Core *old_core = attached_object->get_core();
 
-    IVP_Cache_Object *co = attached_object->get_cache_object_no_lock();
-    IVP_U_Quat q_world_f_object = co->q_world_f_object;
-    IVP_U_Point shift_world_f_object(co->m_world_f_object.get_position());
+    IVP_U_Quat q_world_f_object;
+    IVP_U_Point shift_world_f_object;
+    attached_object->get_quat_world_f_object_AT(&q_world_f_object, &shift_world_f_object);
 
     IVP_Core *ncore = parent->get_core();
 
@@ -103,12 +98,7 @@ void IVP_Object_Attach::detach_object(IVP_Real_Object *attached_object, IVP_Temp
     // orientation
     IVP_U_Quat q_world_f_object;
     IVP_U_Point position_ws;
-
-    {
-        IVP_Cache_Object *co = attached_object->get_cache_object_no_lock();
-        q_world_f_object = co->q_world_f_object;
-        position_ws.set(co->m_world_f_object.get_position());
-    }
+    attached_object->get_quat_world_f_object_AT(&q_world_f_object, &position_ws);
 
     // velocity
     IVP_U_Float_Point speed_ws;
@@ -202,8 +192,7 @@ IVP_RETURN_TYPE IVP_Object_Attach::reposition_object_Ros(IVP_Real_Object *parent
     IVP_U_Matrix m_world_f_Ros;
     if (parent)
     {
-        IVP_Cache_Object *co = parent->get_cache_object_no_lock();
-        m_world_f_Ros = co->m_world_f_object;
+        parent->get_m_world_f_object_AT(&m_world_f_Ros);
     }
     else
     {
@@ -238,7 +227,7 @@ IVP_RETURN_TYPE IVP_Object_Attach::reposition_object_Ros(IVP_Real_Object *parent
     IVP_Hull_Manager *h_manager = attached_object->get_hull_manager();
     h_manager->jump_add_hull(diff, moved_distance_val);
 
-    IVP_Cache_Object_Manager::invalid_cache_object(attached_object);
+    attached_object->invalidate_cache_object();
     attached_object->recalc_exact_mindists_of_object();
     attached_object->recalc_invalid_mindists_of_object();
 

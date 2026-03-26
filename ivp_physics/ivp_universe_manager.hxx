@@ -8,25 +8,25 @@
 class IVP_Universe_Manager;
 
 /********************************************************************************
- *	Class:	    IVP_Universe_Manager
- *	Idea:		Each dynamic object in the IVP_Environment will dynamically
- *			request objects around it so that collisions may be detected
- *			and resolved. The IVP_Environment will pass a spherical
- *			radius within which all non moving objects should be in the
- *		        simulation.
- *	Description:	This class is responsible for adding (normally non-moving) objects
- *			into the IVP_Environment. The IVP_Environment will call
- *			IVP_Universe_Manger::ensure_objects_in_environment(
- *			IVP_U_Point *sphere_center, IVP_DOUBLE sphere_radius).
- *			Each IVP_Real_Object has a get_collision_check_reference_count(),
- *			which returns the number of objects which are checking this
- *			object for collision. If -1 is returned than there is no collision detection
- *			enabled for this object
- *			Or
- *	Note:	The implementation of ensure_objects_in_environment should be
- *			fairly fast.
- *			Only objects which can collide the checked object have to
- *			be thrown into the IVP_Environment
+ *  Class:      IVP_Universe_Manager
+ *  Idea:      Each dynamic object in the IVP_Environment will dynamically
+ *          request objects around it so that collisions may be detected
+ *          and resolved. The IVP_Environment will pass a spherical
+ *          radius within which all non moving objects should be in the
+ *              simulation.
+ *  Description:    This class is responsible for adding (normally non-moving) objects
+ *          into the IVP_Environment. The IVP_Environment will call
+ *          IVP_Universe_Manger::ensure_objects_in_environment(
+ *          IVP_U_Point *sphere_center, IVP_DOUBLE sphere_radius).
+ *          Each IVP_Real_Object has a get_collision_check_reference_count(),
+ *          which returns the number of objects which are checking this
+ *          object for collision. If -1 is returned than there is no collision detection
+ *          enabled for this object
+ *          Or
+ *  Note:  The implementation of ensure_objects_in_environment should be
+ *          fairly fast.
+ *          Only objects which can collide the checked object have to
+ *          be thrown into the IVP_Environment
  ********************************************************************************/
 
 class IVP_Universe_Manager_Settings

@@ -13,7 +13,7 @@
 
 #include <ivu_hash.hxx>
 
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 #include <ivp_mindist_minimize.hxx>
 
 #include <ivp_debug.hxx>

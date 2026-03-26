@@ -3,7 +3,6 @@
 #include <ivp_physics.hxx>
 #include <string.h>
 #include <ivp_templates.hxx>
-#include <ivp_cache_object.hxx>
 
 IVP_Template_Object::IVP_Template_Object()
 {

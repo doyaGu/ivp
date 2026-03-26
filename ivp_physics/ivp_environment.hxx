@@ -39,23 +39,6 @@ class IVP_Event_Object;
 class IVP_Debug_Manager;
 class IVP_Draw_Vector_Debug;
 class IVP_Debug_Manager;
-class IVP_Actuator_Spring;
-class IVP_Template_Spring;
-class IVP_Actuator_Suspension;
-class IVP_Template_Suspension;
-class IVP_Template_Force;
-class IVP_Template_Torque;
-class IVP_Template_Rot_Mot;
-class IVP_Template_Stabilizer;
-class IVP_Template_Check_Dist;
-class IVP_Controller_Motion;
-class IVP_Actuator_Spring;
-class IVP_Actuator_Force;
-class IVP_Actuator_Torque;
-class IVP_Actuator_Rot_Mot;
-class IVP_Actuator_Stabilizer;
-class IVP_Actuator_Check_Dist;
-class IVP_Template_Constraint;
 class IVP_Constraint;
 class IVP_Collision_Delegator_Root;
 class IVP_SurfaceManager;
@@ -372,23 +355,6 @@ public:
                           const IVP_Template_Real_Object *templ_obj, // used to set mass center and rotation inertia directly (no automatism)
                           const IVP_U_Quat *quat_world_f_object,     // the rotation of the object
                           const IVP_U_Point *position);              // the position
-
-    // simple (predefined) actuators
-    IVP_Actuator_Spring *create_spring(IVP_Template_Spring *templ);             // creates a damped spring, Note IVP_Controller_Stiff_Spring are better
-    IVP_Actuator_Suspension *create_suspension(IVP_Template_Suspension *templ); // creates a special vehicle spring
-
-    IVP_Actuator_Force *create_force(IVP_Template_Force *templ);      // creates a force actuator
-    IVP_Actuator_Torque *create_torque(IVP_Template_Torque *templ);   // creates a torque actuator
-    IVP_Actuator_Rot_Mot *create_rotmot(IVP_Template_Rot_Mot *templ); // creates a motor
-
-    IVP_Actuator_Stabilizer *create_stabilizer(IVP_Template_Stabilizer *templ); // used for cars
-    IVP_Actuator_Check_Dist *create_check_dist(IVP_Template_Check_Dist *templ); // creates a distance checker
-
-    ////////// create constraints
-    // for mor info on constraints look at ivp_template_constraint.hxx
-    IVP_Constraint *create_constraint(const IVP_Template_Constraint *template_constraint);
-
-    IVP_Controller_Motion *create_controller_motion(IVP_Real_Object *, const class IVP_Template_Controller_Motion *);
 
     const IVP_U_Point *get_gravity() { return &gravity; }; // current gravity vector, default (0,9.83f,0);
     void set_gravity(IVP_U_Point *gravity);                // sets gravity vector (can be changed at any time)

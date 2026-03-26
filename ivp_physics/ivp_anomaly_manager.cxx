@@ -13,7 +13,7 @@
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_mindist.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 
 IVP_Anomaly_Limits::IVP_Anomaly_Limits(IVP_BOOL delete_this_if_env_is_deleted_in)
 {

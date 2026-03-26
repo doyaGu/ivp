@@ -21,6 +21,7 @@
 class IVP_Contact_Point;
 class IVP_Friction_Solver_Long_Term;
 class IVP_Mindist_Manager;
+class IVP_Mindist;
 class IVP_Core;
 class IVP_Friction_Info_For_Core;
 class IV_U_Point_PCore;

@@ -5,7 +5,7 @@
 
 #include <ivp_material.hxx>
 #include <ivp_hull_manager.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 #include "ivp_mindist_macros.hxx"
 #include <ivp_friction.hxx>
 

@@ -4,8 +4,6 @@
 #ifndef WIN32
 #pragma implementation "ivp_controller_world_frict.hxx"
 #endif
-#include <ivp_cache_object.hxx>
-#include <ivp_solver_core_reaction.hxx>
 #include <ivp_controller_world_frict.hxx>
 
 static void ivp_world_friction_clamp_non_negative(IVP_U_Float_Point *values)

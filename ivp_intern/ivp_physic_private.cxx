@@ -14,7 +14,7 @@
 #include <ivp_physic_private.hxx>
 #include <ivp_i_object_vhash.hxx>
 #include <ivp_i_collision_vhash.hxx>
-#include <ivp_mindist_intern.hxx> //because of Mindist
+#include <ivp_mindist_internal.hxx> //because of Mindist
 #include <ivp_friction.hxx>
 #include <ivu_active_value.hxx>
 

@@ -6,7 +6,7 @@
 #include <ivp_physics.hxx>
 
 #include <ivp_mindist_event.hxx>
-#include <ivp_mindist_intern.hxx>
+#include <ivp_mindist_internal.hxx>
 
 #include <ivu_hash.hxx>
 

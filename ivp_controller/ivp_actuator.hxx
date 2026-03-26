@@ -299,7 +299,7 @@ public:
  *	Name:	     	IVP_Actuator_Force
  *	Description:	Forces push one or two objects at the anchor position.
  *			The force value can be controlled by an IVP_Active_Float
- *	Attention:	To create a force use the IVP_Environment->create_force function
+ *	Attention:	To create a force use IVP_Controller_Factory::create_force(...)
  *                      Constantly changing the force value will cause that
  *			the involved objects are never taken out of simulation.
  *			(What means unnessary CPU consumption when e.g.
@@ -316,8 +316,9 @@ class IVP_Actuator_Force : public IVP_Actuator_Two_Point
 
 protected:
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
 
-    // To create a new force actuator, use the method IVP_Environment->create_force
+    // To create a new force actuator, use IVP_Controller_Factory::create_force(...)
     IVP_Actuator_Force(IVP_Environment *env, IVP_Template_Force *templ);
 
 public:
@@ -334,10 +335,11 @@ class IVP_Actuator_Force_Active : public IVP_Actuator_Force, IVP_U_Active_Float_
 protected:
     void active_float_changed(IVP_U_Active_Float *calling_mod); // for wakup
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
     IVP_Actuator_Force_Active(IVP_Environment *env, IVP_Template_Force *templ);
 
 public:
-    // to create a new use the IVP_Environment->create_force function
+    // to create a new use IVP_Controller_Factory::create_force(...)
     virtual ~IVP_Actuator_Force_Active();
 };
 
@@ -364,6 +366,7 @@ class IVP_Actuator_Rot_Mot : public IVP_Actuator_Two_Point
 
 protected:
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
     IVP_Actuator_Rot_Mot(IVP_Environment *env, IVP_Template_Rot_Mot *templ);
 
 public:
@@ -407,6 +410,7 @@ class IVP_Actuator_Torque : public IVP_Actuator_Two_Point
 
 protected:
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
 
     void do_simulation_controller(IVP_Event_Sim *, IVP_U_Vector<IVP_Core> *core_list);
 
@@ -490,6 +494,7 @@ protected:
     friend class IVP_Anchor_Check_Dist;
     void hull_limit_exceeded_event(); // internal use
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
     IVP_Actuator_Check_Dist(IVP_Environment *env, IVP_Template_Check_Dist *check_dist);
 
 public:
@@ -554,6 +559,7 @@ class IVP_Actuator_Stabilizer : public IVP_Actuator_Four_Point
 protected:
     IVP_FLOAT stabi_constant;
     friend class IVP_Environment;
+    friend class IVP_Controller_Factory;
     IVP_Actuator_Stabilizer(IVP_Environment *env, IVP_Template_Stabilizer *stabi);
     void do_simulation_controller(IVP_Event_Sim *, IVP_U_Vector<IVP_Core> *core_list);
 
