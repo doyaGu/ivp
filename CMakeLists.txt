@@ -515,7 +515,6 @@ target_link_libraries(ivp_compact_builder PUBLIC
 # Set target properties
 set_target_properties(ivp_compact_builder PROPERTIES
     POSITION_INDEPENDENT_CODE ON
-    LINK_INTERFACE_MULTIPLICITY 4
 )
 
 # Platform-specific configurations for compact builder
