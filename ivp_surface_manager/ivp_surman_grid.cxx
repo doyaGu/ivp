@@ -1,6 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
+#include <string.h>
 
 #include <ivp_compact_grid.hxx>
 #include <ivp_compact_ledge.hxx>
@@ -9,7 +11,6 @@
     #pragma implementation "ivp_surman_grid.hxx"
 #endif
 
-#include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 #include <ivp_ray_solver.hxx>
 #include <ivp_surman_grid.hxx>

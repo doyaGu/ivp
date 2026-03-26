@@ -5,7 +5,6 @@
 #endif
 
 #include <ivp_compact_ledge.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_buoyancy_solver.hxx>
 #include <ivu_geometry.hxx>
 #include <ivp_compact_ledge_solver.hxx>
@@ -31,8 +30,7 @@ void ivp_core_get_surface_speed_os(IVP_Core *pc, IVP_Real_Object *object, const 
     IVP_U_Point point_ws;
     IVP_U_Float_Point point_core;
 
-    IVP_Cache_Object *cache_object = object->get_cache_object_no_lock(); // needed to transform coordinates into other coord. systems
-    cache_object->transform_position_to_world_coords(point_os, &point_ws);
+    object->transform_position_to_world_coords(point_os, &point_ws);
 
     const IVP_U_Matrix *m_world_f_core_PSI = object->get_core()->get_m_world_f_core_PSI();
     m_world_f_core_PSI->vimult4(&point_ws, &point_core);
@@ -46,7 +44,7 @@ void ivp_core_get_surface_speed_os(IVP_Core *pc, IVP_Real_Object *object, const 
 
     IVP_U_Float_Point float_speed_out_ws;
     float_speed_out_ws.set(&speed_out_ws);
-    cache_object->transform_vector_to_object_coords(&float_speed_out_ws, speed_out_os);
+    object->transform_vector_to_object_coords(&float_speed_out_ws, speed_out_os);
 
     IVP_IF(0)
     {
@@ -104,8 +102,7 @@ IVP_BOOL IVP_Buoyancy_Solver::compute_forces(const IVP_U_Float_Point *rel_speed_
 
     {
         // translate resulting_speed_of_current_ws into object coordinate system
-        IVP_Cache_Object *cache_object = object->get_cache_object_no_lock();
-        cache_object->transform_vector_to_object_coords(&resulting_speed_of_current_ws, &resulting_speed_of_current_os);
+        object->transform_vector_to_object_coords(&resulting_speed_of_current_ws, &resulting_speed_of_current_os);
     }
 
     switch (object->get_type())
@@ -1255,10 +1252,8 @@ void IVP_Buoyancy_Solver::compute_volumes_and_centers_for_one_pyramid(IVP_Real_O
             sp1.set_interpolate(triangle_points[index_neg], triangle_points[index_neg + 1], factor1);
             sp2.set_interpolate(triangle_points[index_neg], triangle_points[index_neg + 2], factor2);
 
-            IVP_Cache_Object *cache_object = object->get_cache_object(); // needed to transform coordinates into other coord. systems
-            cache_object->transform_position_to_world_coords(&sp1, &sp1_ws);
-            cache_object->transform_position_to_world_coords(&sp2, &sp2_ws);
-            cache_object->remove_reference();
+            object->transform_position_to_world_coords(&sp1, &sp1_ws);
+            object->transform_position_to_world_coords(&sp2, &sp2_ws);
 
             IVP_U_Float_Point edge12;
             edge12.subtract(&sp1_ws, &sp2_ws);
@@ -1328,10 +1323,8 @@ void IVP_Buoyancy_Solver::compute_volumes_and_centers_for_one_pyramid(IVP_Real_O
             IVP_U_Point sp1_ws, sp2_ws;
             sp1.set_interpolate(triangle_points[index_positiv], triangle_points[index_positiv + 1], factor1);
             sp2.set_interpolate(triangle_points[index_positiv], triangle_points[index_positiv + 2], factor2);
-            IVP_Cache_Object *cache_object = object->get_cache_object(); // needed to transform coordinates into other coord. systems
-            cache_object->transform_position_to_world_coords(&sp1, &sp1_ws);
-            cache_object->transform_position_to_world_coords(&sp2, &sp2_ws);
-            cache_object->remove_reference();
+            object->transform_position_to_world_coords(&sp1, &sp1_ws);
+            object->transform_position_to_world_coords(&sp2, &sp2_ws);
 
             IVP_U_Float_Point edge12;
             edge12.subtract(&sp1_ws, &sp2_ws);
@@ -1532,10 +1525,8 @@ void IVP_Buoyancy_Solver::compute_rotation_and_translation_values_for_one_triang
             IVP_U_Point center_of_triangle_ws;
             IVP_U_Float_Point impulse_vector_ws;
             {
-                IVP_Cache_Object *cache_object = object->get_cache_object();
-                cache_object->transform_position_to_world_coords(&area_center_part_under_os, &center_of_triangle_ws);
-                cache_object->transform_vector_to_world_coords(&impulse_vector, &impulse_vector_ws);
-                cache_object->remove_reference();
+                object->transform_position_to_world_coords(&area_center_part_under_os, &center_of_triangle_ws);
+                object->transform_vector_to_world_coords(&impulse_vector, &impulse_vector_ws);
             }
             environment->add_draw_vector(&center_of_triangle_ws, &impulse_vector_ws, "", 2);
         }

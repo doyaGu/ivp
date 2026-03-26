@@ -14,6 +14,11 @@
 #ifndef IVP_GRIDBUILD_ARRAY_INCLUDED
 #define IVP_GRIDBUILD_ARRAY_INCLUDED
 
+#include <ivu_types.hxx>
+#include <ivu_vector.hxx>
+#include <ivu_linear.hxx>
+#include <ivu_memory.hxx>
+
 #define IVP_GRID_MAX_ROWS 257
 #define IVP_GRID_MAX_COLUMNS IVP_GRID_MAX_ROWS
 
@@ -22,7 +27,6 @@ class IVP_Compact_Grid;
 class IVP_Template_Compact_Grid;
 class IVP_Compact_Ledge;
 class IVP_Compact_Poly_Point;
-class IVP_U_Point;
 class IVP_Compact_Grid_Element;
 
 /********************************************************************************
@@ -120,13 +124,13 @@ class IVP_GridBuilder_Array
      *  Description:    This method will convert an arbitrary heightfield array
      *			into a compact grid by using the information supplied
      *			through the IVP_Template_Compact_Grid parameter.
-     *	Input:		<environment>  your physical environment
+     *	Input:		<memory_manager> short-term memory manager used for temporary allocations
      *			<parameters>   a filled-in grid template (see above)
      *			<height_field> pointer to your 2-dimensional heightfield
      *			               array
      *	Output:		Pointer to IVP_Compact_Grid structure
      *****************************************************************************/
-    static IVP_Compact_Grid *IVP_CDECL convert_array_to_compact_grid(IVP_Environment *environment,
+    static IVP_Compact_Grid *IVP_CDECL convert_array_to_compact_grid(IVP_U_Memory *memory_manager,
                                                                      const IVP_Template_Compact_Grid *parameters,
                                                                      IVP_FLOAT *height_field);
 

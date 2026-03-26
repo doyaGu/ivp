@@ -12,12 +12,10 @@
 
 // includes for API
 #include <ivp_material.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_actuator.hxx>
 #include <ivp_constraint_car.hxx>
 #include <ivp_car_system.hxx>
 #include <ivp_ray_solver.hxx>
-#include <ivp_solver_core_reaction.hxx>
 
 //-----------------------------------------------------------------------------
 // Purpose: Main raycast airboat simulation.

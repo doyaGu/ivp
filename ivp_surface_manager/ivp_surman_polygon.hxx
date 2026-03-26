@@ -13,6 +13,8 @@
 #ifndef IVP_SURMAN_POLYGON_INCLUDED
 #define IVP_SURMAN_POLYGON_INCLUDED
 
+#include <ivp_surface_manager.hxx>
+
 class IVP_Compact_Surface;
 class IVP_Compact_Ledgetree_Node;
 

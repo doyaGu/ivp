@@ -14,6 +14,11 @@
 #ifndef IVP_COMPACT_GRID_INCLUDED
 #define IVP_COMPACT_GRID_INCLUDED
 
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
+
+class IVP_Compact_Ledge;
+
 /********************************************************************************
  *  Class:	    IVP_Compact_Grid_Element
  *  Description:    an INTERNAL structure

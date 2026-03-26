@@ -1,7 +1,8 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 // [ CK 2001 ]
 
-#include <ivp_physics.hxx>
+#include <ivu_types.hxx>
+#include <ivu_string.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_surface.hxx>
 

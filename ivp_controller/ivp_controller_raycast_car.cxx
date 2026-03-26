@@ -14,7 +14,6 @@
 // includes for API
 
 #include <ivp_material.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_actuator.hxx>
 #include <ivp_constraint_car.hxx>
 #include <ivp_car_system.hxx>
@@ -345,11 +344,10 @@ bool IVP_Controller_Raycast_Car::DoSimulationWheels(IVP_Ray_Solver_Template *pRa
 		if (pRayHit->hit_real_object)
 		{
 			// Get the hit object.
-			IVP_Cache_Object *pCacheObject = pRayHit->hit_real_object->get_cache_object_no_lock();
-			if (pCacheObject)
+			if (pRayHit->hit_real_object)
 			{
 				// Transform the impact normal from object-space to world-space.
-				pCacheObject->transform_vector_to_world_coords(&pRayHit->hit_surface_direction_os, &pTempWheel->ground_normal_ws);
+				pRayHit->hit_real_object->transform_vector_to_world_coords(&pRayHit->hit_surface_direction_os, &pTempWheel->ground_normal_ws);
 
 				// Set the wheel's distance to move along the ray to reach the impact surface.
 				pWheel->raycast_dist = pRayHit->hit_distance;

@@ -1,9 +1,11 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
-#include <ivp_physics.hxx>
+#include <ivu_types.hxx>
+#include <ivu_linear.hxx>
 #if defined(LINUX)
     #include <memory.h>
 #endif
+#include <string.h>
 
 #include <ivu_memory.hxx>
 
@@ -14,7 +16,6 @@
 #include <ivp_compact_grid.hxx>
 #include <ivp_gridbuild_array.hxx>
 
-#include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 
@@ -971,9 +972,8 @@ IVP_Compact_Grid *IVP_GridBuilder_Array::compile_ledges_into_compact_grid(const 
     return cg;
 }
 
-IVP_Compact_Grid *IVP_GridBuilder_Array::convert_array_to_compact_grid(IVP_Environment *env, const IVP_Template_Compact_Grid *gp, IVP_FLOAT *height_field)
+IVP_Compact_Grid *IVP_GridBuilder_Array::convert_array_to_compact_grid(IVP_U_Memory *mm, const IVP_Template_Compact_Grid *gp, IVP_FLOAT *height_field)
 {
-    IVP_U_Memory *mm = env->get_memory_manager();
     mm->start_memory_transaction();
 
     IVP_GridBuilder_Array builder(mm, gp, height_field);
