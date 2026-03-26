@@ -8,8 +8,7 @@
 
 #define IVP_MAGIC_INERTIA_RADIUS 100.0f  // for ill calculated inertias use this default radius
 
-#include <ivp_cache_object.hxx>
-#include <ivp_cache_ledge_point.hxx>
+class IVP_Cache_Ledge_Point;
 
 class IVP_Cache_Ball;
 
@@ -169,7 +168,7 @@ class IVP_Compact_Ledge_Solver
      *	Name:	       	various functions to get the coordinates of a point
      ********************************************************************************/
     IVP_STATIC void give_world_coords_AT(const IVP_Compact_Edge *edge, IVP_Cache_Ledge_Point *clp, IVP_U_Point *p_ws_out);
-    IVP_STATIC inline const IVP_Compact_Poly_Point *give_object_coords(const IVP_Compact_Edge *edge, IVP_Cache_Ledge_Point *clp);
+    IVP_STATIC const IVP_Compact_Poly_Point *give_object_coords(const IVP_Compact_Edge *edge, IVP_Cache_Ledge_Point *clp);
     IVP_STATIC inline const IVP_Compact_Poly_Point *give_object_coords(const IVP_Compact_Edge *edge, const IVP_Compact_Ledge *ledge);
 
     IVP_STATIC void calc_pos_other_space(const IVP_Compact_Edge *P, IVP_Cache_Ledge_Point *m_cache_P, IVP_Cache_Ledge_Point *m_cache_other_space, IVP_U_Point *res);
@@ -227,17 +226,6 @@ const IVP_Compact_Poly_Point *IVP_Compact_Ledge_Solver::give_object_coords(const
     IVP_ASSERT(ledge == edge->get_compact_ledge());
     int point_index = edge->get_start_point_index();
     const IVP_Compact_Poly_Point *res = &ledge->get_point_array()[point_index];
-
-    return res;
-}
-
-const IVP_Compact_Poly_Point *IVP_Compact_Ledge_Solver::give_object_coords(const IVP_Compact_Edge *edge, IVP_Cache_Ledge_Point *clp)
-{
-    IVP_ASSERT(clp->compact_ledge == edge->get_compact_ledge());
-    int point_index = edge->get_start_point_index();
-    const IVP_Compact_Poly_Point *res = &clp->compact_poly_points[point_index];
-
-    IVP_ASSERT((intp(res) & 15) == 0);
 
     return res;
 }

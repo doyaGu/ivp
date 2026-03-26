@@ -13,7 +13,6 @@
 #include <ivp_object_polygon_tetra.hxx>
 #include <ivp_i_point_vhash.hxx>
 
-#include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 

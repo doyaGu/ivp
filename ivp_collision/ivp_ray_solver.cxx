@@ -5,6 +5,7 @@
 
 #include <ivu_min_hash.hxx>
 
+#include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 

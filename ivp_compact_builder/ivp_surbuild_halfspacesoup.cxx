@@ -4,7 +4,6 @@
 
 // #include <ivp_surman_polygon.hxx>
 #include <ivp_compact_ledge.hxx>
-#include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 #include <ivp_surbuild_pointsoup.hxx>
 

@@ -13,6 +13,8 @@
 #ifndef IVP_SURMAN_GRID_INCLUDED
 #define IVP_SURMAN_GRID_INCLUDED
 
+#include <ivp_surface_manager.hxx>
+
 class IVP_Compact_Grid;
 class IVP_Compact_Triangle;
 
