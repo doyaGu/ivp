@@ -1604,8 +1604,10 @@ void IVP_Friction_Core_Pair::remove_energy_gained_by_real_friction()
 IVP_DOUBLE IVP_Mutual_Energizer::calc_impulse_to_reduce_energy_level(IVP_DOUBLE speed_pot, IVP_DOUBLE inv_mass0, IVP_DOUBLE inv_mass1, IVP_DOUBLE delta_e)
 {
 	delta_e *= 2.0f;
-	IVP_DOUBLE divisor = 1.0f / (inv_mass0 + inv_mass1);
-	IVP_DOUBLE root = (speed_pot * speed_pot - (inv_mass0 + inv_mass1) * delta_e); ///(mass1*speed_pot*speed_pot-target_e));
+	IVP_DOUBLE inv_mass_sum = inv_mass0 + inv_mass1;
+	if (inv_mass_sum < P_DOUBLE_EPS) return 0.0;
+	IVP_DOUBLE divisor = 1.0f / inv_mass_sum;
+	IVP_DOUBLE root = (speed_pot * speed_pot - inv_mass_sum * delta_e);
 	root = IVP_Inline_Math::fabsd(root);
 	root = IVP_Inline_Math::ivp_sqrtf(root);
 	IVP_DOUBLE x = (speed_pot - root) * divisor;
@@ -1621,7 +1623,9 @@ IVP_DOUBLE IVP_Mutual_Energizer::calc_energy_potential(IVP_DOUBLE speed_pot, IVP
 
 	IVP_DOUBLE energy_now = mass1 * speed_pot * speed_pot;
 
-	x = speed_pot / (inv_mass0 + inv_mass1); // solution of E1'(x) = -E0'(x) -> speed of both objects get identical, speed_pot gets zero
+	IVP_DOUBLE inv_mass_sum = inv_mass0 + inv_mass1;
+	if (inv_mass_sum < P_DOUBLE_EPS) return 0.0;
+	x = speed_pot / inv_mass_sum;
 
 	IVP_DOUBLE E0, E1;
 	IVP_DOUBLE speed;
@@ -1978,7 +1982,8 @@ void IVP_Contact_Point::calc_virtual_mass_of_mindist()
 			{
 				vmass_no_dir[j] = core[j]->calc_virt_mass_worst_case(&tmp_contact_info->contact_point_cs[j]);
 			}
-			virt_mass_mindist_no_dir = (vmass_no_dir[0] * vmass_no_dir[1]) / (vmass_no_dir[0] + vmass_no_dir[1]);
+			IVP_DOUBLE vmass_sum = vmass_no_dir[0] + vmass_no_dir[1];
+			virt_mass_mindist_no_dir = (vmass_sum > P_DOUBLE_EPS) ? (vmass_no_dir[0] * vmass_no_dir[1]) / vmass_sum : 0.0;
 		}
 	}
 	this->inv_virt_mass_mindist_no_dir = (virt_mass_mindist_no_dir > P_DOUBLE_EPS) ? (1.0f / virt_mass_mindist_no_dir) : 0.0f;

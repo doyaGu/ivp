@@ -183,7 +183,8 @@ void IVP_Contact_Point::p_calc_friction_s_PK(const IVP_U_Point *pp, const IVP_Co
     IVP_U_Float_Point vec1, vec2;
     vec1.subtract(&tp_next, &tp);
     vec2.subtract(pp, &tp);
-    IVP_DOUBLE i_len = IVP_Inline_Math::isqrt_double(vec1.quad_length());
+    IVP_DOUBLE vec1_ql = vec1.quad_length();
+    IVP_DOUBLE i_len = (vec1_ql > P_DOUBLE_EPS) ? IVP_Inline_Math::isqrt_double(vec1_ql) : 0.0;
 
     IVP_U_Float_Point vert_12;
     vert_12.inline_calc_cross_product(&vec1, &vec2);
