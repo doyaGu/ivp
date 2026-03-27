@@ -53,37 +53,51 @@ void IVP_Real_Object::invalidate_cache_object()
 
 void IVP_Real_Object::transform_position_to_object_coords(const IVP_U_Point *world_pos, IVP_U_Point *object_pos_out)
 {
-    this->get_cache_object_no_lock()->transform_position_to_object_coords(world_pos, object_pos_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_position_to_object_coords(world_pos, object_pos_out);
 }
 
 void IVP_Real_Object::transform_position_to_object_coords(const IVP_U_Point *world_pos, IVP_U_Float_Point *object_pos_out)
 {
-    this->get_cache_object_no_lock()->transform_position_to_object_coords(world_pos, object_pos_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_position_to_object_coords(world_pos, object_pos_out);
 }
 
 void IVP_Real_Object::transform_position_to_world_coords(const IVP_U_Float_Point *object_pos, IVP_U_Point *world_pos_out)
 {
-    this->get_cache_object_no_lock()->transform_position_to_world_coords(object_pos, world_pos_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_position_to_world_coords(object_pos, world_pos_out);
 }
 
 void IVP_Real_Object::transform_vector_to_object_coords(const IVP_U_Point *world_vec, IVP_U_Point *object_vec_out)
 {
-    this->get_cache_object_no_lock()->transform_vector_to_object_coords(world_vec, object_vec_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_vector_to_object_coords(world_vec, object_vec_out);
 }
 
 void IVP_Real_Object::transform_vector_to_object_coords(const IVP_U_Float_Point *world_vec, IVP_U_Float_Point *object_vec_out)
 {
-    this->get_cache_object_no_lock()->transform_vector_to_object_coords(world_vec, object_vec_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_vector_to_object_coords(world_vec, object_vec_out);
 }
 
 void IVP_Real_Object::transform_vector_to_world_coords(const IVP_U_Point *object_vec, IVP_U_Point *world_vec_out)
 {
-    this->get_cache_object_no_lock()->transform_vector_to_world_coords(object_vec, world_vec_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_vector_to_world_coords(object_vec, world_vec_out);
 }
 
 void IVP_Real_Object::transform_vector_to_world_coords(const IVP_U_Float_Point *object_vec, IVP_U_Float_Point *world_vec_out)
 {
-    this->get_cache_object_no_lock()->transform_vector_to_world_coords(object_vec, world_vec_out);
+    IVP_Cache_Object *co = this->get_cache_object_no_lock();
+    IVP_ASSERT(co);
+    co->transform_vector_to_world_coords(object_vec, world_vec_out);
 }
 
 void IVP_Real_Object::set_pinned(IVP_BOOL is_pinned)
