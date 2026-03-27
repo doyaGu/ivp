@@ -117,12 +117,6 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     endif()
 endfunction()
 
-function(ivp_suppress_duplicate_static_lib_warnings TARGET_NAME)
-    if(APPLE)
-        target_link_options(${TARGET_NAME} INTERFACE "LINKER:-no_warn_duplicate_libraries")
-    endif()
-endfunction()
-
 # ============================================================================
 # Library Definitions - One Library Per Directory
 # ============================================================================
@@ -191,9 +185,8 @@ set(IVP_SURFACEMANAGER_SOURCES
     ${IVP_DIR}/ivp_surface_manager/ivp_surman_polygon.hxx
 )
 add_ivp_library(ivp_surface_manager "${IVP_DIR}/ivp_surface_manager" "ivp_utility" "${IVP_SURFACEMANAGER_SOURCES}")
-ivp_suppress_duplicate_static_lib_warnings(ivp_surface_manager)
 
-# ivp_intern - Runtime implementation behind the public physics API
+# ivp_intern - Runtime implementation compiled into the public physics API
 set(IVP_INTERN_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_cache_ledge_point.hxx
     ${IVP_DIR}/ivp_intern/ivp_cache_object.cxx
@@ -223,11 +216,6 @@ set(IVP_INTERN_SOURCES
     ${IVP_DIR}/ivp_intern/ivp_physic_private.hxx
     ${IVP_DIR}/ivp_intern/ivp_sim_unit.cxx
     ${IVP_DIR}/ivp_intern/ivp_sim_unit.hxx
-)
-add_ivp_library(ivp_intern "${IVP_DIR}/ivp_intern" "ivp_utility;ivp_surface_manager" "${IVP_INTERN_SOURCES}")
-ivp_suppress_duplicate_static_lib_warnings(ivp_intern)
-target_include_directories(ivp_intern PRIVATE
-    ${IVP_DIR}/ivp_physics
 )
 
 # ivp_physics - Main physics API
@@ -311,9 +299,11 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_controller.hxx
     ${IVP_DIR}/ivp_physics/ivp_oo_watcher.cxx
 )
+list(APPEND IVP_PHYSICS_SOURCES ${IVP_INTERN_SOURCES})
 add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager" "${IVP_PHYSICS_SOURCES}")
-ivp_suppress_duplicate_static_lib_warnings(ivp_physics)
-target_link_libraries(ivp_physics PRIVATE ivp_intern)
+target_include_directories(ivp_physics PUBLIC
+    $<BUILD_INTERFACE:${IVP_DIR}/ivp_intern>
+)
 
 # ivp_collision - collision implementation, depends on physics API/runtime
 set(IVP_COLLISION_SOURCES
@@ -327,8 +317,6 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
 )
 add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_physics" "${IVP_COLLISION_SOURCES}")
-ivp_suppress_duplicate_static_lib_warnings(ivp_collision)
-target_link_libraries(ivp_collision PRIVATE ivp_intern)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
@@ -378,8 +366,6 @@ set(IVP_CONTROLLER_SOURCES
     ${IVP_DIR}/ivp_controller/ivp_template_constraint.hxx
 )
 add_ivp_library(ivp_controller "${IVP_DIR}/ivp_controller" "ivp_physics" "${IVP_CONTROLLER_SOURCES}")
-ivp_suppress_duplicate_static_lib_warnings(ivp_controller)
-target_link_libraries(ivp_controller PRIVATE ivp_intern)
 
 # ivp_compact_builder - Geometry building tools, depends on core modules
 set(IVP_COMPACT_BUILDER_DIR ${IVP_DIR}/ivp_compact_builder)
@@ -488,7 +474,6 @@ set(ALL_COMPACT_BUILDER_SOURCES ${COMPACT_BUILDER_MAIN_SOURCES} ${EXTERNAL_SOURC
 
 # Create the compact builder library
 add_library(ivp_compact_builder STATIC ${ALL_COMPACT_BUILDER_SOURCES})
-ivp_suppress_duplicate_static_lib_warnings(ivp_compact_builder)
 
 # Set include directories
 target_include_directories(ivp_compact_builder PUBLIC
@@ -622,7 +607,7 @@ if(IVP_INSTALL)
     include(GNUInstallDirs)
 
     # Install libraries
-    install(TARGETS ivp_utility ivp_surface_manager ivp_intern ivp_physics ivp_collision ivp_controller ivp_compact_builder
+    install(TARGETS ivp_utility ivp_surface_manager ivp_physics ivp_collision ivp_controller ivp_compact_builder
         EXPORT ivp_targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
