@@ -620,32 +620,6 @@ inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Q
         res->z = zz;
         res->w = ww;
     }
-#if 0
-  asm __volatile__
-	("
-		lqc2    vf4,0x0(%1)	#q1
-		lqc2    vf5,0x0(%2)	#q2
-
-	 	vmul.xyzw vf12, vf4,vf5	    #vf12 x1x2 y1y2 z1z2 w1w2
-		vmulw.xyz vf8,vf4,vf5	    #vf8  x1w2 y1w2 z1w2 w1w2
-		vmulw.xyz vf9,vf5,vf4	    #vf9  w1x2 w1y2 w1z2 w1w2
-        #nop 
-		vsubx.w vf12,vf12,vf12	    # vf12.w = ww - xx
-		vopmula.xyz	ACC,vf4,vf5
-		vopmsub.xyz	vf6,vf5,vf4
-
-		vadd.xyz vf8, vf8, vf9
-		vsuby.w vf12,vf12,vf12	    # vf12.w = ww - xx - yy
-        #nop nop 
-		vadd.xyz vf8, vf8,vf6
-		vsubz.w vf8,vf12,vf12	     # vf8.w = ww - xx - yy - zz
-        #nop nop nop
-		sqc2    vf8,0x0(%0)
-	"
-	: /*no output */
-	: "r" (this) , "r" (q1) ,"r" (q2)
-	: "memory"    );
-#endif
 }
 
 inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Float_Quat *q2)
