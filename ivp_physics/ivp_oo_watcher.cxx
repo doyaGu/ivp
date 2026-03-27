@@ -2,7 +2,7 @@
 
 #include <ivp_clustering_longrange.hxx>
 #include <ivp_hull_manager.hxx>
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_physics.hxx>
 #include <ivp_range_manager.hxx>
 

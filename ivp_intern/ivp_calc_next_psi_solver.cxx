@@ -12,7 +12,7 @@
 #include <ivp_debug_manager.hxx>
 #include <ivp_hull_manager.hxx>
 #include <ivp_hull_manager_macros.hxx>
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_performancecounter.hxx>
 #include <ivu_float.hxx>
 #include <ivu_min_hash.hxx>

@@ -270,7 +270,6 @@ set(IVP_PHYSICS_SOURCES
     ${IVP_DIR}/ivp_physics/ivp_mindist_event.hxx
     ${IVP_DIR}/ivp_physics/ivp_mindist.hxx
     ${IVP_DIR}/ivp_physics/ivp_mindist_impact.cxx
-    ${IVP_DIR}/ivp_physics/ivp_mindist_internal.hxx
     ${IVP_DIR}/ivp_physics/ivp_mindist_macros.hxx
     ${IVP_DIR}/ivp_physics/ivp_mindist_mcases.cxx
     ${IVP_DIR}/ivp_physics/ivp_mindist_minimize.cxx

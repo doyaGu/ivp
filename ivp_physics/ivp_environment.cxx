@@ -18,7 +18,7 @@
 #define NULL 0
 #endif
 
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_mindist_minimize.hxx>
 #include <ivp_mindist_event.hxx>
 
