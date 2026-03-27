@@ -134,3 +134,10 @@ benchmark_results/
 config.local.h
 config.h
 !config.h.in
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Cache directories
+.cache/
