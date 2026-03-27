@@ -3,7 +3,7 @@
 #ifndef IVP_COLLISION_MINDIST_EVENT_INCLUDED
 #define IVP_COLLISION_MINDIST_EVENT_INCLUDED
 
-#include "ivp_mindist_internal.hxx"
+#include "ivp_mindist.hxx"
 
 class IVP_Cache_Ledge_Point;
 

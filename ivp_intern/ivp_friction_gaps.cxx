@@ -11,7 +11,7 @@
 #include <ivp_debug_manager.hxx> // because of debug psi_synchrone
 #include <ivp_friction.hxx>
 #include <ivp_friction_solver.hxx>
-#include <ivp_mindist_internal.hxx> // because of Mindist
+#include <ivp_mindist.hxx> // because of Mindist
 
 #if !defined(WIN32) && !defined(PSXII) && !defined(GEKKO) && !defined(PLATFORM_BSD)
 #include <alloca.h>

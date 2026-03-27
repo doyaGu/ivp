@@ -17,7 +17,7 @@
 #include <ivp_listener_object.hxx>
 #include <ivp_templates.hxx>
 #include <ivp_hull_manager.hxx>
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_friction.hxx>
 #include <ivp_anchor.hxx>
 #include <ivp_cache_object.hxx>

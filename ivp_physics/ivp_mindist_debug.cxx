@@ -4,7 +4,7 @@
 #include <ivu_geometry.hxx>
 
 #include <ivp_debug.hxx>
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_mindist_minimize.hxx>
 
 #include <ivp_cache_ledge_point.hxx>

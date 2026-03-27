@@ -4,7 +4,7 @@
 
 #include <ivp_hull_manager.hxx>
 
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>

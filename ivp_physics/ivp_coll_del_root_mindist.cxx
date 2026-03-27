@@ -5,7 +5,6 @@
 #include <ivp_clustering_longrange.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_mindist.hxx>
-#include <ivp_mindist_internal.hxx>
 #include <ivp_physics.hxx>
 
 void IVP_Collision_Delegator_Root_Mindist::object_is_removed_from_collision_detection(IVP_Real_Object *o)

@@ -11,7 +11,7 @@
 #include <ivp_core_macros.hxx>
 #include <ivp_material.hxx>
 #include <ivp_impact.hxx>
-#include <ivp_mindist_internal.hxx>
+#include <ivp_mindist.hxx>
 #include <ivp_friction.hxx>
 #include <ivp_hull_manager.hxx>
 #include <ivp_mindist_macros.hxx>
