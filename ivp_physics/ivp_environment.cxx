@@ -119,6 +119,7 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
     debug_information = NULL;
     draw_vectors = NULL;
     integrated_energy_damp = 0.0;
+    state = IVP_ES_PSI;
 
     get_freeze_manager()->init_freeze_manager();
 
