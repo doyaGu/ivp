@@ -695,7 +695,7 @@ void IVP_U_Hesse::calc_hesse(const IVP_U_Float_Point *tp0,
 void IVP_U_Hesse::normize()
 {
     IVP_DOUBLE len = this->real_length();
-    if (len < P_DOUBLE_EPS) return;
+    if (len < P_DOUBLE_EPS) { this->set_to_zero(); hesse_val = 0.0; return; }
     IVP_DOUBLE l = 1.0f / len;
     this->mult(l);
     hesse_val *= l;
@@ -748,7 +748,7 @@ void IVP_U_Float_Hesse::calc_hesse_val(const IVP_U_Float_Point *p0)
 void IVP_U_Float_Hesse::normize()
 {
     IVP_DOUBLE len = this->real_length();
-    if (len < P_DOUBLE_EPS) return;
+    if (len < P_DOUBLE_EPS) { this->set_to_zero(); hesse_val = 0.0f; return; }
     IVP_DOUBLE l = 1.0f / len;
     this->mult(l);
     hesse_val *= l;
