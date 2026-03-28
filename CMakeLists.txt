@@ -33,30 +33,16 @@ set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # ============================================================================
 
 # Options for including external dependencies in compact builder
-# Use CACHE INTERNAL to avoid polluting parent project's cache when used as submodule
+option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
+option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
+option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
 if(IVP_IS_SUBPROJECT)
-    option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
-    option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
-    option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
     mark_as_advanced(IVP_INCLUDE_GEOMPACK IVP_INCLUDE_3DSIMPORT IVP_INCLUDE_QHULL)
-else()
-    option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
-    option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
-    option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
 endif()
 
-# Compiler options for C++98 compatibility
-if(MSVC)
-    # Microsoft Visual C++ options
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Zi")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
-else()
-    # GCC and Clang options
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fno-strict-aliasing")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-endif()
+# Note: compiler options are set per-target inside add_ivp_library(), not globally,
+# so that subproject consumers are not affected.  CMake's built-in defaults for
+# Debug (-g -O0 / /Od /Zi) and Release (-O2 / /O2) are sufficient.
 
 # ============================================================================
 # Common Library Function
@@ -66,12 +52,14 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
     
-    # Public interface should only expose the target's own headers plus the
-    # shared utility headers. Cross-module includes remain a private build detail.
+    # All public headers are staged flat under include/ivp/.  Consumers use
+    # bare includes (#include "ivp_physics.hxx") which is the original convention.
     target_include_directories(${LIBRARY_NAME} PUBLIC
-        $<BUILD_INTERFACE:${SOURCE_DIR}>
-        $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
-        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/ivp>
+        $<INSTALL_INTERFACE:include/ivp>
+    )
+    target_include_directories(${LIBRARY_NAME} PRIVATE
+        ${SOURCE_DIR}
     )
     
     # Set compile definitions
@@ -81,11 +69,6 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     if(DEPENDENCIES)
         target_link_libraries(${LIBRARY_NAME} PUBLIC ${DEPENDENCIES})
     endif()
-    
-    # Set target properties
-    set_target_properties(${LIBRARY_NAME} PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-    )
     
     # Platform-specific configurations
     if(WIN32)
@@ -104,16 +87,21 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
         endif()
     endif()
     
+    if(NOT MSVC)
+        # C++98 codebase — suppress warnings and disable strict-aliasing
+        # optimisations that break the original pointer-casting patterns.
+        target_compile_options(${LIBRARY_NAME} PRIVATE -w -fno-strict-aliasing)
+    endif()
+
     if(UNIX)
         target_compile_definitions(${LIBRARY_NAME} PRIVATE UNIX)
         if(CMAKE_SYSTEM_NAME MATCHES "Linux")
             target_compile_definitions(${LIBRARY_NAME} PRIVATE LINUX)
         endif()
     endif()
-    
+
     if(APPLE)
         target_compile_definitions(${LIBRARY_NAME} PRIVATE APPLE)
-        target_compile_options(${LIBRARY_NAME} PRIVATE -Wno-deprecated-declarations)
     endif()
 endfunction()
 
@@ -301,8 +289,8 @@ set(IVP_PHYSICS_SOURCES
 )
 list(APPEND IVP_PHYSICS_SOURCES ${IVP_INTERN_SOURCES})
 add_ivp_library(ivp_physics "${IVP_DIR}/ivp_physics" "ivp_utility;ivp_surface_manager" "${IVP_PHYSICS_SOURCES}")
-target_include_directories(ivp_physics PUBLIC
-    $<BUILD_INTERFACE:${IVP_DIR}/ivp_intern>
+target_include_directories(ivp_physics PRIVATE
+    ${IVP_DIR}/ivp_intern
 )
 
 # ivp_collision - collision implementation, depends on physics API/runtime
@@ -316,7 +304,12 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
     ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
 )
-add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "ivp_physics" "${IVP_COLLISION_SOURCES}")
+# IMPORTANT: collision headers DO expose physics types (ivp_clustering_longrange.hxx
+# -> ivp_real_object.hxx).  This PRIVATE link is only correct because the staged-headers
+# architecture (ivp_public_headers target) provides all headers through each library's own
+# PUBLIC include/ivp dir.  If staged headers are ever removed, this must become PUBLIC.
+add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "" "${IVP_COLLISION_SOURCES}")
+target_link_libraries(ivp_collision PRIVATE ivp_physics)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
@@ -472,62 +465,16 @@ set(COMPACT_BUILDER_MAIN_SOURCES
 # Combine all sources
 set(ALL_COMPACT_BUILDER_SOURCES ${COMPACT_BUILDER_MAIN_SOURCES} ${EXTERNAL_SOURCES})
 
-# Create the compact builder library
-add_library(ivp_compact_builder STATIC ${ALL_COMPACT_BUILDER_SOURCES})
-
-# Set include directories
-target_include_directories(ivp_compact_builder PUBLIC
-    $<BUILD_INTERFACE:${IVP_COMPACT_BUILDER_DIR}>
-    $<INSTALL_INTERFACE:include>
-)
-
-# Set compile definitions
-target_compile_definitions(ivp_compact_builder PRIVATE IVP_VERSION_SDK)
+# compact_builder's public headers only use ivu_* (utility) and ivp_compact_* (surface_manager)
+# types.  ivp_physics and ivp_collision are only needed at link time — their types appear in
+# compact_builder headers only as forward-declared pointers / friend classes.
+add_ivp_library(ivp_compact_builder "${IVP_COMPACT_BUILDER_DIR}" "ivp_surface_manager" "${ALL_COMPACT_BUILDER_SOURCES}")
+target_link_libraries(ivp_compact_builder PRIVATE ivp_physics ivp_collision)
 if(IVP_INCLUDE_GEOMPACK)
     target_compile_definitions(ivp_compact_builder PRIVATE IVP_ENABLE_GEOMPACK)
 endif()
 if(IVP_INCLUDE_QHULL)
     target_compile_definitions(ivp_compact_builder PRIVATE IVP_ENABLE_QHULL)
-endif()
-
-# Link with dependencies
-target_link_libraries(ivp_compact_builder PUBLIC
-    ivp_physics
-    ivp_collision
-)
-
-# Set target properties
-set_target_properties(ivp_compact_builder PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-)
-
-# Platform-specific configurations for compact builder
-if(WIN32)
-    target_compile_definitions(ivp_compact_builder PRIVATE
-        WIN32
-        _WINDOWS
-        _CRT_SECURE_NO_WARNINGS
-    )
-    if(MSVC)
-        target_compile_options(ivp_compact_builder PRIVATE /W3)
-        target_compile_options(ivp_compact_builder PRIVATE
-            /wd4996  # deprecated function warnings
-            /wd4244  # conversion warnings
-            /wd4267  # size_t to int warnings
-        )
-    endif()
-endif()
-
-if(UNIX)
-    target_compile_definitions(ivp_compact_builder PRIVATE UNIX)
-    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-        target_compile_definitions(ivp_compact_builder PRIVATE LINUX)
-    endif()
-endif()
-
-if(APPLE)
-    target_compile_definitions(ivp_compact_builder PRIVATE APPLE)
-    target_compile_options(ivp_compact_builder PRIVATE -Wno-deprecated-declarations)
 endif()
 
 # ============================================================================
@@ -595,6 +542,84 @@ endif()
 # Installation and Export Configuration
 # ============================================================================
 
+set(IVP_PUBLIC_PACKAGE_TARGETS
+    ivp_utility
+    ivp_surface_manager
+    ivp_physics
+    ivp_collision
+    ivp_controller
+    ivp_compact_builder
+)
+
+set(IVP_PUBLIC_HEADER_DIRS
+    ivp_collision
+    ivp_controller
+    ivp_intern
+    ivp_physics
+    ivp_surface_manager
+    ivp_utility
+    ivp_compact_builder
+)
+
+include(CMakePackageConfigHelpers)
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cmake")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/ivp")
+
+set(IVP_PUBLIC_HEADER_SOURCES)
+foreach(_ivp_header_dir IN LISTS IVP_PUBLIC_HEADER_DIRS)
+    file(GLOB _ivp_header_matches CONFIGURE_DEPENDS
+        "${IVP_DIR}/${_ivp_header_dir}/*.h"
+        "${IVP_DIR}/${_ivp_header_dir}/*.hxx"
+    )
+    list(APPEND IVP_PUBLIC_HEADER_SOURCES ${_ivp_header_matches})
+endforeach()
+
+set(IVP_PUBLIC_STAGED_HEADERS)
+foreach(_ivp_header_src IN LISTS IVP_PUBLIC_HEADER_SOURCES)
+    get_filename_component(_ivp_header_name "${_ivp_header_src}" NAME)
+    set(_ivp_header_dst "${CMAKE_CURRENT_BINARY_DIR}/include/ivp/${_ivp_header_name}")
+    add_custom_command(
+        OUTPUT "${_ivp_header_dst}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/include/ivp"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_ivp_header_src}" "${_ivp_header_dst}"
+        DEPENDS "${_ivp_header_src}"
+        VERBATIM
+    )
+    list(APPEND IVP_PUBLIC_STAGED_HEADERS "${_ivp_header_dst}")
+endforeach()
+
+add_custom_target(ivp_public_headers ALL
+    DEPENDS ${IVP_PUBLIC_STAGED_HEADERS}
+)
+
+foreach(_ivp_public_target IN LISTS IVP_PUBLIC_PACKAGE_TARGETS)
+    add_dependencies(${_ivp_public_target} ivp_public_headers)
+endforeach()
+
+export(TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS}
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/ivp_targets.cmake"
+    NAMESPACE ivp::
+)
+
+# Build-tree config uses configure_file (absolute paths, not relocatable).
+# Install-tree config uses configure_package_config_file (relocatable).
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp-config-build-tree.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/ivp-config.cmake"
+    @ONLY
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/ivp-config-version.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+# Phase 1 package surface intentionally exports only the current engine
+# libraries. Example-side renderer ownership is classified in the repository
+# split work and should not be implicitly exported here.
+
 # Option to control installation (disabled by default when used as subproject)
 if(IVP_IS_SUBPROJECT)
     option(IVP_INSTALL "Generate installation target" OFF)
@@ -606,13 +631,14 @@ if(IVP_INSTALL)
     # Include GNUInstallDirs to use standard directories
     include(GNUInstallDirs)
 
-    # Install libraries
-    install(TARGETS ivp_utility ivp_surface_manager ivp_physics ivp_collision ivp_controller ivp_compact_builder
+    # Install libraries.
+    # Note: INCLUDES DESTINATION is omitted — include paths are already set
+    # via $<INSTALL_INTERFACE:...> in target_include_directories().
+    install(TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS}
         EXPORT ivp_targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
     if(IVP_HAVANA_FUNCTIONAL)
@@ -621,19 +647,15 @@ if(IVP_INSTALL)
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         )
     endif()
 
-    # Install header files
-    install(DIRECTORY
-        ${IVP_DIR}/ivp_collision/
-        ${IVP_DIR}/ivp_controller/
-        ${IVP_DIR}/ivp_intern/
-        ${IVP_DIR}/ivp_physics/
-        ${IVP_DIR}/ivp_surface_manager/
-        ${IVP_DIR}/ivp_utility/
-        ${IVP_DIR}/ivp_compact_builder/
+    # Install header files (same directories used for build-tree staging)
+    set(_ivp_install_header_dirs)
+    foreach(_ivp_hdir IN LISTS IVP_PUBLIC_HEADER_DIRS)
+        list(APPEND _ivp_install_header_dirs "${IVP_DIR}/${_ivp_hdir}/")
+    endforeach()
+    install(DIRECTORY ${_ivp_install_header_dirs}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ivp
         FILES_MATCHING PATTERN "*.hxx" PATTERN "*.h"
     )
@@ -654,24 +676,16 @@ if(IVP_INSTALL)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
     )
 
-    # Create package configuration files
-    include(CMakePackageConfigHelpers)
-
     configure_package_config_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp-config.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
-    )
-
-    write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
+        NO_SET_AND_CHECK_MACRO
     )
 
     install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/ivp-config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/ivp-config-version.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/ivp-config-version.cmake"
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
     )
 
