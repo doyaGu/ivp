@@ -363,7 +363,7 @@ void IVP_Compact_Ledge_Solver::calc_qr_vals(const IVP_Compact_Edge *e_tri,
     IVP_DOUBLE QQRR = QQ * RR;
     IVP_DOUBLE QRQR = QR * QR;
     IVP_DOUBLE det = QQRR - QRQR;
-    if (IVP_Inline_Math::fabsd(det) < P_DOUBLE_EPS) return IVP_FAULT;
+    if (IVP_Inline_Math::fabsd(det) < P_DOUBLE_EPS) return;
     IVP_DOUBLE i_det = 1.0f / det;
 
     Pvec.subtract(p_world, &tp_next);
