@@ -310,6 +310,7 @@ set(IVP_COLLISION_SOURCES
 # PUBLIC include/ivp dir.  If staged headers are ever removed, this must become PUBLIC.
 add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "" "${IVP_COLLISION_SOURCES}")
 target_link_libraries(ivp_collision PRIVATE ivp_physics)
+target_link_libraries(ivp_surface_manager PUBLIC ivp_collision)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
