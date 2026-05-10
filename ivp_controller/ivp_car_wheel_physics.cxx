@@ -1,6 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 // Car-wheel-specific physics code extracted from ivp_friction.cxx and
-// ivp_calc_next_psi_solver.cxx to break ivp_physics → ivp_controller cycle.
+// ivp_calc_next_psi_solver.cxx to break ivp_physics to ivp_controller cycle.
 
 #include <ivp_physics.hxx>
 #include <ivp_constraint_car.hxx>

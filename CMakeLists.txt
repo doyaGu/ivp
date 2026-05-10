@@ -88,7 +88,7 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     endif()
     
     if(NOT MSVC)
-        # C++98 codebase — suppress warnings and disable strict-aliasing
+        # C++98 codebase: suppress warnings and disable strict-aliasing
         # optimisations that break the original pointer-casting patterns.
         target_compile_options(${LIBRARY_NAME} PRIVATE -w -fno-strict-aliasing)
     endif()
@@ -467,7 +467,7 @@ set(COMPACT_BUILDER_MAIN_SOURCES
 set(ALL_COMPACT_BUILDER_SOURCES ${COMPACT_BUILDER_MAIN_SOURCES} ${EXTERNAL_SOURCES})
 
 # compact_builder's public headers only use ivu_* (utility) and ivp_compact_* (surface_manager)
-# types.  ivp_physics and ivp_collision are only needed at link time — their types appear in
+# types.  ivp_physics and ivp_collision are only needed at link time; their types appear in
 # compact_builder headers only as forward-declared pointers / friend classes.
 add_ivp_library(ivp_compact_builder "${IVP_COMPACT_BUILDER_DIR}" "ivp_surface_manager" "${ALL_COMPACT_BUILDER_SOURCES}")
 target_link_libraries(ivp_compact_builder PRIVATE ivp_physics ivp_collision)
@@ -633,7 +633,7 @@ if(IVP_INSTALL)
     include(GNUInstallDirs)
 
     # Install libraries.
-    # Note: INCLUDES DESTINATION is omitted — include paths are already set
+    # Note: INCLUDES DESTINATION is omitted; include paths are already set
     # via $<INSTALL_INTERFACE:...> in target_include_directories().
     install(TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS}
         EXPORT ivp_targets
