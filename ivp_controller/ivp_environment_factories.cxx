@@ -1,6 +1,6 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 // Factory methods for IVP_Environment that instantiate concrete controller types.
-// Extracted from ivp_environment.cxx to break ivp_physics → ivp_controller cycle.
+// Extracted from ivp_environment.cxx to break ivp_physics to ivp_controller cycle.
 
 #include <ivp_controller_factory.hxx>
 #include <ivp_physics.hxx>

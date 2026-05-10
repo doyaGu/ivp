@@ -1,5 +1,5 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
-// Extracted from ivp_actuator.hxx to break ivp_physics → ivp_controller cycle.
+// Extracted from ivp_actuator.hxx to break ivp_physics to ivp_controller cycle.
 
 #ifndef IVP_ANCHOR_INCLUDED
 #define IVP_ANCHOR_INCLUDED
