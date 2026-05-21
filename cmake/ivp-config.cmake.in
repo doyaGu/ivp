@@ -4,12 +4,12 @@ include(CMakeFindDependencyMacro)
 include("${CMAKE_CURRENT_LIST_DIR}/ivp_targets.cmake")
 
 set(IVP_LIBRARIES
-    ivp::ivp_physics
-    ivp::ivp_collision
     ivp::ivp_controller
     ivp::ivp_compact_builder
+    ivp::ivp_physics
     ivp::ivp_surface_manager
     ivp::ivp_utility
+    ivp::ivp_collision
 )
 
 set(IVP_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include/ivp")
