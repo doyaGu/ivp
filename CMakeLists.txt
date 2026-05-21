@@ -304,13 +304,12 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
     ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
 )
-# IMPORTANT: collision headers DO expose physics types (ivp_clustering_longrange.hxx
-# -> ivp_real_object.hxx).  This PRIVATE link is only correct because the staged-headers
-# architecture (ivp_public_headers target) provides all headers through each library's own
-# PUBLIC include/ivp dir.  If staged headers are ever removed, this must become PUBLIC.
+# collision and surface_manager contain legacy cross-calls.  Do not model those as
+# target links here: doing so creates a public static-library cycle that CMake expands
+# into duplicate archives on consumers such as physics_RT.  The staged-headers target
+# below provides the shared include surface; complete consumers link the top-level IVP
+# components in dependency order.
 add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "" "${IVP_COLLISION_SOURCES}")
-target_link_libraries(ivp_collision PRIVATE ivp_physics)
-target_link_libraries(ivp_surface_manager PUBLIC ivp_collision)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES

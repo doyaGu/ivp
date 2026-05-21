@@ -7,5 +7,5 @@ Name: IVP Physics Engine
 Description: Ipion Virtual Physics Engine - Real-time physics simulation library
 URL: https://github.com/Source-Authors/ivp
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -livp_compact_builder -livp_controller -livp_collision -livp_physics -livp_surface_manager -livp_utility
+Libs: -L${libdir} -livp_controller -livp_compact_builder -livp_physics -livp_surface_manager -livp_utility -livp_collision
 Cflags: -I${includedir}/ivp
