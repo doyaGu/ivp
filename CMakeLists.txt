@@ -51,6 +51,10 @@ endif()
 function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
+
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set_target_properties(${LIBRARY_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif ()
     
     # All public headers are staged flat under include/ivp/.  Consumers use
     # bare includes (#include "ivp_physics.hxx") which is the original convention.
