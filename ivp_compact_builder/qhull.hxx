@@ -351,7 +351,7 @@ struct vertexT {
 
 /*======= -global variables -qh ============================*/
 
-extern char qh_version[];  /* defined in unix.c */
+extern char ivp_qh_version[];  /* defined in qhull_user.cxx */
 
 /*-<a                             href="qh-c.htm#global"
   >--------------------------------</a><a name="qh">-</a>

@@ -1596,7 +1596,7 @@ void qh_initbuild( void) {
     if (qh TRACElevel || qh IStracing)
       ivp_message( "\nTrace level %d for %s | %s\n", 
          qh IStracing ? qh IStracing : qh TRACElevel, qh rbox_command, qh qhull_command);
-    ivp_message( "Options selected for qhull %s:\n%s\n", qh_version, qh qhull_options);
+    ivp_message( "Options selected for qhull %s:\n%s\n", ivp_qh_version, qh qhull_options);
   }
   qh_resetlists (False /*qh visible_list newvertex_list newfacet_list */);
   qh facet_next= qh facet_list;
