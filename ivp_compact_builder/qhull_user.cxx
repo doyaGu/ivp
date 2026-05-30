@@ -47,7 +47,7 @@
   qh_call_qhull( void )
     template for calling qhull from inside your program
     remove #if 0, #endif to compile
-    define: char qh_version[]= "...";
+    define: char ivp_qh_version[]= "...";
 
   returns: 
     exit code (see qh_ERR... in qhull.h)
@@ -60,7 +60,7 @@
     qh_call_qhull_once()
     
 */
-char qh_version[] = "ipion 99/07/10";  /* used for error messages */
+char ivp_qh_version[] = "ipion 99/07/10";  /* used for error messages */
 
 #if 0
 {
@@ -204,7 +204,7 @@ void qh_errexit(int exitcode, facetT *facet, ridgeT *ridge) {
 	    qh hulltime= qh_CPUclock - qh hulltime;
 	qh_errprint("ERRONEOUS", facet, NULL, ridge, NULL);
 	ivp_message( "\nWhile executing: %s | %s\n", qh rbox_command, qh qhull_command);
-	ivp_message( "Options selected for %s:\n%s\n", qh_version, qh qhull_options);
+	ivp_message( "Options selected for %s:\n%s\n", ivp_qh_version, qh qhull_options);
 	if (qh furthest_id >= 0) {
 	    ivp_message( "Last point added to hull was p%d.", qh furthest_id);
 	    if (zzval_(Ztotmerge))

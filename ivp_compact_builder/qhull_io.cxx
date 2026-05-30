@@ -2546,7 +2546,7 @@ void qh_printfacets(FILE *fp, int format, facetT *facetlist, setT *facets, boolT
     else 
       qh_printextremes (fp, facetlist, facets, printall);
   }else if (format == qh_PRINToptions)
-    fprintf(fp, "Options selected for qhull %s:\n%s\n", qh_version, qh qhull_options);
+    fprintf(fp, "Options selected for qhull %s:\n%s\n", ivp_qh_version, qh qhull_options);
   else if (format == qh_PRINTpoints && !qh VORONOI)
     qh_printpoints_out (fp, facetlist, facets, printall);
   else if (format == qh_PRINTqhull)

@@ -539,7 +539,7 @@ void qh_printstatistics (FILE *fp, const char *string) {
   fprintf (fp, "\n\
 %s\n\
  qhull invoked by: %s | %s\n%s with options:\n%s\n", string, qh rbox_command, 
-     qh qhull_command, qh_version, qh qhull_options);
+     qh qhull_command, ivp_qh_version, qh qhull_options);
   fprintf (fp, "\nprecision constants:\n\
  %6.2g max. abs. coordinate in the (transformed) input ('Qbd:n')\n\
  %6.2g max. roundoff error for distance computation ('En')\n\
