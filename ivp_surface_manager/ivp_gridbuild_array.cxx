@@ -5,6 +5,7 @@
 #if defined(LINUX)
     #include <memory.h>
 #endif
+#include <new>
 #include <string.h>
 
 #include <ivu_memory.hxx>
@@ -823,10 +824,16 @@ void IVP_GridBuilder_Array::convert_array_to_compact_ledges(const IVP_Template_C
 }
 
 /* merge everything into the final compact grid thing */
+static intp ivp_compact_grid_header_size()
+{
+    IVP_Compact_Grid layout;
+    return (char *)&layout.offset_compact_ledge_array[0] - (char *)&layout;
+}
+
 IVP_Compact_Grid *IVP_GridBuilder_Array::compile_ledges_into_compact_grid(const IVP_Template_Compact_Grid *gp, IVP_U_Vector<IVP_Compact_Ledge> *ledges)
 {
     IVP_Compact_Grid *cg = NULL;
-    intp buffer_size = offsetof(IVP_Compact_Grid, offset_compact_ledge_array);  // size for base compact ledge
+    intp buffer_size = ivp_compact_grid_header_size();  // size for base compact ledge
 
     buffer_size += ledges->len() * sizeof(int);                                     // add buffersize for ledge index array
     buffer_size += 15;                                                               // worst-case padding for 16-byte alignment of grid elements
@@ -843,6 +850,7 @@ IVP_Compact_Grid *IVP_GridBuilder_Array::compile_ledges_into_compact_grid(const 
     }
 
     cg = (IVP_Compact_Grid *)ivp_malloc_aligned(buffer_size + 4, 16);
+    new (cg) IVP_Compact_Grid;
     cg->byte_size = buffer_size;
 
     cg->n_rows = n_rows - 1;
