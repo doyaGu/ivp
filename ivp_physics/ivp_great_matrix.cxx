@@ -488,9 +488,12 @@ void IVP_Great_Matrix_Many_Zero::align_matrix_values()
 
 void IVP_Great_Matrix_Many_Zero::copy_matrix(IVP_DOUBLE *values, IVP_DOUBLE *desired)
 {
-	for (int d = columns * columns - 1; d >= 0; d--)
+	for (int i = 0; i < columns; i++)
 	{
-		values[d] = matrix_values[d];
+		for (int j = 0; j < columns; j++)
+		{
+			values[i * columns + j] = matrix_values[i * aligned_row_len + j];
+		}
 	}
 	for (int j = 0; j < columns; j++)
 	{
