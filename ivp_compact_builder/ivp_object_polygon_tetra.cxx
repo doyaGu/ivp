@@ -270,17 +270,21 @@ P_Sur_2D_Triangle::P_Sur_2D_Triangle(int pn0, int pn1, int pn2)
 
 P_Sur_2D_Point::P_Sur_2D_Point(int i_point_num)
 {
-    P_MEM_CLEAR(this);
     point_num = i_point_num;
+    was_reached = 0;
+    line_ref = NULL;
 }
 
 P_Sur_2D_Point::~P_Sur_2D_Point() {}
 
 P_Sur_2D_Line::P_Sur_2D_Line(P_Sur_2D_Point *sp, P_Sur_2D_Point *ep)
 {
-    P_MEM_CLEAR(this);
+    next = NULL;
+    prev = NULL;
     start_point = sp;
     end_point = ep;
+    delta_x = 0.0;
+    delta_y = 0.0;
 
     if (sp && ep)
     {
@@ -574,9 +578,10 @@ int P_Sur_2D_Line::is_crossing_line(P_Sur_2D_Line *line_v)
 
 P_Sur_2D::P_Sur_2D(IVP_Object_Polygon_Tetra *tetras_, IVP_Template_Surface *sur)
 {
-    P_MEM_CLEAR(this);
     orig_tetras = tetras_;
     orig_surface = sur;
+    line_array = NULL;
+    point_array = NULL;
 }
 
 P_Sur_2D::~P_Sur_2D()
@@ -1038,8 +1043,23 @@ void ivp_check_for_opposite(IVP_Hash *hash, IVP_Poly_Point *p0, IVP_Poly_Point *
 
 IVP_Object_Polygon_Tetra::IVP_Object_Polygon_Tetra(IVP_Template_Polygon *i_temp_pop)
 {
-    P_MEM_CLEAR(this);
     this->template_polygon = i_temp_pop;
+    for (int hash_class = 0; hash_class < P_HASH_CLASS_MAX; hash_class++)
+    {
+        this->min_hash[hash_class] = NULL;
+    }
+    this->points_to_edge_hash = NULL;
+    this->tetra_intrude = NULL;
+    this->n_tetra_points = 0;
+    this->n_tetra_points_malloced = 0;
+    this->tetra_points = NULL;
+    this->real_object = NULL;
+    this->points = NULL;
+    this->n_points = 0;
+    this->surfaces = NULL;
+    this->n_surfaces = 0;
+    this->extra_points = NULL;
+    this->n_extra_points = 0;
 
     this->n_points = i_temp_pop->n_points;
     this->points = (IVP_Poly_Point *)p_calloc(sizeof(IVP_Poly_Point), this->n_points);
