@@ -5,9 +5,8 @@
 #include <ivp_templates.hxx>
 
 IVP_Template_Object::IVP_Template_Object()
+    : name(NULL)
 {
-    P_MEM_CLEAR(this);
-    this->name = NULL;
     return;
 }
 
@@ -28,14 +27,20 @@ void IVP_Template_Object::set_name(const char *s)
 
 IVP_Template_Real_Object::IVP_Template_Real_Object()
 {
-    P_MEM_CLEAR(this);
+    memset(this->nocoll_group_ident, 0, sizeof(this->nocoll_group_ident));
+    this->physical_unmoveable = IVP_FALSE;
+    this->enable_piling_optimization = IVP_FALSE;
+    this->pinned = IVP_FALSE;
+    this->material = NULL;
     this->mass = 1.0f; // default;
     this->rot_inertia_is_factor = IVP_TRUE;
     this->rot_inertia.set(1.0f, 1.0f, 1.0f);
     this->auto_check_rot_inertia = 0.03f;
     this->speed_damp_factor = 0.01f;
     this->rot_speed_damp_factor.set(0.01f, 0.01f, 0.01f);
-    this->pinned = IVP_FALSE;
+    this->extra_radius = 0.0f;
+    this->mass_center_override = NULL;
+    this->client_data = NULL;
     return;
 }
 
