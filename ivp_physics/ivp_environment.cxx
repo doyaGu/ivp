@@ -592,13 +592,33 @@ IVP_Debug_Manager::~IVP_Debug_Manager()
 
 void IVP_Debug_Manager::init_debug_manager()
 {
-    P_MEM_CLEAR(this);
+    psi_synchrone = IVP_FALSE;
+    disable_mindists = IVP_FALSE;
+    disable_friction = IVP_FALSE;
+    debug_impact = IVP_FALSE;
+    debug_mindist = IVP_FALSE;
+    debug_friction = IVP_FALSE;
+    disable_core_dampening = IVP_FALSE;
+    display_statistic = IVP_FALSE;
+    display_debug_vectors = IVP_FALSE;
+    all_time_impacts = 0.0;
+    psi_counter = 0.0;
+    last_impact_translation_speed_normal = 0.0f;
+    last_impact_rot_speed_normal = 0.0f;
+    last_impact_rot_speed_whole = 0.0f;
+    out_deb_file = NULL;
+    file_nr = 0;
+    file_out_impacts = IVP_FALSE;
+    debug_imp_sys = IVP_FALSE;
+    revolve_deb_file = IVP_FALSE;
+    check_fs = IVP_FALSE;
+    arbitrary_counter = 0;
+    arbitrary_flag = 0;
     // out_deb_file = fopen("debugout0","w");
     // file_nr=0;
     // file_out_impacts=IVP_TRUE;
     // check_fs=IVP_TRUE;
     // out_deb_file=stdout;
-    revolve_deb_file = IVP_FALSE;
 }
 
 IVP_Debug_Manager::IVP_Debug_Manager()
