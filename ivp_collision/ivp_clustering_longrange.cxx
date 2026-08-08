@@ -144,6 +144,22 @@ int IVP_OV_Tree_Manager::log_base2(IVP_DOUBLE x) const
     return PFM_LD(x);
 }
 
+static IVP_DOUBLE ivp_raster_scale(int rasterlevel_diff)
+{
+    if (rasterlevel_diff <= 0)
+    {
+        IVP_ASSERT(rasterlevel_diff >= 0);
+        return 1.0;
+    }
+
+    IVP_DOUBLE scale = 1.0;
+    for (int i = 0; i < rasterlevel_diff; i++)
+    {
+        scale *= 2.0;
+    }
+    return scale;
+}
+
 IVP_BOOL IVP_OV_Tree_Manager::box_contains_box(const struct IVP_OV_Node_Data *master_data,
                                                const IVP_OV_Node *sub_node,
                                                const int rasterlevel_diff) const
@@ -151,10 +167,11 @@ IVP_BOOL IVP_OV_Tree_Manager::box_contains_box(const struct IVP_OV_Node_Data *ma
     // returns IVP_TRUE  if second box completely fits into first box
     // returns IVP_FALSE if second box is (partially) outside of first box
 
-    int master_x1 = master_data->x << rasterlevel_diff; // convert master rasterpoints to sub rasterpoints
-    int master_y1 = master_data->y << rasterlevel_diff;
-    int master_z1 = master_data->z << rasterlevel_diff;
-    int offset = (2 << rasterlevel_diff) - 2;
+    const IVP_DOUBLE scale = ivp_raster_scale(rasterlevel_diff);
+    IVP_DOUBLE master_x1 = master_data->x * scale; // convert master rasterpoints to sub rasterpoints
+    IVP_DOUBLE master_y1 = master_data->y * scale;
+    IVP_DOUBLE master_z1 = master_data->z * scale;
+    IVP_DOUBLE offset = 2.0 * scale - 2.0;
 
     if (sub_node->data.x < master_x1) return (IVP_FALSE);
     if (sub_node->data.y < master_y1) return (IVP_FALSE);
@@ -352,18 +369,20 @@ IVP_BOOL IVP_OV_Tree_Manager::box_overlaps_with_box(const IVP_OV_Node *largenode
 // returns IVP_TRUE  if the two boxes overlap
 // returns IVP_FALSE if the two boxes are disjunkt
 {
-    if (smallnode->data.x + 2 <= (largenode->data.x << rasterlevel_diff))
+    const IVP_DOUBLE scale = ivp_raster_scale(rasterlevel_diff);
+
+    if ((IVP_DOUBLE)smallnode->data.x + 2.0 <= largenode->data.x * scale)
         return (IVP_FALSE);
-    if (smallnode->data.y + 2 <= (largenode->data.y << rasterlevel_diff))
+    if ((IVP_DOUBLE)smallnode->data.y + 2.0 <= largenode->data.y * scale)
         return (IVP_FALSE);
-    if (smallnode->data.z + 2 <= (largenode->data.z << rasterlevel_diff))
+    if ((IVP_DOUBLE)smallnode->data.z + 2.0 <= largenode->data.z * scale)
         return (IVP_FALSE);
 
-    if (smallnode->data.x >= ((largenode->data.x + 2) << rasterlevel_diff))
+    if (smallnode->data.x >= ((IVP_DOUBLE)largenode->data.x + 2.0) * scale)
         return (IVP_FALSE);
-    if (smallnode->data.y >= ((largenode->data.y + 2) << rasterlevel_diff))
+    if (smallnode->data.y >= ((IVP_DOUBLE)largenode->data.y + 2.0) * scale)
         return (IVP_FALSE);
-    if (smallnode->data.z >= ((largenode->data.z + 2) << rasterlevel_diff))
+    if (smallnode->data.z >= ((IVP_DOUBLE)largenode->data.z + 2.0) * scale)
         return (IVP_FALSE);
 
     return (IVP_TRUE);
@@ -392,6 +411,9 @@ void IVP_OV_Tree_Manager::connect_boxes(IVP_OV_Node *node, IVP_OV_Node *new_node
 
     IVP_ASSERT(rasterlevel_diff > 0);
 
+    const IVP_DOUBLE scale = ivp_raster_scale(rasterlevel_diff);
+    const IVP_DOUBLE half_scale = scale * 0.5;
+
     if (rasterlevel_diff == 1)
     {
         // new node is exactly one level below -> simply insert it as one of our children
@@ -418,12 +440,12 @@ void IVP_OV_Tree_Manager::connect_boxes(IVP_OV_Node *node, IVP_OV_Node *new_node
     IVP_OV_Node *new_subnode = new IVP_OV_Node();
 
     // if new node lower than center, use lowest row
-    if (new_node->data.x >= ((node->data.x + 1) << rasterlevel_diff))
+    if (new_node->data.x >= ((IVP_DOUBLE)node->data.x + 1.0) * scale)
     {
         new_subnode->data.x = (node->data.x + 1) * 2;
     }
     // if new node lower than quarter, use middle row
-    else if (new_node->data.x >= (((node->data.x << 1) + 1) << (rasterlevel_diff - 1)))
+    else if (new_node->data.x >= ((IVP_DOUBLE)node->data.x * 2.0 + 1.0) * half_scale)
     {
         new_subnode->data.x = (node->data.x * 2) + 1;
     }
@@ -434,12 +456,12 @@ void IVP_OV_Tree_Manager::connect_boxes(IVP_OV_Node *node, IVP_OV_Node *new_node
     }
 
     // if new node lower than center, use lowest row
-    if (new_node->data.y >= ((node->data.y + 1) << rasterlevel_diff))
+    if (new_node->data.y >= ((IVP_DOUBLE)node->data.y + 1.0) * scale)
     {
         new_subnode->data.y = (node->data.y + 1) * 2;
     }
     // if new node lower than quarter, use middle row
-    else if (new_node->data.y >= (((node->data.y << 1) + 1) << (rasterlevel_diff - 1)))
+    else if (new_node->data.y >= ((IVP_DOUBLE)node->data.y * 2.0 + 1.0) * half_scale)
     {
         new_subnode->data.y = (node->data.y * 2) + 1;
     }
@@ -450,12 +472,12 @@ void IVP_OV_Tree_Manager::connect_boxes(IVP_OV_Node *node, IVP_OV_Node *new_node
     }
 
     // if new node lower than center, use lowest row
-    if (new_node->data.z >= ((node->data.z + 1) << rasterlevel_diff))
+    if (new_node->data.z >= ((IVP_DOUBLE)node->data.z + 1.0) * scale)
     {
         new_subnode->data.z = (node->data.z + 1) * 2;
     }
     // if new node lower than quarter, use middle row
-    else if (new_node->data.z >= (((node->data.z << 1) + 1) << (rasterlevel_diff - 1)))
+    else if (new_node->data.z >= ((IVP_DOUBLE)node->data.z * 2.0 + 1.0) * half_scale)
     {
         new_subnode->data.z = (node->data.z * 2) + 1;
     }
