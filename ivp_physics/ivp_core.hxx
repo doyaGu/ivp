@@ -149,6 +149,9 @@ public:
     const IVP_U_Float_Point *get_rot_inertia() const { return &rot_inertia; };
     const IVP_U_Float_Point *get_inv_rot_inertia() const { return &inv_rot_inertia; };
     IVP_FLOAT get_inv_mass() const { return inv_rot_inertia.hesse_val; };
+
+protected:
+    void initialize_core_fast_static();
 };
 
 class IVP_Core_Fast_PSI : public IVP_Core_Fast_Static
