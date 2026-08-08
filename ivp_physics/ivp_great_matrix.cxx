@@ -450,11 +450,12 @@ IVP_RETURN_TYPE IVP_Great_Matrix_Many_Zero::solve_great_matrix_many_zero()
 
 void IVP_Great_Matrix_Many_Zero::copy_matrix(IVP_Great_Matrix_Many_Zero *orig_mat)
 {
+	IVP_ASSERT(columns == orig_mat->columns);
 	for (int i = 0; i < columns; i++)
 	{
 		for (int j = 0; j < columns; j++)
 		{
-			this->matrix_values[i * columns + j] = orig_mat->matrix_values[i * columns + j];
+			this->matrix_values[i * aligned_row_len + j] = orig_mat->matrix_values[i * orig_mat->aligned_row_len + j];
 		}
 		this->desired_vector[i] = orig_mat->desired_vector[i];
 	}
@@ -795,7 +796,7 @@ void IVP_Great_Matrix_Many_Zero::copy_to_sub_matrix(IVP_DOUBLE *values_big_matri
 	{
 		for (int j = 0; j < sub_matrix->columns; j++)
 		{
-			sub_matrix->matrix_values[i * sub_matrix->columns + j] = values_big_matrix[original_pos[i] * columns + original_pos[j]];
+			sub_matrix->matrix_values[i * sub_matrix->aligned_row_len + j] = values_big_matrix[original_pos[i] * aligned_row_len + original_pos[j]];
 		}
 	}
 }
