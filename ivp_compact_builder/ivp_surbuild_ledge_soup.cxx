@@ -100,14 +100,27 @@ void debug_sphere_output(IVV_Sphere *sphere)
 
 IVP_SurfaceBuilder_Ledge_Soup::IVP_SurfaceBuilder_Ledge_Soup()
 {
-    P_MEM_CLEAR(this);
-    this->smallest_radius = 0;
     this->compact_surface = NULL;
+    this->number_of_terminal_spheres = 0;
+    this->number_of_nodes = 0;
+    this->smallest_radius = 0.0;
+    this->size_of_tree_in_bytes = 0;
+    this->spheres_cluster = NULL;
 
     this->extents_min.set(1000000.0f, 1000000.0f, 1000000.0f);
     this->extents_max.set(-1000000.0f, -1000000.0f, -1000000.0f);
 
+    this->longest_axis = 0;
+    this->number_of_unclustered_spheres = 0;
     this->interval_minhash = NULL;
+    this->parameters = NULL;
+    this->first_compact_ledge = NULL;
+    this->first_poly_point = NULL;
+    this->n_poly_points_allocated = 0;
+    this->point_hash = NULL;
+    this->ledgetree_work = NULL;
+    this->clt_highmem = NULL;
+    this->clt_lowmem = NULL;
 
     return;
 }
