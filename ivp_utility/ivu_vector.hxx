@@ -176,7 +176,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
     void remove_allow_resort(T *elem)
     {
         int index = this->index_of(elem);
-        IVP_ASSERT(index >= 0);
+        if (index < 0)
+        {
+            IVP_ASSERT(index >= 0);
+            return;
+        }
         n_elems--;
         elems[index] = elems[n_elems];
     };
@@ -184,7 +188,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
     void remove(T *elem)
     {
         int index = this->index_of(elem);
-        IVP_ASSERT(index >= 0);
+        if (index < 0)
+        {
+            IVP_ASSERT(index >= 0);
+            return;
+        }
         n_elems--;
         while (index < n_elems)
         {
