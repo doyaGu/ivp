@@ -137,6 +137,8 @@ public:
         unsigned int object_listener_exists : 1;    /* is set to one if an object listener exists */
         unsigned int collision_listener_exists : 1; /* all flags of object listeners functions */
         unsigned int collision_listener_listens_to_friction : 1;
+        unsigned int object_deletion_deferred : 1;
+        unsigned int check_vicinity_on_deferred_deletion : 1;
     } flags;
     IVP_Real_Object_Fast(IVP_Cluster *father, const IVP_Template_Object *templ)
         : IVP_Real_Object_Fast_Static(father, templ), cache_object(NULL)
@@ -199,6 +201,10 @@ protected:
      *	The physics simulation internal public section. Handle with care:
      ********************************************************************************/
 public:
+    static void begin_deferred_deletion();
+    static void end_deferred_deletion();
+    static IVP_BOOL is_deletion_deferred(const IVP_Real_Object *object);
+
     char nocoll_group_ident[IVP_NO_COLL_GROUP_STRING_LEN]; /* Identifier for filtering collisions, used only
                                                             * if the IVP_Collision_Filter_Coll_Group_Ident is
                                                             * the installed collision filter, see IVP_Application_Environment. */

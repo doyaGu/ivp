@@ -312,6 +312,7 @@ void IVP_Mindist::do_impact()
 
     env->mindist_event_timestamp_reference++;
 
+    IVP_Real_Object::begin_deferred_deletion();
     IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(this, objects[0], objects[1]);
     env->sim_unit_mem->end_memory_transaction();
     bool delete_current = g_fDeferDeleteMindist;
@@ -321,4 +322,5 @@ void IVP_Mindist::do_impact()
     {
         delete this;
     }
+    IVP_Real_Object::end_deferred_deletion();
 }
