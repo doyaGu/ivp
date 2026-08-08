@@ -967,14 +967,77 @@ void IVP_Core::transform_PSI_matrizes_core(const IVP_U_Matrix *m_core_f_core)
     q_world_f_core_next_psi = q_world_f_core_last_psi;
 }
 
+void IVP_Core_Fast_Static::initialize_core_fast_static()
+{
+    fast_piling_allowed_flag = IVP_FALSE;
+    physical_unmoveable = IVP_FALSE;
+    is_in_wakeup_vec = IVP_FALSE;
+    rot_inertias_are_equal = IVP_FALSE;
+    pinned = IVP_FALSE;
+    upper_limit_radius = 0.0f;
+    max_surface_deviation = 0.0f;
+    environment = NULL;
+    car_wheel = NULL;
+    rot_inertia.set_to_zero();
+    rot_inertia.hesse_val = 0.0f;
+    rot_speed_damp_factor.set_to_zero();
+    inv_rot_inertia.set_to_zero();
+    inv_rot_inertia.hesse_val = 0.0f;
+    speed_damp_factor = 0.0f;
+    inv_object_diameter = 0.0f;
+    spin_clipping = NULL;
+    core_friction_info.for_unmoveables.l_friction_info_hash = NULL;
+}
+
 void IVP_Core::init(IVP_Real_Object *io)
 {
-    // P_MEM_CLEAR zeroes all members including non-POD vectors.
-    // The zero state coincidentally matches IVP_U_Vector's default, but
-    // objects.reset() and controllers_of_core reinit provide explicit safety.
-    P_MEM_CLEAR(this);
-    objects.reset();
-    controllers_of_core.clear();
+    initialize_core_fast_static();
+    movement_state = (IVP_Movement_Type)0;
+    temporarily_unmovable = IVP_FALSE;
+    impacts_since_last_PSI = 0;
+    time_of_last_psi = IVP_Time(0.0);
+    i_delta_time = 0.0f;
+    rot_speed_change.set_to_zero();
+    speed_change.set_to_zero();
+    rot_speed.set_to_zero();
+    speed.set_to_zero();
+    pos_world_f_core_last_psi.set_to_zero();
+    delta_world_f_core_psis.set_to_zero();
+    q_world_f_core_last_psi.x = 0.0;
+    q_world_f_core_last_psi.y = 0.0;
+    q_world_f_core_last_psi.z = 0.0;
+    q_world_f_core_last_psi.w = 0.0;
+    q_world_f_core_next_psi.x = 0.0;
+    q_world_f_core_next_psi.y = 0.0;
+    q_world_f_core_next_psi.z = 0.0;
+    q_world_f_core_next_psi.w = 0.0;
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int column = 0; column < 3; ++column)
+        {
+            m_world_f_core_last_psi.set_elem(row, column, 0.0);
+        }
+    }
+    m_world_f_core_last_psi.vv.set_to_zero();
+    rotation_axis_world_space.set_to_zero();
+    current_speed = 0.0f;
+    abs_omega = 0.0f;
+    max_surface_rot_speed = 0.0f;
+    merged_core_which_replace_this_core = NULL;
+    sim_unit_of_core = NULL;
+    for (int reference = 0; reference < 2; ++reference)
+    {
+        time_of_calm_reference[reference] = IVP_Time(0.0);
+        q_world_f_core_calm_reference[reference].x = 0.0f;
+        q_world_f_core_calm_reference[reference].y = 0.0f;
+        q_world_f_core_calm_reference[reference].z = 0.0f;
+        q_world_f_core_calm_reference[reference].w = 0.0f;
+        position_world_f_core_calm_reference[reference].set_to_zero();
+    }
+    tmp.union_find_father = NULL;
+    tmp_null.old_sync_info = NULL;
+    mindist_event_already_done = 0;
+
     objects.add(io);
     environment = io->get_environment();
 
