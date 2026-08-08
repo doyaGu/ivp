@@ -42,7 +42,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
     IVP_U_Vector(void **ielems, int size)
     {
         IVP_ASSERT(ielems == (void **)(this + 1));
-        IVP_ASSERT(size >= 0 && size <= 0xFFFFU);
+        if (size < 0 || size > 0xFFFF)
+        {
+            IVP_ASSERT(size >= 0 && size <= 0xFFFF);
+            size = 0;
+        }
         elems = ielems;
         memsize = (unsigned short)size;
         n_elems = 0;
@@ -51,7 +55,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
   public:
     IVP_U_Vector(int size = 0)
     {
-        IVP_ASSERT(size >= 0 && size <= 0xFFFFU);
+        if (size < 0 || size > 0xFFFF)
+        {
+            IVP_ASSERT(size >= 0 && size <= 0xFFFF);
+            size = 0;
+        }
         memsize = (unsigned short)size;
         n_elems = 0;
         if (size) // will be optimized by most compilers
@@ -104,6 +112,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
 
     int add(T *elem)
     {
+        if (n_elems == 0xFFFF)
+        {
+            IVP_ASSERT(n_elems != 0xFFFF);
+            return -1;
+        }
         ensure_capacity();
         // IVP_ASSERT( index_of(elem) == -1);
         elems[n_elems] = (void *)elem;
@@ -115,6 +128,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
         int old_index = index_of(elem);
         if (old_index != -1)
             return old_index;
+        if (n_elems == 0xFFFF)
+        {
+            IVP_ASSERT(n_elems != 0xFFFF);
+            return -1;
+        }
         ensure_capacity();
         elems[n_elems] = (void *)elem;
         return n_elems++;
@@ -132,7 +150,12 @@ class IVP_U_Vector : public IVP_U_Vector_Base
 
     void insert_after(int index, T *elem)
     {
-        IVP_ASSERT((index >= 0) && (index < n_elems));
+        if (index < 0 || index >= n_elems || n_elems == 0xFFFF)
+        {
+            IVP_ASSERT((index >= 0) && (index < n_elems));
+            IVP_ASSERT(n_elems != 0xFFFF);
+            return;
+        }
         index++;
         ensure_capacity();
         int j = n_elems;
@@ -147,7 +170,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
 
     void remove_at(int index)
     {
-        IVP_ASSERT((index >= 0) && (index < n_elems));
+        if (index < 0 || index >= n_elems)
+        {
+            IVP_ASSERT((index >= 0) && (index < n_elems));
+            return;
+        }
         int j = index;
         while (j < n_elems - 1)
         {
@@ -168,7 +195,11 @@ class IVP_U_Vector : public IVP_U_Vector_Base
 
     void remove_at_and_allow_resort(int index)
     {
-        IVP_ASSERT((index >= 0) && (index < n_elems));
+        if (index < 0 || index >= n_elems)
+        {
+            IVP_ASSERT((index >= 0) && (index < n_elems));
+            return;
+        }
         n_elems--;
         elems[index] = elems[n_elems];
     };

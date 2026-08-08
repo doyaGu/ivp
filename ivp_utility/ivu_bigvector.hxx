@@ -49,6 +49,11 @@ class IVP_U_BigVector : public IVP_U_BigVector_Base
   public:
     IVP_U_BigVector(int size = 0)
     {
+        if (size < 0)
+        {
+            IVP_ASSERT(size >= 0);
+            size = 0;
+        }
         memsize = size;
         n_elems = 0;
         if (size)
@@ -117,7 +122,11 @@ class IVP_U_BigVector : public IVP_U_BigVector_Base
 
     void remove_at(int index)
     {
-        IVP_ASSERT((index >= 0) && (index < n_elems));
+        if (index < 0 || index >= n_elems)
+        {
+            IVP_ASSERT((index >= 0) && (index < n_elems));
+            return;
+        }
         int j = index;
         while (j < n_elems - 1)
         {
@@ -140,7 +149,11 @@ class IVP_U_BigVector : public IVP_U_BigVector_Base
     void remove(T *elem)
     {
         int index = this->index_of(elem);
-        IVP_ASSERT(index >= 0);
+        if (index < 0)
+        {
+            IVP_ASSERT(index >= 0);
+            return;
+        }
         n_elems--;
         while (index < n_elems)
         {

@@ -5,7 +5,11 @@
 void IVP_U_Vector_Base::increment_mem()
 {
     int i;
-    IVP_ASSERT(memsize != 0xFFFF);
+    if (memsize == 0xFFFF)
+    {
+        IVP_ASSERT(memsize != 0xFFFF);
+        return;
+    }
     void **new_elems = (void **)p_malloc(sizeof(void *) * 2 * (memsize + 1));
     int newMemsize = memsize * 2 + 1;
     if (newMemsize > 0xFFFF)
