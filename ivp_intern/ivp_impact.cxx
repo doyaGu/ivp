@@ -934,6 +934,10 @@ void IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(IVP_Mindist *mindist,
 			clus_man->fire_event_pre_collision(obj1, &event_collision);
 		}
 	}
+	if (IVP_Real_Object::is_deletion_deferred(obj0) || IVP_Real_Object::is_deletion_deferred(obj1))
+	{
+		return;
+	}
 
 	imp_solve->do_impact_long_term(impacteers, rescue_val_addon, my_fr_dist);
 

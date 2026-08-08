@@ -30,6 +30,65 @@
 #include <ivp_phantom.hxx>
 #include <ivp_calc_next_psi_solver.hxx>
 
+static int ivp_deferred_object_deletion_depth = 0;
+static IVP_U_Vector<IVP_Real_Object> ivp_deferred_object_deletions;
+
+static IVP_BOOL ivp_defer_object_deletion(IVP_Real_Object *object, IVP_BOOL check_vicinity)
+{
+    if (ivp_deferred_object_deletion_depth == 0)
+    {
+        return IVP_FALSE;
+    }
+
+    if (!object->flags.object_deletion_deferred)
+    {
+        object->flags.object_deletion_deferred = 1;
+        object->flags.check_vicinity_on_deferred_deletion = check_vicinity;
+        ivp_deferred_object_deletions.add(object);
+    }
+    else if (check_vicinity)
+    {
+        object->flags.check_vicinity_on_deferred_deletion = 1;
+    }
+    return IVP_TRUE;
+}
+
+void IVP_Real_Object::begin_deferred_deletion()
+{
+    ++ivp_deferred_object_deletion_depth;
+}
+
+IVP_BOOL IVP_Real_Object::is_deletion_deferred(const IVP_Real_Object *object)
+{
+    return object->flags.object_deletion_deferred ? IVP_TRUE : IVP_FALSE;
+}
+
+void IVP_Real_Object::end_deferred_deletion()
+{
+    IVP_ASSERT(ivp_deferred_object_deletion_depth > 0);
+    if (--ivp_deferred_object_deletion_depth != 0)
+    {
+        return;
+    }
+
+    while (ivp_deferred_object_deletions.len() > 0)
+    {
+        IVP_Real_Object *object = ivp_deferred_object_deletions.element_at(0);
+        ivp_deferred_object_deletions.remove_at(0);
+        IVP_BOOL check_vicinity = (IVP_BOOL)object->flags.check_vicinity_on_deferred_deletion;
+        object->flags.object_deletion_deferred = 0;
+        object->flags.check_vicinity_on_deferred_deletion = 0;
+        if (check_vicinity)
+        {
+            object->delete_and_check_vicinity();
+        }
+        else
+        {
+            object->delete_silently();
+        }
+    }
+}
+
 void IVP_Real_Object::change_nocoll_group_ident(const char *new_string)
 {
     if (!new_string)
@@ -652,6 +711,11 @@ void IVP_Real_Object::reset_time(IVP_Time offset)
  **************************************************************************************/
 void IVP_Real_Object::delete_and_check_vicinity()
 {
+    if (ivp_defer_object_deletion(this, IVP_TRUE))
+    {
+        return;
+    }
+
     IVP_Core *my_core = this->get_core();
     if (!my_core->physical_unmoveable)
     {
@@ -668,6 +732,11 @@ void IVP_Real_Object::delete_and_check_vicinity()
  **************************************************************************************/
 void IVP_Real_Object::delete_silently()
 {
+    if (ivp_defer_object_deletion(this, IVP_FALSE))
+    {
+        return;
+    }
+
     IVP_Real_Object *tmp_o = this;
     P_DELETE(tmp_o);
 }
