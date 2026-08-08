@@ -10,7 +10,8 @@ static int IVP_RAND_SEED = 1;
 // returns 0 .. 1.0
 IVP_FLOAT ivp_rand()
 {
-    IVP_RAND_SEED *= 75;
+    const uint next_seed = (uint)IVP_RAND_SEED * 75U;
+    std::memcpy(&IVP_RAND_SEED, &next_seed, sizeof(IVP_RAND_SEED));
     IVP_FLOAT res = (IVP_RAND_SEED & 0xffff) / (float)0x10000;
     return res;
 }
