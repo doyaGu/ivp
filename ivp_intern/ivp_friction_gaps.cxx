@@ -932,15 +932,15 @@ void out_friction_info_obj(IVP_Core *obj)
         IVP_Friction_Info_For_Core *fr_info = obj->moveable_core_has_friction_info();
         while (fr_info)
         {
-            printf("obj %zi fs %zi obj_ma %d",
-                   (intp)obj & 0x0000ffff,
-                   (intp)fr_info->l_friction_system & 0x0000ffff,
+            printf("obj %u fs %u obj_ma %d",
+                   (uint)((uintp)obj & 0x0000ffffU),
+                   (uint)((uintp)fr_info->l_friction_system & 0x0000ffffU),
                    obj->physical_unmoveable);
 
             for (int i = fr_info->friction_springs.len() - 1; i >= 0; i--)
             {
                 IVP_Contact_Point *mindist = fr_info->friction_springs.element_at(i);
-                printf("  md %zi", (intp)mindist & 0x0000ffff);
+                printf("  md %u", (uint)((uintp)mindist & 0x0000ffffU));
             }
             fr_info = NULL;
             printf("\n");
@@ -1201,15 +1201,15 @@ void IVP_Friction_System::ivp_debug_fs_pointers()
 {
     IVP_IF(1)
     {
-        printf("%zi  ", (intp)first_friction_dist & 0x0000ffff);
+        printf("%u  ", (uint)((uintp)first_friction_dist & 0x0000ffffU));
         for (IVP_Contact_Point *fr_d = get_first_friction_dist(); fr_d;
              fr_d = get_next_friction_dist(fr_d))
         {
-            printf("%zi %zi %d %zi  ",
-                   (intp)fr_d->prev_dist_in_friction & 0x0000ffff,
-                   (intp)fr_d & 0x0000ffff,
+            printf("%u %u %d %u  ",
+                   (uint)((uintp)fr_d->prev_dist_in_friction & 0x0000ffffU),
+                   (uint)((uintp)fr_d & 0x0000ffffU),
                    fr_d->has_negative_pull_since,
-                   (intp)fr_d->next_dist_in_friction & 0x0000ffff);
+                   (uint)((uintp)fr_d->next_dist_in_friction & 0x0000ffffU));
         }
         printf("\n");
     }

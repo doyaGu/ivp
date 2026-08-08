@@ -1477,7 +1477,7 @@ IVP_BOOL IVP_Impact_System::test_loop_all_pairs()
 			{
 				IVP_IF(l_environment->get_debug_manager()->debug_imp_sys)
 				{
-					printf("did_not_test %zi\n", 0x0000ffff & (intp)my_fr);
+					printf("did_not_test %u\n", (uint)((uintp)my_fr & 0x0000ffffU));
 				}
 			}
 			else
@@ -1725,7 +1725,7 @@ void IVP_Contact_Point::calc_coll_distance()
 			IVP_Core *core0, *core1;
 			core0 = get_synapse(0)->l_obj->friction_core;
 			core1 = get_synapse(1)->l_obj->friction_core;
-			fprintf(fp, "  %zi %zi-%zi: ", 0x0000ffff & (intp)this, 0x0000ffff & (intp)core0, 0x0000ffff & (intp)core1);
+			fprintf(fp, "  %u %u-%u: ", (uint)((uintp)this & 0x0000ffffU), (uint)((uintp)core0 & 0x0000ffffU), (uint)((uintp)core1 & 0x0000ffffU));
 			fprintf(fp, "di %.4f  ", get_gap_length());
 			IVP_DOUBLE debug_cs = closing_speed + info->impact.rescue_speed_addon * 0.5f;
 			fprintf(fp, "cs %.4f  ", debug_cs);
@@ -1733,8 +1733,8 @@ void IVP_Contact_Point::calc_coll_distance()
 		}
 		IVP_IF(env->get_debug_manager()->debug_imp_sys)
 		{
-			printf("tested_frdist %zi di %.4f cs %.4f dr %.4f\n",
-				   0x0000ffff & (intp)this,
+			printf("tested_frdist %u di %.4f cs %.4f dr %.4f\n",
+				   (uint)((uintp)this & 0x0000ffffU),
 				   get_gap_length(),
 				   closing_speed + info->impact.rescue_speed_addon * 0.5f,
 				   info->impact.distance_reached_in_time);
