@@ -344,6 +344,9 @@ void IVP_Compact_Ledge_Solver::calc_qr_vals(const IVP_Compact_Edge *e_tri,
                                             IVP_DOUBLE *out_r,
                                             IVP_Cache_Ledge_Point *m_cache_e_tri)
 {
+    *out_q = 0.0;
+    *out_r = 0.0;
+
     IVP_U_Point tp;
     IVP_CLS.give_world_coords_AT(e_tri, m_cache_e_tri, &tp);
     IVP_U_Point tp_next;
