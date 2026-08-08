@@ -115,7 +115,7 @@ public:
 
     void install_element(T *elem)
     {
-        int index = elem_to_index(elem);
+        int index = this->elem_to_index(elem);
         T *hit = (T *)IVP_VHash::find_elem(elem, index);
         if (hit)
             return;
