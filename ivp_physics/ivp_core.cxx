@@ -934,7 +934,7 @@ void IVP_Core::calc_calc()
 
     if (!(ri.hesse_val >= P_RES_EPS && ri.hesse_val <= P_DOUBLE_MAX))
     {
-        ri.hesse_val = P_RES_EPS;
+        ri.hesse_val = static_cast<IVP_FLOAT>(P_RES_EPS);
     }
 
     iri->set(1.0f / ri.k[0], 1.0f / ri.k[1], 1.0f / ri.k[2]);
@@ -1305,7 +1305,7 @@ void IVP_Core::set_mass(IVP_FLOAT new_mass)
 {
     if (!(new_mass >= P_RES_EPS && new_mass <= P_DOUBLE_MAX))
     {
-        new_mass = P_RES_EPS;
+        new_mass = static_cast<IVP_FLOAT>(P_RES_EPS);
     }
 
     IVP_DOUBLE old_mass = this->get_mass();
