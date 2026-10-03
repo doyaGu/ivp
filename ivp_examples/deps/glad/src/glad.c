@@ -7,7 +7,7 @@
     APIs: gl=3.3
     Profile: core
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -67,7 +67,6 @@ int open_gl(void) {
 
     return 0;
 }
-
 static
 void close_gl(void) {
     if(libGL != NULL) {
@@ -1137,4 +1136,3 @@ int gladLoadGLLoader(GLADloadproc load) {
 	if (!find_extensionsGL()) return 0;
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
-
