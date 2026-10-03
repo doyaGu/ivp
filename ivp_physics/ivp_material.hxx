@@ -40,7 +40,7 @@ class IVP_Material
 {
     // base class that may be implemented in different ways (e.g. IVP_Material_Simple);
 public:
-    P_MATERIAL_TYPE material_type = P_MATERIAL_TYPE_UNINITIALIZED; // indicates way of implementation
+    P_MATERIAL_TYPE material_type;                                // indicates way of implementation
     IVP_BOOL second_friction_x_enabled;                            // when we want two different friction values (e.g. for Skis)
 
     virtual IVP_DOUBLE get_friction_factor() = 0;
@@ -51,7 +51,11 @@ public:
     // INTERN_END
     virtual const char *get_name() = 0; // helps debugging
     virtual ~IVP_Material();
-    IVP_Material() { second_friction_x_enabled = IVP_FALSE; }
+    IVP_Material()
+        : material_type(P_MATERIAL_TYPE_UNINITIALIZED),
+          second_friction_x_enabled(IVP_FALSE)
+    {
+    }
 };
 
 /********************************************************************************
