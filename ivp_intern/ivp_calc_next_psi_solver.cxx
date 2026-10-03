@@ -180,12 +180,16 @@ void IVP_Calc_Next_PSI_Solver::calc_next_PSI_matrix(IVP_Event_Sim *event_sim, IV
         core->q_world_f_core_next_psi.fast_normize_quat();
     }
 
-    IVP_Hull_Manager *h_manager_0;
-    IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+    // A temporary IVP_Core_Merged has no objects while its first matrix is
+    // calculated.
+    if (core->objects.len() > 0)
     {
-        IVP_Real_Object *r_obj = core->objects.element_at(0);
-        h_manager_0 = r_obj->get_hull_manager();
-        h_manager_0->prefetch0_gradient();
+        IVP_IF_PREFETCH_ENABLED(IVP_TRUE)
+        {
+            IVP_Real_Object *r_obj = core->objects.element_at(0);
+            IVP_Hull_Manager *h_manager_0 = r_obj->get_hull_manager();
+            h_manager_0->prefetch0_gradient();
+        }
     }
     calc_psi_rotation_axis(&q_core_f_core);
 
