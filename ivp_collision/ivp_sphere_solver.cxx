@@ -75,10 +75,29 @@ static inline IVP_BOOL sphere_against_object(IVP_Real_Object *obj, IVP_U_Point *
 {
     if (obj->get_type() == IVP_POLYGON)
     {
-        const IVP_Compact_Surface *cs = static_cast<IVP_SurfaceManager_Polygon *>(obj->get_surface_manager())->get_compact_surface();
-        const IVP_Compact_Ledgetree_Node *cln = cs->get_compact_ledge_tree_root();
+        IVP_SurfaceManager *surface_manager = obj->get_surface_manager();
+        if (!surface_manager)
+        {
+            return IVP_FALSE;
+        }
 
-        return sphere_against_ledgetree_node(cln, query_pos, query_rad, 0, max_depth);
+        IVP_SurfaceManager_Polygon *polygon_manager =
+            dynamic_cast<IVP_SurfaceManager_Polygon *>(surface_manager);
+        if (polygon_manager)
+        {
+            const IVP_Compact_Surface *cs = polygon_manager->get_compact_surface();
+            if (!cs)
+            {
+                return IVP_FALSE;
+            }
+            const IVP_Compact_Ledgetree_Node *cln = cs->get_compact_ledge_tree_root();
+            return sphere_against_ledgetree_node(cln, query_pos, query_rad, 0, max_depth);
+        }
+
+        IVP_Vector_of_Ledges_16 ledges;
+        surface_manager->get_all_ledges_within_radius(
+            query_pos, query_rad, NULL, obj, NULL, &ledges);
+        return ledges.len() > 0 ? IVP_TRUE : IVP_FALSE;
     }
     else if (obj->get_type() == IVP_BALL)
     {
