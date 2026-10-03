@@ -623,6 +623,12 @@ write_basic_package_version_file(
 # The package exports engine libraries only. Graphical examples and their
 # renderer are optional build targets and are not included in the package.
 
+option(IVP_BUILD_TESTS "Build IVP core regression tests" OFF)
+if(IVP_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests/core)
+endif()
+
 option(IVP_BUILD_EXAMPLES "Build SDL3/OpenGL graphical examples" OFF)
 if(IVP_BUILD_EXAMPLES)
     option(IVP_BUILD_EXAMPLE_TESTS "Build graphical example regression tests" OFF)
