@@ -196,6 +196,8 @@ protected:
                     const IVP_U_Quat *q_world_f_obj, const IVP_U_Point *position);
 
     virtual ~IVP_Real_Object(); // to delete the object use delete_and_check_vicinity or delete_silently
+    void delete_and_check_vicinity_immediately();
+    void delete_silently_immediately();
 
     /********************************************************************************
      *	The physics simulation internal public section. Handle with care:

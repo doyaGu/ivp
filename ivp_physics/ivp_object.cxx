@@ -30,12 +30,32 @@
 #include <ivp_phantom.hxx>
 #include <ivp_calc_next_psi_solver.hxx>
 
-static int ivp_deferred_object_deletion_depth = 0;
-static IVP_U_Vector<IVP_Real_Object> ivp_deferred_object_deletions;
+class IVP_Deferred_Object_Deletion_State
+{
+public:
+    int depth;
+    IVP_BOOL draining;
+    IVP_Real_Object *object_being_deleted;
+    IVP_U_Vector<IVP_Real_Object> objects;
+
+    IVP_Deferred_Object_Deletion_State()
+        : depth(0), draining(IVP_FALSE), object_being_deleted(NULL)
+    {
+    }
+};
+
+static IVP_Deferred_Object_Deletion_State ivp_deferred_object_deletion;
 
 static IVP_BOOL ivp_defer_object_deletion(IVP_Real_Object *object, IVP_BOOL check_vicinity)
 {
-    if (ivp_deferred_object_deletion_depth == 0)
+    // A deletion callback may request the object whose destructor is already
+    // running. The active drain owns that deletion, so the repeat is a no-op.
+    if (object == ivp_deferred_object_deletion.object_being_deleted)
+    {
+        return IVP_TRUE;
+    }
+
+    if (ivp_deferred_object_deletion.depth == 0 && !ivp_deferred_object_deletion.draining)
     {
         return IVP_FALSE;
     }
@@ -44,7 +64,7 @@ static IVP_BOOL ivp_defer_object_deletion(IVP_Real_Object *object, IVP_BOOL chec
     {
         object->flags.object_deletion_deferred = 1;
         object->flags.check_vicinity_on_deferred_deletion = check_vicinity;
-        ivp_deferred_object_deletions.add(object);
+        ivp_deferred_object_deletion.objects.add(object);
     }
     else if (check_vicinity)
     {
@@ -55,7 +75,7 @@ static IVP_BOOL ivp_defer_object_deletion(IVP_Real_Object *object, IVP_BOOL chec
 
 void IVP_Real_Object::begin_deferred_deletion()
 {
-    ++ivp_deferred_object_deletion_depth;
+    ++ivp_deferred_object_deletion.depth;
 }
 
 IVP_BOOL IVP_Real_Object::is_deletion_deferred(const IVP_Real_Object *object)
@@ -65,28 +85,40 @@ IVP_BOOL IVP_Real_Object::is_deletion_deferred(const IVP_Real_Object *object)
 
 void IVP_Real_Object::end_deferred_deletion()
 {
-    IVP_ASSERT(ivp_deferred_object_deletion_depth > 0);
-    if (--ivp_deferred_object_deletion_depth != 0)
+    if (ivp_deferred_object_deletion.depth <= 0)
+    {
+        IVP_ASSERT(ivp_deferred_object_deletion.depth > 0);
+        return;
+    }
+
+    --ivp_deferred_object_deletion.depth;
+    if (ivp_deferred_object_deletion.depth != 0 || ivp_deferred_object_deletion.draining)
     {
         return;
     }
 
-    while (ivp_deferred_object_deletions.len() > 0)
+    // Keep callback-triggered deletions queued until the current drain reaches
+    // them. Otherwise a callback can free an object that is still in objects.
+    ivp_deferred_object_deletion.draining = IVP_TRUE;
+    while (ivp_deferred_object_deletion.objects.len() > 0)
     {
-        IVP_Real_Object *object = ivp_deferred_object_deletions.element_at(0);
-        ivp_deferred_object_deletions.remove_at(0);
+        IVP_Real_Object *object = ivp_deferred_object_deletion.objects.element_at(0);
+        ivp_deferred_object_deletion.objects.remove_at(0);
         IVP_BOOL check_vicinity = (IVP_BOOL)object->flags.check_vicinity_on_deferred_deletion;
         object->flags.object_deletion_deferred = 0;
         object->flags.check_vicinity_on_deferred_deletion = 0;
+        ivp_deferred_object_deletion.object_being_deleted = object;
         if (check_vicinity)
         {
-            object->delete_and_check_vicinity();
+            object->delete_and_check_vicinity_immediately();
         }
         else
         {
-            object->delete_silently();
+            object->delete_silently_immediately();
         }
+        ivp_deferred_object_deletion.object_being_deleted = NULL;
     }
+    ivp_deferred_object_deletion.draining = IVP_FALSE;
 }
 
 void IVP_Real_Object::change_nocoll_group_ident(const char *new_string)
@@ -716,6 +748,11 @@ void IVP_Real_Object::delete_and_check_vicinity()
         return;
     }
 
+    delete_and_check_vicinity_immediately();
+}
+
+void IVP_Real_Object::delete_and_check_vicinity_immediately()
+{
     IVP_Core *my_core = this->get_core();
     if (!my_core->physical_unmoveable)
     {
@@ -737,6 +774,11 @@ void IVP_Real_Object::delete_silently()
         return;
     }
 
+    delete_silently_immediately();
+}
+
+void IVP_Real_Object::delete_silently_immediately()
+{
     IVP_Real_Object *tmp_o = this;
     P_DELETE(tmp_o);
 }

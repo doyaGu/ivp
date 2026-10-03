@@ -23,6 +23,20 @@
 extern IVP_Mindist *g_pCurrentMindist;
 extern bool g_fDeferDeleteMindist;
 
+class IVP_Deferred_Object_Deletion_Scope
+{
+public:
+    IVP_Deferred_Object_Deletion_Scope()
+    {
+        IVP_Real_Object::begin_deferred_deletion();
+    }
+
+    ~IVP_Deferred_Object_Deletion_Scope()
+    {
+        IVP_Real_Object::end_deferred_deletion();
+    }
+};
+
 // generates friction mindist from mindist when no friction mindist exists and
 // makes sure that friction mindist (generated or not) is up to date.
 // sim_unit_not_destroy is the one that has to remain after fusion.
@@ -312,15 +326,16 @@ void IVP_Mindist::do_impact()
 
     env->mindist_event_timestamp_reference++;
 
-    IVP_Real_Object::begin_deferred_deletion();
-    IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(this, objects[0], objects[1]);
-    env->sim_unit_mem->end_memory_transaction();
-    bool delete_current = g_fDeferDeleteMindist;
-    g_pCurrentMindist = previous_mindist;
-    g_fDeferDeleteMindist = previous_defer_delete;
-    if (delete_current)
     {
-        delete this;
+        IVP_Deferred_Object_Deletion_Scope deletion_scope;
+        IVP_Impact_Solver_Long_Term::do_impact_of_two_objects(this, objects[0], objects[1]);
+        env->sim_unit_mem->end_memory_transaction();
+        bool delete_current = g_fDeferDeleteMindist;
+        g_pCurrentMindist = previous_mindist;
+        g_fDeferDeleteMindist = previous_defer_delete;
+        if (delete_current)
+        {
+            delete this;
+        }
     }
-    IVP_Real_Object::end_deferred_deletion();
 }
