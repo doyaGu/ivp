@@ -1124,6 +1124,7 @@ IVP_Core_Merged::IVP_Core_Merged(IVP_Core *core0, IVP_Core *core1) : IVP_Core(co
     movement_state = IVP_MT_MOVING;
 
     set_by_merge(core0, core1);
+    q_world_f_core_next_psi = q_world_f_core_last_psi;
     IVP_Event_Sim es(environment);
     IVP_Calc_Next_PSI_Solver nps(this);
     nps.calc_next_PSI_matrix(&es, NULL);
