@@ -620,9 +620,17 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-# Phase 1 package surface intentionally exports only the current engine
-# libraries. Example-side renderer ownership is classified in the repository
-# split work and should not be implicitly exported here.
+# The package exports engine libraries only. Graphical examples and their
+# renderer are optional build targets and are not included in the package.
+
+option(IVP_BUILD_EXAMPLES "Build SDL3/OpenGL graphical examples" OFF)
+if(IVP_BUILD_EXAMPLES)
+    option(IVP_BUILD_EXAMPLE_TESTS "Build graphical example regression tests" OFF)
+    if(IVP_BUILD_EXAMPLE_TESTS)
+        enable_testing()
+    endif()
+    add_subdirectory(ivp_examples)
+endif()
 
 # Option to control installation (disabled by default when used as subproject)
 if(IVP_IS_SUBPROJECT)
