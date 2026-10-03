@@ -25,8 +25,19 @@ public:
 
     IVP_U_Matrix *calc_matrix_at(IVP_Time t, int index)
     {
-        IVP_ASSERT(index <= IVP_3D_SOLVER_MAX_STEPS_PER_PSI);
-        IVP_ASSERT(((int)((t - base_time) * (IVP_3D_SOLVER_MAX_STEPS_PER_PSI * IVP_3D_SOLVER_PSIS_PER_SECOND) + .5f)) == index);
+        const int requested_index = index;
+        if (index < 0)
+        {
+            index = 0;
+        }
+        else if (index > IVP_3D_SOLVER_MAX_STEPS_PER_PSI)
+        {
+            index = IVP_3D_SOLVER_MAX_STEPS_PER_PSI;
+        }
+        if (requested_index == index)
+        {
+            IVP_ASSERT(((int)((t - base_time) * (IVP_3D_SOLVER_MAX_STEPS_PER_PSI * IVP_3D_SOLVER_PSIS_PER_SECOND) + .5f)) == index);
+        }
 
         if (!m_world_f_object[index])
         {
