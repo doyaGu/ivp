@@ -799,7 +799,7 @@ void IVP_Great_Matrix_Many_Zero::copy_to_sub_matrix(IVP_DOUBLE *values_big_matri
 	{
 		for (int j = 0; j < sub_matrix->columns; j++)
 		{
-			sub_matrix->matrix_values[i * sub_matrix->aligned_row_len + j] = values_big_matrix[original_pos[i] * aligned_row_len + original_pos[j]];
+			sub_matrix->matrix_values[i * sub_matrix->aligned_row_len + j] = values_big_matrix[original_pos[i] * columns + original_pos[j]];
 		}
 	}
 }
