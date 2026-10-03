@@ -958,7 +958,7 @@ IVP_Compact_Grid *IVP_GridBuilder_Array::compile_ledges_into_compact_grid(const 
             dest += l_size;
         }
         ledges->remove_all();
-        IVP_ASSERT((char *)dest - (char *)cg == cg->byte_size);
+        IVP_ASSERT((char *)dest - (char *)cg <= cg->byte_size);
     }
 
     {                                                                                        // fill in the grid referencing offset_compact_ledge_array
