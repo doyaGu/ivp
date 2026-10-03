@@ -1635,16 +1635,15 @@ IVP_DOUBLE IVP_Mutual_Energizer::calc_energy_potential(IVP_DOUBLE speed_pot, IVP
 	speed = x * inv_mass0;
 	E0 = mass0 * speed * speed;
 
-	IVP_DOUBLE tmp = energy_now + P_DOUBLE_EPS - (E0 + E1);
+	IVP_DOUBLE tmp = energy_now - E0 - E1;
 	// VALVE: For very large energies (e.g. 3e15) this can be slightly off due to precision errors :(
 	// Clamp instead
-	// IVP_ASSERT(tmp>=0);
 	if (tmp < 0)
 	{
 		tmp = 0;
 	}
 
-	return 0.5f * (energy_now - E0 - E1);
+	return 0.5f * tmp;
 }
 
 // rot moment in a direction
