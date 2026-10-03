@@ -333,8 +333,9 @@ public:
 
     // this is preleminary: allows to define breakable objects.
     // to create fixed complex objects, see the IVP_SurfaceBuilder_Ledge_Soup classes
-    // Note: merge objects before collision detection is enabled and objects are revived !!!
-    //       you may use IVP_Object_Attach::xxxx()  instead
+    // Note: each object must be the sole owner of a frozen, contact-free core.
+    //       Invalid merge requests are ignored without changing the objects.
+    //       You may use IVP_Object_Attach::xxxx() instead.
     void merge_objects(IVP_U_Vector<IVP_Real_Object> *obj_to_merge);
 
     /********************************************************************************
