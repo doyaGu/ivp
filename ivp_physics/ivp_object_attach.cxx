@@ -17,6 +17,13 @@ void IVP_Object_Attach::attach_object(IVP_Real_Object *parent, IVP_Real_Object *
                                       IVP_DOUBLE max_distance_attached_object_to_parent)
 {
 
+    if (!parent || !attached_object ||
+        !parent->physical_core || !attached_object->physical_core ||
+        parent == attached_object)
+    {
+        return;
+    }
+
     if (max_distance_attached_object_to_parent < 0.0f)
     {
         // take current distance
