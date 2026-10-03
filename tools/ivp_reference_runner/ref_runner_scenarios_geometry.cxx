@@ -461,7 +461,7 @@ static void setup_hull_pile(IVP_Environment *env, SceneObjects *scene) {
     IVP_U_Quat q_b; geo_quat(&q_b, 0.24399876718044458, 0.24399876718044458, 0.24399876718044458, 0.9063077870366499);
     IVP_U_Quat q_c; geo_quat(&q_c, 0.15529142706151244, 0.0, 0.2070552360820166, 0.9659258262890683);
 
-    IVP_U_Point p; 
+    IVP_U_Point p;
     p.set(0.6, -2.0, -0.2);
     scene->objects[idx] = geo_dynamic_polygon(env, geo_hull_surface(GEO_GEODE, 32), &mat_dyn, 1.2, 0, 0.0, &q_ident, &p);
     scene->types[idx++] = "geode";
