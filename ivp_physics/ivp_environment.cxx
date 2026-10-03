@@ -874,6 +874,38 @@ void IVP_Environment::remove_listener_constraint_global(IVP_Listener_Constraint 
 
 void IVP_Environment::merge_objects(IVP_U_Vector<IVP_Real_Object> *objs_to_merge)
 {
+    if (!objs_to_merge || objs_to_merge->len() <= 0)
+    {
+        return;
+    }
+
+    for (int i = 0; i < objs_to_merge->len(); ++i)
+    {
+        IVP_Real_Object *object = objs_to_merge->element_at(i);
+        if (!object || object->get_environment() != this || !object->physical_core)
+        {
+            return;
+        }
+
+        IVP_Core *core = object->physical_core;
+        if (core->objects.len() != 1 ||
+            object->friction_core != core ||
+            object->original_core != core ||
+            IVP_MTIS_SIMULATED(core->movement_state) ||
+            object->get_first_friction_synapse())
+        {
+            return;
+        }
+
+        for (int previous = 0; previous < i; ++previous)
+        {
+            if (objs_to_merge->element_at(previous) == object)
+            {
+                return;
+            }
+        }
+    }
+
     IVP_Merge_Core merge_all_objs;
     int obj_num = objs_to_merge->len();
     merge_all_objs.n_cores = obj_num;
@@ -893,7 +925,6 @@ void IVP_Environment::merge_objects(IVP_U_Vector<IVP_Real_Object> *objs_to_merge
         }
 
         merge_all_objs.cores[i] = my_obj->physical_core;
-        merge_all_objs.core_stack[i] = my_obj->physical_core;
         my_obj->physical_core = merged_core_for_all;
         my_obj->friction_core = merged_core_for_all;
         my_obj->original_core = merged_core_for_all;
