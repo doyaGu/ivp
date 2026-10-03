@@ -128,14 +128,7 @@ class IVP_U_Vector : public IVP_U_Vector_Base
         int old_index = index_of(elem);
         if (old_index != -1)
             return old_index;
-        if (n_elems == 0xFFFF)
-        {
-            IVP_ASSERT(n_elems != 0xFFFF);
-            return -1;
-        }
-        ensure_capacity();
-        elems[n_elems] = (void *)elem;
-        return n_elems++;
+        return add(elem);
     };
 
     void swap_elems(int index1, int index2)
