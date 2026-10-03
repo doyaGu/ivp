@@ -170,7 +170,7 @@ class IVP_Compact_Ledge
 
     inline void set_offset_ledge_points(int offset)
     {
-        IVP_ASSERT((offset & 15) == 0);
+        IVP_ASSERT((offset & 3) == 0);
         c_point_offset = offset;
     }
 
