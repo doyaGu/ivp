@@ -266,7 +266,7 @@ void IVP_Time_Event_PSI::simulate_time_event(IVP_Environment *env)
     IVP_DOUBLE delta_psi_time = env->get_delta_PSI_time();
     env->time_of_last_psi = env->get_current_time();
     env->time_of_next_psi = env->time_of_last_psi + delta_psi_time;
-    IVP_FLOAT event_time = env->time_of_last_psi.get_time();
+    IVP_FLOAT event_time = env->time_of_last_psi - tm->base_time;
     // reset min_list
     {
         IVP_U_Min_List_Enumerator enumerator(tm->min_hash);
