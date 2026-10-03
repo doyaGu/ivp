@@ -917,7 +917,6 @@ IVP_Vec_PCore::IVP_Vec_PCore(const IVP_Core *pc, const IVP_U_Float_Point *p)
 
 void IVP_Core::calc_calc()
 {
-    IVP_ASSERT(get_rot_inertia()->real_length() > P_DOUBLE_EPS);
     IVP_U_Float_Hesse *iri = (IVP_U_Float_Hesse *)get_inv_rot_inertia();
 
     // Clamp inertia to a finite, positive range to avoid invalid inverses.
@@ -936,6 +935,8 @@ void IVP_Core::calc_calc()
     {
         ri.hesse_val = static_cast<IVP_FLOAT>(P_RES_EPS);
     }
+
+    IVP_ASSERT(get_rot_inertia()->real_length() > P_DOUBLE_EPS);
 
     iri->set(1.0f / ri.k[0], 1.0f / ri.k[1], 1.0f / ri.k[2]);
     iri->hesse_val = 1.0f / get_mass();
