@@ -792,7 +792,7 @@ IVP_BOOL IVP_Compact_Ledge_Solver::check_ledge(const IVP_Compact_Ledge *cl)
 
     IVP_ASSERT((intp(cl) & 15) == 0);
     const IVP_Compact_Poly_Point *ppppp = cl->get_point_array();
-    IVP_ASSERT(((intp)ppppp & 15) == 0);
+    IVP_ASSERT(((intp)ppppp & 3) == 0);
 
     // all triangles
     const IVP_Compact_Triangle *tri = cl->get_first_triangle();
