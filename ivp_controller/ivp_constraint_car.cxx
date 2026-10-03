@@ -734,6 +734,7 @@ IVP_RETURN_TYPE IVP_Constraint_Solver_Car_Builder::calc_constraint_matrix()
 	// Malloc matrix value vec (temp).
 	int gm_size = n_constraints * n_appends;
 	this->tmp_matrix.columns = gm_size;
+	this->tmp_matrix.aligned_row_len = gm_size;
 	this->tmp_matrix.MATRIX_EPS = P_DOUBLE_EPS;
 	this->tmp_matrix.matrix_values = (IVP_DOUBLE *)p_malloc(gm_size * gm_size * sizeof(IVP_DOUBLE));
 	this->tmp_matrix.desired_vector = (IVP_DOUBLE *)p_malloc(gm_size * sizeof(IVP_DOUBLE));
