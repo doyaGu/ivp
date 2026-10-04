@@ -1,4 +1,5 @@
 #include <clocale>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -86,6 +87,72 @@ bool file_exists(const std::string &path) {
     }
     std::fclose(fp);
     return true;
+}
+
+struct BenchmarkTimes {
+    long long simulate_ns;
+    long long total_ns;
+    BenchmarkTimes() : simulate_ns(0), total_ns(0) {}
+};
+
+long long steady_now_ns() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+               std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+bool run_benchmark_world(const ref_runner::RunnerConfig &cfg, BenchmarkTimes *times) {
+    const long long total_start = steady_now_ns();
+    IVP_Application_Environment appl_env;
+    IVP_Environment_Manager *mgr = IVP_Environment_Manager::get_environment_manager();
+    IVP_Environment *env = mgr->create_environment(&appl_env, "ivp_reference_runner", 0);
+    env->reset_time();
+    env->set_delta_PSI_time(cfg.dt);
+
+    ref_runner::SceneObjects scene;
+    ref_runner::ScenarioResources resources;
+    if (!ref_runner::setup_scenario(cfg.scenario, env, &scene, &resources)) {
+        resources.cleanup();
+        delete env;
+        return false;
+    }
+
+    long long simulate_ns = 0;
+    for (int step = 1; step <= cfg.steps; ++step) {
+        if (resources.step_hook) resources.step_hook(step, env, &resources);
+        IVP_Time target = env->get_current_time() + cfg.dt;
+        const long long start = steady_now_ns();
+        env->simulate_until(target);
+        simulate_ns += steady_now_ns() - start;
+    }
+    resources.cleanup();
+    delete env;
+    times->simulate_ns += simulate_ns;
+    times->total_ns += steady_now_ns() - total_start;
+    return true;
+}
+
+int run_benchmark(const ref_runner::RunnerConfig &cfg) {
+    for (int i = 0; i < cfg.warmup; ++i) {
+        BenchmarkTimes ignored;
+        if (!run_benchmark_world(cfg, &ignored)) return 2;
+    }
+    const long long minimum_ns = (long long)(cfg.min_sample_ms * 1000000.0);
+    for (int sample = 0; sample < cfg.samples; ++sample) {
+        BenchmarkTimes aggregate;
+        int worlds = 0;
+        do {
+            if (!run_benchmark_world(cfg, &aggregate)) return 2;
+            ++worlds;
+        } while (aggregate.simulate_ns < minimum_ns);
+        std::printf(
+            "{\"schema\":\"libivp-benchmark-v1\",\"kind\":\"scenario\","
+            "\"implementation\":\"reference\",\"scenario\":\"%s\","
+            "\"sample\":%d,\"worlds\":%d,\"steps_per_world\":%d,"
+            "\"dt\":%.17g,\"simulate_ns\":%lld,\"total_ns\":%lld}\n",
+            scenario_name(cfg.scenario), sample, worlds, cfg.steps, cfg.dt,
+            aggregate.simulate_ns, aggregate.total_ns);
+    }
+    return 0;
 }
 
 int run_c17_test_scenarios(const char *argv0, const ref_runner::RunnerConfig &cfg) {
@@ -194,12 +261,14 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    {
+    if (!cfg.benchmark) {
         int delegated_rc = run_c17_test_scenarios(argv[0], cfg);
         if (delegated_rc == 0) {
             return 0;
         }
     }
+
+    if (cfg.benchmark) return run_benchmark(cfg);
 
     IVP_Application_Environment appl_env;
     IVP_Environment_Manager *mgr = IVP_Environment_Manager::get_environment_manager();

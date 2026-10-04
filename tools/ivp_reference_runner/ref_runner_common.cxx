@@ -40,8 +40,9 @@ bool ref_debug_enabled() {
 void print_usage(const char *exe) {
     std::fprintf(
         stderr,
-        "Usage: %s --scenario freefall|cubes|springs|rope|buoyancy|motor|force_actuator|forcefield|stiff_spring|check_distance|collision_filter|motion_controller|phantom|vehicle|car_real_wheels|concave_static|compound_dynamic|convex_hulls|grid_terrain|hull_pile|galton|fast_impacts|spawn_remove|long_range|two_balls|slope_friction|raycast_car_drive|check_dist_events|golem_beam|universe_evict|merge_objects|object_attach|merge_buoyancy|anchor_follow [--steps N] [--dt seconds]\\n"
-        "Outputs JSONL snapshots to stdout.\\n",
+        "Usage: %s --scenario NAME [--steps N] [--dt seconds] "
+        "[--benchmark [--samples N] [--warmup N] [--min-sample-ms MS]]\\n"
+        "Outputs JSONL snapshots, or benchmark records in benchmark mode.\\n",
         exe);
 }
 
@@ -164,12 +165,51 @@ bool parse_args(int argc, char **argv, RunnerConfig *cfg) {
             cfg->dt = v;
             continue;
         }
+        if (!std::strcmp(arg, "--benchmark")) {
+            cfg->benchmark = true;
+            continue;
+        }
+        if (!std::strcmp(arg, "--samples")) {
+            int v = 0;
+            if (i + 1 >= argc || !parse_int(argv[++i], &v) || v <= 0) {
+                std::fprintf(stderr, "Invalid --samples\\n");
+                return false;
+            }
+            cfg->samples = v;
+            continue;
+        }
+        if (!std::strcmp(arg, "--warmup")) {
+            int v = 0;
+            if (i + 1 >= argc || !parse_int(argv[++i], &v) || v < 0) {
+                std::fprintf(stderr, "Invalid --warmup\\n");
+                return false;
+            }
+            cfg->warmup = v;
+            continue;
+        }
+        if (!std::strcmp(arg, "--min-sample-ms")) {
+            double v = 0.0;
+            if (i + 1 >= argc || !parse_double(argv[++i], &v) || v <= 0.0) {
+                std::fprintf(stderr, "Invalid --min-sample-ms\\n");
+                return false;
+            }
+            cfg->min_sample_ms = v;
+            continue;
+        }
 
         std::fprintf(stderr, "Unknown arg: %s\\n", arg);
         print_usage(argv[0]);
         return false;
     }
 
+    if (!cfg->benchmark && (cfg->samples != 5 || cfg->warmup != 1 || cfg->min_sample_ms != 200.0)) {
+        std::fprintf(stderr, "Benchmark sampling options require --benchmark\\n");
+        return false;
+    }
+    if (cfg->benchmark && cfg->steps <= 0) {
+        std::fprintf(stderr, "Benchmark mode requires --steps > 0\\n");
+        return false;
+    }
     return true;
 }
 

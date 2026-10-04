@@ -85,8 +85,14 @@ struct RunnerConfig {
     Scenario scenario;
     int steps;
     double dt;
+    bool benchmark;
+    int samples;
+    int warmup;
+    double min_sample_ms;
 
-    RunnerConfig() : scenario(SCENARIO_FREEFALL), steps(240), dt(1.0 / 60.0) {}
+    RunnerConfig()
+        : scenario(SCENARIO_FREEFALL), steps(240), dt(1.0 / 60.0),
+          benchmark(false), samples(5), warmup(1), min_sample_ms(200.0) {}
 };
 
 struct SceneObjects {
