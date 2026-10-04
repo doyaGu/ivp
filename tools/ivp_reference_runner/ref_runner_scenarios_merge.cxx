@@ -12,6 +12,10 @@
 //                   reposition_object_Ros, detach_object of the attached box
 //                   and ball and of the frozen box (whose core keeps the
 //                   ball attached to it).
+//   anchor_follow   actuator anchors follow their object into a new core
+//                   space (IVP_Real_Object::set_new_m_object_f_core):
+//                   springs on an attached box, reposition_object_Ros,
+//                   detach_object
 //   merge_buoyancy  IVP_Attacher_To_Cores_Buoyancy on a merged raft (box +
 //                   box + ball) and on a box that gets a ball attached:
 //                   IVP_Controller_Buoyancy computes buoyancy and dampening
@@ -387,6 +391,73 @@ void setup_merge_buoyancy(IVP_Environment *env, SceneObjects *scene, ScenarioRes
     res->cleanup_hook = merge_buoyancy_cleanup_hook;
 }
 
+/* ===================================================================== */
+/* anchor_follow                                                          */
+/* ===================================================================== */
+
+struct AnchorFollowScenario {
+    IVP_Real_Object *parent, *box, *hook;
+    IVP_Material *mat;
+    int done;
+};
+
+void anchor_follow_step_hook(int step, IVP_Environment *env, ScenarioResources *res) {
+    (void)step;
+    AnchorFollowScenario *s = (AnchorFollowScenario *)res->scenario_data;
+    const double t = env->get_current_time().get_time();
+    if (s->done == 0 && t >= 0.1) {
+        s->done = 1;
+        IVP_Object_Attach::attach_object(s->parent, s->box, -1.0f);
+        /* after the attach: the springs act on the parent's core through the box's anchors */
+        add_spring(env, s->hook, 0.0, 0.1, 0.0, s->box, 0.1, -0.2, 0.05, 30.0, 1.5, 0.6);
+        add_spring(env, s->hook, 0.3, 0.1, 0.0, s->parent, -0.4, 0.0, 0.1, 15.0, 1.0, 0.9);
+    } else if (s->done == 1 && t >= 0.5) {
+        s->done = 2;
+        IVP_U_Quat q; set_quat_axis_angle(&q, 0.0, 1.0, 0.0, 0.6);
+        IVP_U_Point shift; shift.set(0.6, -0.15, 0.25);
+        IVP_Object_Attach::reposition_object_Ros(s->parent, s->box, &q, &shift, IVP_FALSE);
+    } else if (s->done == 2 && t >= 1.0) {
+        s->done = 3;
+        IVP_Template_Real_Object templ;
+        mg_template(&templ, s->mat, 1.1, 0.03, 0.03, 0.03);
+        IVP_Object_Attach::detach_object(s->box, &templ);
+    }
+}
+
+void anchor_follow_cleanup_hook(ScenarioResources *res) {
+    delete (AnchorFollowScenario *)res->scenario_data;
+    res->scenario_data = 0;
+}
+
+void setup_anchor_follow(IVP_Environment *env, SceneObjects *scene, ScenarioResources *res) {
+    static IVP_Material_Simple mat_ground(0.7, 0.1);
+    static IVP_Material_Simple mat_dyn(0.5, 0.2);
+    AnchorFollowScenario *s = new AnchorFollowScenario;
+    s->mat = &mat_dyn;
+    s->done = 0;
+
+    mg_add(scene, mg_static(env, &mat_ground, 20.0, 0.5, 20.0, 0.0, 3.0, 0.0, 0), "ground");
+
+    IVP_U_Quat qp; set_quat_axis_angle(&qp, 1.0, 0.0, 0.0, 0.2);
+    IVP_Polygon *parent = mg_box(env, &mat_dyn, 0.6, 0.2, 0.4, 3.0, 0.2, 0.52, 0.4, 0.0, 0.8, 0.0, &qp, true);
+    parent->get_core()->speed.set(0.5f, -1.0f, 0.0f);
+    parent->get_core()->rot_speed.set(0.0f, 1.0f, 0.3f);
+    IVP_U_Quat qb; set_quat_axis_angle(&qb, 0.0, 0.0, 1.0, 0.3);
+    IVP_Polygon *box = mg_box(env, &mat_dyn, 0.2, 0.2, 0.2, 1.0, 0.027, 0.027, 0.027, 1.2, 0.5, 0.3, &qb, true);
+    IVP_Polygon *hook = mg_static(env, &mat_ground, 0.1, 0.1, 0.1, 1.0, -1.5, 0.2, 0);
+
+    s->parent = parent;
+    s->box = box;
+    s->hook = hook;
+    mg_add(scene, parent, "parent");
+    mg_add(scene, box, "box");
+    mg_add(scene, hook, "hook");
+
+    res->scenario_data = s;
+    res->step_hook = anchor_follow_step_hook;
+    res->cleanup_hook = anchor_follow_cleanup_hook;
+}
+
 } // namespace
 
 bool setup_merge_scenarios(Scenario scenario, IVP_Environment *env, SceneObjects *scene, ScenarioResources *resources) {
@@ -394,6 +465,7 @@ bool setup_merge_scenarios(Scenario scenario, IVP_Environment *env, SceneObjects
     case SCENARIO_MERGE_OBJECTS: setup_merge_objects(env, scene, resources); return true;
     case SCENARIO_OBJECT_ATTACH: setup_object_attach(env, scene, resources); return true;
     case SCENARIO_MERGE_BUOYANCY: setup_merge_buoyancy(env, scene, resources); return true;
+    case SCENARIO_ANCHOR_FOLLOW: setup_anchor_follow(env, scene, resources); return true;
     default: return false;
     }
 }

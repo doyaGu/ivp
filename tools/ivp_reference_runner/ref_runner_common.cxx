@@ -40,7 +40,7 @@ bool ref_debug_enabled() {
 void print_usage(const char *exe) {
     std::fprintf(
         stderr,
-        "Usage: %s --scenario freefall|cubes|springs|rope|buoyancy|motor|force_actuator|forcefield|stiff_spring|check_distance|collision_filter|motion_controller|phantom|vehicle|car_real_wheels|concave_static|compound_dynamic|convex_hulls|grid_terrain|hull_pile|galton|fast_impacts|spawn_remove|long_range|two_balls|slope_friction|raycast_car_drive|check_dist_events|golem_beam|universe_evict|merge_objects|object_attach|merge_buoyancy [--steps N] [--dt seconds]\\n"
+        "Usage: %s --scenario freefall|cubes|springs|rope|buoyancy|motor|force_actuator|forcefield|stiff_spring|check_distance|collision_filter|motion_controller|phantom|vehicle|car_real_wheels|concave_static|compound_dynamic|convex_hulls|grid_terrain|hull_pile|galton|fast_impacts|spawn_remove|long_range|two_balls|slope_friction|raycast_car_drive|check_dist_events|golem_beam|universe_evict|merge_objects|object_attach|merge_buoyancy|anchor_follow [--steps N] [--dt seconds]\\n"
         "Outputs JSONL snapshots to stdout.\\n",
         exe);
 }
@@ -110,6 +110,7 @@ static Scenario parse_scenario(const char *s, bool *ok) {
     if (!std::strcmp(s, "merge_objects")) return SCENARIO_MERGE_OBJECTS;
     if (!std::strcmp(s, "object_attach")) return SCENARIO_OBJECT_ATTACH;
     if (!std::strcmp(s, "merge_buoyancy")) return SCENARIO_MERGE_BUOYANCY;
+    if (!std::strcmp(s, "anchor_follow")) return SCENARIO_ANCHOR_FOLLOW;
 
     if (!std::strcmp(s, "two_balls")) return SCENARIO_TWO_BALLS;
     if (!std::strcmp(s, "slope_friction")) return SCENARIO_SLOPE_FRICTION;

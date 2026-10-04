@@ -77,7 +77,8 @@ enum Scenario {
     /* shared cores: ref_runner_scenarios_merge.cxx */
     SCENARIO_MERGE_OBJECTS = 600,
     SCENARIO_OBJECT_ATTACH = 601,
-    SCENARIO_MERGE_BUOYANCY = 602
+    SCENARIO_MERGE_BUOYANCY = 602,
+    SCENARIO_ANCHOR_FOLLOW = 603
 };
 
 struct RunnerConfig {

@@ -62,6 +62,7 @@ const char *scenario_name(ref_runner::Scenario scenario) {
         case ref_runner::SCENARIO_MERGE_OBJECTS: return "merge_objects";
         case ref_runner::SCENARIO_OBJECT_ATTACH: return "object_attach";
         case ref_runner::SCENARIO_MERGE_BUOYANCY: return "merge_buoyancy";
+        case ref_runner::SCENARIO_ANCHOR_FOLLOW: return "anchor_follow";
         default: return 0;
     }
 }
