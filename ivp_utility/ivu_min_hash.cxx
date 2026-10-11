@@ -45,6 +45,9 @@ IVP_U_Min_Hash::IVP_U_Min_Hash(int sizei)
     stadel = (IVP_U_Min_Hash_Elem **)p_calloc(sizeof(void *), size * 2);
     min_per_array_pos = stadel + size;
     counter = 0;
+#if defined(SORT_MINDIST_ELEMENTS)
+    sort_counter = 1;
+#endif
 }
 
 IVP_U_Min_Hash::~IVP_U_Min_Hash()
@@ -175,7 +178,6 @@ void IVP_U_Min_Hash::add(void *elem, IVP_DOUBLE val)
     IVP_U_Min_Hash_Elem *el =
         new IVP_U_Min_Hash_Elem();  //(IVP_U_Min_Hash_Elem *)p_malloc(sizeof(IVP_U_Min_Hash_Elem));
 #if defined(SORT_MINDIST_ELEMENTS)
-    static int sort_counter = 1;
     el->cmp_index = sort_counter++;
 #endif
     el->elem = elem;

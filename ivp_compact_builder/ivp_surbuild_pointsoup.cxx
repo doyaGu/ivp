@@ -4,7 +4,11 @@
 #include <ivp_physics.hxx>
 
 #ifdef IVP_ENABLE_QHULL
+#ifdef IVP_QHULL_REENTRANT
+#include <libqhull_r/qhull_ra.h>
+#else
 #include <qhull_a.hxx>
+#endif
 #endif
 
 #include <ivp_betterdebugmanager.hxx>
@@ -32,6 +36,110 @@
 #include <excpt.h>
 #include <stdarg.h>
 #include <windef.h>
+#endif
+
+#ifdef IVP_ENABLE_QHULL
+// Each invocation owns its hull and memory pool, including failed attempts.
+// REFERENCE retains the original global Qhull state for parity work.
+class IVP_Qhull_Context
+{
+#ifdef IVP_QHULL_REENTRANT
+    qhT state;
+#endif
+    bool hull_active;
+    bool memory_initialized;
+    IVP_Qhull_Context(const IVP_Qhull_Context &);
+    IVP_Qhull_Context &operator=(const IVP_Qhull_Context &);
+
+    void free_hull()
+    {
+        if (!hull_active)
+            return;
+#ifdef IVP_QHULL_REENTRANT
+        qh_freeqhull(&state, !qh_ALL);
+#else
+        qh_freeqhull(!qh_ALL);
+#endif
+        hull_active = false;
+    }
+
+public:
+    IVP_Qhull_Context() : hull_active(false), memory_initialized(false)
+    {
+#ifdef IVP_QHULL_REENTRANT
+        QHULL_LIB_CHECK
+        qh_zero(&state, stderr);
+#endif
+    }
+
+    ~IVP_Qhull_Context() { free_memory(); }
+
+    int new_hull(int dim, int count, coordT *points, char *flags, FILE *out, FILE *err)
+    {
+        free_hull();
+        memory_initialized = true;
+        hull_active = true;
+#ifdef IVP_QHULL_REENTRANT
+        return qh_new_qhull(&state, dim, count, points, False, flags, out, err);
+#else
+        return qh_new_qhull(dim, count, points, False, flags, out, err);
+#endif
+    }
+
+    void free_memory()
+    {
+        free_hull();
+        if (!memory_initialized)
+            return;
+        int curlong, totlong;
+#ifdef IVP_QHULL_REENTRANT
+        qh_memfreeshort(&state, &curlong, &totlong);
+#else
+        qh_memfreeshort(&curlong, &totlong);
+#endif
+        memory_initialized = false;
+    }
+
+#ifdef IVP_QHULL_REENTRANT
+    qhT *get_state() { return &state; }
+#endif
+
+    int hull_dimension() const
+    {
+#ifdef IVP_QHULL_REENTRANT
+        return state.hull_dim;
+#else
+        return qh hull_dim;
+#endif
+    }
+
+    int point_id(pointT *point)
+    {
+#ifdef IVP_QHULL_REENTRANT
+        return qh_pointid(&state, point);
+#else
+        return qh_pointid(point);
+#endif
+    }
+
+    setT *facet_vertices(facetT *facet)
+    {
+#ifdef IVP_QHULL_REENTRANT
+        return qh_facet3vertex(&state, facet);
+#else
+        return qh_facet3vertex(facet);
+#endif
+    }
+
+    void free_vertices(setT **vertices)
+    {
+#ifdef IVP_QHULL_REENTRANT
+        qh_settempfree(&state, vertices);
+#else
+        qh_settempfree(vertices);
+#endif
+    }
+};
 #endif
 
 int IVP_SurfaceBuilder_Pointsoup::get_offset_from_pointlist(IVP_Template_Point *points, int length, IVP_U_Point *point)
@@ -365,15 +473,19 @@ class IVP_SB_PS_DUMMY
     int dummy;
 };
 
-IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_qhull_result(IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list)
+IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_qhull_result(IVP_Qhull_Context *context, IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list)
 {
 #ifndef IVP_ENABLE_QHULL
+    (void)context;
     (void)points;
     (void)skip_point;
     (void)skip_list;
     (void)use_list;
     return NULL;
 #else
+#ifdef IVP_QHULL_REENTRANT
+    qhT *qh = context->get_state(); // used by Qhull's traversal macros
+#endif
     *skip_point = IVP_FALSE;
     // DEBUG: Print all vertices of convex hull
     IVP_IF(1)
@@ -383,7 +495,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
             vertexT *vertex; /* set by FORALLvertices */
             FORALLvertices
             {
-                int point_index = qh_pointid(vertex->point);
+                int point_index = context->point_id(vertex->point);
                 ivp_debugmanager.dprint(IVP_DM_SURBUILD_POINTSOUP, "Point in convex hull: %f %f %f\n", points->element_at(point_index)->k[0], points->element_at(point_index)->k[1], points->element_at(point_index)->k[2]);
             }
         }
@@ -397,7 +509,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
     {
         IVP_SurMan_PS_Plane *plane = new IVP_SurMan_PS_Plane();
         planes.add(plane);
-        for (int k = 0; k < qh hull_dim; k++)
+        for (int k = 0; k < context->hull_dimension(); k++)
         {
             plane->k[k] = facet->normal[k];
         }
@@ -405,11 +517,11 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
 
         vertexT *vertex, **vertexp;
         setT *vertices;
-        vertices = qh_facet3vertex(facet);
+        vertices = context->facet_vertices(facet);
         point_indizes.remove_all();
         FOREACHvertex_(vertices)
         {
-            int point_index = qh_pointid(vertex->point);
+            int point_index = context->point_id(vertex->point);
             point_indizes.add((int *)(intp)point_index);
             plane->points.add(points->element_at(point_index));
             use_list[point_index]++;
@@ -480,7 +592,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::try_to_build_convex_ledge_from_
         no_point_skipped:;
         } // for all facets
 
-        qh_settempfree(&vertices);
+        context->free_vertices(&vertices);
         IVP_IF(0)
         {
             IVP_IFDEBUG(IVP_DM_SURBUILD_POINTSOUP)
@@ -588,14 +700,17 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
     // starting qhull
     // --------------
 
-#if defined(PSXII) || defined(WIN32) || defined(LINUX) || defined(GEKKO)
+#ifdef IVP_QHULL_REENTRANT
+    FILE *outfile = NULL;
+    FILE *errfile = stderr;
+#elif defined(PSXII) || defined(WIN32) || defined(LINUX) || defined(GEKKO)
     FILE *outfile = NULL; // output from qh_produce_output() use NULL to skip qh_produce_output()
     FILE *errfile = NULL; // error messages from qhull code
 #else
     FILE *outfile = stderr; // stdout // output from qh_produce_output() use NULL to skip qh_produce_output()
     FILE *errfile = stderr; // stderr // error messages from qhull code
 #endif
-    boolT ismalloc = False; // True if qhull should free points in qh_freeqhull() or reallocation
+    IVP_Qhull_Context context;
 
     char flags[250];
     // sprintf(flags, "qhull Qx Pp E7.9e-20"); // "qhull QbB Pp"
@@ -604,17 +719,13 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
     // first loop, try to randomize point 0 until we get an result
     IVP_Compact_Ledge *res = NULL;
     IVP_BOOL try_unjumbled = IVP_TRUE;
-    IVP_BOOL qhull_free_flag = IVP_FALSE;
     for (IVP_DOUBLE random_eps = 1e-12f; random_eps < 0.02f;)
     {
         sprintf(flags, "qhull Qs Pp C-0 W1e-14 E1.0e-18"); // "qhull QbB Pp"
         int exitcode = 0;
         if (try_unjumbled)
         {
-            if (qhull_free_flag)
-                qh_freeqhull(!qh_ALL); /* free long memory  */
-            exitcode = qh_new_qhull(dim, numpoints, points2, ismalloc, flags, outfile, errfile);
-            qhull_free_flag = IVP_TRUE;
+            exitcode = context.new_hull(dim, numpoints, points2, flags, outfile, errfile);
         }
         if (exitcode || !try_unjumbled)
         {
@@ -624,10 +735,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
             }
 
             sprintf(flags, "qhull Qs QJ%G C-0 Pp W1e-14 E1.0e-18", random_eps); // "qhull QbB Pp"
-            if (qhull_free_flag)
-                qh_freeqhull(!qh_ALL); /* free long memory  */
-            exitcode = qh_new_qhull(dim, numpoints, points2, ismalloc, flags, outfile, errfile);
-            qhull_free_flag = IVP_TRUE;
+            exitcode = context.new_hull(dim, numpoints, points2, flags, outfile, errfile);
             if (exitcode)
             {
                 random_eps = (random_eps + 1e-12f) * 1.2f;
@@ -640,7 +748,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
 
         memset(use_list, 0, numpoints * sizeof(unsigned int));	 // reset list
         memset(skip_list, 0, numpoints * sizeof(unsigned int)); // reset list
-        res = try_to_build_convex_ledge_from_qhull_result(&points, &skip_point, skip_list, use_list);
+        res = try_to_build_convex_ledge_from_qhull_result(&context, &points, &skip_point, skip_list, use_list);
 
         if (res) //@@CB
         {
@@ -712,9 +820,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
 
     // free all the memory
     {
-        qh_freeqhull(!qh_ALL); /* free long memory  */
-        int curlong, totlong;
-        qh_memfreeshort(&curlong, &totlong);
+        context.free_memory();
 
         P_FREE(points2);
         P_FREE(skip_list);

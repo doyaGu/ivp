@@ -45,6 +45,7 @@ class IVP_Template_Point;
 class IVP_Template_Line;
 class IVP_Template_Polygon;
 class IVP_Compact_Surface;
+class IVP_Qhull_Context;
 
 /********************************************************************************
  *  Class:	    IVP_SurMan_PS_Plane
@@ -102,7 +103,7 @@ protected:
     static IVP_Template_Polygon *planes_to_template(IVP_U_Vector<IVP_U_Point> *points, IVP_U_Vector<IVP_SurMan_PS_Plane> *planes);
     static void error_output(IVP_Template_Polygon *templ);
     static IVP_Compact_Ledge *convert_pointsoup_to_compact_ledge_internal(IVP_U_Vector<IVP_U_Point> *points);
-    static IVP_Compact_Ledge *try_to_build_convex_ledge_from_qhull_result(IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list);
+    static IVP_Compact_Ledge *try_to_build_convex_ledge_from_qhull_result(IVP_Qhull_Context *context, IVP_U_Vector<IVP_U_Point> *points, IVP_BOOL *skip_point, unsigned int *skip_list, unsigned int *use_list);
 
 public:
     static void cleanup();

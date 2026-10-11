@@ -31,6 +31,10 @@ class IVP_U_Min_Hash
     friend class IVP_U_Min_Hash_Enumerator;
     inline int hash_index(const intp *key) const;
     unsigned int size;
+#if defined(SORT_MINDIST_ELEMENTS)
+    // Tie ordering is local to this hash, including parallel triangulations.
+    int sort_counter;
+#endif
     IVP_U_Min_Hash_Elem **stadel;
     IVP_U_Min_Hash_Elem **min_per_array_pos;
     IVP_U_Min_Hash_Elem **elems;

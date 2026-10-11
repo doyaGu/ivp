@@ -36,8 +36,18 @@ set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 option(IVP_INCLUDE_GEOMPACK "Include geompack convex decomposition" ON)
 option(IVP_INCLUDE_3DSIMPORT "Include 3D Studio import library" ON)
 option(IVP_INCLUDE_QHULL "Include Qhull computational geometry library" ON)
+# REENTRANT owns one Qhull context per hull and fetches pinned upstream sources.
+# REFERENCE uses the bundled global-state implementation for legacy parity.
+# IVP_INCLUDE_QHULL=OFF disables both backends without fetching dependencies.
+set(IVP_QHULL_MODE "REENTRANT" CACHE STRING
+    "Qhull backend: REENTRANT (Qhull 8.0.2) or REFERENCE (bundled original)")
+set_property(CACHE IVP_QHULL_MODE PROPERTY STRINGS REENTRANT REFERENCE)
+string(TOUPPER "${IVP_QHULL_MODE}" IVP_QHULL_MODE)
+if(IVP_INCLUDE_QHULL AND NOT IVP_QHULL_MODE MATCHES "^(REENTRANT|REFERENCE)$")
+    message(FATAL_ERROR "IVP_QHULL_MODE must be REENTRANT or REFERENCE, got: ${IVP_QHULL_MODE}")
+endif()
 if(IVP_IS_SUBPROJECT)
-    mark_as_advanced(IVP_INCLUDE_GEOMPACK IVP_INCLUDE_3DSIMPORT IVP_INCLUDE_QHULL)
+    mark_as_advanced(IVP_INCLUDE_GEOMPACK IVP_INCLUDE_3DSIMPORT IVP_INCLUDE_QHULL IVP_QHULL_MODE)
 endif()
 
 # Note: compiler options are set per-target inside add_ivp_library(), not globally,
@@ -397,7 +407,7 @@ if(IVP_INCLUDE_3DSIMPORT)
     )
 endif()
 
-if(IVP_INCLUDE_QHULL)
+if(IVP_INCLUDE_QHULL AND IVP_QHULL_MODE STREQUAL "REFERENCE")
     list(APPEND EXTERNAL_SOURCES
         ${IVP_COMPACT_BUILDER_DIR}/qhull.cxx
         ${IVP_COMPACT_BUILDER_DIR}/qhull_geom.cxx
@@ -479,6 +489,11 @@ if(IVP_INCLUDE_GEOMPACK)
 endif()
 if(IVP_INCLUDE_QHULL)
     target_compile_definitions(ivp_compact_builder PRIVATE IVP_ENABLE_QHULL)
+    if(IVP_QHULL_MODE STREQUAL "REENTRANT")
+        enable_language(C)
+        include(cmake/IVPQhull.cmake)
+        ivp_configure_reentrant_qhull(ivp_compact_builder)
+    endif()
 endif()
 
 # ============================================================================
@@ -659,6 +674,12 @@ if(IVP_INSTALL)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
+    if(IVP_INCLUDE_QHULL AND IVP_QHULL_MODE STREQUAL "REENTRANT")
+        install(FILES "${IVP_QHULL_LICENSE_FILE}"
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/ivp/qhull
+        )
+    endif()
+
     if(IVP_HAVANA_FUNCTIONAL)
         install(TARGETS hk_base hk_math hk_physics
             EXPORT ivp_targets
@@ -732,6 +753,10 @@ if(NOT IVP_IS_SUBPROJECT)
     message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
     message(STATUS "  Install Enabled: ${IVP_INSTALL}")
     message(STATUS "  Build Havana: ${IVP_BUILD_HAVANA}")
+    message(STATUS "  Include Qhull: ${IVP_INCLUDE_QHULL}")
+    if(IVP_INCLUDE_QHULL)
+        message(STATUS "  Qhull Backend: ${IVP_QHULL_MODE}")
+    endif()
     if(IVP_BUILD_HAVANA)
         message(STATUS "    Havana sources found: ${HAVANA_SOURCES_FOUND}")
         message(STATUS "    Havana functionality enabled: ${IVP_HAVANA_FUNCTIONAL}")
