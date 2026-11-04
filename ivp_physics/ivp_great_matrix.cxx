@@ -1743,6 +1743,9 @@ void IVP_Linear_Constraint_Solver::exchange_activ_inactiv(int change_var)
 // Retail 0x34F40 receives the selected step through a double call argument.
 void IVP_Linear_Constraint_Solver::update_step_vars(IVP_DOUBLE step_size)
 {
+	// Preserve the binary64 call argument even when the method is inlined.
+	const volatile IVP_DOUBLE stored_step = step_size;
+	step_size = stored_step;
 	int i;
 	IVP_IF(debug_lcs)
 	{
