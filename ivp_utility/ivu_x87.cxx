@@ -122,11 +122,6 @@ IVP_X87_Arithmetic::IVP_X87_Arithmetic(const IVP_X87_Control &control)
 {
 }
 
-IVP_X87_Arithmetic::~IVP_X87_Arithmetic()
-{
-    static_cast<softfloat_status_t *>(get_status())->~softfloat_status_t();
-}
-
 void IVP_X87_Arithmetic::set_precision(Precision precision)
 {
     assert(precision == PRECISION_24 || precision == PRECISION_53 || precision == PRECISION_64);
@@ -184,6 +179,50 @@ double IVP_X87_Arithmetic::store_double(const IVP_U_Float80 &value)
     double result;
     memcpy(&result, &bits, sizeof(result));
     return result;
+}
+
+#if defined(_MSC_VER) && defined(_M_IX86)
+// Only transport uses the native ABI; arithmetic remains in the integer
+// numerical backend. The byte encoding avoids depending on object padding.
+static __declspec(naked) double __cdecl ivp_x87_return_double(const unsigned char *)
+{
+    __asm {
+        mov eax, [esp+4]
+        fld tbyte ptr [eax]
+        ret
+    }
+}
+
+static __declspec(naked) float __cdecl ivp_x87_return_float(const unsigned char *)
+{
+    __asm {
+        mov eax, [esp+4]
+        fld tbyte ptr [eax]
+        ret
+    }
+}
+#endif
+
+double IVP_X87_Arithmetic::return_double(const IVP_U_Float80 &value)
+{
+#if defined(_MSC_VER) && defined(_M_IX86)
+    unsigned char bytes[10];
+    value.to_bytes(bytes);
+    return ivp_x87_return_double(bytes);
+#else
+    return store_double(value);
+#endif
+}
+
+float IVP_X87_Arithmetic::return_float(const IVP_U_Float80 &value)
+{
+#if defined(_MSC_VER) && defined(_M_IX86)
+    unsigned char bytes[10];
+    value.to_bytes(bytes);
+    return ivp_x87_return_float(bytes);
+#else
+    return store_float(value);
+#endif
 }
 
 IVP_U_Float80 IVP_X87_Arithmetic::add(const IVP_U_Float80 &first, const IVP_U_Float80 &second)

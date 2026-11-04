@@ -53,7 +53,6 @@ public:
     explicit IVP_X87_Arithmetic(Precision precision = PRECISION_64,
         Rounding rounding = ROUND_NEAREST);
     explicit IVP_X87_Arithmetic(const IVP_X87_Control &control);
-    ~IVP_X87_Arithmetic();
     void set_precision(Precision precision);
     void set_rounding(Rounding rounding);
     unsigned get_exception_flags() const;
@@ -64,6 +63,10 @@ public:
     IVP_U_Float80 load(int32_t value);
     float store_float(const IVP_U_Float80 &value);
     double store_double(const IVP_U_Float80 &value);
+    // Scalar API returns use the host ABI. On a native x87 ABI this retains
+    // the extended result; internal portable call chains use IVP_U_Float80.
+    float return_float(const IVP_U_Float80 &value);
+    double return_double(const IVP_U_Float80 &value);
 
     IVP_U_Float80 add(const IVP_U_Float80 &first, const IVP_U_Float80 &second);
     IVP_U_Float80 subtract(const IVP_U_Float80 &first, const IVP_U_Float80 &second);
