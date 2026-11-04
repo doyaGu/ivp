@@ -28,6 +28,8 @@ endif()
 # Set IVP root directory
 set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+option(IVP_ENABLE_X87_EMULATION "Reproduce extended precision, rounding and write-back rules" OFF)
+
 # ============================================================================
 # External Dependencies Configuration
 # ============================================================================
@@ -55,6 +57,14 @@ endif()
 function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
+    target_compile_definitions(${LIBRARY_NAME} PUBLIC
+        IVP_ENABLE_X87_EMULATION=$<BOOL:${IVP_ENABLE_X87_EMULATION}>)
+    if(IVP_ENABLE_X87_EMULATION AND MSVC)
+        target_compile_options(${LIBRARY_NAME} PUBLIC /fp:precise)
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            target_compile_options(${LIBRARY_NAME} PUBLIC /arch:IA32)
+        endif()
+    endif()
 
     if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set_target_properties(${LIBRARY_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -163,6 +173,12 @@ set(IVP_UTILITY_SOURCES
     ${IVP_DIR}/ivp_utility/ivu_vhash.hxx
 )
 add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
+
+if(IVP_ENABLE_X87_EMULATION)
+    include(cmake/IVPX87.cmake)
+    ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
+    target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
+endif()
 
 # ivp_surface_manager - Depends on utility
 set(IVP_SURFACEMANAGER_SOURCES
