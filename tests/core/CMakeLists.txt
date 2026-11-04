@@ -61,7 +61,7 @@ endif()
 add_test(NAME ivp_pointsoup_backend COMMAND ivp_pointsoup_test)
 set_tests_properties(ivp_pointsoup_backend PROPERTIES TIMEOUT 30)
 
-if(IVP_INCLUDE_QHULL AND IVP_QHULL_MODE STREQUAL "REENTRANT")
+if(IVP_INCLUDE_QHULL AND IVP_REENTRANT_QHULL)
     find_package(Threads REQUIRED)
     add_executable(ivp_pointsoup_parallel_test pointsoup_backend.cxx)
     target_compile_definitions(ivp_pointsoup_parallel_test PRIVATE
