@@ -271,18 +271,23 @@ void IVP_Contact_Point::p_calc_friction_s_PK(const IVP_U_Point *pp, const IVP_Co
 #endif
 }
 
-#if IVP_ENABLE_X87_EMULATION
 static IVP_DOUBLE ivp_kk_contact_fraction(const IVP_U_Point *area, const IVP_U_Point *first,
     const IVP_U_Point *last, const IVP_U_Point *point)
 {
+#if IVP_ENABLE_X87_EMULATION
     IVP_X87_Arithmetic fp(IVP_X87_Control::current());
     const IVP_U_Float80 a = area->dot_product_extended(fp, first);
     const IVP_U_Float80 b = area->dot_product_extended(fp, last);
     const IVP_U_Float80 reciprocal = fp.divide(fp.load(1.0), fp.subtract(a, b));
     const IVP_U_Float80 x = area->dot_product_extended(fp, point);
     return fp.store_double(fp.multiply(fp.subtract(a, x), reciprocal));
-}
+#else
+    const IVP_DOUBLE a = area->dot_product(first);
+    const IVP_DOUBLE b = area->dot_product(last);
+    const IVP_DOUBLE reciprocal = 1.0 / (a - b);
+    return (a - area->dot_product(point)) * reciprocal;
 #endif
+}
 
 void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const IVP_Compact_Edge *L,
                                               IVP_Cache_Ledge_Point *m_cache_K,
@@ -317,26 +322,8 @@ void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const I
         K_area.calc_cross_product(&Kvec, &norm);
         L_area.calc_cross_product(&Lvec, &norm);
 
-#if IVP_ENABLE_X87_EMULATION
         sl = ivp_kk_contact_fraction(&K_area, &Lp, &Lp_next, &Kp);
         sk = ivp_kk_contact_fraction(&L_area, &Kp, &Kp_next, &Lp);
-#else
-        IVP_DOUBLE a, b, x;
-        a = K_area.dot_product(&Lp);
-        b = K_area.dot_product(&Lp_next);
-        IVP_DOUBLE ab_diff = a - b;
-        IVP_DOUBLE inv_a_b = (IVP_Inline_Math::fabsd(ab_diff) > P_DOUBLE_EPS) ? (1.0f / ab_diff) : 0.0f;
-        x = K_area.dot_product(&Kp);
-        sl = (a - x) * inv_a_b;
-
-        a = L_area.dot_product(&Kp);
-        b = L_area.dot_product(&Kp_next);
-        ab_diff = a - b;
-        inv_a_b = (IVP_Inline_Math::fabsd(ab_diff) > P_DOUBLE_EPS) ? (1.0f / ab_diff) : 0.0f;
-        x = L_area.dot_product(&Lp);
-        sk = (a - x) * inv_a_b;
-
-#endif
 
         // TL -- modify if necessary  #+#  very bad code down there, vec0 won't be normized soon
         IVP_U_Point vec0, vec1;
