@@ -17,6 +17,9 @@
 #include "ivp_mindist.hxx"
 #include <ivp_controller.hxx>
 #include <ivp_contact_situation.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 class IVP_Contact_Point;
 class IVP_Friction_Solver_Long_Term;
@@ -229,7 +232,7 @@ class IVP_Contact_Point : public IVP_Contact_Point_Fast
 
     void calc_coll_distance(); // returns the distance reached in one PSI and the rescue speed val and stores result in impact.distance_reached_in_time
 
-    IVP_FLOAT get_rot_speed_uncertainty();
+    IVP_DOUBLE get_rot_speed_uncertainty();
     IVP_FLOAT get_rescue_speed_impact(IVP_Environment *);
 
     inline IVP_FLOAT get_possible_friction_slide_way(const IVP_Event_Sim *es);
@@ -503,6 +506,23 @@ public:
     static IVP_Contact_Point *get_associated_contact_point(IVP_Mindist *mindist);
     static void delete_all_contact_points_of_object(IVP_Real_Object *obj0);
 };
+
+// Inverse mass of one contact contribution, including an existing core.
+inline IVP_FLOAT ivp_contact_inverse_mass(const IVP_U_Float_Point *cross,
+    const IVP_FLOAT *masses, IVP_FLOAT previous=0.0f) {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 products[3];
+    for (int axis = 0; axis < 3; ++axis)
+        products[axis] = fp.multiply(fp.multiply(fp.load(masses[axis]), fp.load(cross->k[axis])), fp.load(cross->k[axis]));
+    return fp.store_float(fp.add(fp.add(fp.add(fp.add(products[2], products[1]), products[0]),
+        fp.load(masses[3])), fp.load(previous)));
+#else
+    return (IVP_DOUBLE(masses[2])*cross->k[2]*cross->k[2]
+        +IVP_DOUBLE(cross->k[1])*masses[1]*cross->k[1]
+        +IVP_DOUBLE(masses[0])*cross->k[0]*cross->k[0])+masses[3]+previous;
+#endif
+}
 
 IVP_DOUBLE IVP_Impact_Solver_Long_Term::get_closing_speed() const
 {

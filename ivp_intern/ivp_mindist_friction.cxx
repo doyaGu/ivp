@@ -1,6 +1,7 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #include <ivp_physics.hxx>
+
 #include <ivp_debug_manager.hxx>
 
 #include <ivp_material.hxx>
@@ -15,6 +16,45 @@
 #include <ivp_cache_ledge_point.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 #include <ivu_memory.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
+
+// Inverse-rotate the contact normal before forming its moment arm. X stays
+// extended, Y/Z are float writes, and the Z cross component uses double products.
+static void contact_normal_cross(const IVP_U_Matrix *matrix,
+    const IVP_U_Float_Point *normal, const IVP_U_Float_Point *point,
+    IVP_U_Float_Point *cross, bool second_core)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 n[3];
+    const int order[3] = { second_core ? 0 : 2, 1, second_core ? 2 : 0 };
+    n[0] = fp.add(fp.add(
+        fp.multiply(fp.load(matrix->get_elem(order[0], 0)), fp.load(normal->k[order[0]])),
+        fp.multiply(fp.load(matrix->get_elem(order[1], 0)), fp.load(normal->k[order[1]]))),
+        fp.multiply(fp.load(matrix->get_elem(order[2], 0)), fp.load(normal->k[order[2]])));
+    for (int axis = 1; axis < 3; ++axis)
+        n[axis] = fp.load(fp.store_float(fp.add(fp.add(
+            fp.multiply(fp.load(matrix->get_elem(1, axis)), fp.load(normal->k[1])),
+            fp.multiply(fp.load(normal->k[0]), fp.load(matrix->get_elem(0, axis)))),
+            fp.multiply(fp.load(matrix->get_elem(2, axis)), fp.load(normal->k[2])))));
+    const IVP_U_Float80 y_times_x = fp.load(fp.store_double(fp.multiply(n[1], fp.load(point->k[0]))));
+    const IVP_U_Float80 x_times_y = fp.load(fp.store_double(fp.multiply(n[0], fp.load(point->k[1]))));
+    cross->k[0] = fp.store_float(fp.subtract(fp.multiply(n[2], fp.load(point->k[1])), fp.multiply(n[1], fp.load(point->k[2]))));
+    cross->k[1] = fp.store_float(fp.subtract(fp.multiply(n[0], fp.load(point->k[2])), fp.multiply(n[2], fp.load(point->k[0]))));
+    cross->k[2] = fp.store_float(fp.subtract(y_times_x, x_times_y));
+#else
+    IVP_U_Float_Point n;
+    matrix->inline_vimult3(normal, &n);
+    const IVP_DOUBLE nx = second_core
+        ? matrix->get_elem(0,0)*normal->k[0]+matrix->get_elem(1,0)*normal->k[1]+matrix->get_elem(2,0)*normal->k[2]
+        : matrix->get_elem(2,0)*normal->k[2]+matrix->get_elem(1,0)*normal->k[1]+matrix->get_elem(0,0)*normal->k[0];
+    cross->set(IVP_DOUBLE(n.k[2])*point->k[1]-IVP_DOUBLE(n.k[1])*point->k[2],
+        nx*point->k[2]-IVP_DOUBLE(n.k[2])*point->k[0],
+        IVP_DOUBLE(n.k[1])*point->k[0]-nx*point->k[1]);
+#endif
+}
 
 // calculates:
 //    diff_contact_vec
@@ -231,6 +271,19 @@ void IVP_Contact_Point::p_calc_friction_s_PK(const IVP_U_Point *pp, const IVP_Co
 #endif
 }
 
+#if IVP_ENABLE_X87_EMULATION
+static IVP_DOUBLE ivp_kk_contact_fraction(const IVP_U_Point *area, const IVP_U_Point *first,
+    const IVP_U_Point *last, const IVP_U_Point *point)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 a = area->dot_product_extended(fp, first);
+    const IVP_U_Float80 b = area->dot_product_extended(fp, last);
+    const IVP_U_Float80 reciprocal = fp.divide(fp.load(1.0), fp.subtract(a, b));
+    const IVP_U_Float80 x = area->dot_product_extended(fp, point);
+    return fp.store_double(fp.multiply(fp.subtract(a, x), reciprocal));
+}
+#endif
+
 void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const IVP_Compact_Edge *L,
                                               IVP_Cache_Ledge_Point *m_cache_K,
                                               IVP_Cache_Ledge_Point *m_cache_L, IVP_Impact_Solver_Long_Term *info, IVP_U_Float_Point *diff_contact_vec)
@@ -264,6 +317,10 @@ void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const I
         K_area.calc_cross_product(&Kvec, &norm);
         L_area.calc_cross_product(&Lvec, &norm);
 
+#if IVP_ENABLE_X87_EMULATION
+        sl = ivp_kk_contact_fraction(&K_area, &Lp, &Lp_next, &Kp);
+        sk = ivp_kk_contact_fraction(&L_area, &Kp, &Kp_next, &Lp);
+#else
         IVP_DOUBLE a, b, x;
         a = K_area.dot_product(&Lp);
         b = K_area.dot_product(&Lp_next);
@@ -278,6 +335,8 @@ void IVP_Contact_Point::p_calc_friction_ss_KK(const IVP_Compact_Edge *K, const I
         inv_a_b = (IVP_Inline_Math::fabsd(ab_diff) > P_DOUBLE_EPS) ? (1.0f / ab_diff) : 0.0f;
         x = L_area.dot_product(&Lp);
         sk = (a - x) * inv_a_b;
+
+#endif
 
         // TL -- modify if necessary  #+#  very bad code down there, vec0 won't be normized soon
         IVP_U_Point vec0, vec1;
@@ -471,18 +530,25 @@ void IVP_Contact_Point::recalc_friction_s_vals()
 
         if (!core0->physical_unmoveable)
         {                                        // && !core0->pinned){ //@@CBPIN
-            IVP_U_Float_Point surface_normal_cs; // pointing to synapse
 
             const IVP_U_Matrix *m_world_f_core = core0->get_m_world_f_core_PSI();
-            m_world_f_core->inline_vimult4(&info->contact_point_ws, &info->contact_point_cs[0]);
-            m_world_f_core->inline_vimult3(&info->surf_normal, &surface_normal_cs);
+            const IVP_DOUBLE px=info->contact_point_ws.k[0]-m_world_f_core->vv.k[0];
+            const IVP_DOUBLE py=info->contact_point_ws.k[1]-m_world_f_core->vv.k[1];
+            const IVP_DOUBLE pz=info->contact_point_ws.k[2]-m_world_f_core->vv.k[2];
+            info->contact_point_cs[0].set(
+                m_world_f_core->get_elem(1,0)*py+m_world_f_core->get_elem(2,0)*pz+m_world_f_core->get_elem(0,0)*px,
+                m_world_f_core->get_elem(1,1)*py+m_world_f_core->get_elem(2,1)*pz+m_world_f_core->get_elem(0,1)*px,
+                m_world_f_core->get_elem(1,2)*py+m_world_f_core->get_elem(2,2)*pz+m_world_f_core->get_elem(0,2)*px);
 
-            info->contact_cross_nomal_cs[0].inline_calc_cross_product(&info->contact_point_cs[0], &surface_normal_cs);
+            // RVA 0x1F860 keeps the transformed normal's x component in x87;
+            // y/z are float spills. Rounding x first cancels the small torque
+            // generated by the already-rounded contact position of a ball.
+            contact_normal_cross(m_world_f_core, &info->surf_normal, &info->contact_point_cs[0],
+                &info->contact_cross_nomal_cs[0], false);
             core0->get_surface_speed_on_test(&info->contact_point_cs[0], &core0->speed, &core0->rot_speed, &delta_velocity_ws);
 
-            IVP_U_Float_Point hp;
-            hp.set_pairwise_mult(&info->contact_cross_nomal_cs[0], core0->get_inv_rot_inertia());
-            info->inv_virtual_mass = info->contact_cross_nomal_cs[0].dot_product(&hp) + core0->get_inv_mass();
+            info->inv_virtual_mass = ivp_contact_inverse_mass(
+                &info->contact_cross_nomal_cs[0], reinterpret_cast<const IVP_FLOAT *>(core0->get_inv_masses()));
         }
         else
         {
@@ -499,21 +565,19 @@ void IVP_Contact_Point::recalc_friction_s_vals()
         IVP_Core *core1 = syn1->get_object()->get_core();
         if (!core1->physical_unmoveable)
         {                                        // && !core1->pinned){ //@@CBPIN
-            IVP_U_Float_Point surface_normal_cs; // pointing to synapse
 
             const IVP_U_Matrix *m_world_f_core = core1->get_m_world_f_core_PSI();
             m_world_f_core->inline_vimult4(&info->contact_point_ws, &info->contact_point_cs[1]);
-            m_world_f_core->inline_vimult3(&info->surf_normal, &surface_normal_cs);
 
-            info->contact_cross_nomal_cs[1].inline_calc_cross_product(&info->contact_point_cs[1], &surface_normal_cs);
+            contact_normal_cross(m_world_f_core, &info->surf_normal, &info->contact_point_cs[1],
+                &info->contact_cross_nomal_cs[1], true);
 
             IVP_U_Float_Point dh;
             core1->get_surface_speed_on_test(&info->contact_point_cs[1], &core1->speed, &core1->rot_speed, &dh);
             delta_velocity_ws.subtract(&dh);
 
-            IVP_U_Float_Point hp;
-            hp.set_pairwise_mult(&info->contact_cross_nomal_cs[1], core1->get_inv_rot_inertia());
-            info->inv_virtual_mass += info->contact_cross_nomal_cs[1].dot_product(&hp) + core1->get_inv_mass();
+            info->inv_virtual_mass = ivp_contact_inverse_mass(
+                &info->contact_cross_nomal_cs[1], reinterpret_cast<const IVP_FLOAT *>(core1->get_inv_masses()), info->inv_virtual_mass);
         }
         else
         {
