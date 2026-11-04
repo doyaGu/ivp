@@ -3,6 +3,9 @@
 #include <ivp_physics.hxx>
 #include <string.h>
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivu_list.hxx>
 #include <ivu_hash.hxx>
@@ -2538,13 +2541,23 @@ void IVP_Object_Polygon_Tetra::insert_pierce_info()
                     continue;
                 // minimize scalarproduct
                 // @@@ we could stop earlier to avoid full quadratic runtime
-                IVP_DOUBLE scal_val = tri->tmp.gen.hesse.dot_product(&tri2->tmp.gen.hesse);
-                if (scal_val < min_scal_val)
+                const IVP_DOUBLE *a = tri->tmp.gen.hesse.k, *b = tri2->tmp.gen.hesse.k;
+#if IVP_ENABLE_X87_EMULATION
+                IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+                const IVP_U_Float80 score = fp.add(fp.add(
+                    fp.multiply(fp.load(a[2]), fp.load(b[2])),
+                    fp.multiply(fp.load(a[1]), fp.load(b[1]))),
+                    fp.multiply(fp.load(a[0]), fp.load(b[0])));
+                const IVP_X87_Arithmetic::Relation relation = fp.compare(score, fp.load(min_scal_val));
+                if (relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED)
                 {
-                    // @@@ we could add some more intelligence like dist from tri...
-                    min_scal_val = scal_val;
+                    min_scal_val = fp.store_double(score);
                     found_tri = tri2;
                 }
+#else
+                IVP_DOUBLE scal_val = a[2] * b[2] + a[1] * b[1] + a[0] * b[0];
+                if (scal_val < min_scal_val) { min_scal_val = scal_val; found_tri = tri2; }
+#endif
             }
 
             // insert pierce info

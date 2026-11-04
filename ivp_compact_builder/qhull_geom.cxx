@@ -11,6 +11,9 @@
    infrequent code goes into geom2.c
 */
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
    
 #include "qhull_a.hxx"
    
@@ -65,8 +68,11 @@ void qh_backnormal (realT **rows, int numrow, int numcol, boolT sign,
     *normalp= 0.0;
     ai= rows[i] + i + 1;
     ak= normalp+1;
+    // RVA 0x4E4C0 writes every subtraction to binary64 before the next term.
+    // An accumulated x87 register changes small plane-normal components.
+    volatile coordT *component=normalp;
     for(j= i+1; j < numcol; j++)
-      *normalp -= *ai++ * *ak++;
+      *component -= *ai++ * *ak++;
     diagonal= (rows[i])[i];
     if (fabs_(diagonal) > qh MINdenom_2)
       *(normalp--) /= diagonal;
@@ -113,25 +119,27 @@ void qh_distplane (pointT *point, facetT *facet, realT *dist) {
   
   switch(qh hull_dim){
   case 2:
-    *dist= facet->offset + point[0] * normal[0] + point[1] * normal[1];
+    *dist= point[1] * normal[1] + point[0] * normal[0] + facet->offset;
     break;
   case 3:
-    *dist= facet->offset + point[0] * normal[0] + point[1] * normal[1] + point[2] * normal[2];
+    // Retail RVA 0x4E6A0 sums Z/Y/X before adding the plane offset.
+    // Near-coplanar merge choices depend on the cancellation at this boundary.
+    *dist= point[2] * normal[2] + point[1] * normal[1] + point[0] * normal[0] + facet->offset;
     break;
   case 4:
-    *dist= facet->offset+point[0]*normal[0]+point[1]*normal[1]+point[2]*normal[2]+point[3]*normal[3];
+    *dist= point[3]*normal[3]+point[2]*normal[2]+point[1]*normal[1]+point[0]*normal[0]+facet->offset;
     break;
   case 5:
-    *dist= facet->offset+point[0]*normal[0]+point[1]*normal[1]+point[2]*normal[2]+point[3]*normal[3]+point[4]*normal[4];
+    *dist= point[4]*normal[4]+point[3]*normal[3]+point[2]*normal[2]+point[1]*normal[1]+point[0]*normal[0]+facet->offset;
     break;
   case 6:
-    *dist= facet->offset+point[0]*normal[0]+point[1]*normal[1]+point[2]*normal[2]+point[3]*normal[3]+point[4]*normal[4]+point[5]*normal[5];
+    *dist= point[5]*normal[5]+point[4]*normal[4]+point[3]*normal[3]+point[2]*normal[2]+point[1]*normal[1]+point[0]*normal[0]+facet->offset;
     break;
   case 7:  
-    *dist= facet->offset+point[0]*normal[0]+point[1]*normal[1]+point[2]*normal[2]+point[3]*normal[3]+point[4]*normal[4]+point[5]*normal[5]+point[6]*normal[6];
+    *dist= point[6]*normal[6]+point[5]*normal[5]+point[4]*normal[4]+point[3]*normal[3]+point[2]*normal[2]+point[1]*normal[1]+point[0]*normal[0]+facet->offset;
     break;
   case 8:
-    *dist= facet->offset+point[0]*normal[0]+point[1]*normal[1]+point[2]*normal[2]+point[3]*normal[3]+point[4]*normal[4]+point[5]*normal[5]+point[6]*normal[6]+point[7]*normal[7];
+    *dist= point[7]*normal[7]+point[6]*normal[6]+point[5]*normal[5]+point[4]*normal[4]+point[3]*normal[3]+point[2]*normal[2]+point[1]*normal[1]+point[0]*normal[0]+facet->offset;
     break;
   default:
     *dist= facet->offset;
@@ -759,6 +767,27 @@ void qh_normalize2 (coordT *normal, int dim, boolT toporient,
   realT *colp, *maxp, norm= 0, temp, *norm1, *norm2, *norm3;
   boolT zerodiv;
 
+#if IVP_ENABLE_X87_EMULATION
+  if (dim == 3) {
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 length = fp.square_root(fp.add(fp.add(
+      fp.multiply(fp.load(normal[2]), fp.load(normal[2])),
+      fp.multiply(fp.load(normal[1]), fp.load(normal[1]))),
+      fp.multiply(fp.load(normal[0]), fp.load(normal[0]))));
+    norm = fp.store_double(length);
+    if (minnorm) {
+      IVP_X87_Arithmetic::Relation relation = fp.compare(length, fp.load(*minnorm));
+      *ismin = relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED;
+    }
+    if (fp.compare(length, fp.load(qh MINdenom)) == IVP_X87_Arithmetic::GREATER) {
+      if (!toporient) length = fp.negate(length);
+      for (k = 0; k < 3; ++k)
+        normal[k] = fp.store_double(fp.divide(fp.load(normal[k]), length));
+      wmin_(Wmindenom,norm);
+      return;
+    }
+  }
+#endif
   norm1= normal+1;
   norm2= normal+2;
   norm3= normal+3;
@@ -1175,9 +1204,11 @@ void qh_sethyperplane_gauss (int dim, coordT **rows, pointT *point0,
   qh_normalize2(normal, dim, True, NULL, NULL);
   pointcoord= point0;
   normalcoef= normal;
-  *offset= -(*pointcoord++ * *normalcoef++);
+  // RVA 0x50630 writes each offset subtraction to binary64.
+  volatile realT *offset_spill=offset;
+  *offset_spill= -(*pointcoord++ * *normalcoef++);
   for(k= dim-1; k--; )
-    *offset -= *pointcoord++ * *normalcoef++;
+    *offset_spill -= *pointcoord++ * *normalcoef++;
 } /* sethyperplane_gauss */
 
 

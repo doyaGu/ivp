@@ -1427,7 +1427,10 @@ qhull configuration warning (qh_RANDOMmax in user.h):\n\
     qh_errexit (qh_ERRqhull, NULL, NULL);
   }
   if (numpoints+extra < pointsneeded) {
-    fprintf(qh ferr,"qhull input error: not enough points (%d) to construct initial simplex (need %d)\n",
+    // The retail MSVCRT returns EOF for a null stream. UCRT terminates the
+    // process instead; preserve suppressed diagnostics and the qh_errexit path.
+    if (qh ferr)
+      fprintf(qh ferr,"qhull input error: not enough points (%d) to construct initial simplex (need %d)\n",
 	    numpoints, pointsneeded);
     qh_errexit(qh_ERRinput, NULL, NULL);
   }

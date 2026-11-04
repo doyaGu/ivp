@@ -2,6 +2,9 @@
 
 // IVP_EXPORT_PUBLIC
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #ifdef IVP_ENABLE_QHULL
 #ifdef IVP_QHULL_REENTRANT
@@ -23,9 +26,6 @@
 
 #if defined(WIN32) && !defined(_XBOX)
 #include "wtypes.h"
-#if defined(_MSC_VER)
-#include <float.h>
-#endif
 #elif defined(_XBOX)
 #ifndef WINVER
 #define WINVER 0x0500
@@ -891,21 +891,10 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_triangle_to_compace_led
 
 IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge(IVP_U_Vector<IVP_U_Point> *points)
 {
-    /************************************************
-     * FPU mode
-     ************************************************/
-    // doesnt work with threads !!
-#if defined(WIN32) && defined(_MSC_VER)
-    unsigned int oldControl = 0;
-    unsigned int ignoredControl = 0;
-    _controlfp_s(&oldControl, 0, 0);
-    _controlfp_s(&ignoredControl, _PC_64, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    unsigned short tmpflag;
-    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
-
-    unsigned short newFPUflag = tmpflag | 0x0300;
-    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Control control = IVP_X87_Control::current();
+    control.precision = IVP_X87_Arithmetic::PRECISION_64;
+    IVP_X87_Control::set(control);
 #endif
 
     IVP_Compact_Ledge *result = NULL;
@@ -924,12 +913,7 @@ IVP_Compact_Ledge *IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_le
         result = IVP_SurfaceBuilder_Pointsoup::convert_pointsoup_to_compact_ledge_internal(points);
     }
 
-#if defined(WIN32) && defined(_MSC_VER)
-    _controlfp_s(&ignoredControl, oldControl, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
-#endif
-
+    // Retail RVA 0x3AE20 leaves PC64 active for subsequent physics calls.
     return result;
 }
 
