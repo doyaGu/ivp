@@ -133,6 +133,10 @@ public:
     void rotate(IVP_COORDINATE_INDEX axis, IVP_FLOAT angle); // rotate the point around origin
 
     IVP_DOUBLE real_length() const;                                       // real length = sqrt(quad_length)
+#if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 real_length_extended(IVP_X87_Arithmetic &fp) const;
+    IVP_U_Float80 dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Float_Point *point) const;
+#endif
     IVP_DOUBLE fast_real_length() const;                                  // real length with 0.1f% error, really fast
     IVP_DOUBLE real_length_plus_normize();                                // Normize vector and return former real length.
     inline IVP_DOUBLE quad_distance_to(const IVP_U_Float_Point *p) const; // quad distance from this point to another
@@ -230,6 +234,7 @@ public:
     IVP_DOUBLE real_length() const;        // Returns real length (= sqrt(quad_length)).
 #if IVP_ENABLE_X87_EMULATION
     IVP_U_Float80 real_length_extended(IVP_X87_Arithmetic &fp) const;
+    IVP_U_Float80 dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Point *point) const;
 #endif
     IVP_DOUBLE real_length_plus_normize(); // Normize vector and return former real length.
     IVP_DOUBLE fast_real_length() const;   // Returns real length with max. 0.1f% error, really fast if in cache.

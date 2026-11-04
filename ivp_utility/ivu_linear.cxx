@@ -95,6 +95,28 @@ void IVP_U_Float_Point::set_interpolate(const IVP_U_Float_Point *p0, const IVP_U
     k[2] = (IVP_FLOAT)(c + c2);
 }
 
+#if IVP_ENABLE_X87_EMULATION
+IVP_U_Float80 IVP_U_Float_Point::real_length_extended(IVP_X87_Arithmetic &fp) const
+{
+    const IVP_U_Float80 x = fp.load(k[0]), y = fp.load(k[1]), z = fp.load(k[2]);
+    return fp.square_root(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)), fp.multiply(z, z)));
+}
+
+IVP_U_Float80 IVP_U_Float_Point::dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Float_Point *point) const
+{
+    return fp.add(fp.add(fp.multiply(fp.load(k[2]), fp.load(point->k[2])),
+        fp.multiply(fp.load(k[1]), fp.load(point->k[1]))), fp.multiply(fp.load(k[0]), fp.load(point->k[0])));
+}
+
+#if !defined(IVP_NO_DOUBLE)
+IVP_U_Float80 IVP_U_Point::dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Point *point) const
+{
+    return fp.add(fp.add(fp.multiply(fp.load(k[2]), fp.load(point->k[2])),
+        fp.multiply(fp.load(k[1]), fp.load(point->k[1]))), fp.multiply(fp.load(k[0]), fp.load(point->k[0])));
+}
+#endif
+#endif
+
 IVP_DOUBLE IVP_U_Float_Point::real_length() const
 {
     return IVP_Inline_Math::sqrtd(this->quad_length());
