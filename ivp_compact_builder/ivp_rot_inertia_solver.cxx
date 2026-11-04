@@ -7,6 +7,9 @@
 
 #include <ivp_physics.hxx>
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivu_hash.hxx>
 
 #include <ivp_compact_ledge.hxx>
@@ -39,6 +42,55 @@ IVP_Compact_Ledge_Find_Mass_Center::IVP_Compact_Ledge_Find_Mass_Center()
     qsum_surface = 0.0f;
     sum_mass.set_to_zero();
 }
+
+#if IVP_ENABLE_X87_EMULATION
+// Integrate the quadratic edge coefficients while preserving the separate
+// binary64 endpoint powers and the register-width cubic integral.
+static void inertia_edge_integral(IVP_FLOAT p0_x, IVP_FLOAT p0_y, IVP_FLOAT p0_z,
+    IVP_FLOAT p1_x, IVP_DOUBLE vector_x, IVP_DOUBLE vector_y, IVP_DOUBLE vector_z,
+    IVP_BOOL triangle_area, IVP_DOUBLE fzdy, IVP_DOUBLE fydz, IVP_DOUBLE *area)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 x0 = fp.load(p0_x), x1 = fp.load(p1_x);
+    const IVP_U_Float80 slope_y = fp.load(fp.store_double(fp.divide(fp.load(vector_y), fp.load(vector_x))));
+    const IVP_U_Float80 offset_y = fp.subtract(fp.load(p0_y), fp.multiply(x0, slope_y));
+    const IVP_U_Float80 stored_y = fp.load(fp.store_double(offset_y));
+    IVP_U_Float80 a, b, c;
+    if (triangle_area)
+    {
+        a = fp.multiply(fp.multiply(offset_y, offset_y), fp.load(fzdy));
+        b = fp.multiply(fp.multiply(stored_y, slope_y), fp.load(fzdy));
+        b = fp.add(b, b);
+        c = fp.multiply(fp.multiply(slope_y, slope_y), fp.load(fzdy));
+    }
+    else
+    {
+        const IVP_U_Float80 slope_z = fp.load(fp.store_double(fp.divide(fp.load(vector_z), fp.load(vector_x))));
+        const IVP_U_Float80 offset_z = fp.subtract(fp.load(p0_z), fp.multiply(x0, slope_z));
+        const IVP_U_Float80 stored_z = fp.load(fp.store_double(offset_z));
+        a = fp.multiply(fp.add(offset_y, fp.multiply(offset_z, fp.load(fydz))), offset_z);
+        b = fp.multiply(fp.multiply(stored_z, slope_z), fp.load(fydz));
+        b = fp.add(fp.add(fp.add(b, b), fp.multiply(slope_z, stored_y)), fp.multiply(stored_z, slope_y));
+        c = fp.multiply(fp.add(fp.multiply(slope_z, fp.load(fydz)), slope_y), slope_z);
+    }
+    const IVP_U_Float80 square1 = fp.multiply(x1, x1);
+    const IVP_U_Float80 square0 = fp.load(fp.store_double(fp.multiply(x0, x0)));
+    const IVP_U_Float80 integral2 = fp.load(fp.store_double(fp.multiply(fp.subtract(square1, square0), fp.load(0.5))));
+    const IVP_U_Float80 cube1 = fp.load(fp.store_double(fp.multiply(square1, x1)));
+    const IVP_U_Float80 cube0 = fp.load(fp.store_double(fp.multiply(square0, x0)));
+    const IVP_U_Float80 integral3 = fp.multiply(fp.subtract(cube1, cube0), fp.load(1.0 / 3.0));
+    const IVP_U_Float80 fourth1 = fp.load(fp.store_double(fp.multiply(cube1, x1)));
+    const IVP_U_Float80 fourth0 = fp.load(fp.store_double(fp.multiply(cube0, x0)));
+    const IVP_U_Float80 integral4 = fp.load(fp.store_double(fp.multiply(fp.subtract(fourth1, fourth0), fp.load(0.25))));
+    const IVP_U_Float80 integral5 = fp.multiply(fp.subtract(fp.multiply(fourth1, x1), fp.multiply(fourth0, x0)), fp.load(0.2f));
+    area[0] = fp.store_double(fp.add(fp.add(fp.add(fp.multiply(fp.subtract(x1, x0), a),
+        fp.multiply(integral3, c)), fp.multiply(integral2, b)), fp.load(area[0])));
+    area[1] = fp.store_double(fp.add(fp.add(fp.add(fp.multiply(integral4, c),
+        fp.multiply(integral3, b)), fp.multiply(integral2, a)), fp.load(area[1])));
+    area[2] = fp.store_double(fp.add(fp.add(fp.add(fp.multiply(integral5, c),
+        fp.multiply(integral4, b)), fp.multiply(integral3, a)), fp.load(area[2])));
+}
+#endif
 
 void IVP_Compact_Ledge_Mass_Center_Solver::integrate_triangle(const IVP_Compact_Ledge *ledge, const IVP_Compact_Triangle *triangle, int x, int y, int z)
 {
@@ -73,9 +125,7 @@ void IVP_Compact_Ledge_Mass_Center_Solver::integrate_triangle(const IVP_Compact_
         fydz = 0.0f;
     }
     int l;
-    IVP_DOUBLE area_msum = 0.0f;
-    IVP_DOUBLE area_mzsum = 0.0f;
-    IVP_DOUBLE area_mzzsum = 0.0f;
+    IVP_DOUBLE area[3]={0.0,0.0,0.0};
     for (l = 0; l < 3; l++)
     {
         IVP_U_Float_Point p0, p1;
@@ -94,6 +144,10 @@ void IVP_Compact_Ledge_Mass_Center_Solver::integrate_triangle(const IVP_Compact_
         {
             continue;
         }
+#if IVP_ENABLE_X87_EMULATION
+        inertia_edge_integral(p0.k[x],p0.k[y],p0.k[z],p1.k[x],
+                              vec.k[x],vec.k[y],vec.k[z],three_edge_area,fzdy,fydz,area);
+#else
         IVP_DOUBLE lydx = vec.k[y] / vec.k[x];	   // Steigung der Linie in y nach dx
         IVP_DOUBLE ly0 = p0.k[y] - lydx * p0.k[x]; // intersection point of line with x-axis
 
@@ -101,9 +155,9 @@ void IVP_Compact_Ledge_Mass_Center_Solver::integrate_triangle(const IVP_Compact_
         if (three_edge_area)
         {
             // loese Integrale im Bereich [x0 x1]: (y0 + x lydx)(y0 + x lydx) fzdy [x][x] dx
-            ka = fzdy * ly0 * ly0;
-            kb = fzdy * 2.0f * ly0 * lydx;
-            kc = fzdy * lydx * lydx;
+            ka = ly0 * ly0 * fzdy;
+            kb = ly0 * lydx * fzdy + ly0 * lydx * fzdy;
+            kc = lydx * lydx * fzdy;
         }
         else
         {
@@ -112,26 +166,28 @@ void IVP_Compact_Ledge_Mass_Center_Solver::integrate_triangle(const IVP_Compact_
             IVP_DOUBLE lzdx = vec.k[z] / vec.k[x];
             IVP_DOUBLE lz0 = p0.k[z] - lzdx * p0.k[x];
             ka = (ly0 + fydz * lz0) * lz0;
-            kb = ly0 * lzdx + lydx * lz0 + 2.0f * fydz * lz0 * lzdx;
-            kc = (lydx + fydz * lzdx) * lzdx;
+            kb = lz0 * lzdx * fydz + lz0 * lzdx * fydz + lzdx * ly0 + lz0 * lydx;
+            kc = (lzdx * fydz + lydx) * lzdx;
         }
         IVP_DOUBLE x0 = p0.k[x];
         IVP_DOUBLE x1 = p1.k[x];
         IVP_DOUBLE dx = x1 - x0;
         IVP_DOUBLE dx2 = (x1 * x1 - x0 * x0) * .5f;
-        IVP_DOUBLE dx3 = (x1 * x1 * x1 - x0 * x0 * x0) * (1.0f / 3.0f);
+        // RVA 0x3B550 uses a double 1/3, not the rounded float constant.
+        IVP_DOUBLE dx3 = (x1 * x1 * x1 - x0 * x0 * x0) * (1.0 / 3.0);
         IVP_DOUBLE dx4 = (x1 * x1 * x1 * x1 - x0 * x0 * x0 * x0) * .25f;
         IVP_DOUBLE dx5 = (x1 * x1 * x1 * x1 * x1 - x0 * x0 * x0 * x0 * x0) * .2f;
-        IVP_DOUBLE f = dx * ka + dx2 * kb + dx3 * kc;  // Flaecheninhalt
-        IVP_DOUBLE k = dx2 * ka + dx3 * kb + dx4 * kc; // Kippmoment
-        IVP_DOUBLE m = dx3 * ka + dx4 * kb + dx5 * kc; // Drehmomentum
-        area_msum += f;
-        area_mzsum += k;
-        area_mzzsum += m;
+        IVP_DOUBLE f = dx * ka + dx3 * kc + dx2 * kb;  // Flaecheninhalt
+        IVP_DOUBLE k = dx4 * kc + dx3 * kb + dx2 * ka; // Kippmoment
+        IVP_DOUBLE m = dx5 * kc + dx4 * kb + dx3 * ka; // Drehmomentum
+        area[0] += f;
+        area[1] += k;
+        area[2] += m;
+#endif
     }
-    msum += area_msum;
-    mzsum += area_mzsum;
-    mzzsum += area_mzzsum;
+    msum += area[0];
+    mzsum += area[1];
+    mzzsum += area[2];
 }
 
 void IVP_Compact_Ledge_Find_Mass_Center::integrate_triangle(const IVP_Compact_Ledge *ledge, const IVP_Compact_Triangle *triangle)
@@ -141,6 +197,40 @@ void IVP_Compact_Ledge_Find_Mass_Center::integrate_triangle(const IVP_Compact_Le
     const IVP_U_Float_Point *p1 = IVP_CLS.give_object_coords(edge->get_next(), ledge);
     const IVP_U_Float_Point *p2 = IVP_CLS.give_object_coords(edge->get_prev(), ledge);
 
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 a[3], b[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        a[i] = fp.load(fp.store_double(fp.subtract(fp.load(p2->k[i]), fp.load(p0->k[i]))));
+        b[i] = fp.load(fp.store_double(fp.subtract(fp.load(p1->k[i]), fp.load(p0->k[i]))));
+    }
+    const IVP_U_Float80 cross_x = fp.load(fp.store_float(fp.subtract(fp.multiply(b[1], a[2]), fp.multiply(b[2], a[1]))));
+    const IVP_U_Float80 cross_y = fp.load(fp.store_float(fp.subtract(fp.multiply(b[2], a[0]), fp.multiply(b[0], a[2]))));
+    const IVP_U_Float80 cross_z = fp.subtract(fp.multiply(b[0], a[1]), fp.multiply(b[1], a[0]));
+    const IVP_U_Float80 determinant = fp.add(fp.add(fp.multiply(cross_x, fp.load(p0->k[0])),
+        fp.multiply(cross_z, fp.load(p0->k[2]))), fp.multiply(cross_y, fp.load(p0->k[1])));
+    const IVP_U_Float80 square = fp.add(fp.add(fp.multiply(cross_z, cross_z),
+        fp.multiply(cross_y, cross_y)), fp.multiply(cross_x, cross_x));
+    qsum_surface = fp.store_double(fp.add(square, fp.load(qsum_surface)));
+    sum_det = fp.store_double(fp.add(determinant, fp.load(sum_det)));
+    const IVP_U_Float80 mass_factor = fp.multiply(determinant, fp.load(0.25));
+    const IVP_U_Float_Point *vertices[3] = { p0, p1, p2 };
+    IVP_DOUBLE previous_y = 0.0;
+    for (int vertex = 0; vertex < 3; ++vertex)
+    {
+        IVP_U_Float80 values[3];
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            const IVP_U_Float80 previous = axis == 1 && vertex == 1 ? fp.load(previous_y) : fp.load(sum_mass.k[axis]);
+            values[axis] = fp.add(fp.multiply(fp.load(vertices[vertex]->k[axis]), mass_factor), previous);
+            if (axis != 0) values[axis] = fp.load(fp.store_double(values[axis]));
+        }
+        previous_y = fp.store_double(values[1]);
+        for (int axis = 0; axis < 3; ++axis)
+            sum_mass.k[axis] = fp.store_float(values[axis]);
+    }
+#else
     IVP_U_Float_Point surface_normal;
     surface_normal.inline_set_vert_to_area_defined_by_three_points(p0, p2, p1);
     IVP_DOUBLE det = surface_normal.dot_product(p0);
@@ -150,6 +240,7 @@ void IVP_Compact_Ledge_Find_Mass_Center::integrate_triangle(const IVP_Compact_Le
     sum_mass.add_multiple(p0, det * 0.25f);
     sum_mass.add_multiple(p1, det * 0.25f);
     sum_mass.add_multiple(p2, det * 0.25f);
+#endif
 }
 
 void IVP_Compact_Ledge_Find_Mass_Center::integrate_ledge(const IVP_Compact_Ledge *ledge)
