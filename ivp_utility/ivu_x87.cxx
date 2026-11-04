@@ -21,10 +21,15 @@ static thread_local unsigned int ivp_x87_saved_native_control = 0;
 
 IVP_X87_Control IVP_X87_Control::current()
 {
-    if(ivp_x87_control_is_explicit) return ivp_x87_control;
-    IVP_X87_Control result =
-        {IVP_X87_Arithmetic::PRECISION_64, IVP_X87_Arithmetic::ROUND_NEAREST};
+    IVP_X87_Control result = ivp_x87_control;
+    if (!ivp_x87_control_is_explicit)
+    {
+        result.precision = IVP_X87_Arithmetic::PRECISION_64;
+        result.rounding = IVP_X87_Arithmetic::ROUND_NEAREST;
+    }
 #if defined(_MSC_VER) && defined(_M_IX86)
+    // Native callers can change the control word after a software selection.
+    // The executing FPU remains authoritative for the surrounding expressions.
     unsigned int native_control = 0;
     _controlfp_s(&native_control, 0, 0);
     const unsigned int precision = native_control & _MCW_PC;
