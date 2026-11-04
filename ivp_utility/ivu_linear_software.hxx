@@ -60,7 +60,7 @@ inline void IVP_U_Float_Point::mult(IVP_DOUBLE factor)
 
 inline IVP_DOUBLE IVP_U_Float_Point::dot_product(const IVP_U_Float_Point *v2) const
 {
-    return (k[0] * v2->k[0] + k[1] * v2->k[1] + k[2] * v2->k[2]);
+    return IVP_DOUBLE(k[2]) * v2->k[2] + IVP_DOUBLE(k[1]) * v2->k[1] + IVP_DOUBLE(k[0]) * v2->k[0];
 };
 
 inline void IVP_U_Float_Point::add_multiple(const IVP_U_Float_Point *v1, const IVP_U_Float_Point *v2, IVP_DOUBLE factor2)
@@ -302,6 +302,9 @@ inline IVP_DOUBLE IVP_U_Quat::acos_quat(const IVP_U_Quat *q) const
 
 inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Quat *q2)
 {
+#if IVP_ENABLE_X87_EMULATION
+    set_mult_quat(q1, q2);
+#else
     IVP_U_Quat *res = this;
     IVP_DOUBLE xx, yy, zz, ww;
     xx = q1->w * q2->x + q1->x * q2->w + q1->y * q2->z - q1->z * q2->y;
@@ -312,6 +315,7 @@ inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Q
     res->y = yy;
     res->z = zz;
     res->w = ww;
+#endif
 }
 
 inline void IVP_U_Quat::inline_set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Float_Quat *q2)

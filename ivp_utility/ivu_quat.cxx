@@ -1,8 +1,36 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #include <ivu_linear.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #define IVP_QUAT_DELTA 1e-6f  // error tolerance
+
+#if IVP_ENABLE_X87_EMULATION
+static IVP_U_Float80 ivp_quat_square(IVP_X87_Arithmetic &fp,
+    const IVP_U_Float80 &x, const IVP_U_Float80 &y,
+    const IVP_U_Float80 &z, const IVP_U_Float80 &w)
+{
+    return fp.add(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)),
+        fp.multiply(z, z)), fp.multiply(w, w));
+}
+
+static void ivp_quat_scale(IVP_X87_Arithmetic &fp, IVP_U_Quat *quat,
+    const IVP_U_Float80 &factor)
+{
+    quat->x = fp.store_double(fp.multiply(factor, fp.load(quat->x)));
+    quat->y = fp.store_double(fp.multiply(factor, fp.load(quat->y)));
+    quat->z = fp.store_double(fp.multiply(factor, fp.load(quat->z)));
+    quat->w = fp.store_double(fp.multiply(factor, fp.load(quat->w)));
+}
+
+static IVP_U_Float80 ivp_quat_sine_polynomial(IVP_X87_Arithmetic &fp, const IVP_U_Float80 &angle)
+{
+    const IVP_U_Float80 cube = fp.multiply(fp.multiply(angle, angle), angle);
+    return fp.subtract(angle, fp.multiply(cube, fp.load(1.0f / 6.0f)));
+}
+#endif
 
 void IVP_U_Quat::get_angles(IVP_U_Float_Point *angles_out)
 {
@@ -24,23 +52,57 @@ void IVP_U_Quat::set_fast_multiple(const IVP_U_Point *angles, IVP_DOUBLE factor)
     //	w = IVP_Inline_Math::sqrtd(1.0f - n);
 }
 
-inline IVP_FLOAT ivp_very_fast_sin(IVP_FLOAT x)
+// RVA 0x18F80 stores binary64 components, retaining the float 1/6 constant.
+inline IVP_DOUBLE ivp_very_fast_sin(IVP_DOUBLE x)
 {
     return x - x * x * x * (1.0f / 6.0f);
 }
 
 void IVP_U_Quat::set_very_fast_multiple(const IVP_U_Float_Point *angles, IVP_DOUBLE factor)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 half_factor = fp.multiply(fp.load(factor), fp.load(0.5));
+    x = fp.store_double(ivp_quat_sine_polynomial(fp, fp.multiply(fp.load(angles->k[0]), half_factor)));
+    y = fp.store_double(ivp_quat_sine_polynomial(fp, fp.multiply(fp.load(angles->k[1]), half_factor)));
+    const IVP_U_Float80 wide_z = ivp_quat_sine_polynomial(fp, fp.multiply(half_factor, fp.load(angles->k[2])));
+    z = fp.store_double(wide_z);
+    const IVP_U_Float80 square = fp.add(fp.add(fp.multiply(wide_z, wide_z),
+        fp.multiply(fp.load(y), fp.load(y))), fp.multiply(fp.load(x), fp.load(x)));
+    w = fp.store_double(fp.square_root(fp.subtract(fp.load(1.0), square)));
+#else
     IVP_DOUBLE f = factor * .5f;
     x = ivp_very_fast_sin(angles->k[0] * f);
     y = ivp_very_fast_sin(angles->k[1] * f);
     z = ivp_very_fast_sin(angles->k[2] * f);
-    IVP_DOUBLE qlen = x * x + y * y + z * z;
-    w = (qlen < 1.0f) ? IVP_Inline_Math::sqrtd(1.0f - qlen) : 0.0f;
+    w = IVP_Inline_Math::sqrtd(1.0 - (z * z + y * y + x * x));
+#endif
 }
 
 void IVP_U_Quat::set_fast_multiple_with_clip(const IVP_U_Float_Point *angles, IVP_DOUBLE factor)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 one = fp.load(1.0);
+    const IVP_U_Float80 half_factor = fp.multiply(fp.load(factor), fp.load(0.5));
+    x = fp.store_double(fp.sine(fp.multiply(fp.load(angles->k[0]), half_factor)));
+    y = fp.store_double(fp.sine(fp.multiply(fp.load(angles->k[1]), half_factor)));
+    IVP_U_Float80 wide_z = fp.sine(fp.multiply(half_factor, fp.load(angles->k[2])));
+    z = fp.store_double(wide_z);
+    IVP_U_Float80 square = fp.add(fp.add(fp.multiply(fp.load(x), fp.load(x)),
+        fp.multiply(fp.load(y), fp.load(y))), fp.multiply(wide_z, wide_z));
+    if (fp.compare(square, one) == IVP_X87_Arithmetic::GREATER)
+    {
+        const IVP_U_Float80 scale = fp.divide(fp.load(1.0 - P_RES_EPS), fp.square_root(square));
+        x = fp.store_double(fp.multiply(scale, fp.load(x)));
+        y = fp.store_double(fp.multiply(scale, fp.load(y)));
+        wide_z = fp.multiply(scale, fp.load(z));
+        z = fp.store_double(wide_z);
+        square = fp.add(fp.add(fp.multiply(wide_z, wide_z),
+            fp.multiply(fp.load(y), fp.load(y))), fp.multiply(fp.load(x), fp.load(x)));
+    }
+    w = fp.store_double(fp.square_root(fp.subtract(one, square)));
+#else
     IVP_DOUBLE f = factor * .5f;
     x = IVP_Inline_Math::ivp_sinf(angles->k[0] * f);
     y = IVP_Inline_Math::ivp_sinf(angles->k[1] * f);
@@ -56,6 +118,7 @@ void IVP_U_Quat::set_fast_multiple_with_clip(const IVP_U_Float_Point *angles, IV
         qlen = x * x + y * y + z * z;
     }
     w = IVP_Inline_Math::sqrtd(1.0f - qlen);
+#endif
 }
 
 void IVP_U_Quat::set(IVP_DOUBLE rot_x, IVP_DOUBLE rot_y, IVP_DOUBLE rot_z)
@@ -101,7 +164,31 @@ void IVP_U_Quat::set_matrix(IVP_DOUBLE m[4][4]) const
 
 void IVP_U_Quat::set_matrix(IVP_U_Matrix3 *mat) const
 {
-#if !defined(IVP_USE_PS2_VU0_)
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 one = fp.load(1.0);
+    const IVP_U_Float80 x2 = fp.load(fp.store_double(fp.add(fp.load(x), fp.load(x))));
+    const IVP_U_Float80 y2 = fp.load(fp.store_double(fp.add(fp.load(y), fp.load(y))));
+    const IVP_U_Float80 z2 = fp.add(fp.load(z), fp.load(z));
+    const IVP_U_Float80 xx = fp.load(fp.store_double(fp.multiply(x2, fp.load(x))));
+    const IVP_U_Float80 xy = fp.load(fp.store_double(fp.multiply(y2, fp.load(x))));
+    const IVP_U_Float80 xz = fp.load(fp.store_double(fp.multiply(z2, fp.load(x))));
+    const IVP_U_Float80 yy = fp.load(fp.store_double(fp.multiply(y2, fp.load(y))));
+    const IVP_U_Float80 yz = fp.load(fp.store_double(fp.multiply(z2, fp.load(y))));
+    const IVP_U_Float80 zz = fp.load(fp.store_double(fp.multiply(z2, fp.load(z))));
+    const IVP_U_Float80 wx = fp.load(fp.store_double(fp.multiply(x2, fp.load(w))));
+    const IVP_U_Float80 wy = fp.load(fp.store_double(fp.multiply(y2, fp.load(w))));
+    const IVP_U_Float80 wz = fp.multiply(z2, fp.load(w));
+    mat->set_elem(0, 0, fp.store_double(fp.subtract(one, fp.add(zz, yy))));
+    mat->set_elem(0, 1, fp.store_double(fp.subtract(xy, wz)));
+    mat->set_elem(0, 2, fp.store_double(fp.add(wy, xz)));
+    mat->set_elem(1, 0, fp.store_double(fp.add(wz, xy)));
+    mat->set_elem(1, 1, fp.store_double(fp.subtract(one, fp.add(zz, xx))));
+    mat->set_elem(1, 2, fp.store_double(fp.subtract(yz, wx)));
+    mat->set_elem(2, 0, fp.store_double(fp.subtract(xz, wy)));
+    mat->set_elem(2, 1, fp.store_double(fp.add(wx, yz)));
+    mat->set_elem(2, 2, fp.store_double(fp.subtract(one, fp.add(yy, xx))));
+#elif !defined(IVP_USE_PS2_VU0_)
     const IVP_U_Quat *quat = this;
     IVP_DOUBLE wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 
@@ -165,6 +252,42 @@ void IVP_U_Quat::set_matrix(IVP_U_Matrix3 *mat) const
 //  Comments: remember matrix (in OGL) is represented in COLUMN major form
 void IVP_U_Quat::set_quaternion(const IVP_U_Matrix3 *mat)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 zero = fp.load(0.0), one = fp.load(1.0), half = fp.load(0.5);
+    const IVP_U_Float80 trace = fp.add(fp.add(fp.load(mat->get_elem(2, 2)),
+        fp.load(mat->get_elem(0, 0))), fp.load(mat->get_elem(1, 1)));
+    if (fp.compare(trace, zero) == IVP_X87_Arithmetic::GREATER)
+    {
+        const IVP_U_Float80 root = fp.square_root(fp.add(trace, one));
+        w = fp.store_double(fp.multiply(root, half));
+        const IVP_U_Float80 scale = fp.divide(half, root);
+        x = fp.store_double(fp.multiply(fp.subtract(fp.load(mat->get_elem(2, 1)), fp.load(mat->get_elem(1, 2))), scale));
+        y = fp.store_double(fp.multiply(fp.subtract(fp.load(mat->get_elem(0, 2)), fp.load(mat->get_elem(2, 0))), scale));
+        z = fp.store_double(fp.multiply(fp.subtract(fp.load(mat->get_elem(1, 0)), fp.load(mat->get_elem(0, 1))), scale));
+    }
+    else
+    {
+        int i = 0;
+        if (mat->get_elem(1, 1) > mat->get_elem(0, 0)) i = 1;
+        if (mat->get_elem(2, 2) > mat->get_elem(i, i)) i = 2;
+        const int next[3] = { 1, 2, 0 };
+        const int j = next[i], k = next[j];
+        const IVP_U_Float80 root = fp.square_root(fp.add(fp.subtract(fp.load(mat->get_elem(i, i)),
+            fp.add(fp.load(mat->get_elem(k, k)), fp.load(mat->get_elem(j, j)))), one));
+        IVP_DOUBLE components[3];
+        components[i] = fp.store_double(fp.multiply(root, half));
+        const IVP_X87_Arithmetic::Relation relation = fp.compare(root, zero);
+        const IVP_U_Float80 scale = relation == IVP_X87_Arithmetic::EQUAL || relation == IVP_X87_Arithmetic::UNORDERED ?
+            root : fp.divide(half, root);
+        w = fp.store_double(fp.multiply(fp.subtract(fp.load(mat->get_elem(k, j)), fp.load(mat->get_elem(j, k))), scale));
+        components[j] = fp.store_double(fp.multiply(fp.add(fp.load(mat->get_elem(j, i)), fp.load(mat->get_elem(i, j))), scale));
+        components[k] = fp.store_double(fp.multiply(fp.add(fp.load(mat->get_elem(k, i)), fp.load(mat->get_elem(i, k))), scale));
+        x = components[0]; y = components[1]; z = components[2];
+    }
+    normize_quat();
+#else
+
 
     IVP_U_Quat *quat = this;
     const IVP_U_Matrix3 &m = *mat;
@@ -221,6 +344,7 @@ void IVP_U_Quat::set_quaternion(const IVP_U_Matrix3 *mat)
         quat->w = q[3];
     }
     quat->normize_quat();
+#endif
 }
 
 //  Comments: remember matrix (in OGL) is represented in COLUMN major form
@@ -294,26 +418,44 @@ void IVP_U_Quat::set_interpolate_smoothly(const IVP_U_Quat *from, const IVP_U_Qu
 {
     IVP_U_Quat *res = this;
 
-    // calc cosine
-    IVP_DOUBLE cosom = from->x * to->x + from->y * to->y + from->z * to->z + from->w * to->w;
-
-    // adjust signs (if necessary)
+    IVP_DOUBLE cosom;
     IVP_FLOAT sign;
-    if (cosom > 0.0f)
-    {
-        sign = 1.0f;
-    }
-    else
-    {
-        cosom = -cosom;
-        sign = -1.0f;
-    }
-
-    // calculate coefficients
-
-    // #+# get rid of sin and cos
-    if (cosom < 1.0f - 0.001f /*IVP_QUAT_DELTA*/)
+    int spherical=0;
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 cosine = fp.add(fp.add(fp.add(
+        fp.multiply(fp.load(from->z), fp.load(to->z)),
+        fp.multiply(fp.load(from->y), fp.load(to->y))),
+        fp.multiply(fp.load(to->w), fp.load(from->w))),
+        fp.multiply(fp.load(from->x), fp.load(to->x)));
+    sign = fp.compare(cosine, fp.load(0.0)) == IVP_X87_Arithmetic::GREATER ? 1.0f : -1.0f;
+    if (sign < 0.0f) cosine = fp.negate(cosine);
+    cosom = fp.store_double(cosine);
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(cosine, fp.load(1.0 - 0.001f));
+    spherical = relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED;
+#else
+    cosom=from->z*to->z+from->y*to->y+from->w*to->w+from->x*to->x;
+    sign=cosom>0.0 ? 1.0f : -1.0f;
+    if(sign<0.0f) cosom=-cosom;
+    spherical=cosom<1.0-0.001f;
+#endif
+    if (spherical)
     {  // 0.033 * 180/PI  degrees
+#if IVP_ENABLE_X87_EMULATION
+        const IVP_DOUBLE omega = IVP_Inline_Math::acosd(cosom);
+        const IVP_U_Float80 one = fp.load(1.0);
+        const IVP_U_Float80 inverse = fp.divide(one,
+            fp.square_root(fp.subtract(one, fp.multiply(fp.load(cosom), fp.load(cosom)))));
+        const IVP_DOUBLE inverse_sine = fp.store_double(inverse);
+        const IVP_U_Float80 scale0 = fp.multiply(inverse, fp.sine(
+            fp.multiply(fp.subtract(one, fp.load(t)), fp.load(omega))));
+        const IVP_U_Float80 scale1 = fp.multiply(fp.multiply(fp.sine(
+            fp.multiply(fp.load(omega), fp.load(t))), fp.load(sign)), fp.load(inverse_sine));
+        res->x = fp.store_double(fp.add(fp.multiply(scale0, fp.load(from->x)), fp.multiply(scale1, fp.load(to->x))));
+        res->y = fp.store_double(fp.add(fp.multiply(scale0, fp.load(from->y)), fp.multiply(scale1, fp.load(to->y))));
+        res->z = fp.store_double(fp.add(fp.multiply(scale0, fp.load(from->z)), fp.multiply(scale1, fp.load(to->z))));
+        res->w = fp.store_double(fp.add(fp.multiply(scale1, fp.load(to->w)), fp.multiply(scale0, fp.load(from->w))));
+#else
         IVP_DOUBLE scale0, scale1;
         // standard case (slerp)
         IVP_DOUBLE omega = IVP_Inline_Math::acosd(cosom);
@@ -326,6 +468,7 @@ void IVP_U_Quat::set_interpolate_smoothly(const IVP_U_Quat *from, const IVP_U_Qu
         res->y = scale0 * from->y + scale1 * to->y;
         res->z = scale0 * from->z + scale1 * to->z;
         res->w = scale0 * from->w + scale1 * to->w;
+#endif
 #if 0
 	IVP_DOUBLE len = res->acos_quat(res);
 	printf("angle quat_error: %G %G %G	\n", t,cosom,  1.0f - len);
@@ -333,6 +476,23 @@ void IVP_U_Quat::set_interpolate_smoothly(const IVP_U_Quat *from, const IVP_U_Qu
     }
     else
     {
+#if IVP_ENABLE_X87_EMULATION
+        const IVP_U_Float80 time = fp.load(t), direction = fp.load(sign);
+        const IVP_U_Float80 values[4] = {
+            fp.add(fp.multiply(fp.subtract(fp.multiply(direction, fp.load(to->x)), fp.load(from->x)), time), fp.load(from->x)),
+            fp.add(fp.multiply(fp.subtract(fp.multiply(direction, fp.load(to->y)), fp.load(from->y)), time), fp.load(from->y)),
+            fp.add(fp.multiply(fp.subtract(fp.multiply(direction, fp.load(to->z)), fp.load(from->z)), time), fp.load(from->z)),
+            fp.add(fp.multiply(fp.subtract(fp.multiply(direction, fp.load(to->w)), fp.load(from->w)), time), fp.load(from->w)) };
+        res->x = fp.store_double(values[0]); res->y = fp.store_double(values[1]);
+        res->z = fp.store_double(values[2]); res->w = fp.store_double(values[3]);
+        const IVP_U_Float80 half = fp.load(0.5);
+        const IVP_U_Float80 square_half = fp.multiply(ivp_quat_square(fp,
+            fp.load(res->x), fp.load(res->y), fp.load(res->z), values[3]), half);
+        IVP_U_Float80 factor = fp.subtract(fp.load(1.5), square_half);
+        for (int i = 0; i < 2; ++i)
+            factor = fp.add(factor, fp.subtract(half, fp.multiply(fp.multiply(factor, factor), square_half)));
+        ivp_quat_scale(fp, res, factor);
+#else
         // "from" and "to" quaternions are very close
         //  ... so we can do a linear interpolation
         // calculate final values
@@ -341,6 +501,7 @@ void IVP_U_Quat::set_interpolate_smoothly(const IVP_U_Quat *from, const IVP_U_Qu
         res->z = from->z + t * (sign * to->z - from->z);
         res->w = from->w + t * (sign * to->w - from->w);
         res->normize_correct_step(3);
+#endif
     }
 }
 
@@ -404,6 +565,12 @@ void IVP_U_Quat::set_interpolate_linear(const IVP_U_Quat *from, const IVP_U_Quat
 ***********************************************************************EDOC*/
 void IVP_U_Quat::normize_quat()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 square = ivp_quat_square(fp, fp.load(x), fp.load(y), fp.load(z), fp.load(w));
+    if (fp.compare(square, fp.load(P_DOUBLE_EPS)) == IVP_X87_Arithmetic::GREATER)
+        ivp_quat_scale(fp, this, fp.divide(fp.load(1.0), fp.square_root(square)));
+#else
     IVP_DOUBLE dist, square;
     IVP_U_Quat *quat = this;
     square = quat->x * quat->x + quat->y * quat->y + quat->z * quat->z + quat->w * quat->w;
@@ -416,10 +583,27 @@ void IVP_U_Quat::normize_quat()
         quat->z *= dist;
         quat->w *= dist;
     }
+#endif
 }
 
 void IVP_U_Quat::fast_normize_quat()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_DOUBLE stored_square = fp.store_double(ivp_quat_square(fp, fp.load(x), fp.load(y), fp.load(z), fp.load(w)));
+    const IVP_U_Float80 square = fp.load(stored_square), one = fp.load(1.0), half = fp.load(0.5);
+    const IVP_U_Float80 tolerance = fp.load(P_DOUBLE_RES);
+    if (fp.compare(fp.absolute(fp.subtract(one, square)), tolerance) != IVP_X87_Arithmetic::GREATER)
+        return;
+    IVP_U_Float80 factor = fp.subtract(fp.load(1.5), fp.multiply(square, half));
+    do
+    {
+        factor = fp.add(factor, fp.multiply(fp.subtract(one,
+            fp.multiply(fp.multiply(factor, factor), square)), half));
+    } while (fp.compare(fp.absolute(fp.subtract(one,
+        fp.multiply(fp.multiply(factor, factor), square))), tolerance) == IVP_X87_Arithmetic::GREATER);
+    ivp_quat_scale(fp, this, factor);
+#else
     IVP_DOUBLE square;
     IVP_U_Quat *quat = this;
     square = quat->x * quat->x + quat->y * quat->y + quat->z * quat->z + quat->w * quat->w;
@@ -437,6 +621,7 @@ void IVP_U_Quat::fast_normize_quat()
         quat->z *= factor;
         quat->w *= factor;
     }
+#endif
 }
 
 /*SDOC***********************************************************************
@@ -596,7 +781,25 @@ void IVP_U_Quat::set_from_rotation_vectors(IVP_DOUBLE x1, IVP_DOUBLE y1, IVP_DOU
 ***********************************************************************EDOC*/
 void IVP_U_Quat::set_mult_quat(const IVP_U_Quat *q1, const IVP_U_Quat *q2)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 yy = fp.subtract(fp.add(fp.add(
+        fp.multiply(fp.load(q1->w), fp.load(q2->y)), fp.multiply(fp.load(q2->w), fp.load(q1->y))),
+        fp.multiply(fp.load(q1->z), fp.load(q2->x))), fp.multiply(fp.load(q2->z), fp.load(q1->x)));
+    const IVP_U_Float80 ww = fp.subtract(fp.subtract(fp.subtract(
+        fp.multiply(fp.load(q1->w), fp.load(q2->w)), fp.multiply(fp.load(q1->x), fp.load(q2->x))),
+        fp.multiply(fp.load(q1->y), fp.load(q2->y))), fp.multiply(fp.load(q1->z), fp.load(q2->z)));
+    const IVP_U_Float80 xx = fp.subtract(fp.add(fp.add(
+        fp.multiply(fp.load(q1->x), fp.load(q2->w)), fp.multiply(fp.load(q2->z), fp.load(q1->y))),
+        fp.multiply(fp.load(q1->w), fp.load(q2->x))), fp.multiply(fp.load(q1->z), fp.load(q2->y)));
+    const IVP_U_Float80 zz = fp.subtract(fp.add(fp.add(
+        fp.multiply(fp.load(q1->w), fp.load(q2->z)), fp.multiply(fp.load(q1->x), fp.load(q2->y))),
+        fp.multiply(fp.load(q1->z), fp.load(q2->w))), fp.multiply(fp.load(q2->x), fp.load(q1->y)));
+    x = fp.store_double(xx); y = fp.store_double(yy);
+    z = fp.store_double(zz); w = fp.store_double(ww);
+#else
     this->inline_set_mult_quat(q1, q2);
+#endif
 }
 
 /*SDOC***********************************************************************
@@ -625,7 +828,13 @@ void IVP_U_Quat::set_invert_mult(const IVP_U_Quat *q1, const IVP_U_Quat *q2)
     IVP_U_Quat *res = this;
     IVP_U_Quat q;
     q.set_invert_unit_quat(q1);
-    res->inline_set_mult_quat(&q, q2);
+    // RVA 0x19620 inlines a different accumulation order from the ordinary
+    // quaternion multiply at 0x1E7C0. It matters for small relative rotations.
+    const IVP_DOUBLE yy=q.z*q2->x+q.y*q2->w+q.w*q2->y-q.x*q2->z;
+    const IVP_DOUBLE zz=q.w*q2->z+q.z*q2->w+q.x*q2->y-q.y*q2->x;
+    const IVP_DOUBLE ww=q.w*q2->w-q.x*q2->x-q.y*q2->y-q.z*q2->z;
+    const IVP_DOUBLE xx=q.y*q2->z+q.w*q2->x+q.x*q2->w-q.z*q2->y;
+    res->x=xx; res->y=yy; res->z=zz; res->w=ww;
 }
 
 #if 0
