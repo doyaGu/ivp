@@ -12,6 +12,8 @@
 #include <ivp_calc_next_psi_solver.hxx>
 #include <ivp_object_attach.hxx>
 #include <ivp_hull_manager.hxx>
+#include <ivp_core_macros.hxx>
+#include <ivp_hull_manager_macros.hxx>
 
 void IVP_Object_Attach::attach_object(IVP_Real_Object *parent, IVP_Real_Object *attached_object,
                                       IVP_DOUBLE max_distance_attached_object_to_parent)
