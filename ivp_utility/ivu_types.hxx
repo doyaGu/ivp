@@ -183,7 +183,8 @@ public:
     void operator+=(double val) { seconds += val; }
     double get_seconds() const { return seconds; }
     double get_time() const { return seconds; } // for debugging
-    double operator-(const IVP_Time &b) const { return float(this->seconds - b.seconds); }
+    // Retail RVA 0x1E300 subtracts the binary64 clocks without a float cast.
+    double operator-(const IVP_Time &b) const { return this->seconds - b.seconds; }
     void operator-=(const IVP_Time b) { this->seconds -= b.seconds; }
     IVP_Time operator+(double val) const
     {
@@ -419,7 +420,7 @@ inline void P_MEM_CLEAR_ARRAY(T *clss, size_t elems) {
 #define P_DOUBLE_MAX 1e20
 #define P_DOUBLE_RES 1E-12 // double resolution for numbers < 1.0
 #define IVP_3D_SOLVER_NULLSTELLE_EPS 1e-8
-#define P_DOUBLE_EPS 1e-10       // used for division checking
+#define P_DOUBLE_EPS 1e-19       // retail division/normalization cutoff
 #define P_MAX_WORLD_DOUBLE 10000 // max world koords
 #endif
 

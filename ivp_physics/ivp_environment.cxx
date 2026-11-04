@@ -28,6 +28,9 @@
 #include <ivp_sim_unit.hxx>
 #include <ivp_time.hxx>
 #include <ivu_memory.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivu_active_value.hxx>
 #include <ivp_templates.hxx>
 
@@ -179,7 +182,16 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
 
     controller_manager = new IVP_Controller_Manager(this);
 
-    set_delta_PSI_time(1.0f / 66.0f);
+    // Retail RVA 0x12A60 passes binary64 1/66, not a float-rounded value.
+    set_delta_PSI_time(1.0 / 66.0);
+    // Retail computes this once and respects the caller's precision word.
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 logarithm = fp.log2_multiply(fp.load(0.9f), fp.natural_logarithm_of_two());
+    integrated_energy_damp = fp.store_double(fp.exponential(fp.multiply(logarithm, fp.load(delta_PSI_time))));
+#else
+    integrated_energy_damp=exp(log(0.9f)*delta_PSI_time);
+#endif
     cluster_manager = new IVP_Cluster_Manager(this);
     sim_units_manager = new IVP_Sim_Units_Manager(this);
     time_manager = new IVP_Time_Manager();
@@ -283,7 +295,6 @@ void IVP_Environment::set_delta_PSI_time(IVP_DOUBLE psi_time)
     }
     delta_PSI_time = psi_time;
     inv_delta_PSI_time = 1.0f / delta_PSI_time;
-    integrated_energy_damp = IVP_Inline_Math::ivp_expf(IVP_FLOAT(log(0.9f)) * delta_PSI_time);
 }
 
 IVP_Environment::~IVP_Environment()

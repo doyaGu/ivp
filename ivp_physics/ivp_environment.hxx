@@ -138,6 +138,7 @@ class IVP_Hull_Manager_Base;
  ********************************************************************************/
 class IVP_Environment
 {
+    friend class IVP_Environment_External_Clock;
     friend class IVP_Simulation_Unit;
     friend class IVP_Friction_System;
     friend class IVP_Friction_Sys_Static;
@@ -281,8 +282,8 @@ public:
     IVP_Time get_next_PSI_time() { return time_of_next_psi; }
     IVP_Time get_old_time_of_last_PSI() { return time_of_last_psi; };
 
-    IVP_FLOAT get_delta_PSI_time() { return delta_PSI_time; }
-    IVP_FLOAT get_inv_delta_PSI_time() { return inv_delta_PSI_time; }
+    IVP_DOUBLE get_delta_PSI_time() { return delta_PSI_time; }
+    IVP_DOUBLE get_inv_delta_PSI_time() { return inv_delta_PSI_time; }
     void force_psi_on_next_simulation();
     IVP_Time_CODE get_current_time_code() { return current_time_code; }
 
