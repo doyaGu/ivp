@@ -43,11 +43,11 @@ set(numerical_sources ${arithmetic_sources}
 add_library(ivp_softfloat STATIC ${numerical_sources})
 target_compile_features(ivp_softfloat PRIVATE cxx_std_11)
 target_include_directories(ivp_softfloat PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpu
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpu/softfloat3e/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpu/fpu
-    ${CMAKE_CURRENT_BINARY_DIR}/generated
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpu>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpu/softfloat3e/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpu/fpu>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
 )
 target_compile_definitions(ivp_softfloat PRIVATE
     SOFTFLOAT_FAST_INT64 SOFTFLOAT_FAST_DIV32TO16 SOFTFLOAT_FAST_DIV64TO32 INLINE_LEVEL=5)

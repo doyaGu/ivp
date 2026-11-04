@@ -11,7 +11,9 @@ function(ivp_configure_x87_arithmetic target)
     endif()
     add_library(${target} STATIC "${IVP_DIR}/ivp_utility/ivu_x87.cxx")
     target_link_libraries(${target} PRIVATE ivp_softfloat)
-    target_include_directories(${target} PUBLIC "${IVP_DIR}/ivp_utility")
+    target_include_directories(${target} PUBLIC
+        $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
+        $<INSTALL_INTERFACE:include/ivp>)
     target_compile_features(${target} PRIVATE cxx_std_11)
     target_compile_definitions(${target} PUBLIC IVP_ENABLE_X87_EMULATION=1)
     set_target_properties(${target} PROPERTIES

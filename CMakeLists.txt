@@ -64,6 +64,11 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             target_compile_options(${LIBRARY_NAME} PUBLIC /arch:IA32)
         endif()
+    elseif(IVP_ENABLE_X87_EMULATION AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${LIBRARY_NAME} PRIVATE -ffp-contract=off)
+    endif()
+    if(IVP_ENABLE_X87_EMULATION AND COMMAND ivp_enable_numerical_ipo)
+        ivp_enable_numerical_ipo(${LIBRARY_NAME})
     endif()
 
     if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -178,6 +183,7 @@ if(IVP_ENABLE_X87_EMULATION)
     include(cmake/IVPX87.cmake)
     ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
     target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
+    ivp_enable_numerical_ipo(ivp_utility)
 endif()
 
 # ivp_surface_manager - Depends on utility
@@ -580,6 +586,11 @@ set(IVP_PUBLIC_PACKAGE_TARGETS
     ivp_compact_builder
 )
 
+set(IVP_PACKAGE_TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS})
+if(IVP_ENABLE_X87_EMULATION)
+    list(APPEND IVP_PACKAGE_TARGETS ivp_x87_arithmetic ivp_softfloat)
+endif()
+
 set(IVP_PUBLIC_HEADER_DIRS
     ivp_collision
     ivp_controller
@@ -626,7 +637,7 @@ foreach(_ivp_public_target IN LISTS IVP_PUBLIC_PACKAGE_TARGETS)
     add_dependencies(${_ivp_public_target} ivp_public_headers)
 endforeach()
 
-export(TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS}
+export(TARGETS ${IVP_PACKAGE_TARGETS}
     FILE "${CMAKE_CURRENT_BINARY_DIR}/ivp_targets.cmake"
     NAMESPACE ivp::
 )
@@ -677,12 +688,21 @@ if(IVP_INSTALL)
     # Install libraries.
     # Note: INCLUDES DESTINATION is omitted; include paths are already set
     # via $<INSTALL_INTERFACE:...> in target_include_directories().
-    install(TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS}
+    install(TARGETS ${IVP_PACKAGE_TARGETS}
         EXPORT ivp_targets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
+
+    if(IVP_ENABLE_X87_EMULATION)
+        install(FILES
+            "${IVP_DIR}/third_party/softfloat/BOCHS-COPYING"
+            "${IVP_DIR}/third_party/softfloat/BOCHS-LICENSE"
+            "${IVP_DIR}/third_party/softfloat/cpu/softfloat3e/COPYING.txt"
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/ivp/softfloat
+        )
+    endif()
 
     if(IVP_INCLUDE_QHULL AND IVP_REENTRANT_QHULL)
         install(FILES "${IVP_QHULL_LICENSE_FILE}"
