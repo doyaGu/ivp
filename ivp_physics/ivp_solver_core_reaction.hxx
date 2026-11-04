@@ -14,7 +14,9 @@ class IVP_U_Point_4 : public IVP_U_Float_Hesse
   public:
     IVP_DOUBLE dot_product4(const IVP_U_Point_4 &o)
     {
-        return k[0] * o.k[0] + k[1] * o.k[1] + k[2] * o.k[2] + hesse_val * o.hesse_val;
+        // RVA 0x339B0 accumulates w, z, y, x without float intermediates.
+        return IVP_DOUBLE(hesse_val) * o.hesse_val + IVP_DOUBLE(k[2]) * o.k[2]
+            + IVP_DOUBLE(k[1]) * o.k[1] + IVP_DOUBLE(k[0]) * o.k[0];
     }
 
     void set_line_wise_mult4(const IVP_U_Point_4 *a, const IVP_U_Point_4 *b)
