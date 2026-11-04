@@ -14,7 +14,7 @@
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_ledge_solver.hxx>
 
-static IVP_FLOAT ivp_mindist_core_projection(const IVP_U_Point *a,
+IVP_FLOAT IVP_Mindist_Minimize_Solver::calc_contact_center_projection(const IVP_U_Point *a,
     const IVP_U_Point *b, const IVP_U_Float_Point *normal)
 {
 #if IVP_ENABLE_X87_EMULATION
@@ -124,7 +124,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_
         mindist->len_numerator = dist_plus_radius - mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_B->cache_object->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
+        mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_B->cache_object->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
         return IVP_MRC_OK;
     }
@@ -208,7 +208,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         mindist->len_numerator -= mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
+        mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -536,7 +536,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
         mindist->contact_plane.set_multiple(&H_ws, (side - 0.5f) * 2.0f * iHQ);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_K->get_object_cache()->core_pos, &m_cache_L->get_object_cache()->core_pos,&mindist->contact_plane);
+        mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_K->get_object_cache()->core_pos, &m_cache_L->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -748,7 +748,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BP(IVP_Cache_Ball *m_cache_
     mindist->len_numerator = dist_plus_radius - mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-    mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_ball->cache_object->core_pos, &m_cache_P->get_object_cache()->core_pos,&mindist->contact_plane);
+    mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_ball->cache_object->core_pos, &m_cache_P->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     IVP_DOUBLE s_grad_max = 0;
 
@@ -864,7 +864,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_PP(const IVP_Compact_Edge *
         }
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_A->get_object_cache()->core_pos, &m_cache_B->get_object_cache()->core_pos,&mindist->contact_plane);
+        mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_A->get_object_cache()->core_pos, &m_cache_B->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -1075,7 +1075,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     mindist->contact_plane.set_multiple(&Lot2, -inv_len * iqK_len);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-    mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_ball->cache_object->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
+    mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_ball->cache_object->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
 
     m_cache_K->tmp.synapse->update_synapse(K, IVP_ST_EDGE);
@@ -1231,7 +1231,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
         // IVP_ASSERT( mindist->contact_plane.real_length() < 1.001f);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
+        mindist->contact_dot_diff_center = calc_contact_center_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 

@@ -49,6 +49,9 @@ class IVP_Mindist_Minimize_Solver
 
     /////////// real functions
 
+    static IVP_FLOAT calc_contact_center_projection(const IVP_U_Point *first,
+        const IVP_U_Point *second, const IVP_U_Float_Point *normal);
+
     void init_loop_hash();
     IVP_BOOL check_loop_hash(IVP_SYNAPSE_POLYGON_STATUS s0, const IVP_Compact_Edge *e0, IVP_SYNAPSE_POLYGON_STATUS s1, const IVP_Compact_Edge *e1);
 
