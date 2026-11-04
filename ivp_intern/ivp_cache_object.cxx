@@ -161,7 +161,11 @@ void IVP_Cache_Object::transform_position_to_world_coords(const IVP_U_Float_Poin
 
 void IVP_Cache_Object::transform_vector_to_object_coords(const IVP_U_Point *P_world, IVP_U_Point *P_object_out) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    this->m_world_f_object.vimult3(P_world, P_object_out);
+#else
     this->m_world_f_object.inline_vimult3(P_world, P_object_out);
+#endif
 }
 
 void IVP_Cache_Object::transform_vector_to_object_coords(const IVP_U_Float_Point *P_world, IVP_U_Float_Point *P_object_out) const
@@ -171,7 +175,11 @@ void IVP_Cache_Object::transform_vector_to_object_coords(const IVP_U_Float_Point
 
 void IVP_Cache_Object::transform_vector_to_world_coords(const IVP_U_Point *P_object, IVP_U_Point *P_world_out) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    this->m_world_f_object.vmult3(P_object, P_world_out);
+#else
     this->m_world_f_object.inline_vmult3(P_object, P_world_out);
+#endif
 }
 
 void IVP_Cache_Object::transform_vector_to_world_coords(const IVP_U_Float_Point *P_object, IVP_U_Float_Point *P_world_out) const
