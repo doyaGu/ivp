@@ -7,6 +7,9 @@
 
 #include <ivp_physics.hxx>
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivu_hash.hxx>
 
 #include <ivp_cache_ledge_point.hxx>
@@ -246,15 +249,49 @@ void IVP_Compact_Ledge_Solver::calc_radius_to_given_center(const IVP_Compact_Sur
     }
 }
 
+#if IVP_ENABLE_X87_EMULATION
+// Collision-space conversion has a binary64 world-position boundary before
+// the inverse translation. Its forward X sum stays wide through translation.
+static void ivp_transform_collision_point(const IVP_U_Float_Point *point,
+    const IVP_U_Matrix *forward, const IVP_U_Matrix *inverse, IVP_U_Point *output)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 translated[3];
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        IVP_U_Float80 sum = fp.multiply(fp.load(forward->get_elem(axis, 0)), fp.load(point->k[0]));
+        if (axis != 2) sum = fp.load(fp.store_double(sum));
+        sum = fp.add(fp.multiply(fp.load(forward->get_elem(axis, 1)), fp.load(point->k[1])), sum);
+        if (axis != 2) sum = fp.load(fp.store_double(sum));
+        sum = fp.add(fp.multiply(fp.load(forward->get_elem(axis, 2)), fp.load(point->k[2])), sum);
+        const IVP_DOUBLE world = fp.store_double(fp.add(sum, fp.load(forward->vv.k[axis])));
+        translated[axis] = fp.subtract(fp.load(world), fp.load(inverse->vv.k[axis]));
+    }
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        const IVP_U_Float80 projection = fp.add(fp.add(
+            fp.multiply(fp.load(inverse->get_elem(2, axis)), translated[2]),
+            fp.multiply(fp.load(inverse->get_elem(1, axis)), translated[1])),
+            fp.multiply(fp.load(inverse->get_elem(0, axis)), translated[0]));
+        output->k[axis] = fp.store_double(projection);
+    }
+}
+#endif
+
 void IVP_Compact_Ledge_Solver::calc_pos_other_space(const IVP_Compact_Edge *P,
                                                     IVP_Cache_Ledge_Point *m_cache_P,
                                                     IVP_Cache_Ledge_Point *m_cache_other_space,
                                                     IVP_U_Point *res)
 {
     const IVP_U_Float_Point *p_os = IVP_CLS.give_object_coords(P, m_cache_P);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_transform_collision_point(p_os,&m_cache_P->clp_cache_object->m_world_f_object,
+        &m_cache_other_space->clp_cache_object->m_world_f_object,res);
+#else
     IVP_U_Point p_ws;
     m_cache_P->get_object_cache()->m_world_f_object.inline_vmult4(p_os, &p_ws);
     m_cache_other_space->clp_cache_object->m_world_f_object.inline_vimult4(&p_ws, res);
+#endif
 }
 
 void IVP_Compact_Ledge_Solver::transform_vec_other_space(const IVP_U_Point *dir_os,
@@ -272,10 +309,15 @@ void IVP_Compact_Ledge_Solver::transform_pos_other_space(const IVP_U_Float_Point
                                                          IVP_Cache_Ledge_Point *m_cache_other_space,
                                                          IVP_U_Point *res)
 {
+#if IVP_ENABLE_X87_EMULATION
+    ivp_transform_collision_point(pos_in_os,&m_cache_dir->clp_cache_object->m_world_f_object,
+        &m_cache_other_space->clp_cache_object->m_world_f_object,res);
+#else
     IVP_U_Point dir_ws;
     IVP_U_Point pos_os(pos_in_os);
     m_cache_dir->clp_cache_object->m_world_f_object.inline_vmult4(&pos_os, &dir_ws);
     m_cache_other_space->clp_cache_object->m_world_f_object.inline_vimult4(&dir_ws, res);
+#endif
 }
 #ifdef DEBUG
 /********************************************************************************
