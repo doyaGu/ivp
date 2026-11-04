@@ -5,6 +5,9 @@
 
 #include <ivu_types.hxx>
 #include <ivu_linear.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 template <class TBitLayout, class TValue>
 inline TBitLayout ivp_bit_cast_layout(const TValue &value)
@@ -107,6 +110,31 @@ inline int PFM_LD(double a)
 class IVP_Fast_Math
 {
 public:
+#if IVP_ENABLE_X87_EMULATION
+    static IVP_U_Float80 isqrt_extended(IVP_X87_Arithmetic &fp, double square, int resolution_steps)
+    {
+        const uint64_t bits = ivp_bit_cast_layout<uint64_t>(square);
+        const uint32_t high = static_cast<uint32_t>(bits >> 32);
+        const uint64_t seed = uint64_t(((0x7ff00000u - high) >> 1) + 0x1ff00000u) << 32;
+        IVP_U_Float80 inverse = fp.load(ivp_bit_cast_layout<double>(seed));
+        const IVP_U_Float80 half = fp.load(0.5);
+        const IVP_U_Float80 one = fp.load(1.0);
+        const IVP_U_Float80 square_half = fp.multiply(fp.load(square), half);
+        IVP_U_Float80 correction = fp.subtract(half,
+            fp.multiply(fp.multiply(square_half, inverse), inverse));
+        inverse = fp.multiply(inverse, fp.add(one, correction));
+        // The first correction multiplies h*x*x; subsequent ones use x*x*h.
+        const int corrections = 1 + (resolution_steps > 0) +
+            (resolution_steps > 1) + (resolution_steps > 2);
+        for (int i = 0; i < corrections; ++i)
+        {
+            correction = fp.subtract(half,
+                fp.multiply(fp.multiply(inverse, inverse), square_half));
+            inverse = fp.multiply(inverse, fp.add(one, correction));
+        }
+        return inverse;
+    }
+#endif
 #if defined(PSXII)
     /// Calculates the dot product of the calling vector with v.
     /// \param v
@@ -152,6 +180,10 @@ public:
     // 3 -> 1e-16
     static double isqrt(double square, int resolution_steps)
     {
+#if IVP_ENABLE_X87_EMULATION
+        IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+        return fp.store_double(isqrt_extended(fp, square, resolution_steps));
+#else
         IVP_ASSERT(IVP_Inline_Math::fabsd(square) > 0.0f);
         p_double_ieee ie = ivp_bit_cast_layout<p_double_ieee>(square);
         p_double_ieee h;
@@ -160,17 +192,21 @@ public:
         IVP_DOUBLE squareh = square * 0.5f;
         IVP_DOUBLE inv_sqrt = h.val;
 
-        inv_sqrt += inv_sqrt * (0.5f - inv_sqrt * inv_sqrt * squareh);
-        inv_sqrt += inv_sqrt * (0.5f - inv_sqrt * inv_sqrt * squareh);
+        // RVA 0xDAE0/0xDB80 use x * (1 + (0.5 - x*x*h)), rather than
+        // x += x * (0.5 - x*x*h). They differ under x87 PC24/PC53.
+        // The first correction multiplies h*x*x; the later ones x*x*h.
+        inv_sqrt *= 1.0 + (0.5 - squareh * inv_sqrt * inv_sqrt);
+        inv_sqrt *= 1.0 + (0.5 - inv_sqrt * inv_sqrt * squareh);
         if (resolution_steps > 0)
-            inv_sqrt += inv_sqrt * (0.5f - (inv_sqrt * inv_sqrt * squareh));
+            inv_sqrt *= 1.0 + (0.5 - inv_sqrt * inv_sqrt * squareh);
         if (resolution_steps > 1)
-            inv_sqrt += inv_sqrt * (0.5f - (inv_sqrt * inv_sqrt * squareh));
+            inv_sqrt *= 1.0 + (0.5 - inv_sqrt * inv_sqrt * squareh);
         if (resolution_steps > 2)
-            inv_sqrt += inv_sqrt * (0.5f - (inv_sqrt * inv_sqrt * squareh));
+            inv_sqrt *= 1.0 + (0.5 - inv_sqrt * inv_sqrt * squareh);
 
         IVP_ASSERT(IVP_Inline_Math::fabsd(1.0f - inv_sqrt * inv_sqrt * square) < 0.001f);
         return inv_sqrt;
+#endif
     }
     static IVP_DOUBLE sqrt(IVP_DOUBLE x)
     {
