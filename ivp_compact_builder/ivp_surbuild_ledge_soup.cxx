@@ -1210,15 +1210,11 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
     int axis = axes_order[0]; // we just balance over the first
 #endif
     {
-        // calculate median on chosen axis
-        IVP_DOUBLE median = 0.0f;
-
-        for (int median_average = 0; median_average < terminals->len(); median_average++)
-        {
-            median += terminals->element_at(median_average)->center.k[axis];
-        }
-
-        median /= terminals->len();
+        // Retail 0x38C90 splits at the enclosing box midpoint, not the
+        // later SDK's average of terminal centers. Promote float endpoints
+        // before subtracting, matching the original double writeback.
+        const IVP_DOUBLE median = IVP_DOUBLE(extents_min.k[axis])
+            + (IVP_DOUBLE(extents_max.k[axis]) - extents_min.k[axis]) * 0.5;
 
         IVP_IF(0)
         {
@@ -1274,18 +1270,7 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
                 }
 
                 { // reference sphere also had center on median!!
-                    if (lefthand_terminals[axis]->len() == 0)
-                    {
-                        lefthand_terminals[axis]->add(terminal_sphere);
-                        continue;
-                    }
-
-                    if (righthand_terminals[axis]->len() == 0)
-                    {
-                        righthand_terminals[axis]->add(terminal_sphere);
-                        continue;
-                    }
-
+                    // Retail alternates from the left when both centers lie on the split.
                     if (toggle)
                     {
                         lefthand_terminals[axis]->add(terminal_sphere);
@@ -1332,22 +1317,10 @@ IVV_Sphere *IVP_SurfaceBuilder_Ledge_Soup::cluster_spheres_topdown_mediancut_rec
     }
 
 #ifdef IVP_CLUSTER_SHORTRANGE_BALANCED
-    int chosen_axis = 0;
-    { // find optimum axis
-        IVP_DOUBLE max_diff = P_DOUBLE_MAX;
-
-        for (int i = 0; i < 3; i++)
-        {
-            if (difference_in_boundingbox_volumes[i] < max_diff)
-            {
-                if ((lefthand_terminals[i]->len() != 0) && (righthand_terminals[i]->len() != 0))
-                {
-                    chosen_axis = i;
-                    max_diff = difference_in_boundingbox_volumes[i];
-                }
-            }
-        }
-    }
+    // Retail chooses the later axis on equal volume costs: Z before Y before X.
+    const IVP_FLOAT *cost = difference_in_boundingbox_volumes;
+    const int chosen_axis = cost[0] < cost[1] ? (cost[0] < cost[2] ? 0 : 2)
+        : (cost[1] < cost[2] ? 1 : 2);
 #else
     int chosen_axis = axes_order[0];
 #endif
