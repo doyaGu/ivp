@@ -3,6 +3,9 @@
 // IVP_EXPORT_PRIVATE
 
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #ifndef WIN32
     #pragma implementation "ivp_3d_solver.hxx"
@@ -28,8 +31,22 @@ IVP_Time IVP_3D_Solver::calc_nullstelle(IVP_Time t0, IVP_Time t1, IVP_DOUBLE val
     while (1)
     {
 
-        IVP_DOUBLE dv = v1 - v0;
         IVP_Time tt;
+#if IVP_ENABLE_X87_EMULATION
+        if ((counter & 3) == 3 && counter > 64)
+            return t0;
+        IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+        const IVP_U_Float80 first = fp.load(t0.get_seconds()), last = fp.load(t1.get_seconds());
+        IVP_DOUBLE selected = fp.store_double(fp.add(fp.divide(fp.multiply(
+            fp.subtract(last, first), fp.subtract(fp.load(value), fp.load(v0))),
+            fp.subtract(fp.load(v1), fp.load(v0))), first));
+        if ((counter & 3) == 3)
+            selected = fp.store_double(fp.add(fp.multiply(fp.add(
+                fp.subtract(first, fp.load(selected)), fp.subtract(last, fp.load(selected))),
+                fp.load(0.375)), fp.load(selected)));
+        tt = IVP_Time(selected);
+#else
+        IVP_DOUBLE dv = v1 - v0;
         // There are two algorithms to reduce the size of the interval:
         // 1. midpoint
         // 2. zero value of connecting straight
@@ -53,6 +70,8 @@ IVP_Time IVP_3D_Solver::calc_nullstelle(IVP_Time t0, IVP_Time t1, IVP_DOUBLE val
 
             tt += mid2 * (inv_ratio * 0.5f);
         }
+
+#endif
 
         solver_a->calc_at_matrix(tt, &A);
         solver_b->calc_at_matrix(tt, &B);

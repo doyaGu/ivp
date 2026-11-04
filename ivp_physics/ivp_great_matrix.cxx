@@ -6,6 +6,9 @@
 // IVP_EXPORT_PRIVATE
 
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #if defined(LINUX) || (__MWERKS__ && __POWERPC__)
 #include <alloca.h>
@@ -95,6 +98,7 @@ inline void IVP_VecFPU::fpu_add_multiple_row(IVP_DOUBLE *target_adress, IVP_DOUB
 #endif
 }
 
+// Retail 0x35F40 and 0x34340 accumulate the software dot from the last element.
 inline IVP_DOUBLE IVP_VecFPU::fpu_large_dot_product(IVP_DOUBLE *base_a, IVP_DOUBLE *base_b, int size, IVP_BOOL adress_aligned)
 {
 	if (adress_aligned == IVP_FALSE)
@@ -144,7 +148,7 @@ inline IVP_DOUBLE IVP_VecFPU::fpu_large_dot_product(IVP_DOUBLE *base_a, IVP_DOUB
 	else
 	{
 		IVP_DOUBLE sum = 0.0;
-		for (int i = 0; i < size; i++)
+		for (int i = size - 1; i >= 0; i--)
 		{
 			sum += base_a[i] * base_b[i];
 		}
@@ -152,7 +156,7 @@ inline IVP_DOUBLE IVP_VecFPU::fpu_large_dot_product(IVP_DOUBLE *base_a, IVP_DOUB
 	}
 #else
 	IVP_DOUBLE sum = 0.0;
-	for (int i = 0; i < size; i++)
+	for (int i = size - 1; i >= 0; i--)
 	{
 		sum += base_a[i] * base_b[i];
 	}
@@ -549,7 +553,9 @@ void IVP_Great_Matrix_Many_Zero::transform_to_lower_null_triangle()
 	// walk through columns
 	for (j = 0; j < columns; j++)
 	{
-		IVP_DOUBLE diagonal_elem, negativ_inv_diagonal;
+		IVP_DOUBLE diagonal_elem;
+		// RVA 0x33F80 rounds the reciprocal before the first elimination row.
+		volatile IVP_DOUBLE negativ_inv_diagonal;
 #if 0
 	//not always pivot search
 	diagonal_elem=matrix_values[j*aligned_row_len+j];
@@ -730,7 +736,7 @@ IVP_Great_Matrix_Many_Zero::IVP_Great_Matrix_Many_Zero(int n)
 	IVP_ASSERT(0); // does not work any longer: because of Vector-FPU adress has to be aligned
 				   // normal malloc + free is no good
 
-	MATRIX_EPS = 1.0f / 10E8f;
+	MATRIX_EPS = 1.0e-9; // Retail 0x34100 stores the double threshold.
 	columns = n;
 	calc_aligned_row_len();
 	matrix_values = (IVP_DOUBLE *)p_malloc(n * aligned_row_len * sizeof(IVP_DOUBLE));
@@ -740,7 +746,7 @@ IVP_Great_Matrix_Many_Zero::IVP_Great_Matrix_Many_Zero(int n)
 
 IVP_Great_Matrix_Many_Zero::IVP_Great_Matrix_Many_Zero()
 {
-	MATRIX_EPS = 1.0f / 10E8f;
+	MATRIX_EPS = 1.0e-9; // Retail 0x34100 stores the double threshold.
 	columns = 0;
 	aligned_row_len = 0;
 	matrix_values = NULL;
@@ -1734,6 +1740,7 @@ void IVP_Linear_Constraint_Solver::exchange_activ_inactiv(int change_var)
 
 // optimization: do not go from 0 to n_variables
 //               make two loops: one for actives, one for others
+// Retail 0x34F40 receives the selected step through a double call argument.
 void IVP_Linear_Constraint_Solver::update_step_vars(IVP_DOUBLE step_size)
 {
 	int i;
@@ -2566,9 +2573,18 @@ IVP_RETURN_TYPE IVP_Incr_L_U_Matrix::normize_row(int row_nr)
 	{
 		return IVP_FAULT;
 	}
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 reciprocal = fp.divide(fp.load(1.0), fp.load(val));
+    for (int i = 0; i < n_sub; ++i)
+        L_matrix[row_base + i] = fp.store_double(fp.multiply(reciprocal, fp.load(L_matrix[row_base + i])));
+    for (int i = row_nr + 1; i < n_sub; ++i)
+        U_matrix[row_base + i] = fp.store_double(fp.multiply(reciprocal, fp.load(U_matrix[row_base + i])));
+#else
 	IVP_DOUBLE inv_val = 1.0f / val;
 	IVP_VecFPU::fpu_multiply_row(&L_matrix[row_base], inv_val, n_sub, IVP_FALSE);
 	IVP_VecFPU::fpu_multiply_row(&U_matrix[row_base + row_nr + 1], inv_val, n_sub - row_nr - 1, IVP_FALSE);
+#endif
 
 	U_matrix[row_base + row_nr] = 1.0f;
 	return IVP_OK;
