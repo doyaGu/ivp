@@ -5,6 +5,9 @@
 #endif
 
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivp_solver_core_reaction.hxx>
 
 #include <ivu_active_value.hxx>
@@ -201,6 +204,42 @@ IVP_Actuator_Spring_Active::~IVP_Actuator_Spring_Active()
 	}
 }
 
+// RVA 0x146D0: keep axial Z force and both damping factors in x87.
+// X/Y axial forces spill to float; Y/Z damping sums spill to double.
+static void spring_force_vector(const IVP_U_Float_Point *direction,
+    const IVP_U_Float_Point *relative, IVP_FLOAT spring_length, IVP_FLOAT rest_length,
+    IVP_FLOAT constant, IVP_FLOAT damping, IVP_FLOAT lateral_damping,
+    IVP_DOUBLE time_step, IVP_U_Float_Point *output)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_DOUBLE force = fp.store_double(fp.multiply(
+        fp.subtract(fp.load(spring_length), fp.load(rest_length)), fp.load(constant)));
+    const IVP_U_Float80 axial_speed = fp.add(fp.add(
+        fp.multiply(fp.load(direction->k[2]), fp.load(relative->k[2])),
+        fp.multiply(fp.load(direction->k[1]), fp.load(relative->k[1]))),
+        fp.multiply(fp.load(direction->k[0]), fp.load(relative->k[0])));
+    const IVP_U_Float80 axial = fp.multiply(fp.subtract(fp.load(force),
+        fp.multiply(axial_speed, fp.load(damping))), fp.load(time_step));
+    const IVP_U_Float80 lateral = fp.negate(fp.multiply(fp.load(lateral_damping), fp.load(time_step)));
+    IVP_U_Float80 components[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        components[i] = fp.multiply(fp.load(direction->k[i]), axial);
+        if (i != 2) components[i] = fp.load(fp.store_float(components[i]));
+        components[i] = fp.add(fp.multiply(fp.load(relative->k[i]), lateral), components[i]);
+        if (i != 0) components[i] = fp.load(fp.store_double(components[i]));
+    }
+    for (int i = 0; i < 3; ++i)
+        output->k[i] = fp.store_float(components[i]);
+#else
+    IVP_DOUBLE force=(spring_length-rest_length)*constant;
+    force-=damping*direction->dot_product(relative);
+    output->set_multiple(direction,force*time_step);
+    output->add_multiple(relative,-time_step*lateral_damping);
+#endif
+}
+
 void IVP_Actuator_Spring::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vector<IVP_Core> * /*core_list*/)
 {
 
@@ -236,27 +275,11 @@ void IVP_Actuator_Spring::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vect
 
 	if (!spring_force_only_on_stretch || dlen > this->spring_len)
 	{
-		IVP_DOUBLE force = (dlen - this->spring_len) * this->spring_constant;
-
-		// spring damping
-		IVP_U_Float_Point relative_world_speed;
-
-		IVP_Core::get_diff_surface_speed_of_two_cores(pc1, pc0, &anch1->core_pos, &anch0->core_pos, &relative_world_speed);
-
-		IVP_DOUBLE damp_speed = dir_ws.dot_product(&relative_world_speed); // positive means closing each other
-
-		IVP_DOUBLE damp_s = this->spring_damp;
-		IVP_DOUBLE damp_m = this->rel_pos_damp;
-
-		force = force - damp_s * damp_speed;
-
-		IVP_U_Float_Point force_vector_ws; // the force
-		force_vector_ws.set_multiple(&dir_ws, force * es->delta_time);
-
-		{ // manhattan damping
-			IVP_DOUBLE manhattan_factor = -es->delta_time * damp_m;
-			force_vector_ws.add_multiple(&relative_world_speed, manhattan_factor); // manhattan damping
-		}
+        IVP_U_Float_Point relative_world_speed;
+        IVP_Core::get_diff_surface_speed_of_two_cores(pc1,pc0,&anch1->core_pos,&anch0->core_pos,&relative_world_speed);
+        IVP_U_Float_Point force_vector_ws;
+        spring_force_vector(&dir_ws,&relative_world_speed,dlen,spring_len,
+                            spring_constant,spring_damp,rel_pos_damp,es->delta_time,&force_vector_ws);
 
 		if (pc1->movement_state < IVP_MT_NOT_SIM && !pc1->pinned)
 		{

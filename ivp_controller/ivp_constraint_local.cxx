@@ -1,6 +1,9 @@
 // Copyright (C) Ipion Software GmbH 1999-2000. All rights reserved.
 
 #include <ivp_physics.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #if defined(LINUX) || (defined(__MWERKS__) && defined(__POWERPC__))
 #include <alloca.h>
@@ -38,6 +41,35 @@
 // 6 cyan
 // 7 orange
 // 8 white
+
+// RVA 0x28D0A: the three-axis constraint uses a double quaternion
+// polynomial directly, with float spills only in the X component.
+static void constraint_rotation_error(const IVP_U_Quat *q, IVP_U_Point *error)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 cubic = fp.load(0.24f), quintic = fp.load(0.58f);
+    const IVP_U_Float80 x = fp.load(fp.store_float(fp.load(q->x)));
+    const IVP_U_Float80 square = fp.multiply(fp.load(q->x), x);
+    const IVP_U_Float80 cube = fp.multiply(square, x);
+    const IVP_U_Float80 fifth = fp.multiply(fp.multiply(cube, fp.load(fp.store_float(square))), quintic);
+    error->k[0] = fp.store_double(fp.add(fp.add(fifth,
+        fp.multiply(fp.load(fp.store_float(cube)), cubic)), fp.add(x, x)));
+    const IVP_DOUBLE components[2] = { q->y, q->z };
+    for (int i = 0; i < 2; ++i)
+    {
+        const IVP_U_Float80 value = fp.load(components[i]);
+        const IVP_U_Float80 square = fp.multiply(value, value);
+        const IVP_U_Float80 cube = fp.multiply(square, value);
+        error->k[i + 1] = fp.store_double(fp.add(fp.add(value, value),
+            fp.add(fp.multiply(fp.multiply(cube, square), quintic), fp.multiply(cube, cubic))));
+    }
+#else
+    error->set(2.0f*IVP_Inline_Math::fast_asin(q->x),
+               2.0f*IVP_Inline_Math::fast_asin(q->y),
+               2.0f*IVP_Inline_Math::fast_asin(q->z));
+#endif
+}
 
 IVP_Constraint_Local_Anchor::IVP_Constraint_Local_Anchor()
 {
@@ -451,9 +483,7 @@ void IVP_Constraint_Local::do_simulation_controller(IVP_Event_Sim *es, IVP_U_Vec
 
 		IVP_U_Quat quaternion_relatedsystem;
 		quaternion_relatedsystem.set_quaternion(&m_rs_f_Ars);
-		drRA_now_rs.set(2.0f * IVP_Inline_Math::fast_asin(quaternion_relatedsystem.x),
-						2.0f * IVP_Inline_Math::fast_asin(quaternion_relatedsystem.y),
-						2.0f * IVP_Inline_Math::fast_asin(quaternion_relatedsystem.z));
+		constraint_rotation_error(&quaternion_relatedsystem,&drRA_now_rs);
 		if (quaternion_relatedsystem.w < 0.0f)
 		{
 			drRA_now_rs.mult(-1.0f);
