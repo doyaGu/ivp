@@ -134,6 +134,7 @@ public:
 
     IVP_DOUBLE real_length() const;                                       // real length = sqrt(quad_length)
 #if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 quad_length_extended(IVP_X87_Arithmetic &fp) const;
     IVP_U_Float80 real_length_extended(IVP_X87_Arithmetic &fp) const;
     IVP_U_Float80 dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Float_Point *point) const;
 #endif
@@ -233,6 +234,7 @@ public:
 
     IVP_DOUBLE real_length() const;        // Returns real length (= sqrt(quad_length)).
 #if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 quad_length_extended(IVP_X87_Arithmetic &fp) const;
     IVP_U_Float80 real_length_extended(IVP_X87_Arithmetic &fp) const;
     IVP_U_Float80 dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Point *point) const;
 #endif

@@ -26,6 +26,36 @@
 #include <ivu_x87.hxx>
 #endif
 
+#if IVP_ENABLE_X87_EMULATION
+static void ivp_point_scale(IVP_X87_Arithmetic &fp, IVP_U_Float_Point *point, const IVP_U_Float80 &factor)
+{
+    for (int axis = 0; axis < 3; ++axis)
+        point->k[axis] = fp.store_float(fp.multiply(factor, fp.load(point->k[axis])));
+}
+
+#if !defined(IVP_NO_DOUBLE)
+static void ivp_point_scale(IVP_X87_Arithmetic &fp, IVP_U_Point *point, const IVP_U_Float80 &factor)
+{
+    for (int axis = 0; axis < 3; ++axis)
+        point->k[axis] = fp.store_double(fp.multiply(factor, fp.load(point->k[axis])));
+}
+#endif
+
+template <class Point>
+static IVP_RETURN_TYPE ivp_point_normize(IVP_X87_Arithmetic &fp, Point *point,
+    int refinement_steps, IVP_U_Float80 *length = 0)
+{
+    const IVP_U_Float80 square = point->quad_length_extended(fp);
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(square, fp.load(P_DOUBLE_EPS));
+    if (relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED)
+        return IVP_FAULT;
+    const IVP_U_Float80 factor = IVP_Fast_Math::isqrt_extended(fp, square, refinement_steps);
+    ivp_point_scale(fp, point, factor);
+    if (length) *length = fp.multiply(factor, square);
+    return IVP_OK;
+}
+#endif
+
 IVP_DOUBLE get_float()
 {
     return p_atof(p_str_tok(NULL, IVP_WHITESPACE));
@@ -96,10 +126,15 @@ void IVP_U_Float_Point::set_interpolate(const IVP_U_Float_Point *p0, const IVP_U
 }
 
 #if IVP_ENABLE_X87_EMULATION
-IVP_U_Float80 IVP_U_Float_Point::real_length_extended(IVP_X87_Arithmetic &fp) const
+IVP_U_Float80 IVP_U_Float_Point::quad_length_extended(IVP_X87_Arithmetic &fp) const
 {
     const IVP_U_Float80 x = fp.load(k[0]), y = fp.load(k[1]), z = fp.load(k[2]);
-    return fp.square_root(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)), fp.multiply(z, z)));
+    return fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)), fp.multiply(z, z));
+}
+
+IVP_U_Float80 IVP_U_Float_Point::real_length_extended(IVP_X87_Arithmetic &fp) const
+{
+    return fp.square_root(quad_length_extended(fp));
 }
 
 IVP_U_Float80 IVP_U_Float_Point::dot_product_extended(IVP_X87_Arithmetic &fp, const IVP_U_Float_Point *point) const
@@ -124,13 +159,15 @@ IVP_DOUBLE IVP_U_Float_Point::real_length() const
 
 #if !defined(IVP_NO_DOUBLE)
 #if IVP_ENABLE_X87_EMULATION
+IVP_U_Float80 IVP_U_Point::quad_length_extended(IVP_X87_Arithmetic &fp) const
+{
+    const IVP_U_Float80 x = fp.load(k[0]), y = fp.load(k[1]), z = fp.load(k[2]);
+    return fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)), fp.multiply(z, z));
+}
+
 IVP_U_Float80 IVP_U_Point::real_length_extended(IVP_X87_Arithmetic &fp) const
 {
-    const IVP_U_Float80 x = fp.load(k[0]);
-    const IVP_U_Float80 y = fp.load(k[1]);
-    const IVP_U_Float80 z = fp.load(k[2]);
-    return fp.square_root(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)),
-        fp.multiply(z, z)));
+    return fp.square_root(quad_length_extended(fp));
 }
 #endif
 
@@ -146,16 +183,27 @@ IVP_DOUBLE IVP_U_Point::real_length() const
 
 IVP_RETURN_TYPE IVP_U_Point::fast_normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return ivp_point_normize(fp, this, 2);
+#else
     IVP_DOUBLE length = this->quad_length();
     if (length < P_DOUBLE_EPS)
         return IVP_FAULT;
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(length, 2);
     this->mult(f);
     return IVP_OK;
+#endif
 }
 
 IVP_DOUBLE IVP_U_Point::real_length_plus_normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 length;
+    ivp_point_normize(fp, this, 3, &length);
+    return fp.return_double(length);
+#else
     IVP_DOUBLE qlength = this->quad_length();
     if (qlength < P_DOUBLE_EPS)
     {
@@ -165,11 +213,18 @@ IVP_DOUBLE IVP_U_Point::real_length_plus_normize()
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(qlength, 3);
     this->mult(f);
     return f * qlength;  // qlength * f;
+#endif
 }
 #endif
 
 IVP_DOUBLE IVP_U_Float_Point::real_length_plus_normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 length;
+    ivp_point_normize(fp, this, 3, &length);
+    return fp.return_double(length);
+#else
     IVP_DOUBLE qlength = this->quad_length();
     if (qlength < P_DOUBLE_EPS)
     {
@@ -179,37 +234,53 @@ IVP_DOUBLE IVP_U_Float_Point::real_length_plus_normize()
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(qlength, 3);
     this->mult(f);
     return f * qlength;  // qlength * f;
+#endif
 }
 
 IVP_RETURN_TYPE IVP_U_Float_Point::fast_normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return ivp_point_normize(fp, this, 2);
+#else
     IVP_DOUBLE length = this->quad_length();
     if (length < P_DOUBLE_EPS)
         return IVP_FAULT;
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(length, 2);
     this->mult(f);
     return IVP_OK;
+#endif
 }
 
 IVP_RETURN_TYPE IVP_U_Float_Point::normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return ivp_point_normize(fp, this, 2);
+#else
     IVP_DOUBLE length = this->quad_length();
     if (length < P_DOUBLE_EPS)
         return IVP_FAULT;
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(length, 2);
     this->mult(f);
     return IVP_OK;
+#endif
 }
 
 #if !defined(IVP_NO_DOUBLE)
 IVP_RETURN_TYPE IVP_U_Point::normize()
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return ivp_point_normize(fp, this, 3);
+#else
     IVP_DOUBLE length = this->quad_length();
     if (length < P_DOUBLE_EPS)
         return IVP_FAULT;
     IVP_DOUBLE f = IVP_Fast_Math::isqrt(length, 3);
     this->mult(f);
     return IVP_OK;
+#endif
 }
 #endif
 
