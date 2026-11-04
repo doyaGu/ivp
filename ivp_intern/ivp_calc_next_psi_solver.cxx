@@ -15,6 +15,9 @@
 #include <ivp_mindist.hxx>
 #include <ivp_performancecounter.hxx>
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivu_min_hash.hxx>
 
 IVP_DOUBLE IVP_Calc_Next_PSI_Solver::get_longest_time_step_dependent_on_rot()
@@ -26,7 +29,7 @@ IVP_DOUBLE IVP_Calc_Next_PSI_Solver::get_longest_time_step_dependent_on_rot()
 /********************
  * calculate the rotation quaternion
  *************/
-inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_FLOAT delta_sim_time, IVP_U_Quat *q_core_f_core)
+inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_DOUBLE delta_sim_time, IVP_U_Quat *q_core_f_core)
 {
     IVP_Core *pc = core;
 
@@ -49,8 +52,6 @@ inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_FLOAT delta_sim_t
         return;
     }
 
-    const IVP_DOUBLE max_angle = 5.0f * 6.0f / 360.0f; // ten degrees per simulation step
-    const IVP_DOUBLE qmax_angle = max_angle * max_angle;
 
     IVP_DOUBLE square_rot_speed = pc->rot_speed.quad_length(); // was already calculated in clip rot speed
     IVP_DOUBLE dt = delta_sim_time;
@@ -59,10 +60,10 @@ inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_FLOAT delta_sim_t
     // calc number of steps needed for dirty simulation
     int steps = 1;
     {
-        if (qangle > 4.0f * qmax_angle)
+        if (qangle > 0.02777777777777778)
         {
-            steps = 1 + (int)IVP_Inline_Math::ivp_sqrtf(qangle / qmax_angle);
-            dt /= IVP_FLOAT(steps);
+            steps = 1 + (int)IVP_Inline_Math::sqrtd(qangle * 144.0);
+            dt /= IVP_DOUBLE(steps);
         }
     }
     /* divide matrix into small rotational matrizes,
@@ -84,7 +85,19 @@ inline void IVP_Calc_Next_PSI_Solver::calc_rotation_matrix(IVP_FLOAT delta_sim_t
                pc->rot_speed.k[2] * pc->rot_speed.k[0] * diff_other_rot_inertia_div_this.k[1],
                pc->rot_speed.k[0] * pc->rot_speed.k[1] * diff_other_rot_inertia_div_this.k[2]);
 
+#if IVP_ENABLE_X87_EMULATION
+        IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+        IVP_U_Float80 angular[3];
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            angular[axis] = fp.add(fp.multiply(fp.load(hp.k[axis]), fp.load(dt)), fp.load(pc->rot_speed.k[axis]));
+            if (axis == 2) angular[axis] = fp.load(fp.store_double(angular[axis]));
+        }
+        for (int axis = 0; axis < 3; ++axis)
+            pc->rot_speed.k[axis] = fp.store_float(angular[axis]);
+#else
         pc->rot_speed.add_multiple(&hp, dt);
+#endif
         if (i >= steps)
             break;
         IVP_U_Quat rot_matrix;
@@ -163,7 +176,8 @@ void IVP_Calc_Next_PSI_Solver::calc_next_PSI_matrix(IVP_Event_Sim *event_sim, IV
     }
 
     core->current_speed = core->speed.real_length();
-    IVP_FLOAT simulation_delta_time = event_sim->delta_time;
+    // RVA 0x1E300 keeps the event's binary64 step through rotation integration.
+    IVP_DOUBLE simulation_delta_time = event_sim->delta_time;
     core->i_delta_time = event_sim->i_delta_time;
 
     IVP_U_Quat q_core_f_core;
@@ -208,38 +222,57 @@ void IVP_Calc_Next_PSI_Solver::calc_next_PSI_matrix(IVP_Event_Sim *event_sim, IV
 
 void IVP_Calc_Next_PSI_Solver::calc_psi_rotation_axis(const IVP_U_Quat *q_core_f_core)
 {
-
-    // calc rotation axis in world space and rotation speed. using quaternions
-    IVP_DOUBLE qlen = q_core_f_core->x * q_core_f_core->x +
-                      q_core_f_core->y * q_core_f_core->y +
-                      q_core_f_core->z * q_core_f_core->z;
-    if (qlen > P_DOUBLE_EPS)
+#if IVP_ENABLE_X87_EMULATION && !defined(IVP_NO_DOUBLE)
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 components[3] = { fp.load(q_core_f_core->x), fp.load(q_core_f_core->y), fp.load(q_core_f_core->z) };
+    const IVP_U_Float80 square = fp.add(fp.add(fp.multiply(components[0], components[0]),
+        fp.multiply(components[1], components[1])), fp.multiply(components[2], components[2]));
+    const IVP_DOUBLE stored_square = fp.store_double(square);
+    if (fp.compare(square, fp.load(P_DOUBLE_EPS)) == IVP_X87_Arithmetic::GREATER)
     {
-        IVP_DOUBLE ilen = IVP_Fast_Math::isqrt(qlen, 3);
-        IVP_FLOAT abs_angle; // absolute rotation angle interpolated movement
-        abs_angle = IVP_Inline_Math::upper_limit_asin(qlen * ilen);
-        IVP_IF(1)
-        {
-#if defined(DEBUG) && 0
-            IVP_DOUBLE ref_angle = asin(sqrt(qlen)) - 1E9f; //@@@ was P_DOUBLE_RES; difference between old and new (fast) calculation should not be too great;
-            IVP_ASSERT(abs_angle >= ref_angle);
-#endif
-        }
-        core->abs_omega = 2.0f * abs_angle * core->i_delta_time;
-
-        IVP_U_Point rot_axis_ws, core_f_core_ws;
-        // Fix UB on cast IVP_U_Quat -> IVP_U_Point
-        core_f_core_ws.set(q_core_f_core->x, q_core_f_core->y, q_core_f_core->z);
-
-        core->m_world_f_core_last_psi.inline_vmult3(&core_f_core_ws, &rot_axis_ws);
-        core->rotation_axis_world_space.set_multiple(&rot_axis_ws, ilen);
+        const IVP_U_Float80 inverse = IVP_Fast_Math::isqrt_extended(fp, square, 3);
+        const IVP_U_Float80 angle = fp.multiply(inverse, fp.load(stored_square));
+        const IVP_U_Float80 angle2 = fp.multiply(angle, angle);
+        const IVP_U_Float80 angle3 = fp.multiply(angle2, angle);
+        const IVP_U_Float80 polynomial = fp.add(fp.add(
+            fp.multiply(fp.multiply(angle3, angle2), fp.load(0.40414f)),
+            fp.multiply(angle3, fp.load(1.0f / 6.0f))), angle);
+        const IVP_U_Float80 omega = fp.multiply(polynomial, fp.load(core->i_delta_time));
+        core->abs_omega = fp.store_float(fp.add(omega, omega));
+        const IVP_U_Matrix *matrix = &core->m_world_f_core_last_psi;
+        IVP_U_Float80 world[3];
+        world[0] = fp.add(fp.add(
+            fp.multiply(fp.load(matrix->get_elem(0, 2)), components[2]),
+            fp.multiply(fp.load(matrix->get_elem(0, 1)), components[1])),
+            fp.multiply(fp.load(matrix->get_elem(0, 0)), components[0]));
+        for (int axis = 1; axis < 3; ++axis)
+            world[axis] = fp.load(fp.store_double(fp.add(fp.add(
+                fp.multiply(fp.load(matrix->get_elem(axis, 0)), components[0]),
+                fp.multiply(fp.load(matrix->get_elem(axis, 2)), components[2])),
+                fp.multiply(fp.load(matrix->get_elem(axis, 1)), components[1]))));
+        for (int axis = 0; axis < 3; ++axis)
+            core->rotation_axis_world_space.k[axis] = fp.store_float(fp.multiply(world[axis], inverse));
     }
     else
     {
         core->abs_omega = 0.0f;
         core->rotation_axis_world_space.set(1.0f, 0.0f, 0.0f);
     }
-    core->max_surface_rot_speed = core->max_surface_deviation * core->abs_omega;
+    core->max_surface_rot_speed = fp.store_float(fp.multiply(fp.load(core->abs_omega), fp.load(core->max_surface_deviation)));
+#else
+    IVP_DOUBLE qlen=q_core_f_core->x*q_core_f_core->x+q_core_f_core->y*q_core_f_core->y+q_core_f_core->z*q_core_f_core->z;
+    if(qlen>P_DOUBLE_EPS) {
+        const IVP_DOUBLE ilen=IVP_Fast_Math::isqrt(qlen,3), angle=qlen*ilen;
+        const IVP_DOUBLE a2=angle*angle, a3=angle*a2;
+        core->abs_omega=(angle+IVP_DOUBLE(1.0f/6.0f)*a3+IVP_DOUBLE(0.40414f)*a3*a2)*core->i_delta_time*2.0;
+        IVP_U_Point local,world; local.set(q_core_f_core->x,q_core_f_core->y,q_core_f_core->z);
+        core->m_world_f_core_last_psi.inline_vmult3(&local,&world);
+        core->rotation_axis_world_space.set_multiple(&world,ilen);
+    } else {
+        core->abs_omega=0.0f; core->rotation_axis_world_space.set(1.0f,0.0f,0.0f);
+    }
+    core->max_surface_rot_speed=core->max_surface_deviation*core->abs_omega;
+#endif
 }
 
 void IVP_Calc_Next_PSI_Solver::set_transformation(const IVP_U_Quat *rotation, const IVP_U_Point *position, IVP_BOOL optimize_for_repeated_calls)
