@@ -1030,7 +1030,8 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
     if (fast_moving_flag < 0)
     {
         this->sim_unit_has_fast_objects = IVP_TRUE;
-        check_movement_state = es->environment->must_perform_movement_check(); // do not always make movement check
+        // RVA 0x121B0 leaves the movement-check clock untouched for fast units.
+        check_movement_state = IVP_FALSE;
         //	check_movement_state = IVP_FALSE;   // this might be wrong if flag is set to IVP_MT_SLOW
     }
     else
@@ -1090,10 +1091,13 @@ void IVP_Simulation_Unit::simulate_single_sim_unit_psi(IVP_Event_Sim *es, IVP_U_
         }
     }
 
-    // Union-find splits are deferred to after the simulate_sim_units_psi loop
-    // completes.  Splitting here would mutate the linked list of sim units while
-    // the prefetch-unrolled iteration in simulate_sim_units_psi is traversing it,
-    // causing newly created sim units to be missed for the current PSI.
+    // Retail 0x12443..0x1244C splits before ending this unit's transaction.
+    // The manager retains its original prefetched traversal: new units are
+    // not given another PSI merely because this split inserts them in the list.
+    if (union_find_needed_for_sim_unit)
+    {
+        do_sim_unit_union_find();
+    }
     es->environment->sim_unit_mem->end_memory_transaction();
 }
 
@@ -1175,31 +1179,7 @@ sim_units_2:
 sim_units_1:
     s_u->simulate_single_sim_unit_psi(&es, touched_cores);
 sim_units_0:
-
-    // Process deferred union-find splits.  These were postponed from
-    // simulate_single_sim_unit_psi to avoid mutating the linked list
-    // during the prefetch-unrolled traversal above.
-    //
-    // Scan both the moving slot and the still slot: a sim unit can request a
-    // split and then transition to IVP_MT_NOT_SIM during the same PSI.
-    for (s_u = sman->sim_units_slots[0]; s_u;)
-    {
-        IVP_Simulation_Unit *next_su = s_u->next_sim_unit;
-        if (s_u->union_find_needed_for_sim_unit)
-        {
-            s_u->do_sim_unit_union_find();
-        }
-        s_u = next_su;
-    }
-    for (s_u = sman->still_slot; s_u;)
-    {
-        IVP_Simulation_Unit *next_su = s_u->next_sim_unit;
-        if (s_u->union_find_needed_for_sim_unit)
-        {
-            s_u->do_sim_unit_union_find();
-        }
-        s_u = next_su;
-    }
+    ;
 
 #if 0 && defined(WIN32)
     unsigned long time = p_get_time();
