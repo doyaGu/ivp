@@ -15,6 +15,9 @@ typedef char IVP_X87_Status_Size_Check[sizeof(softfloat_status_t) <= 16 ? 1 : -1
 static thread_local bool ivp_x87_control_is_explicit = false;
 static thread_local IVP_X87_Control ivp_x87_control =
     {IVP_X87_Arithmetic::PRECISION_64, IVP_X87_Arithmetic::ROUND_NEAREST};
+#if defined(_MSC_VER) && defined(_M_IX86)
+static thread_local unsigned int ivp_x87_saved_native_control = 0;
+#endif
 
 IVP_X87_Control IVP_X87_Control::current()
 {
@@ -37,12 +40,32 @@ IVP_X87_Control IVP_X87_Control::current()
 
 void IVP_X87_Control::set(const IVP_X87_Control &control)
 {
+#if defined(_MSC_VER) && defined(_M_IX86)
+    // Ordinary expressions in the surrounding engine still execute on the
+    // native FPU. Keep their precision and rounding in step with the software.
+    unsigned int ignored = 0;
+    if (!ivp_x87_control_is_explicit)
+        _controlfp_s(&ivp_x87_saved_native_control, 0, 0);
+    const unsigned int precision = control.precision == IVP_X87_Arithmetic::PRECISION_24 ? _PC_24 :
+        control.precision == IVP_X87_Arithmetic::PRECISION_53 ? _PC_53 : _PC_64;
+    const unsigned int rounding = control.rounding == IVP_X87_Arithmetic::ROUND_DOWN ? _RC_DOWN :
+        control.rounding == IVP_X87_Arithmetic::ROUND_UP ? _RC_UP :
+        control.rounding == IVP_X87_Arithmetic::ROUND_TO_ZERO ? _RC_CHOP : _RC_NEAR;
+    _controlfp_s(&ignored, precision | rounding, _MCW_PC | _MCW_RC);
+#endif
     ivp_x87_control = control;
     ivp_x87_control_is_explicit = true;
 }
 
 void IVP_X87_Control::reset()
 {
+#if defined(_MSC_VER) && defined(_M_IX86)
+    if (ivp_x87_control_is_explicit)
+    {
+        unsigned int ignored = 0;
+        _controlfp_s(&ignored, ivp_x87_saved_native_control, _MCW_PC | _MCW_RC);
+    }
+#endif
     ivp_x87_control_is_explicit = false;
 }
 

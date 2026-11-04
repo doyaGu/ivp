@@ -39,6 +39,9 @@ native x87 control word; other targets use 64-bit significands and nearest-even
 rounding. Callers that require the same arithmetic on multiple targets should
 set the control explicitly. Hull construction selects 64-bit precision and
 leaves that selection active for subsequent operations.
+On 32-bit MSVC, setting explicit control also updates the native precision and
+rounding used by ordinary surrounding expressions. Reset restores the native
+control saved before the first override.
 
 The built-in anomaly manager supplies an extended gravity-based penetration
 speed through `get_push_speed_penetration_extended`. Custom managers inherit an
