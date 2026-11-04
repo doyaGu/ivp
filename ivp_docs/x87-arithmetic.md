@@ -34,9 +34,10 @@ Keep a register-width intermediate as `IVP_U_Float80` when a later comparison or
 operation uses it. Return it explicitly across internal numerical calls.
 
 `IVP_X87_Control` supplies thread-local precision and rounding. Explicit control
-works on every supported target. Without an override, 32-bit MSVC imports the
-native x87 control word; other targets use 64-bit significands and nearest-even
-rounding. Callers that require the same arithmetic on multiple targets should
+works on every supported target. On 32-bit MSVC, the native control word remains
+authoritative, including changes made by surrounding callers; other targets
+default to 64-bit significands and nearest-even rounding. Callers that require
+the same arithmetic on multiple targets should
 set the control explicitly. Hull construction selects 64-bit precision and
 leaves that selection active for subsequent operations.
 On 32-bit MSVC, setting explicit control also updates the native precision and
@@ -51,11 +52,16 @@ environment creates the built-in gravity manager through `create_default`.
 
 ## Compilation
 
+Scalar API returns and memory writes are separate operations. A 32-bit MSVC ABI
+adapter returns a computed value through ST0 without narrowing it prematurely.
+Internal portable numerical calls pass `IVP_U_Float80` explicitly; other scalar
+ABIs receive the declared float or double representation.
+
 The arithmetic implementation and embedded numerical sources use C++11
 privately; the public arithmetic header remains usable from C++98. Supported
 Release builds enable interprocedural optimization across the numerical backend
-and solver libraries. The implementation uses portable integer arithmetic and
-does not depend on host `long double`, native x87 instructions or CPU emulation.
+and solver libraries. The numerical backend uses portable integer arithmetic
+and does not depend on host `long double`, native x87 arithmetic or CPU emulation.
 
 With the option disabled, the embedded dependency and arithmetic library are
 excluded. The original subsystem algorithms use their ordinary floating-point
