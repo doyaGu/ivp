@@ -82,6 +82,9 @@ public:
     IVP_U_Float80 log2_multiply(const IVP_U_Float80 &x, const IVP_U_Float80 &y);
     IVP_U_Float80 round_integer(const IVP_U_Float80 &value);
     IVP_U_Float80 scale(const IVP_U_Float80 &value, const IVP_U_Float80 &exponent);
+    IVP_U_Float80 natural_logarithm_of_two() const;
+    IVP_U_Float80 logarithm2_of_e() const;
+    IVP_U_Float80 exponential(const IVP_U_Float80 &value);
 };
 
 // Precision and rounding belong to the executing thread, as in an x87 control

@@ -10,7 +10,7 @@
 #include <float.h>
 #endif
 
-typedef char IVP_X87_State_Size_Check[sizeof(softfloat_status_t) <= 16 ? 1 : -1];
+typedef char IVP_X87_Status_Size_Check[sizeof(softfloat_status_t) <= 16 ? 1 : -1];
 
 static thread_local bool ivp_x87_control_is_explicit = false;
 static thread_local IVP_X87_Control ivp_x87_control =
@@ -251,4 +251,29 @@ IVP_U_Float80 IVP_X87_Arithmetic::scale(const IVP_U_Float80 &value, const IVP_U_
 {
     return ivp_x87_output(extF80_scale(ivp_x87_input(value), ivp_x87_input(exponent),
         static_cast<softfloat_status_t *>(get_status())));
+}
+
+// Constant loads round the internal constants according to RC, independently
+// of arithmetic precision, and do not raise the inexact-result flag.
+IVP_U_Float80 IVP_X87_Arithmetic::natural_logarithm_of_two() const
+{
+    const unsigned mode = static_cast<const softfloat_status_t *>(get_status())->softfloat_roundingMode;
+    const uint64_t significand = UINT64_C(0xb17217f7d1cf79ac) -
+        (mode == ROUND_DOWN || mode == ROUND_TO_ZERO);
+    return IVP_U_Float80::from_bits(0x3ffe, significand);
+}
+
+IVP_U_Float80 IVP_X87_Arithmetic::logarithm2_of_e() const
+{
+    const unsigned mode = static_cast<const softfloat_status_t *>(get_status())->softfloat_roundingMode;
+    const uint64_t significand = UINT64_C(0xb8aa3b295c17f0bc) -
+        (mode == ROUND_DOWN || mode == ROUND_TO_ZERO);
+    return IVP_U_Float80::from_bits(0x3fff, significand);
+}
+
+IVP_U_Float80 IVP_X87_Arithmetic::exponential(const IVP_U_Float80 &value)
+{
+    const IVP_U_Float80 exponent = multiply(value, logarithm2_of_e());
+    const IVP_U_Float80 integral = round_integer(exponent);
+    return scale(add(power2_minus1(subtract(exponent, integral)), load(1.0)), integral);
 }

@@ -111,15 +111,15 @@ class IVP_Fast_Math
 {
 public:
 #if IVP_ENABLE_X87_EMULATION
-    static IVP_U_Float80 isqrt_extended(IVP_X87_Arithmetic &fp, double square, int resolution_steps)
+    static IVP_U_Float80 isqrt_extended(IVP_X87_Arithmetic &fp, const IVP_U_Float80 &square, int resolution_steps)
     {
-        const uint64_t bits = ivp_bit_cast_layout<uint64_t>(square);
+        const uint64_t bits = ivp_bit_cast_layout<uint64_t>(fp.store_double(square));
         const uint32_t high = static_cast<uint32_t>(bits >> 32);
         const uint64_t seed = uint64_t(((0x7ff00000u - high) >> 1) + 0x1ff00000u) << 32;
         IVP_U_Float80 inverse = fp.load(ivp_bit_cast_layout<double>(seed));
         const IVP_U_Float80 half = fp.load(0.5);
         const IVP_U_Float80 one = fp.load(1.0);
-        const IVP_U_Float80 square_half = fp.multiply(fp.load(square), half);
+        const IVP_U_Float80 square_half = fp.multiply(square, half);
         IVP_U_Float80 correction = fp.subtract(half,
             fp.multiply(fp.multiply(square_half, inverse), inverse));
         inverse = fp.multiply(inverse, fp.add(one, correction));
@@ -133,6 +133,10 @@ public:
             inverse = fp.multiply(inverse, fp.add(one, correction));
         }
         return inverse;
+    }
+    static IVP_U_Float80 isqrt_extended(IVP_X87_Arithmetic &fp, double square, int resolution_steps)
+    {
+        return isqrt_extended(fp, fp.load(square), resolution_steps);
     }
 #endif
 #if defined(PSXII)
