@@ -1,0 +1,9 @@
+#ifndef IVP_FREESTANDING_NEW_INCLUDED
+#define IVP_FREESTANDING_NEW_INCLUDED
+
+#include <stddef.h>
+
+inline void *operator new(size_t, void *storage) noexcept { return storage; }
+inline void operator delete(void *, void *) noexcept {}
+
+#endif
