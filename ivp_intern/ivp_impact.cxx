@@ -6,6 +6,9 @@
 
 #include <ivp_physics.hxx>
 #include <ivu_memory.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivp_compact_ledge.hxx>
 #include <ivp_cache_object.hxx>
@@ -264,22 +267,23 @@ void IVP_Impact_Solver::do_rescue_push(IVP_U_Float_Point *push_dir_norm, IVP_BOO
 	translation.set(&trans_speed[1]);
 	core[1]->get_surface_speed_on_test(obj_point[1], &translation, &rotation, &world_speed1);
 
-	IVP_U_Float_Point rel_speed_world; // speed of second synapse against first, in world coords
-	rel_speed_world.subtract(&world_speed1, &world_speed0);
-
-	IVP_DOUBLE dist_velocity = rel_speed_world.dot_product(&diff_vec_world); // velocity of distance change. negative means getting closer.
-	if ((panic_mode == IVP_TRUE))
-	{
-		if (dist_velocity > 0.0f)
-		{
-			dist_velocity = 0.0f; // assure that a positive push is really done
-		}
-	}
-
-	//	IVP_Environment *env = core0->environment;
-	// if (dist_velocity > 0) dist_velocity = 0;	//
-	IVP_DOUBLE desired_velo_change = //(ivp_mindist_settings.coll_dist + 2 * ivp_mindist_settings.mindist_change_force_dist - dist_len_now) / env->get_delta_PSI_time() +
-		this->rescue_speed_impact_solver - dist_velocity;
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 projected[3];
+    for (int axis = 0; axis < 3; ++axis)
+        projected[axis] = fp.multiply(fp.subtract(fp.load(world_speed1.k[axis]), fp.load(world_speed0.k[axis])), fp.load(diff_vec_world.k[axis]));
+    IVP_U_Float80 velocity = fp.add(fp.add(projected[2], projected[1]), projected[0]);
+    if (panic_mode == IVP_TRUE && fp.compare(velocity, fp.load(0.0)) == IVP_X87_Arithmetic::GREATER)
+        velocity = fp.load(0.0);
+    IVP_DOUBLE desired_velo_change = fp.store_double(fp.subtract(fp.load(rescue_speed_impact_solver), velocity));
+#else
+    IVP_DOUBLE dist_velocity=
+        (IVP_DOUBLE(world_speed1.k[2])-world_speed0.k[2])*diff_vec_world.k[2]
+        +(IVP_DOUBLE(world_speed1.k[1])-world_speed0.k[1])*diff_vec_world.k[1]
+        +(IVP_DOUBLE(world_speed1.k[0])-world_speed0.k[0])*diff_vec_world.k[0];
+    if(panic_mode==IVP_TRUE && dist_velocity>0.0) dist_velocity=0.0;
+    IVP_DOUBLE desired_velo_change=rescue_speed_impact_solver-dist_velocity;
+#endif
 
 	if (desired_velo_change < 0.0f)
 	{
@@ -349,7 +353,8 @@ void IVP_Impact_Solver::do_rescue_push(IVP_U_Float_Point *push_dir_norm, IVP_BOO
 		speed_change_scalar += push_vec_world.dot_product(&speed_change_vec);
 	}
 
-	IVP_DOUBLE resulting_push = desired_velo_change / (speed_change_scalar + 1e-15f);
+	// Retail divides directly; the later SDK added an epsilon here.
+	IVP_DOUBLE resulting_push = desired_velo_change / speed_change_scalar;
 	if (resulting_push < 0.0f)
 	{
 		return;
@@ -432,7 +437,9 @@ void IVP_Impact_Solver::do_impact(IVP_Core *pushed_cores[2], IVP_BOOL allow_dela
 
 	used_conservation = 1.0f - (1.0f / (pushes_while_system * IVP_INV_HALF_CONSERVATION_STEPS + 1.0f)) * (1.0f - percent_energy_conservation);
 
-	this->rescue_speed_impact_solver = (IVP_FLOAT)(ivp_mindist_settings.min_vertical_speed_at_collision + rescue_speed_addon) * IVP_SAFETY_FACTOR_FOR_DELAY;
+	// RVA 0x22ED0 retains the sum in x87 through the safety-factor multiply.
+	// A float spill changes the frame-7728 rescue speed by one ULP.
+	this->rescue_speed_impact_solver = (IVP_DOUBLE(ivp_mindist_settings.min_vertical_speed_at_collision) + rescue_speed_addon) * IVP_SAFETY_FACTOR_FOR_DELAY;
 
 	delaying_is_allowed = allow_delaying;
 	// delaying_is_allowed=IVP_FALSE;
@@ -1023,11 +1030,23 @@ void IVP_Contact_Point::recompute_friction()
 
 void IVP_Impact_Solver::get_cos_sin_for_impact(IVP_FLOAT friction_val, IVP_FLOAT percent_energy_conservation, IVP_FLOAT *cos_val, IVP_FLOAT *sin_val)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 one = fp.load(1.0f);
+    const IVP_U_Float80 friction = fp.multiply(fp.add(fp.square_root(fp.load(percent_energy_conservation)), one), fp.load(friction_val));
+    const IVP_U_Float80 angle = fp.arctangent(friction, one);
+    const IVP_U_Float80 square = fp.multiply(angle, angle);
+    const IVP_U_Float80 cosine = fp.add(fp.subtract(one, fp.multiply(square, fp.load(0.5f))),
+        fp.multiply(fp.multiply(square, square), fp.load(1.0f / 24.0f)));
+    *cos_val = fp.store_float(cosine);
+    *sin_val = fp.store_float(fp.multiply(cosine, friction));
+#else
 	IVP_DOUBLE impact_fri_fact = friction_val * (1.0f + IVP_Inline_Math::ivp_sqrtf(percent_energy_conservation));
 	IVP_DOUBLE fri_angle = IVP_Inline_Math::atand(impact_fri_fact); // #+# bitter, kill,
 	IVP_DOUBLE c = IVP_Inline_Math::approx5_cos(fri_angle);
 	*cos_val = c;
 	*sin_val = c * impact_fri_fact;
+#endif
 }
 
 void IVP_Contact_Point::read_materials_for_contact_situation(IVP_Impact_Solver_Long_Term *info)
@@ -1611,69 +1630,36 @@ void IVP_Impact_Solver::get_world_direction_second_friction(IVP_Contact_Point *c
 	two_friction_values = use_second_friction;
 }
 
-IVP_FLOAT IVP_Contact_Point::get_rot_speed_uncertainty()
+IVP_DOUBLE IVP_Contact_Point::get_rot_speed_uncertainty()
 {
-	IVP_FLOAT rot_uncertainty = 0.0f;
-	int i;
-	for (i = 0; i < 2; i++)
-	{
-		IVP_Core *my_core = tmp_contact_info->contact_core[i];
-		if (my_core)
-		{
-			IVP_Synapse_Friction *my_syn = this->get_synapse(i);
-			if (my_syn->get_status() != IVP_ST_BALL)
-			{
-				// IVP_DOUBLE rota_way=my_core->rot_speed.real_length() * IVP_COLL_DETECT_MIN_TIME;
-				// if( rota_way > IVP_PI_2) { printf("warning_pi\n"); }
-
-				// IVP_DOUBLE tan_quad = tan ( rota_way );
-				// tan_quad*=tan_quad;
-				IVP_DOUBLE tan_quad = my_core->rot_speed.quad_length() * IVP_COLL_DETECT_MIN_TIME * IVP_COLL_DETECT_MIN_TIME; // approximate tan quad alpha with alpha*alpha
-
-				IVP_DOUBLE max_tan_quad = IVP_ROT_MAX_UNCERTAINTY * IVP_ROT_MAX_UNCERTAINTY;
-				if (tan_quad > max_tan_quad)
-				{
-					// printf("clippingrottan %f to %f\n",sqrt(tan_quad),sqrt(max_tan_quad));
-					tan_quad = max_tan_quad;
-				}
-#if 0		  
-		  IVP_DOUBLE under_root = 1.0f + tan_quad;
-		  under_root = sqrtf( under_root );
-
-		  under_root = under_root - 1.0f;
-		  IVP_DOUBLE uncertain_way = under_root * my_core->upper_limit_radius; //this->long_term_impact_info.contact_point_cs[i].real_length();
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 result = fp.load(0.0);
+    for (int i = 0; i < 2; ++i)
+    {
+        IVP_Core *core = tmp_contact_info->contact_core[i];
+        if (!core || get_synapse(i)->get_status() == IVP_ST_BALL) continue;
+        const IVP_U_Float80 x = fp.load(core->rot_speed.k[0]), y = fp.load(core->rot_speed.k[1]), z = fp.load(core->rot_speed.k[2]);
+        IVP_U_Float80 square = fp.multiply(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)), fp.multiply(z, z)), fp.load(0.000025));
+        if (fp.compare(square, fp.load(0.25)) == IVP_X87_Arithmetic::GREATER) square = fp.load(0.25);
+        IVP_U_Float80 uncertainty = fp.subtract(fp.load(1.0), fp.cosine(fp.square_root(square)));
+        uncertainty = fp.multiply(fp.multiply(uncertainty, fp.load(core->upper_limit_radius)), fp.load(core->environment->get_inv_delta_PSI_time()));
+        result = fp.add(result, uncertainty);
+    }
+    return fp.store_double(result);
+#else
+    IVP_DOUBLE result=0.0;
+    for(int i=0;i<2;++i) {
+        IVP_Core *core=tmp_contact_info->contact_core[i];
+        if(core && get_synapse(i)->get_status()!=IVP_ST_BALL) {
+            IVP_DOUBLE square=core->rot_speed.quad_length()*0.000025;
+            if(square>0.25) square=0.25;
+            result+=(1.0-IVP_Inline_Math::cosd(IVP_Inline_Math::sqrtd(square)))
+                *core->upper_limit_radius*core->environment->get_inv_delta_PSI_time();
+        }
+    }
+    return result;
 #endif
-				IVP_DOUBLE alpha = IVP_Inline_Math::ivp_sqrtf(tan_quad);
-				IVP_DOUBLE uncertain_way = (1.0f - IVP_Inline_Math::cosd(alpha)) * my_core->upper_limit_radius;
-
-				// test only
-				// IVP_DOUBLE alpha = my_core->rot_speed.real_length() * IVP_COLL_DETECT_MIN_TIME;
-				// IVP_DOUBLE sina = sin(alpha);
-				// IVP_ASSERT(alpha >= sina);
-				// IVP_DOUBLE uncertain_way2 = (alpha - sina) * this->long_term_impact_info.contact_point_cs[i].real_length();
-
-				IVP_DOUBLE uncertain_speed = uncertain_way * my_core->environment->get_inv_delta_PSI_time(); // later speed is transformed back to way with get_delta_PSI_time
-
-				// IVP_FLOAT rot_speed_quad=my_core->get_quad_surface_speed_orth_to_normal(&this->long_term_impact_info.contact_point_cs[i],&this->get_lt()->surf_normal);
-				// IVP_FLOAT upper_bound=IVP_ROT_MAX_UNCERTAINTY*IVP_ROT_MAX_UNCERTAINTY*my_core->environment->get_inv_delta_PSI_time()*my_core->environment->get_inv_delta_PSI_time();
-				// if(rot_speed_quad > upper_bound ) {
-				//   rot_speed_quad = upper_bound;
-				// }
-				//  rotate surface and take worst case way passed -> get uncertainty speed
-				//  in formula tan alpha is approximated through alpha
-				// IVP_FLOAT speed_uncertainty=1.0f+rot_speed_quad;
-				// speed_uncertainty=sqrt( speed_uncertainty ) - 1.0f;
-
-				// printf("speed_unctnty %f\n",speed_uncertainty);
-				// speed_uncertainty=0.0f;
-				// IVP_FLOAT obj_length_factor=long_term_impact_info.contact_point_cs[i].real_length();
-				// IVP_ASSERT( (obj_length_factor < my_core->upper_limit_radius + P_DOUBLE_EPS) );
-
-				rot_uncertainty = rot_uncertainty + uncertain_speed;
-			}
-		}
-	}
-	return rot_uncertainty;
 }
 
 IVP_FLOAT IVP_Contact_Point::get_rescue_speed_impact(IVP_Environment *env)
