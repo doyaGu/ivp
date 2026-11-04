@@ -22,13 +22,16 @@
 #endif
 
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 IVP_DOUBLE get_float()
 {
     return p_atof(p_str_tok(NULL, IVP_WHITESPACE));
 }
 
-IVP_FLOAT IVP_Inline_Math::isqrt_float(IVP_FLOAT quad)
+IVP_DOUBLE IVP_Inline_Math::isqrt_float(IVP_FLOAT quad)
 {
     return IVP_Fast_Math::isqrt(quad, 2);
 }
@@ -47,8 +50,9 @@ void IVP_U_Point::set_interpolate(const IVP_U_Point *p0, const IVP_U_Point *p1, 
     IVP_DOUBLE b = p0->k[1] * is;
     IVP_DOUBLE b2 = p1->k[1] * s;
     a += a2;
-    IVP_DOUBLE c = p0->k[2] * is;
-    IVP_DOUBLE c2 = p1->k[2] * s;
+    // RVA 0xDC40 spills both Z products to double before their final sum.
+    const volatile IVP_DOUBLE c = p0->k[2] * is;
+    const volatile IVP_DOUBLE c2 = p1->k[2] * s;
     b += b2;
 
     k[0] = a;
@@ -97,9 +101,25 @@ IVP_DOUBLE IVP_U_Float_Point::real_length() const
 }
 
 #if !defined(IVP_NO_DOUBLE)
+#if IVP_ENABLE_X87_EMULATION
+IVP_U_Float80 IVP_U_Point::real_length_extended(IVP_X87_Arithmetic &fp) const
+{
+    const IVP_U_Float80 x = fp.load(k[0]);
+    const IVP_U_Float80 y = fp.load(k[1]);
+    const IVP_U_Float80 z = fp.load(k[2]);
+    return fp.square_root(fp.add(fp.add(fp.multiply(x, x), fp.multiply(y, y)),
+        fp.multiply(z, z)));
+}
+#endif
+
 IVP_DOUBLE IVP_U_Point::real_length() const
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return fp.store_double(real_length_extended(fp));
+#else
     return IVP_Inline_Math::sqrtd(this->quad_length());
+#endif
 }
 
 IVP_RETURN_TYPE IVP_U_Point::fast_normize()
@@ -694,11 +714,17 @@ void IVP_U_Hesse::calc_hesse(const IVP_U_Float_Point *tp0,
 
 void IVP_U_Hesse::normize()
 {
-    IVP_DOUBLE len = this->real_length();
-    if (len < P_DOUBLE_EPS) { this->set_to_zero(); hesse_val = 0.0; return; }
-    IVP_DOUBLE l = 1.0f / len;
+#if IVP_ENABLE_X87_EMULATION && !defined(IVP_NO_DOUBLE)
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 inverse_length = fp.divide(fp.load(1.0), real_length_extended(fp));
+    for (int i = 0; i < 3; ++i)
+        k[i] = fp.store_double(fp.multiply(inverse_length, fp.load(k[i])));
+    hesse_val = fp.store_double(fp.multiply(inverse_length, fp.load(hesse_val)));
+#else
+    IVP_DOUBLE l = 1.0 / this->real_length();
     this->mult(l);
     hesse_val *= l;
+#endif
 }
 
 void IVP_U_Float_Hesse::mult_hesse(IVP_DOUBLE factor)
@@ -766,6 +792,40 @@ void IVP_U_Matrix::interpolate(const IVP_U_Matrix *m1, const IVP_U_Matrix *m2, I
 
 IVP_RETURN_TYPE IVP_U_Matrix::real_invert(IVP_DOUBLE epsilon)
 {
+#if IVP_ENABLE_X87_EMULATION && !defined(IVP_NO_DOUBLE)
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 cofactors[3][3];
+    for (int row = 0; row < 3; ++row)
+    {
+        const int a = (row + 1) % 3, b = (row + 2) % 3;
+        for (int col = 0; col < 3; ++col)
+        {
+            const int y = (col + 1) % 3, z = (col + 2) % 3;
+            cofactors[row][col] = fp.subtract(
+                fp.multiply(fp.load(get_elem(a, y)), fp.load(get_elem(b, z))),
+                fp.multiply(fp.load(get_elem(b, y)), fp.load(get_elem(a, z))));
+            // The third cofactor's X component remains in a register.
+            if (row != 2 || col != 0)
+                cofactors[row][col] = fp.load(fp.store_double(cofactors[row][col]));
+        }
+    }
+    const IVP_U_Float80 determinant = fp.add(fp.add(
+        fp.multiply(cofactors[0][2], fp.load(get_elem(0, 2))),
+        fp.multiply(cofactors[0][1], fp.load(get_elem(0, 1)))),
+        fp.multiply(cofactors[0][0], fp.load(get_elem(0, 0))));
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(fp.absolute(determinant), fp.load(epsilon));
+    if (relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED)
+        return IVP_FAULT;
+    const IVP_U_Float80 inverse_determinant = fp.divide(fp.load(1.0), determinant);
+    for (int row = 0; row < 3; ++row)
+        for (int col = 0; col < 3; ++col)
+            set_elem(col, row, fp.store_double(fp.multiply(cofactors[row][col], inverse_determinant)));
+    IVP_U_Point position;
+    vmult3(&vv, &position);
+    vv.set_negative(&position);
+    return IVP_OK;
+#else
+
     // real inversion using determinant algorithm
 
     IVP_U_Point r0;
@@ -794,6 +854,7 @@ IVP_RETURN_TYPE IVP_U_Matrix::real_invert(IVP_DOUBLE epsilon)
     vv.set_negative(&p);
 
     return IVP_OK;
+#endif
 }
 
 IVP_DOUBLE IVP_U_Matrix3::get_determinante() const
@@ -1116,9 +1177,88 @@ void IVP_U_Matrix::mimult4(const IVP_U_Matrix *mb, IVP_U_Matrix *m_out) const
     inline_mimult4(mb, m_out);
 }
 
+#if IVP_ENABLE_X87_EMULATION
+// Template parameters preserve each transform's accumulation order without
+// selecting an arithmetic operation at runtime.
+template <bool Inverse, int First, int Second, int Third>
+static IVP_U_Float80 ivp_matrix_projection(IVP_X87_Arithmetic &fp,
+    const IVP_U_Matrix3 *matrix, const IVP_U_Float80 *point, int axis)
+{
+    const IVP_U_Float80 a = fp.multiply(fp.load(matrix->get_elem(
+        Inverse ? First : axis, Inverse ? axis : First)), point[First]);
+    const IVP_U_Float80 b = fp.multiply(fp.load(matrix->get_elem(
+        Inverse ? Second : axis, Inverse ? axis : Second)), point[Second]);
+    const IVP_U_Float80 c = fp.multiply(fp.load(matrix->get_elem(
+        Inverse ? Third : axis, Inverse ? axis : Third)), point[Third]);
+    return fp.add(fp.add(a, b), c);
+}
+
+template <bool Transpose>
+static void ivp_matrix_product(const IVP_U_Matrix3 *left,
+    const IVP_U_Matrix3 *right, IVP_U_Matrix3 *output)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_DOUBLE values[3][3];
+    for (int row = 0; row < 3; ++row)
+    {
+        const IVP_U_Float80 point[3] = { fp.load(left->get_elem(row, 0)),
+            fp.load(left->get_elem(row, 1)), fp.load(left->get_elem(row, 2)) };
+        values[row][0] = fp.store_double(ivp_matrix_projection<!Transpose, 1, 0, 2>(fp, right, point, 0));
+        values[row][1] = fp.store_double(ivp_matrix_projection<!Transpose, 2, 1, 0>(fp, right, point, 1));
+        values[row][2] = fp.store_double(ivp_matrix_projection<!Transpose, 2, 1, 0>(fp, right, point, 2));
+    }
+    for (int row = 0; row < 3; ++row)
+        for (int col = 0; col < 3; ++col)
+            output->set_elem(row, col, values[row][col]);
+}
+
+template <class Point>
+static void ivp_matrix_transform_position(const IVP_U_Matrix *matrix,
+    const Point *input, IVP_U_Point *output)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 point[3] = { fp.load(input->k[0]), fp.load(input->k[1]), fp.load(input->k[2]) };
+    IVP_DOUBLE values[3];
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        IVP_U_Float80 sum = fp.multiply(fp.load(matrix->get_elem(axis, 0)), point[0]);
+        if (axis != 2)
+            sum = fp.load(fp.store_double(sum));
+        for (int col = 1; col < 3; ++col)
+        {
+            // The product is added to the previously accumulated sum.
+            sum = fp.add(fp.multiply(fp.load(matrix->get_elem(axis, col)), point[col]), sum);
+            if (axis == 0 || (axis == 1 && col == 1))
+                sum = fp.load(fp.store_double(sum));
+        }
+        values[axis] = fp.store_double(fp.add(sum, fp.load(matrix->vv.k[axis])));
+    }
+    for (int axis = 0; axis < 3; ++axis)
+        output->k[axis] = values[axis];
+}
+
+template <bool Inverse>
+static void ivp_matrix_transform_direction(const IVP_U_Matrix3 *matrix,
+    const IVP_U_Float_Point *input, IVP_U_Float_Point *output)
+{
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 point[3] = { fp.load(input->k[0]), fp.load(input->k[1]), fp.load(input->k[2]) };
+    const IVP_U_Float80 y = ivp_matrix_projection<Inverse, 0, 1, 2>(fp, matrix, point, 1);
+    const IVP_DOUBLE z = fp.store_double(ivp_matrix_projection<Inverse, 0, 1, 2>(fp, matrix, point, 2));
+    const IVP_U_Float80 x = ivp_matrix_projection<Inverse, 1, 2, 0>(fp, matrix, point, 0);
+    output->k[0] = fp.store_float(x);
+    output->k[1] = fp.store_float(y);
+    output->k[2] = fp.store_float(fp.load(z));
+}
+#endif
+
 void IVP_U_Matrix3::mmult3(const IVP_U_Matrix3 *mb, IVP_U_Matrix3 *m_out) const
 {
-    inline_mmult3(mb, m_out);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_product<false>(this, mb, m_out);
+#else
+    inline_mmult3(mb,m_out);
+#endif
 }
 
 void IVP_U_Matrix3::mimult3(const IVP_U_Matrix3 *mb, IVP_U_Matrix3 *m_out) const
@@ -1137,14 +1277,13 @@ void IVP_U_Matrix::mi2mult4(const IVP_U_Matrix *mb, IVP_U_Matrix *m_out) const
 
 void IVP_U_Matrix3::mi2mult3(const IVP_U_Matrix3 *mb, IVP_U_Matrix3 *m_out) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_product<true>(this, mb, m_out);
+#else
     IVP_U_Point row[3];
-    for (int r = 0; r < 3; r++)
-    {
-        mb->inline_vmult3(&rows[r], &row[r]);
-    }
-    m_out->rows[0].set(&row[0]);
-    m_out->rows[1].set(&row[1]);
-    m_out->rows[2].set(&row[2]);
+    for(int r=0;r<3;++r) mb->inline_vmult3(&rows[r],&row[r]);
+    for(int r=0;r<3;++r) m_out->rows[r].set(&row[r]);
+#endif
 }
 
 void IVP_U_Matrix::transpose()
@@ -1215,7 +1354,16 @@ void IVP_U_Matrix::set_transpose(const IVP_U_Matrix *in)
 #if !defined(IVP_NO_DOUBLE)
 void IVP_U_Matrix::vimult4(const IVP_U_Point *p_in, IVP_U_Float_Point *p_out) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 translated[3];
+    for (int axis = 0; axis < 3; ++axis)
+        translated[axis] = fp.subtract(fp.load(p_in->k[axis]), fp.load(vv.k[axis]));
+    for (int axis = 0; axis < 3; ++axis)
+        p_out->k[axis] = fp.store_float(ivp_matrix_projection<true, 2, 1, 0>(fp, this, translated, axis));
+#else
     inline_vimult4(p_in, p_out);
+#endif
 };
 void IVP_U_Matrix::vimult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
@@ -1236,35 +1384,73 @@ void IVP_U_Matrix::vmult4(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_ou
 #if !defined(IVP_NO_DOUBLE)
 void IVP_U_Matrix::vmult4(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
-    inline_vmult4(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_transform_position(this, p_in, p_out);
+#else
+    inline_vmult4(p_in,p_out);
+#endif
 };
 
 void IVP_U_Matrix::vmult4(const IVP_U_Float_Point *p_in, IVP_U_Point *p_out) const
 {
-    inline_vmult4(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_transform_position(this, p_in, p_out);
+#else
+    inline_vmult4(p_in,p_out);
+#endif
 };
 #endif
 
 void IVP_U_Matrix3::vmult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
-    inline_vmult3(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_transform_direction<false>(this, p_in, p_out);
+#else
+    inline_vmult3(p_in,p_out);
+#endif
 };
 
 #if !defined(IVP_NO_DOUBLE)
 void IVP_U_Matrix3::vmult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
-    inline_vmult3(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 point[3] = { fp.load(p_in->k[0]), fp.load(p_in->k[1]), fp.load(p_in->k[2]) };
+    const IVP_U_Float80 y = ivp_matrix_projection<false, 0, 2, 1>(fp, this, point, 1);
+    const IVP_DOUBLE z = fp.store_double(ivp_matrix_projection<false, 0, 2, 1>(fp, this, point, 2));
+    const IVP_U_Float80 x = ivp_matrix_projection<false, 2, 1, 0>(fp, this, point, 0);
+    p_out->k[0] = fp.store_double(x);
+    p_out->k[1] = fp.store_double(y);
+    p_out->k[2] = z;
+#else
+    inline_vmult3(p_in,p_out);
+#endif
 };
 
 void IVP_U_Matrix3::vimult3(const IVP_U_Point *p_in, IVP_U_Point *p_out) const
 {
-    inline_vimult3(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 point[3] = { fp.load(p_in->k[0]), fp.load(p_in->k[1]), fp.load(p_in->k[2]) };
+    const IVP_U_Float80 y = ivp_matrix_projection<true, 0, 2, 1>(fp, this, point, 1);
+    const IVP_DOUBLE z = fp.store_double(ivp_matrix_projection<true, 0, 2, 1>(fp, this, point, 2));
+    const IVP_U_Float80 x = ivp_matrix_projection<true, 2, 1, 0>(fp, this, point, 0);
+    p_out->k[0] = fp.store_double(x);
+    p_out->k[1] = fp.store_double(y);
+    p_out->k[2] = z;
+#else
+    inline_vimult3(p_in,p_out);
+#endif
 };
 #endif
 
 void IVP_U_Matrix3::vimult3(const IVP_U_Float_Point *p_in, IVP_U_Float_Point *p_out) const
 {
-    inline_vimult3(p_in, p_out);
+#if IVP_ENABLE_X87_EMULATION
+    ivp_matrix_transform_direction<true>(this, p_in, p_out);
+#else
+    inline_vimult3(p_in,p_out);
+#endif
 };
 
 void IVP_U_Matrix::shift_ws(const IVP_U_Point *v_in)

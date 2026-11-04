@@ -23,6 +23,8 @@ class IVP_U_Hesse;
 class IVP_U_Quat;
 class IVP_U_Point;
 class IVP_U_Float_Quat;
+class IVP_U_Float80;
+class IVP_X87_Arithmetic;
 
 template <class T>
 inline void ivp_byte_swap4_alias_safe(T *value)
@@ -226,6 +228,9 @@ public:
     inline IVP_DOUBLE quad_distance_to(const IVP_U_Float_Point *p) const; // Square distance from this point to another.
 
     IVP_DOUBLE real_length() const;        // Returns real length (= sqrt(quad_length)).
+#if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 real_length_extended(IVP_X87_Arithmetic &fp) const;
+#endif
     IVP_DOUBLE real_length_plus_normize(); // Normize vector and return former real length.
     IVP_DOUBLE fast_real_length() const;   // Returns real length with max. 0.1f% error, really fast if in cache.
     IVP_RETURN_TYPE normize();             // Normize vector (-> real length == 1.0f), return IVP_FALSE if length too small.
@@ -345,7 +350,9 @@ public:
     static inline IVP_FLOAT fast_approx_asin(IVP_FLOAT angle);   //   "
     static inline IVP_FLOAT fast_anywhere_asin(IVP_FLOAT angle); //   "
 
-    static IVP_FLOAT isqrt_float(IVP_FLOAT quad);    //   "
+    // Retail RVA 0xDAE0 returns the unrounded x87 ST0 value. Consumers that
+    // store it in a float still narrow it; friction consumes it as a double.
+    static IVP_DOUBLE isqrt_float(IVP_FLOAT quad);
     static IVP_DOUBLE isqrt_double(IVP_DOUBLE quad); //   "
 
     static inline int int_div_2(int a); // workaround for compiler bug in CodeWarrior1.6
