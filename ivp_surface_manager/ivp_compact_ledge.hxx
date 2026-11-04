@@ -141,7 +141,7 @@ class IVP_Compact_Triangle  //
     void byte_swap();  // just byte swap this data ( and the owned edge data )
 };
 
-#define IVP_COMPACT_BOUNDINGBOX_STEP_SIZE (1.0f / 250.0f)
+#define IVP_COMPACT_BOUNDINGBOX_STEP_SIZE (1.0 / 250.0)
 
 class IVP_Compact_Ledge
 {

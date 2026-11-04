@@ -155,7 +155,8 @@ void IVP_Cache_Object::transform_position_to_object_coords(const IVP_U_Point *P_
 
 void IVP_Cache_Object::transform_position_to_world_coords(const IVP_U_Float_Point *P_object, IVP_U_Point *P_world_out) const
 {
-    this->m_world_f_object.inline_vmult4(P_object, P_world_out);
+    // Retail RVA 0x18D10 uses the same X/Y double spills as vmult4 (0xF5F0).
+    this->m_world_f_object.vmult4(P_object, P_world_out);
 }
 
 void IVP_Cache_Object::transform_vector_to_object_coords(const IVP_U_Point *P_world, IVP_U_Point *P_object_out) const
