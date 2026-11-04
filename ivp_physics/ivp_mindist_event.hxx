@@ -6,6 +6,7 @@
 #include "ivp_mindist.hxx"
 
 class IVP_Cache_Ledge_Point;
+class IVP_U_Float80;
 
 class IVP_Mindist_Event_Solver
 {
@@ -64,6 +65,11 @@ protected:
     void calc_next_event_BB(IVP_Cache_Object *m_cache_A, IVP_Cache_Object *m_cache_B);
 
 public:
+    void calculate_speed_bounds(const IVP_Core *core0, const IVP_Core *core1);
+    void calculate_projected_speed(const IVP_U_Float_Point *plane, const IVP_Core *core0, const IVP_Core *core1,
+                                   IVP_U_Float80 *maximum_extended = 0);
+    bool collision_is_possible(const IVP_U_Float80 *maximum_extended, IVP_DOUBLE now, IVP_DOUBLE next,
+                               IVP_FLOAT length, IVP_FLOAT collision_distance) const;
     static void init_mim_function_table();
 
     // get the next interesting event e.g. collision ....

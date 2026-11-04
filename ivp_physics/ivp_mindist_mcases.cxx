@@ -2,6 +2,9 @@
 #include <ivp_physics.hxx>
 
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivp_mindist.hxx>
 #include <ivp_mindist_minimize.hxx>
@@ -10,6 +13,22 @@
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_compact_ledge_solver.hxx>
+
+static IVP_FLOAT ivp_mindist_core_projection(const IVP_U_Point *a,
+    const IVP_U_Point *b, const IVP_U_Float_Point *normal)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 differences[3];
+    for (int i = 0; i < 3; ++i)
+        differences[i] = fp.subtract(fp.load(a->k[i]), fp.load(b->k[i]));
+    return fp.store_float(fp.add(fp.add(fp.multiply(differences[1], fp.load(normal->k[1])),
+        fp.multiply(differences[2], fp.load(normal->k[2]))), fp.multiply(differences[0], fp.load(normal->k[0]))));
+#else
+    return static_cast<IVP_FLOAT>((a->k[1] - b->k[1]) * normal->k[1] +
+        (a->k[2] - b->k[2]) * normal->k[2] + (a->k[0] - b->k[0]) * normal->k[0]);
+#endif
+}
 
 // IVP_EXPORT_PRIVATE
 
@@ -105,9 +124,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_
         mindist->len_numerator = dist_plus_radius - mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        IVP_U_Float_Point diff_center;
-        diff_center.subtract(&m_cache_B->cache_object->core_pos, &m_cache_F->get_object_cache()->core_pos);
-        mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_B->cache_object->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
         return IVP_MRC_OK;
     }
@@ -130,6 +147,28 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BF(IVP_Cache_Ball *m_cache_
     }
     IVP_ASSERT(min_edge);
     return p_minimize_BK(m_cache_B, min_edge, m_cache_F);
+}
+
+// RVA 0x30F80 subtracts the Y/Z/X face projection from the Z/X/Y point
+// projection in x87 before storing the signed distance as a float.
+static IVP_FLOAT ivp_pf_signed_distance(const IVP_U_Point *normal,
+                                        const IVP_U_Point *point,
+                                        const IVP_U_Float_Point *face_point)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 projection = fp.add(fp.add(
+        fp.multiply(fp.load(normal->k[2]), fp.load(point->k[2])),
+        fp.multiply(fp.load(normal->k[0]), fp.load(point->k[0]))),
+        fp.multiply(fp.load(normal->k[1]), fp.load(point->k[1])));
+    const IVP_U_Float80 face = fp.add(fp.add(
+        fp.multiply(fp.load(face_point->k[1]), fp.load(normal->k[1])),
+        fp.multiply(fp.load(face_point->k[2]), fp.load(normal->k[2]))),
+        fp.multiply(fp.load(face_point->k[0]), fp.load(normal->k[0])));
+    return fp.store_float(fp.subtract(projection, face));
+#else
+    return normal->dot_product(point)-normal->dot_product(face_point);
+#endif
 }
 
 IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_Edge *P, const IVP_U_Point *P_Fos, const IVP_Compact_Edge *F, IVP_Cache_Ledge_Point *m_cache_P, IVP_Cache_Ledge_Point *m_cache_F)
@@ -158,7 +197,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
 
         // if backside than reverse hesse
         const IVP_U_Float_Point *F_O_Fos = IVP_CLS.give_object_coords(F, m_cache_F);
-        mindist->len_numerator = wHesse_vecF_Fos.dot_product(P_Fos) - wHesse_vecF_Fos.dot_product(F_O_Fos);
+        mindist->len_numerator = ivp_pf_signed_distance(&wHesse_vecF_Fos, P_Fos, F_O_Fos);
         mindist->contact_plane.set(&hesse_vec_ws);
 
         if (mindist->len_numerator < back_side_check_distance)
@@ -169,9 +208,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PF(const IVP_Compact_
         mindist->len_numerator -= mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        IVP_U_Float_Point diff_center;
-        diff_center.subtract(&m_cache_P->get_object_cache()->core_pos, &m_cache_F->get_object_cache()->core_pos);
-        mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_F->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -419,6 +456,45 @@ public:
     IVP_U_Point hesse_Fos;
 };
 
+// RVA 0x317A0 evaluates the candidate gradient in x87, but saves the
+// accepted minimum as binary64. Keep the comparison before that final spill.
+static bool ivp_kk_better_gradient(const IVP_U_Point *edge, const IVP_U_Point *hesse,
+                                   IVP_DOUBLE minimum, IVP_DOUBLE *gradient)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 delta = fp.add(fp.add(
+        fp.multiply(fp.load(edge->k[1]), fp.load(hesse->k[1])),
+        fp.multiply(fp.load(edge->k[2]), fp.load(hesse->k[2]))),
+        fp.multiply(fp.load(edge->k[0]), fp.load(hesse->k[0])));
+    const IVP_DOUBLE stored_delta = fp.store_double(delta);
+    const IVP_X87_Arithmetic::Relation sign = fp.compare(delta, fp.load(0.0));
+    if (sign != IVP_X87_Arithmetic::LESS && sign != IVP_X87_Arithmetic::UNORDERED) return false;
+    const IVP_FLOAT hesse_square = fp.store_float(fp.add(fp.add(
+        fp.multiply(fp.load(hesse->k[0]), fp.load(hesse->k[0])),
+        fp.multiply(fp.load(hesse->k[2]), fp.load(hesse->k[2]))),
+        fp.multiply(fp.load(hesse->k[1]), fp.load(hesse->k[1]))));
+    const IVP_DOUBLE inverse_hesse = fp.store_double(IVP_Fast_Math::isqrt_extended(fp, double(hesse_square), 2));
+    const IVP_FLOAT edge_square = fp.store_float(fp.add(fp.add(
+        fp.multiply(fp.load(edge->k[2]), fp.load(edge->k[2])),
+        fp.multiply(fp.load(edge->k[1]), fp.load(edge->k[1]))),
+        fp.multiply(fp.load(edge->k[0]), fp.load(edge->k[0]))));
+    const IVP_U_Float80 value = fp.multiply(fp.multiply(IVP_Fast_Math::isqrt_extended(fp, double(edge_square), 2),
+        fp.load(stored_delta)), fp.load(inverse_hesse));
+    const IVP_DOUBLE stored_gradient = fp.store_double(value);
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(value, fp.load(minimum));
+    if (relation != IVP_X87_Arithmetic::LESS && relation != IVP_X87_Arithmetic::UNORDERED) return false;
+    *gradient = stored_gradient;
+    return true;
+#else
+    const IVP_DOUBLE delta=edge->dot_product(hesse);
+    if(delta>=0.0) return false;
+    *gradient=delta*IVP_Inline_Math::isqrt_float(edge->quad_length())
+        *IVP_Inline_Math::isqrt_float(hesse->quad_length());
+    return *gradient<minimum;
+#endif
+}
+
 // prerequisites:
 // synapses are set correctly
 // world_coords of points of KK are already set
@@ -460,9 +536,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
         mindist->contact_plane.set_multiple(&H_ws, (side - 0.5f) * 2.0f * iHQ);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        IVP_U_Float_Point diff_center;
-        diff_center.subtract(&m_cache_K->get_object_cache()->core_pos, &m_cache_L->get_object_cache()->core_pos);
-        mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_K->get_object_cache()->core_pos, &m_cache_L->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -526,24 +600,14 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_KK(const IVP_Compact_
         for (int i = 0; i <= 3; i++, cF++)
         {
             IVP_Leave_KK_Case *ce = &cases[(i ^ side) ^ (int)reverse_side_check[i]];
-            IVP_DOUBLE delta_h2;
             IVP_U_Point e_dir_Fos;
             {
                 IVP_Leave_KK_Case *ce2 = &cases[i ^ side];
                 IVP_Leave_KK_Case *ce2_next = &cases[1 ^ (i ^ side)];
-
                 e_dir_Fos.subtract(ce2->P_Fos, ce2_next->P_Fos);
-                delta_h2 = e_dir_Fos.dot_product(&cF->hesse_Fos);
             }
-
-            if (delta_h2 >= 0.0f)
-                continue;
-
-            // calc gradient as real sin(alpha)
-            IVP_DOUBLE inv_hesse_real_length = IVP_Inline_Math::isqrt_float(cF->hesse_Fos.quad_length());
-            IVP_DOUBLE grad = delta_h2 * IVP_Inline_Math::isqrt_float(e_dir_Fos.quad_length());
-            grad *= inv_hesse_real_length;
-            if (grad < min_grad_pos)
+            IVP_DOUBLE grad;
+            if (ivp_kk_better_gradient(&e_dir_Fos, &cF->hesse_Fos, min_grad_pos, &grad))
             {
                 // check side of triangle
 
@@ -684,9 +748,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_BP(IVP_Cache_Ball *m_cache_
     mindist->len_numerator = dist_plus_radius - mindist->sum_extra_radius;
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-    IVP_U_Float_Point diff_center;
-    diff_center.subtract(&m_cache_ball->cache_object->core_pos, &m_cache_P->get_object_cache()->core_pos);
-    mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+    mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_ball->cache_object->core_pos, &m_cache_P->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     IVP_DOUBLE s_grad_max = 0;
 
@@ -802,9 +864,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_PP(const IVP_Compact_Edge *
         }
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        IVP_U_Float_Point diff_center;
-        diff_center.subtract(&m_cache_A->get_object_cache()->core_pos, &m_cache_B->get_object_cache()->core_pos);
-        mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_A->get_object_cache()->core_pos, &m_cache_B->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 
@@ -1015,9 +1075,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_BK(IVP_Cache_Ball *m_
     mindist->contact_plane.set_multiple(&Lot2, -inv_len * iqK_len);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-    IVP_U_Float_Point diff_center;
-    diff_center.subtract(&m_cache_ball->cache_object->core_pos, &m_cache_K->get_object_cache()->core_pos);
-    mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+    mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_ball->cache_object->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
 
     m_cache_K->tmp.synapse->update_synapse(K, IVP_ST_EDGE);
@@ -1173,9 +1231,7 @@ IVP_MRC_TYPE IVP_Mindist_Minimize_Solver::p_minimize_Leave_PK(const IVP_Compact_
         // IVP_ASSERT( mindist->contact_plane.real_length() < 1.001f);
 
 #ifdef IVP_HALFSPACE_OPTIMIZATION_ENABLED
-        IVP_U_Float_Point diff_center;
-        diff_center.subtract(&m_cache_P->get_object_cache()->core_pos, &m_cache_K->get_object_cache()->core_pos);
-        mindist->contact_dot_diff_center = diff_center.dot_product(&mindist->contact_plane);
+        mindist->contact_dot_diff_center = ivp_mindist_core_projection(&m_cache_P->get_object_cache()->core_pos, &m_cache_K->get_object_cache()->core_pos,&mindist->contact_plane);
 #endif
     }
 

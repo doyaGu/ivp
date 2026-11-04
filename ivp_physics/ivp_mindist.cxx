@@ -11,6 +11,9 @@
 
 #include <ivp_hull_manager.hxx>
 #include <ivu_memory.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivp_mindist_event.hxx>
 #include <ivp_mindist.hxx>
@@ -47,6 +50,73 @@
 // start position of 2 synapses.
 
 IVP_Mindist_Settings ivp_mindist_settings;
+
+void IVP_Mindist_Event_Solver::calculate_speed_bounds(const IVP_Core *core0, const IVP_Core *core1)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 surface = fp.add(fp.load(core0->max_surface_rot_speed), fp.load(core1->max_surface_rot_speed));
+    sum_max_surface_rot_speed = fp.store_double(surface);
+    worst_case_speed = fp.store_double(fp.add(fp.add(fp.load(core1->current_speed), fp.load(core0->current_speed)), surface));
+#else
+    sum_max_surface_rot_speed=core0->max_surface_rot_speed+core1->max_surface_rot_speed;
+    worst_case_speed=sum_max_surface_rot_speed+core0->current_speed+core1->current_speed;
+#endif
+}
+
+void IVP_Mindist_Event_Solver::calculate_projected_speed(const IVP_U_Float_Point *plane,
+                                                        const IVP_Core *core0, const IVP_Core *core1,
+                                                        IVP_U_Float80 *maximum_extended)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float_Point *vectors[4] = { &core1->speed, &core0->speed,
+        &core0->rotation_axis_world_space, &core1->rotation_axis_world_space };
+    IVP_U_Float80 projections[4];
+    for (int i = 0; i < 4; ++i)
+        projections[i] = fp.add(fp.add(
+            fp.multiply(fp.load(plane->k[2]), fp.load(vectors[i]->k[2])),
+            fp.multiply(fp.load(plane->k[1]), fp.load(vectors[i]->k[1]))),
+            fp.multiply(fp.load(plane->k[0]), fp.load(vectors[i]->k[0])));
+    const IVP_U_Float80 projected = fp.subtract(projections[0], projections[1]);
+    projected_center_speed = fp.store_double(projected);
+    const IVP_U_Float80 rotation0 = fp.multiply(fp.square_root(fp.subtract(fp.load(1.001f),
+        fp.multiply(projections[2], projections[2]))), fp.load(core0->max_surface_rot_speed));
+    const IVP_U_Float80 rotation1 = fp.multiply(fp.square_root(fp.subtract(fp.load(1.001f),
+        fp.multiply(projections[3], projections[3]))), fp.load(core1->max_surface_rot_speed));
+    const IVP_U_Float80 max_coll_speed_extended = fp.add(projected, fp.add(rotation0, rotation1));
+    max_coll_speed = fp.store_double(max_coll_speed_extended);
+    if (maximum_extended) *maximum_extended = max_coll_speed_extended;
+#else
+    projected_center_speed=core1->speed.dot_product(plane)-core0->speed.dot_product(plane);
+    IVP_DOUBLE rot0=plane->dot_product(&core0->rotation_axis_world_space);
+    rot0*=rot0;
+    rot0=IVP_Inline_Math::ivp_sqrtf(1.001f-rot0)*core0->max_surface_rot_speed;
+    IVP_DOUBLE rot1=plane->dot_product(&core1->rotation_axis_world_space);
+    rot1*=rot1;
+    rot1=IVP_Inline_Math::ivp_sqrtf(1.001f-rot1)*core1->max_surface_rot_speed;
+    max_coll_speed=rot0+rot1+projected_center_speed;
+#endif
+}
+
+bool IVP_Mindist_Event_Solver::collision_is_possible(const IVP_U_Float80 *maximum_extended, IVP_DOUBLE now, IVP_DOUBLE next, IVP_FLOAT current_length, IVP_FLOAT collision_distance) const
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_X87_Arithmetic::Relation speed = fp.compare(*maximum_extended, fp.load(ivp_mindist_settings.speed_after_keeper_dist));
+    if (speed == IVP_X87_Arithmetic::LESS || speed == IVP_X87_Arithmetic::UNORDERED)
+    {
+        const IVP_X87_Arithmetic::Relation epsilon = fp.compare(*maximum_extended, fp.load(P_DOUBLE_EPS));
+        if (epsilon == IVP_X87_Arithmetic::LESS || epsilon == IVP_X87_Arithmetic::UNORDERED) return false;
+    }
+    const IVP_U_Float80 bound = fp.add(fp.multiply(fp.subtract(fp.load(next), fp.load(now)), *maximum_extended), fp.load(collision_distance));
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(fp.load(current_length), bound);
+    return relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED;
+#else
+    if(max_coll_speed<ivp_mindist_settings.speed_after_keeper_dist && max_coll_speed<P_DOUBLE_EPS) return false;
+    return current_length<collision_distance+(next-now)*max_coll_speed;
+#endif
+}
 
 void IVP_Mindist_Settings::set_collision_tolerance(IVP_DOUBLE t)
 {
@@ -1005,10 +1075,12 @@ void IVP_Mindist::update_exact_mindist_events(IVP_BOOL allow_hull_conversion, IV
 
     // speed is speed toward each other
     IVP_Mindist_Event_Solver mim;
-    {
-        mim.sum_max_surface_rot_speed = core0->max_surface_rot_speed + core1->max_surface_rot_speed;
-        mim.worst_case_speed = mim.sum_max_surface_rot_speed + core0->current_speed + core1->current_speed;
-    }
+    IVP_U_Float80 *maximum_extended = 0;
+#if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 maximum_value;
+    maximum_extended = &maximum_value;
+#endif
+    mim.calculate_speed_bounds(core0,core1);
 
     if (this->index != IVP_U_MINLIST_UNUSED)
     {
@@ -1036,47 +1108,21 @@ void IVP_Mindist::update_exact_mindist_events(IVP_BOOL allow_hull_conversion, IV
     }
 
     {
-        mim.projected_center_speed = core1->speed.dot_product(&contact_plane) - core0->speed.dot_product(&contact_plane); // inverse to direction
-
-        IVP_DOUBLE rot0_projected = contact_plane.dot_product(&core0->rotation_axis_world_space);
-        rot0_projected *= rot0_projected;
-        rot0_projected = IVP_Inline_Math::ivp_sqrtf(1.001f - rot0_projected) * core0->max_surface_rot_speed; // make sure sqrt does not crash -> increase result
-
-        IVP_DOUBLE rot1_projected = contact_plane.dot_product(&core1->rotation_axis_world_space);
-        rot1_projected *= rot1_projected;
-        rot1_projected = IVP_Inline_Math::ivp_sqrtf(1.001f - rot1_projected) * core1->max_surface_rot_speed;
-        mim.max_coll_speed = rot0_projected + rot1_projected + mim.projected_center_speed;
+        mim.calculate_projected_speed(&contact_plane,core0,core1,maximum_extended);
         mim.t_now = env->get_current_time();
         mim.t_max = env->get_next_PSI_time();
     }
 
     IVP_DOUBLE len = get_length();
 
-    if (mim.max_coll_speed < ivp_mindist_settings.speed_after_keeper_dist)
-    {
-        if (len < ivp_mindist_settings.keeper_dist)
-        {
-            // mim.flag_near_slow_impact = IVP_TRUE;
-        }
-        if (mim.max_coll_speed < P_DOUBLE_EPS)
-        {
-            return; // no movement towards each other!!
-        }
-    }
-
-    IVP_DOUBLE d_time = mim.t_max - mim.t_now;
-    IVP_DOUBLE d_len = d_time * mim.max_coll_speed; // max length that the system can move till next PSI
-    IVP_DOUBLE sec_dist = this->get_coll_dist() + d_len;
+    if(!mim.collision_is_possible(maximum_extended,mim.t_now.get_time(),mim.t_max.get_time(),
+                                  static_cast<IVP_FLOAT>(len),static_cast<IVP_FLOAT>(get_coll_dist())))
+        return;
 
     IVP_IF(ivp_check_debug_mindist(this))
     {
+        const IVP_DOUBLE sec_dist=get_coll_dist()+(mim.t_max-mim.t_now)*mim.max_coll_speed;
         ivp_message("%32s  event  len_now %g, sec_dist:%g\n", "update_exact_mindist_events", get_length(), sec_dist);
-    }
-
-    if (len >= sec_dist)
-    {
-        // no collision possible
-        return;
     }
 
     // real check next collision time
@@ -1164,7 +1210,12 @@ void IVP_Mindist::update_exact_mindist_events(IVP_BOOL allow_hull_conversion, IV
         }
         else
         {
+#if IVP_ENABLE_X87_EMULATION
+            IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+            const IVP_FLOAT event_time = fp.store_float(fp.subtract(fp.load(next_event.get_time()), fp.load(tm->base_time.get_time())));
+#else
             IVP_FLOAT event_time = next_event - tm->base_time;
+#endif
             this->index = tm->min_hash->add(this, event_time);
         }
 
