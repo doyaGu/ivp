@@ -74,6 +74,24 @@ IVP_DOUBLE IVP_Inline_Math::isqrt_double(IVP_DOUBLE quad)
 #if !defined(IVP_NO_DOUBLE)
 void IVP_U_Point::set_interpolate(const IVP_U_Point *p0, const IVP_U_Point *p1, IVP_DOUBLE s)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 second = fp.load(s), first = fp.subtract(fp.load(1.0), second);
+    IVP_U_Float80 values[3];
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        IVP_U_Float80 a = fp.multiply(first, fp.load(p0->k[axis]));
+        IVP_U_Float80 b = fp.multiply(second, fp.load(p1->k[axis]));
+        if (axis == 2)
+        {
+            a = fp.load(fp.store_double(a));
+            b = fp.load(fp.store_double(b));
+        }
+        values[axis] = axis == 2 ? fp.add(b, a) : fp.add(a, b);
+    }
+    for (int axis = 0; axis < 3; ++axis)
+        k[axis] = fp.store_double(values[axis]);
+#else
     IVP_DOUBLE is = 1.0f - s;
     IVP_DOUBLE a = p0->k[0] * is;
     IVP_DOUBLE a2 = p1->k[0] * s;
@@ -88,6 +106,7 @@ void IVP_U_Point::set_interpolate(const IVP_U_Point *p0, const IVP_U_Point *p1, 
     k[0] = a;
     k[1] = b;
     k[2] = c + c2;
+#endif
 }
 
 void IVP_U_Point::set_interpolate(const IVP_U_Float_Point *p0, const IVP_U_Float_Point *p1, IVP_DOUBLE s)
