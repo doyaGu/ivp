@@ -7,6 +7,9 @@
 #include <ivp_core_macros.hxx>
 #include <ivp_great_matrix.hxx>
 #include <ivu_memory.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivp_debug_manager.hxx> // because of debug psi_synchrone
 #include <ivp_friction.hxx>
@@ -85,70 +88,54 @@ void IVP_Friction_Solver::factor_result_vec()
     }
 }
 
+// Retail RVA 0x36190 is an independent matrix normalization call.
 void IVP_Friction_Solver::normize_constraint_equ()
 {
-    IVP_DOUBLE max_val = 0.0f;
-    int i;
-    // find highest diagonal element
-    for (i = dist_change_mat.columns - 1; i >= 0; i--)
+    IVP_DOUBLE max_diagonal = 0.0;
+    for (int i = dist_change_mat.columns - 1; i >= 0; --i)
     {
-        IVP_DOUBLE test_val =
-            dist_change_mat.matrix_values[i * dist_change_mat.aligned_row_len + i];
-        if (test_val > max_val)
+        const IVP_DOUBLE diagonal = dist_change_mat.matrix_values[i * dist_change_mat.aligned_row_len + i];
+        if (diagonal > max_diagonal) max_diagonal = diagonal;
+    }
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 matrix_scale = max_diagonal > P_DOUBLE_EPS ? fp.divide(fp.load(1.0), fp.load(max_diagonal)) : fp.load(1.0);
+#else
+    const IVP_DOUBLE matrix_scale = max_diagonal > P_DOUBLE_EPS ? 1.0 / max_diagonal : 1.0;
+#endif
+    IVP_DOUBLE max_desired = 0.0;
+    for (int i = dist_change_mat.columns - 1; i >= 0; --i)
+    {
+        const IVP_DOUBLE desired = IVP_Inline_Math::fabsd(dist_change_mat.desired_vector[i]);
+        if (desired > max_desired) max_desired = desired;
+    }
+    if (max_desired <= P_DOUBLE_EPS) max_desired = 1.0;
+#if IVP_ENABLE_X87_EMULATION
+    const IVP_DOUBLE desired_scale = fp.store_double(fp.divide(fp.load(1.0), fp.load(max_desired)));
+    correct_x_factor = fp.store_double(fp.multiply(matrix_scale, fp.load(max_desired)));
+#else
+    const IVP_DOUBLE desired_scale = 1.0 / max_desired;
+    correct_x_factor = matrix_scale * max_desired;
+#endif
+    for (int i = 0; i < dist_change_mat.columns; ++i)
+    {
+        IVP_DOUBLE *row = &dist_change_mat.matrix_values[i * dist_change_mat.aligned_row_len];
+        for (int j = 0; j < dist_change_mat.aligned_row_len; ++j)
         {
-            max_val = test_val;
+#if IVP_ENABLE_X87_EMULATION
+            row[j] = fp.store_double(fp.multiply(matrix_scale, fp.load(row[j])));
+#else
+            row[j] *= matrix_scale;
+#endif
         }
     }
-
-    IVP_DOUBLE a_norm;
-    if (max_val > P_DOUBLE_EPS)
+    for (int i = dist_change_mat.columns - 1; i >= 0; --i)
     {
-        a_norm = 1.0f / max_val;
-    }
-    else
-    {
-        a_norm = 1.0f;
-    }
-
-    correct_x_factor = a_norm;
-
-    max_val = 0.0f;
-    // find highest value in desired vector
-    for (i = dist_change_mat.columns - 1; i >= 0; i--)
-    {
-        IVP_DOUBLE test_val = IVP_Inline_Math::fabsd(dist_change_mat.desired_vector[i]);
-        if (test_val > max_val)
-        {
-            max_val = test_val;
-        }
-    }
-
-    IVP_DOUBLE b_norm;
-    if (max_val > P_DOUBLE_EPS)
-    {
-        b_norm = 1.0f / max_val;
-    }
-    else
-    {
-        b_norm = 1.0f;
-        max_val = 1.0f;
-    }
-
-    correct_x_factor *= max_val;
-
-    // #+# use fpu to do this
-    for (i = 0; i < dist_change_mat.columns; i++)
-    {
-        IVP_DOUBLE *base = &dist_change_mat.matrix_values[i * dist_change_mat.aligned_row_len];
-        for (int j = 0; j < dist_change_mat.aligned_row_len; j++)
-        {
-            base[j] *= a_norm;
-        }
-    }
-
-    for (i = dist_change_mat.columns - 1; i >= 0; i--)
-    {
-        dist_change_mat.desired_vector[i] *= b_norm;
+#if IVP_ENABLE_X87_EMULATION
+        dist_change_mat.desired_vector[i] = fp.store_double(fp.multiply(fp.load(dist_change_mat.desired_vector[i]), fp.load(desired_scale)));
+#else
+        dist_change_mat.desired_vector[i] *= desired_scale;
+#endif
     }
 }
 
@@ -525,6 +512,7 @@ void IVP_Friction_Solver::complex_failed(IVP_Friction_System *fs)
 }
 
 // returns 1 if a friction distance has to be removed (not used any more)
+// Retail RVA 0x364C0 is a separate call after the pressure solve.
 int IVP_Friction_Solver::do_resulting_pushes(IVP_Friction_System *fs)
 {
 
@@ -960,7 +948,7 @@ void IVP_Friction_Solver::calc_distance_matrix_column(int current_contact_point_
                                                       IVP_Core *core,
                                                       IVP_Friction_Info_For_Core *fr_info,
                                                       IVP_U_Float_Point *rotation_vec,
-                                                      IVP_U_Float_Point *translation_vec)
+                                                      IVP_U_Float_Point *translation_vec, bool spill_rotation_dot)
 {
 
     // dist_counter is number of distance that is tested. It is represented with a column of the
@@ -997,9 +985,18 @@ void IVP_Friction_Solver::calc_distance_matrix_column(int current_contact_point_
         }
         if (info->contact_core[which_obj])
         {
-            IVP_DOUBLE speed_change_scalar =
-                factor * get_closing_speed_core_i(info, which_obj, rotation_vec, translation_vec);
-            dist_change_mat.matrix_values[line_num * dist_change_mat.aligned_row_len + current_contact_point_index] += speed_change_scalar;
+#if IVP_ENABLE_X87_EMULATION
+            IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+            IVP_U_Float80 rotation = rotation_vec->dot_product_extended(fp, &info->contact_cross_nomal_cs[which_obj]);
+            if (spill_rotation_dot) rotation = fp.load(fp.store_double(rotation));
+            const IVP_U_Float80 translation = translation_vec->dot_product_extended(fp, &info->surf_normal);
+            const IVP_U_Float80 speed_change = fp.multiply(fp.load(factor), fp.add(translation, rotation));
+            IVP_DOUBLE &element = dist_change_mat.matrix_values[line_num * dist_change_mat.aligned_row_len + current_contact_point_index];
+            element = fp.store_double(fp.add(fp.load(element), speed_change));
+#else
+            const IVP_DOUBLE speed_change = factor * get_closing_speed_core_i(info, which_obj, rotation_vec, translation_vec);
+            dist_change_mat.matrix_values[line_num * dist_change_mat.aligned_row_len + current_contact_point_index] += speed_change;
+#endif
             // if ( line_num != current_contact_point_index){
             // dist_change_mat.matrix_values[current_contact_point_index * dist_change_mat.columns +
             // line_num] += speed_change_scalar * ( ivp_rand() * 0.001f + 1.0f);
@@ -1034,7 +1031,20 @@ int IVP_Friction_Solver::calc_solver_PSI(IVP_Friction_System *fs, int *active_is
     {
         IVP_Impact_Solver_Long_Term *info = contact_info_vector.element_at(i);
         // get closing speed
+#if IVP_ENABLE_X87_EMULATION
+        IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+        IVP_DOUBLE dist_velocity = 0.0;
+        for (int body = 0; body < 2; ++body)
+        {
+            const IVP_Core *core = info->contact_core[body];
+            if (!core) continue;
+            const IVP_DOUBLE rotation = fp.store_double(core->rot_speed.dot_product_extended(fp, &info->contact_cross_nomal_cs[body]));
+            const IVP_U_Float80 closing = fp.add(core->speed.dot_product_extended(fp, &info->surf_normal), fp.load(rotation));
+            dist_velocity = fp.store_double(body == 0 ? closing : fp.subtract(fp.load(dist_velocity), closing));
+        }
+#else
         IVP_DOUBLE dist_velocity = info->get_closing_speed();
+#endif
 
         IVP_DOUBLE distance_off = ivp_mindist_settings.friction_dist - info->friction.dist_len; // distance to my optimal position
         dist_change_mat.desired_vector[i] =
@@ -1060,7 +1070,7 @@ int IVP_Friction_Solver::calc_solver_PSI(IVP_Friction_System *fs, int *active_is
                                         info->contact_core[0],
                                         info->friction.friction_infos[0],
                                         &rotation_vec,
-                                        &translation_vec);
+                                        &translation_vec, true);
         }
 
         if (info->contact_core[1])

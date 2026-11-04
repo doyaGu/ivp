@@ -3,6 +3,10 @@
 #ifndef IVP_FRICTION_SOLVER_INCLUDED
 #define IVP_FRICTION_SOLVER_INCLUDED
 
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
+
 #define IVP_DESCENDING_SPEEDUP 20.0f
 
 class IVP_U_Memory;
@@ -46,7 +50,7 @@ public:
     // setup
     static inline IVP_DOUBLE calc_desired_gap_speed(IVP_DOUBLE closing_speed, IVP_DOUBLE gap_diff, IVP_FLOAT speedup_factor);
     void setup_coords_mindists(IVP_Friction_System *fs);
-    inline void calc_distance_matrix_column(int current_contact_point_index, IVP_Core *core_to_test, IVP_Friction_Info_For_Core *fr_info, IVP_U_Float_Point *rotation_vec, IVP_U_Float_Point *translation_vec);
+    inline void calc_distance_matrix_column(int current_contact_point_index, IVP_Core *core_to_test, IVP_Friction_Info_For_Core *fr_info, IVP_U_Float_Point *rotation_vec, IVP_U_Float_Point *translation_vec, bool spill_rotation_dot = false);
     int calc_solver_PSI(IVP_Friction_System *fs, int *original_pos_of_active);
 
     // gauss
@@ -90,7 +94,11 @@ void IVP_Friction_Solver::apply_impulse(const IVP_Impact_Solver_Long_Term *info,
         IVP_U_Float_Point hp;
         hp.set_pairwise_mult(&info->contact_cross_nomal_cs[0], c0->get_inv_rot_inertia());
         c0->rot_speed.add_multiple(&hp, -impulse);
-        c0->speed.add_multiple(&info->surf_normal, -impulse * c0->get_inv_mass());
+        // RVA 0x1AE40 passes the first core's linear factor through the
+        // double argument of add_multiple. Keeping it in x87 instead can
+        // change a small residual when pressure cancels vertical velocity.
+        const volatile IVP_DOUBLE translation_impulse = -impulse * c0->get_inv_mass();
+        c0->speed.add_multiple(&info->surf_normal, translation_impulse);
     }
 
     IVP_Core *c1;
@@ -119,7 +127,22 @@ void IVP_Friction_Solver::async_apply_impulse(const IVP_Impact_Solver_Long_Term 
     {
         IVP_U_Float_Point hp;
         hp.set_pairwise_mult(&info->contact_cross_nomal_cs[1], c1->get_inv_rot_inertia());
-        c1->rot_speed_change.add_multiple(&hp, impulse);
+#if IVP_ENABLE_X87_EMULATION
+        IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            IVP_U_Float80 inertia = axis == 0 ? fp.multiply(fp.load(info->contact_cross_nomal_cs[1].k[0]),
+                fp.load(c1->get_inv_rot_inertia()->k[0])) : fp.load(hp.k[axis]);
+            c1->rot_speed_change.k[axis] = fp.store_float(fp.add(fp.load(c1->rot_speed_change.k[axis]), fp.multiply(inertia, fp.load(impulse))));
+        }
+#else
+        // RVA 0x364C0 retains the second core's X inertia product in x87;
+        // only Y/Z pass through the float hp spills before the impulse.
+        c1->rot_speed_change.k[0] += (IVP_DOUBLE(info->contact_cross_nomal_cs[1].k[0])
+            * c1->get_inv_rot_inertia()->k[0]) * impulse;
+        c1->rot_speed_change.k[1] += IVP_DOUBLE(hp.k[1]) * impulse;
+        c1->rot_speed_change.k[2] += IVP_DOUBLE(hp.k[2]) * impulse;
+#endif
         c1->speed_change.add_multiple(&info->surf_normal, impulse * c1->get_inv_mass());
     }
 }
