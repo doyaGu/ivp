@@ -9,10 +9,49 @@
 #include <ivp_physics.hxx>
 
 #include <ivp_anomaly_manager.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 
 #include <ivp_cache_object.hxx>
 #include <ivp_compact_ledge.hxx>
 #include <ivp_mindist.hxx>
+
+#if IVP_ENABLE_X87_EMULATION
+static IVP_U_Float80 ivp_gravity_penetration_speed(IVP_X87_Arithmetic &fp, IVP_Real_Object *object)
+{
+    const IVP_U_Float80 gravity = object->get_environment()->get_gravity()->real_length_extended(fp);
+    return fp.multiply(fp.add(gravity, gravity), fp.load(object->get_environment()->get_delta_PSI_time()));
+}
+
+// The built-in gravity response supplies an extended result explicitly.
+// User managers inherit the adapter to their existing float-valued virtual.
+class IVP_Anomaly_Manager_Gravity : public IVP_Anomaly_Manager
+{
+public:
+    IVP_Anomaly_Manager_Gravity() : IVP_Anomaly_Manager(IVP_TRUE) {}
+    IVP_U_Float80 get_push_speed_penetration_extended(IVP_X87_Arithmetic &fp,
+        IVP_Real_Object *first, IVP_Real_Object *)
+    {
+        return ivp_gravity_penetration_speed(fp, first);
+    }
+};
+
+IVP_U_Float80 IVP_Anomaly_Manager::get_push_speed_penetration_extended(IVP_X87_Arithmetic &fp,
+    IVP_Real_Object *first, IVP_Real_Object *second)
+{
+    return fp.load(get_push_speed_penetration(first, second));
+}
+#endif
+
+IVP_Anomaly_Manager *IVP_Anomaly_Manager::create_default()
+{
+#if IVP_ENABLE_X87_EMULATION
+    return new IVP_Anomaly_Manager_Gravity();
+#else
+    return new IVP_Anomaly_Manager(IVP_TRUE);
+#endif
+}
 
 IVP_Anomaly_Limits::IVP_Anomaly_Limits(IVP_BOOL delete_this_if_env_is_deleted_in)
 {
@@ -64,7 +103,20 @@ void IVP_Anomaly_Manager::max_angular_velocity_exceeded(IVP_Anomaly_Limits *al, 
     angular_velocity_in_out->mult(0.9f * max_rot_speed / IVP_Inline_Math::ivp_sqrtf(square_rot_speed));
 }
 
-void IVP_Anomaly_Manager::solve_inter_penetration_simple(IVP_Real_Object *obj0, IVP_Real_Object *obj1, IVP_DOUBLE speed_change)
+static void ivp_penetration_impulse(const IVP_U_Float_Point *direction, IVP_FLOAT mass,
+                                    IVP_DOUBLE speed, IVP_U_Float_Point *impulse)
+{
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 factor = fp.multiply(fp.load(mass), fp.load(speed));
+    for (int axis = 0; axis < 3; ++axis)
+        impulse->k[axis] = fp.store_float(fp.multiply(fp.load(direction->k[axis]), factor));
+#else
+    impulse->set_multiple(direction, mass * speed);
+#endif
+}
+
+void IVP_Anomaly_Manager::solve_inter_penetration_simple(IVP_Real_Object *obj0, IVP_Real_Object *obj1)
 {
     IVP_Environment *env = obj0->get_environment();
     IVP_DOUBLE d_time = env->get_delta_PSI_time();
@@ -75,28 +127,42 @@ void IVP_Anomaly_Manager::solve_inter_penetration_simple(IVP_Real_Object *obj0, 
     const IVP_U_Matrix *m_world_f_core1 = core1->get_m_world_f_core_PSI();
 
     IVP_U_Float_Point vec01;
-    vec01.subtract(&m_world_f_core1->vv, &m_world_f_core0->vv);
-    float deltaLength = vec01.real_length_plus_normize();
-    if (deltaLength <= 0.01)
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    for (int axis = 0; axis < 3; ++axis)
     {
-        // if the objects are exactly on top of each other just push down X the axis
-        vec01.set(1, 0, 0);
+        IVP_U_Float80 difference = fp.subtract(fp.load(m_world_f_core1->vv.k[axis]), fp.load(m_world_f_core0->vv.k[axis]));
+        if (axis == 2) difference = fp.load(fp.store_double(difference));
+        vec01.k[axis] = fp.store_float(difference);
     }
+#else
+    vec01.subtract(&m_world_f_core1->vv, &m_world_f_core0->vv);
+#endif
+    // RVA 0x2F780 uses normize, then queries the virtual rescue speed itself.
+    // The later SDK's 0.01 fallback and supplied scalar are absent.
+    vec01.normize();
+    IVP_DOUBLE speed_change;
+#if IVP_ENABLE_X87_EMULATION
+    speed_change = fp.store_double(get_push_speed_penetration_extended(fp, obj0, obj1));
+#else
+    speed_change=get_push_speed_penetration(obj0,obj1);
+#endif
 
-    if (IVP_MTIS_SIMULATED(core0->movement_state) && !core0->pinned)
+    if (IVP_MTIS_SIMULATED(core0->movement_state))
     {
         IVP_U_Float_Point p0;
-        p0.set_multiple(&vec01, -speed_change * core0->get_mass());
+        ivp_penetration_impulse(&vec01, -core0->get_mass(), speed_change, &p0);
         obj0->async_push_object_ws(&m_world_f_core0->vv, &p0);
-        IVP_U_Float_Point rot_speed_object(-d_time, 0, 0);
+        IVP_U_Float_Point rot_speed_object(d_time, 0, 0);
         obj0->async_add_rot_speed_object_cs(&rot_speed_object);
     }
 
-    if (IVP_MTIS_SIMULATED(core1->movement_state) && !core1->pinned)
+    if (IVP_MTIS_SIMULATED(core1->movement_state))
     {
         IVP_U_Float_Point p1;
-        p1.set_multiple(&vec01, speed_change * core1->get_mass());
-        obj1->async_push_object_ws(&m_world_f_core1->vv, &p1); // was m_world_f_core0, but this is a bug in Valve's code
+        ivp_penetration_impulse(&vec01, core1->get_mass(), speed_change, &p1);
+        // Retail 0x2F8AA passes core0's position for the second body too.
+        obj1->async_push_object_ws(&m_world_f_core0->vv, &p1);
         IVP_U_Float_Point rot_speed_object(d_time, 0, 0);
         obj1->async_add_rot_speed_object_cs(&rot_speed_object);
     }
@@ -114,8 +180,7 @@ void IVP_Anomaly_Manager::solve_inter_penetration_simple(IVP_Real_Object *obj0, 
     }
 }
 
-// TODO(nillerusr) in the decompiler output, this function is different, but this should not affect the result
-void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Object *obj0, IVP_Real_Object *obj1, IVP_DOUBLE speed_change)
+void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Object *obj0, IVP_Real_Object *obj1)
 {
     IVP_Real_Object *my_objects[2];
     my_objects[0] = obj0;
@@ -129,7 +194,7 @@ void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Objec
 
     if (!my_objects[swapped]->get_core()->physical_unmoveable)
     {
-        solve_inter_penetration_simple(obj0, obj1, speed_change);
+        solve_inter_penetration_simple(obj0, obj1);
         return;
     }
 
@@ -139,7 +204,7 @@ void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Objec
 #if 1
     if (mindist->synapse[swapped].get_status() > IVP_ST_TRIANGLE)
     {
-        solve_inter_penetration_simple(obj0, obj1, speed_change);
+        solve_inter_penetration_simple(obj0, obj1);
         return;
     }
 
@@ -188,10 +253,25 @@ void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Objec
     IVP_U_Float_Point world_push_vec;
     world_push_vec.set(&world_push_dir);
 
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Float80 speed_change = get_push_speed_penetration_extended(fp, obj0, obj1);
+#else
+    const IVP_DOUBLE speed_change=get_push_speed_penetration(obj0,obj1);
+#endif
     IVP_Core *moving_core = moving_obj->get_core();
     if (IVP_MTIS_SIMULATED(moving_core->movement_state))
     {
+#if IVP_ENABLE_X87_EMULATION
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            IVP_U_Float80 velocity = fp.multiply(fp.load(world_push_vec.k[axis]), speed_change);
+            if (axis == 2) velocity = fp.load(fp.store_double(velocity));
+            world_push_vec.k[axis] = fp.store_float(velocity);
+        }
+#else
         world_push_vec.mult(speed_change);
+#endif
         moving_obj->async_add_speed_object_ws(&world_push_vec);
     }
 
@@ -201,9 +281,14 @@ void IVP_Anomaly_Manager::inter_penetration(IVP_Mindist *mindist, IVP_Real_Objec
 IVP_FLOAT IVP_Anomaly_Manager::get_push_speed_penetration(IVP_Real_Object *obj0, IVP_Real_Object *obj1)
 {
     IVP_DOUBLE d_time = obj0->get_environment()->get_delta_PSI_time();
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return fp.store_float(ivp_gravity_penetration_speed(fp, obj0));
+#else
     IVP_DOUBLE grav = obj0->get_environment()->get_gravity()->real_length();
-    IVP_DOUBLE speed_change = (grav * 4.0f) * d_time;
+    IVP_DOUBLE speed_change = (grav * 2.0f) * d_time;
     return speed_change;
+#endif
 }
 
 IVP_BOOL IVP_Anomaly_Manager::max_collisions_exceeded_check_freezing(IVP_Anomaly_Limits *, IVP_Core *core)

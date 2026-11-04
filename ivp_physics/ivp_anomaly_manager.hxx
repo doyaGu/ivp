@@ -6,6 +6,8 @@
 // IVP_EXPORT_PUBLIC
 
 class IVP_Mindist;
+class IVP_U_Float80;
+class IVP_X87_Arithmetic;
 
 /********************************************************************************
  *	Name:	       	IVP_Anomaly_Limits
@@ -57,7 +59,7 @@ public:
 
     virtual void max_velocity_exceeded(IVP_Anomaly_Limits *, IVP_Core *, IVP_U_Float_Point *velocity_in_out);
     virtual void max_angular_velocity_exceeded(IVP_Anomaly_Limits *, IVP_Core *, IVP_U_Float_Point *angular_velocity_in_out);
-    virtual void inter_penetration(IVP_Mindist *mindist, IVP_Real_Object *, IVP_Real_Object *, IVP_DOUBLE);
+    virtual void inter_penetration(IVP_Mindist *mindist, IVP_Real_Object *, IVP_Real_Object *);
     virtual IVP_BOOL max_collisions_exceeded_check_freezing(IVP_Anomaly_Limits *, IVP_Core *); // return true if object should be temp. freezed
 
     virtual void environment_will_be_deleted(IVP_Environment *);
@@ -67,10 +69,18 @@ public:
     //  -> derive from IVP_Anomaly_Manager and have different implementation
     virtual IVP_FLOAT get_push_speed_penetration(IVP_Real_Object *, IVP_Real_Object *);
 
-    void solve_inter_penetration_simple(IVP_Real_Object *, IVP_Real_Object *, IVP_DOUBLE); // push mass centers in opposite directions
+    void solve_inter_penetration_simple(IVP_Real_Object *, IVP_Real_Object *); // query rescue speed and push along the mass-center direction
 
     IVP_Anomaly_Manager(IVP_BOOL delete_this_if_env_is_deleted = IVP_TRUE);
     virtual ~IVP_Anomaly_Manager();
+
+    static IVP_Anomaly_Manager *create_default();
+#if IVP_ENABLE_X87_EMULATION
+    // Existing custom managers keep their float-valued override through the
+    // default adapter; extended implementations can override this query.
+    virtual IVP_U_Float80 get_push_speed_penetration_extended(IVP_X87_Arithmetic &fp,
+        IVP_Real_Object *, IVP_Real_Object *);
+#endif
 };
 
 #endif

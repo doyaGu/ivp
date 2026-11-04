@@ -151,7 +151,7 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
         anomaly_manager = appl_env->anomaly_manager;
         if (!anomaly_manager)
         {
-            anomaly_manager = new IVP_Anomaly_Manager(IVP_TRUE);
+            anomaly_manager = IVP_Anomaly_Manager::create_default();
         }
 
         anomaly_limits = appl_env->anomaly_limits;
