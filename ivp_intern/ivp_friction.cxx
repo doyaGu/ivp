@@ -1667,7 +1667,7 @@ IVP_DOUBLE IVP_Mutual_Energizer::calc_impulse_to_reduce_energy_level(IVP_DOUBLE 
     const IVP_U_Float80 mass_sum = fp.add(fp.load(inv_mass0), fp.load(inv_mass1));
     const IVP_U_Float80 energy = fp.load(delta_e), speed = fp.load(speed_pot);
     const IVP_U_Float80 root = fp.square_root(fp.absolute(fp.subtract(fp.multiply(speed, speed), fp.multiply(fp.add(energy, energy), mass_sum))));
-    return fp.store_double(fp.multiply(fp.subtract(speed, root), fp.divide(fp.load(1.0), mass_sum)));
+    return fp.return_double(fp.multiply(fp.subtract(speed, root), fp.divide(fp.load(1.0), mass_sum)));
 #else
     IVP_DOUBLE inv_mass_sum=inv_mass0+inv_mass1;
     IVP_DOUBLE root=IVP_Inline_Math::sqrtd(IVP_Inline_Math::fabsd(speed_pot*speed_pot-(delta_e+delta_e)*inv_mass_sum));
@@ -1685,7 +1685,7 @@ IVP_DOUBLE IVP_Mutual_Energizer::calc_energy_potential(IVP_DOUBLE speed_pot, IVP
     const IVP_DOUBLE energy1 = fp.store_double(fp.multiply(fp.multiply(speed1, speed1), fp.load(mass1)));
     const IVP_U_Float80 speed0 = fp.multiply(impulse, fp.load(inv_mass0));
     const IVP_U_Float80 energy0 = fp.multiply(fp.multiply(speed0, speed0), fp.load(mass0));
-    return fp.store_double(fp.multiply(fp.subtract(fp.subtract(fp.multiply(fp.multiply(speed, speed), fp.load(mass1)), energy0), fp.load(energy1)), fp.load(0.5)));
+    return fp.return_double(fp.multiply(fp.subtract(fp.subtract(fp.multiply(fp.multiply(speed, speed), fp.load(mass1)), energy0), fp.load(energy1)), fp.load(0.5)));
 #else
     IVP_DOUBLE x=speed_pot/(inv_mass0+inv_mass1);
     IVP_DOUBLE speed1=speed_pot-x*inv_mass1;

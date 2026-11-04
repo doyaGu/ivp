@@ -27,7 +27,7 @@
 static IVP_DOUBLE ivp_event_dot(const IVP_U_Point *first, const IVP_U_Point *second)
 {
     IVP_X87_Arithmetic fp(IVP_X87_Control::current());
-    return fp.store_double(fp.add(fp.add(
+    return fp.return_double(fp.add(fp.add(
         fp.multiply(fp.load(first->k[2]), fp.load(second->k[2])),
         fp.multiply(fp.load(first->k[1]), fp.load(second->k[1]))),
         fp.multiply(fp.load(first->k[0]), fp.load(second->k[0]))));
@@ -73,7 +73,7 @@ IVP_DOUBLE IVP_3D_Solver_PF_COLL::get_value(IVP_U_Matrix *A_w_f_c, IVP_U_Matrix 
         difference[axis] = fp.subtract(fp.load(point_world.k[axis]), plane[axis]);
         if (axis != 2) difference[axis] = fp.load(fp.store_double(difference[axis]));
     }
-    return fp.store_double(fp.add(fp.add(fp.multiply(difference[2], normal[2]),
+    return fp.return_double(fp.add(fp.add(fp.multiply(difference[2], normal[2]),
         fp.multiply(difference[1], normal[1])), fp.multiply(difference[0], normal[0])));
 #else
     IVP_U_Point hesse_of_area_world, point_of_area_world;
@@ -146,7 +146,7 @@ IVP_DOUBLE IVP_3D_Solver_DISTANCE_OF_TWO_POINTS::get_value(IVP_U_Matrix *A_w_f_c
         fp.multiply(difference[2], fp.load(normized_direction_world_at_t0.k[2]))),
         fp.multiply(difference[0], fp.load(normized_direction_world_at_t0.k[0]))), fp.load(1.2f));
     const IVP_X87_Arithmetic::Relation relation = fp.compare(fp.multiply(fp.absolute(projected), projected), fp.load(square));
-    return fp.store_double(relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED ?
+    return fp.return_double(relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED ?
         projected : fp.square_root(fp.load(square)));
 #else
     IVP_U_Point dir_world;

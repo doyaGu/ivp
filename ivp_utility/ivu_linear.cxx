@@ -138,7 +138,7 @@ IVP_DOUBLE IVP_U_Point::real_length() const
 {
 #if IVP_ENABLE_X87_EMULATION
     IVP_X87_Arithmetic fp(IVP_X87_Control::current());
-    return fp.store_double(real_length_extended(fp));
+    return fp.return_double(real_length_extended(fp));
 #else
     return IVP_Inline_Math::sqrtd(this->quad_length());
 #endif

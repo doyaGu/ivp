@@ -186,7 +186,7 @@ public:
     {
 #if IVP_ENABLE_X87_EMULATION
         IVP_X87_Arithmetic fp(IVP_X87_Control::current());
-        return fp.store_double(isqrt_extended(fp, square, resolution_steps));
+        return fp.return_double(isqrt_extended(fp, square, resolution_steps));
 #else
         IVP_ASSERT(IVP_Inline_Math::fabsd(square) > 0.0f);
         p_double_ieee ie = ivp_bit_cast_layout<p_double_ieee>(square);

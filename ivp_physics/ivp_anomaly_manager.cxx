@@ -283,7 +283,7 @@ IVP_FLOAT IVP_Anomaly_Manager::get_push_speed_penetration(IVP_Real_Object *obj0,
     IVP_DOUBLE d_time = obj0->get_environment()->get_delta_PSI_time();
 #if IVP_ENABLE_X87_EMULATION
     IVP_X87_Arithmetic fp(IVP_X87_Control::current());
-    return fp.store_float(ivp_gravity_penetration_speed(fp, obj0));
+    return fp.return_float(ivp_gravity_penetration_speed(fp, obj0));
 #else
     IVP_DOUBLE grav = obj0->get_environment()->get_gravity()->real_length();
     IVP_DOUBLE speed_change = (grav * 2.0f) * d_time;

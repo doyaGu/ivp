@@ -1646,7 +1646,7 @@ IVP_DOUBLE IVP_Contact_Point::get_rot_speed_uncertainty()
         uncertainty = fp.multiply(fp.multiply(uncertainty, fp.load(core->upper_limit_radius)), fp.load(core->environment->get_inv_delta_PSI_time()));
         result = fp.add(result, uncertainty);
     }
-    return fp.store_double(result);
+    return fp.return_double(result);
 #else
     IVP_DOUBLE result=0.0;
     for(int i=0;i<2;++i) {

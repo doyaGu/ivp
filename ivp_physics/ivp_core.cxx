@@ -199,7 +199,7 @@ IVP_DOUBLE IVP_Core::calc_virt_mass_worst_case(const IVP_U_Float_Point *core_poi
 {
 #if IVP_ENABLE_X87_EMULATION
     IVP_X87_Arithmetic fp(IVP_X87_Control::current());
-    return fp.store_double(calc_virt_mass_worst_case_extended(fp, core_point));
+    return fp.return_double(calc_virt_mass_worst_case_extended(fp, core_point));
 #else
     IVP_U_Float_Point worst_direction;
     worst_direction.k[0] = core_point->k[1] * core_point->k[1] + core_point->k[2] * core_point->k[2];
