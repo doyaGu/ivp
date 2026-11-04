@@ -8,6 +8,9 @@
 #include <ivp_physics.hxx>
 #include <ivu_matrix_macros.hxx>
 #include <ivu_float.hxx>
+#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87.hxx>
+#endif
 #include <ivu_memory.hxx>
 
 #include <ivp_core_macros.hxx>
@@ -54,16 +57,63 @@
 
 #define MAX_PLAUSIBLE_LEN 100000.0f // slower than meter/sec  //XXX 0 added by chris!
 
+#if IVP_ENABLE_X87_EMULATION
+static void ivp_core_cross_extended(IVP_X87_Arithmetic &fp,
+    const IVP_U_Float_Point *first, const IVP_U_Float_Point *second, IVP_U_Float80 *cross)
+{
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        const int y = (axis + 1) % 3, z = (axis + 2) % 3;
+        cross[axis] = fp.subtract(fp.multiply(fp.load(first->k[y]), fp.load(second->k[z])),
+            fp.multiply(fp.load(second->k[y]), fp.load(first->k[z])));
+    }
+    cross[2] = fp.load(fp.store_float(cross[2]));
+}
+
+static void ivp_core_linear_impulse(IVP_X87_Arithmetic &fp,
+    const IVP_U_Float_Point *impulse, IVP_FLOAT inverse_mass,
+    const IVP_U_Float_Point *previous, IVP_U_Float_Point *output)
+{
+    IVP_U_Float80 values[3];
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        values[axis] = fp.multiply(fp.load(impulse->k[axis]), fp.load(inverse_mass));
+        if (previous) values[axis] = fp.add(values[axis], fp.load(previous->k[axis]));
+        if (axis != 0) values[axis] = fp.load(fp.store_double(values[axis]));
+    }
+    for (int axis = 0; axis < 3; ++axis)
+        output->k[axis] = fp.store_float(values[axis]);
+}
+#endif
+
 // get surface speed; take rotation speed and center speed as input
 void IVP_Core::get_surface_speed_on_test(const IVP_U_Float_Point *point_cs,
                                          const IVP_U_Float_Point *center_speed_ws,
                                          const IVP_U_Float_Point *rot_speed_cs,
                                          IVP_U_Float_Point *speed_out_ws) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 cross[3], world[3];
+    ivp_core_cross_extended(fp, rot_speed_cs, point_cs, cross);
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        world[axis] = fp.add(fp.add(
+            fp.multiply(cross[2], fp.load(m_world_f_core_last_psi.get_elem(axis, 2))),
+            fp.multiply(cross[1], fp.load(m_world_f_core_last_psi.get_elem(axis, 1)))),
+            fp.multiply(cross[0], fp.load(m_world_f_core_last_psi.get_elem(axis, 0))));
+        if (axis != 2) world[axis] = fp.load(fp.store_float(world[axis]));
+        world[axis] = fp.add(world[axis], fp.load(center_speed_ws->k[axis]));
+        if (axis == 2) world[axis] = fp.load(fp.store_double(world[axis]));
+    }
+    for (int axis = 0; axis < 3; ++axis)
+        speed_out_ws->k[axis] = fp.store_float(world[axis]);
+#else
     IVP_U_Float_Point speed_cs;
     speed_cs.inline_calc_cross_product(rot_speed_cs, point_cs);
     this->m_world_f_core_last_psi.inline_vmult3(&speed_cs, speed_out_ws); // transform to world coords
     speed_out_ws->add(center_speed_ws);
+#endif
 }
 
 void IVP_Core::get_surface_speed_ws(const IVP_U_Point *position_ws_in, IVP_U_Float_Point *speed_ws_out)
@@ -125,8 +175,32 @@ void IVP_Core::get_diff_surface_speed_of_two_cores_on_test(const IVP_Core *this_
     diff_speed_this_minus_other_out->subtract(&world_this, &world_other);
 }
 
+#if IVP_ENABLE_X87_EMULATION
+IVP_U_Float80 IVP_Core::calc_virt_mass_worst_case_extended(IVP_X87_Arithmetic &fp,
+    const IVP_U_Float_Point *core_point) const
+{
+    const IVP_U_Float_Point *inverse = get_inv_rot_inertia();
+    const IVP_U_Float80 square_x = fp.load(fp.store_float(fp.multiply(fp.load(core_point->k[0]), fp.load(core_point->k[0]))));
+    const IVP_U_Float80 square_y = fp.load(fp.store_float(fp.multiply(fp.load(core_point->k[1]), fp.load(core_point->k[1]))));
+    const IVP_U_Float80 square_z = fp.multiply(fp.load(core_point->k[2]), fp.load(core_point->k[2]));
+    IVP_U_Float80 sums[3] = {
+        fp.load(fp.store_float(fp.add(square_y, square_z))),
+        fp.load(fp.store_float(fp.add(square_x, square_z))), fp.add(square_x, square_y) };
+    for (int axis = 0; axis < 3; ++axis)
+        sums[axis] = fp.load(fp.store_float(fp.multiply(sums[axis], fp.load(inverse->k[axis]))));
+    IVP_U_Float80 maximum = sums[0];
+    if (fp.compare(sums[1], maximum) == IVP_X87_Arithmetic::GREATER) maximum = sums[1];
+    if (fp.compare(sums[2], maximum) == IVP_X87_Arithmetic::GREATER) maximum = sums[2];
+    return fp.divide(fp.load(1.0), fp.add(maximum, fp.load(pinned ? 1.0f : get_inv_mass())));
+}
+#endif
+
 IVP_DOUBLE IVP_Core::calc_virt_mass_worst_case(const IVP_U_Float_Point *core_point) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    return fp.store_double(calc_virt_mass_worst_case_extended(fp, core_point));
+#else
     IVP_U_Float_Point worst_direction;
     worst_direction.k[0] = core_point->k[1] * core_point->k[1] + core_point->k[2] * core_point->k[2];
     worst_direction.k[1] = core_point->k[0] * core_point->k[0] + core_point->k[2] * core_point->k[2];
@@ -155,6 +229,7 @@ IVP_DOUBLE IVP_Core::calc_virt_mass_worst_case(const IVP_U_Float_Point *core_poi
     IVP_DOUBLE ret = 1.0f / dv;
     IVP_ASSERT(ret < 1e31f); // OG test for NaN
     return ret;
+#endif
 }
 
 // also calculates some material dependent redundants
@@ -513,6 +588,32 @@ void IVP_Core::async_center_push_core_multiple_ws(const IVP_U_Float_Point *delta
 
 void IVP_Core::damp_object(IVP_DOUBLE delta_time_, const IVP_U_Float_Point *rotation_factor, IVP_DOUBLE speed_factor)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 scaled[3];
+    IVP_FLOAT factors[3];
+    for (int axis = 0; axis < 3; ++axis)
+        scaled[axis] = fp.multiply(fp.load(rotation_factor->k[axis]), fp.load(delta_time_));
+    const IVP_U_Float80 square = fp.add(fp.add(fp.multiply(scaled[2], scaled[2]),
+        fp.multiply(scaled[1], scaled[1])), fp.multiply(scaled[0], scaled[0]));
+    scaled[1] = fp.load(fp.store_float(scaled[1]));
+    scaled[2] = fp.load(fp.store_float(scaled[2]));
+    const IVP_X87_Arithmetic::Relation relation = fp.compare(square, fp.load(0.5));
+    const bool linear = relation == IVP_X87_Arithmetic::LESS || relation == IVP_X87_Arithmetic::UNORDERED;
+    for (int axis = 0; axis < 3; ++axis)
+        factors[axis] = fp.store_float(linear ? fp.subtract(fp.load(1.0), scaled[axis]) : fp.exponential(fp.negate(scaled[axis])));
+    const IVP_U_Float80 translation = fp.multiply(fp.load(delta_time_), fp.load(speed_factor));
+    const IVP_X87_Arithmetic::Relation speed_relation = fp.compare(translation, fp.load(0.25));
+    const IVP_U_Float80 speed_scale = speed_relation == IVP_X87_Arithmetic::LESS || speed_relation == IVP_X87_Arithmetic::UNORDERED ?
+        fp.subtract(fp.load(1.0), translation) : fp.exponential(fp.negate(translation));
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        IVP_U_Float80 angular = fp.multiply(fp.load(factors[axis]), fp.load(rot_speed.k[axis]));
+        if (axis == 2) angular = fp.load(fp.store_double(angular));
+        rot_speed.k[axis] = fp.store_float(angular);
+        speed.k[axis] = fp.store_float(fp.multiply(fp.load(speed.k[axis]), speed_scale));
+    }
+#else
     IVP_U_Float_Point rot;
     rot.set_multiple(rotation_factor, delta_time_);
 
@@ -542,6 +643,7 @@ void IVP_Core::damp_object(IVP_DOUBLE delta_time_, const IVP_U_Float_Point *rota
     IVP_Core *pc = this;
     pc->rot_speed.set_pairwise_mult(&pc->rot_speed, &r_factor);
     pc->speed.mult(speed_factor);
+#endif
 }
 
 void IVP_Core::set_rotation_inertia(const IVP_U_Float_Point *r)
@@ -618,6 +720,30 @@ void IVP_Core::push_core_ws(const IVP_U_Point *world_point,
 void IVP_Core::async_push_core_ws(const IVP_U_Point *world_point,
                                   const IVP_U_Float_Point *impulse_in_world)
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    const IVP_U_Matrix *matrix = get_m_world_f_core_PSI();
+    IVP_U_Float_Point offset, cross;
+    offset.subtract(world_point, matrix->get_position());
+    cross.calc_cross_product(&offset, impulse_in_world);
+    const IVP_U_Float_Point *inverse = get_inv_rot_inertia();
+    IVP_U_Float80 projected[3];
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        projected[axis] = fp.add(fp.add(
+            fp.multiply(fp.load(matrix->get_elem(2, axis)), fp.load(cross.k[2])),
+            fp.multiply(fp.load(matrix->get_elem(1, axis)), fp.load(cross.k[1]))),
+            fp.multiply(fp.load(matrix->get_elem(0, axis)), fp.load(cross.k[0])));
+        projected[axis] = axis == 2 ? fp.load(fp.store_double(projected[axis])) : fp.load(fp.store_float(projected[axis]));
+        projected[axis] = fp.multiply(projected[axis], fp.load(inverse->k[axis]));
+        if (axis != 2) projected[axis] = fp.load(fp.store_float(projected[axis]));
+        projected[axis] = fp.add(projected[axis], fp.load(rot_speed_change.k[axis]));
+    }
+    for (int axis = 0; axis < 3; ++axis)
+        rot_speed_change.k[axis] = fp.store_float(projected[axis]);
+    ivp_core_linear_impulse(fp, impulse_in_world, get_inv_mass(), &speed_change, &speed_change);
+#else
+
     const IVP_U_Matrix *m_world_f_core = get_m_world_f_core_PSI();
     IVP_U_Float_Point point_d_ws;
     point_d_ws.subtract(world_point, m_world_f_core->get_position());
@@ -627,6 +753,7 @@ void IVP_Core::async_push_core_ws(const IVP_U_Point *world_point,
     cross_point_dir.set_pairwise_mult(&cross_point_dir, get_inv_rot_inertia());
     rot_speed_change.add(&cross_point_dir);
     speed_change.add_multiple(impulse_in_world, get_inv_mass());
+#endif
 }
 
 void IVP_Core::async_rot_push_core_multiple_ws(const IVP_U_Float_Point *angular_impulse_ws, IVP_DOUBLE factor)
@@ -656,10 +783,24 @@ void IVP_Core::test_push_core(const IVP_U_Float_Point *point_cs,
                               const IVP_U_Float_Point *impulse_in_core, const IVP_U_Float_Point *impulse_in_world,
                               IVP_U_Float_Point *speed_out, IVP_U_Float_Point *rot_out) const
 {
+#if IVP_ENABLE_X87_EMULATION
+    IVP_X87_Arithmetic fp(IVP_X87_Control::current());
+    IVP_U_Float80 cross[3];
+    ivp_core_cross_extended(fp, point_cs, impulse_in_core, cross);
+    const IVP_U_Float_Point *inverse = get_inv_rot_inertia();
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        IVP_U_Float80 scaled = fp.multiply(cross[axis], fp.load(inverse->k[axis]));
+        if (axis == 2) scaled = fp.load(fp.store_double(scaled));
+        rot_out->k[axis] = fp.store_float(scaled);
+    }
+    ivp_core_linear_impulse(fp, impulse_in_world, get_inv_mass(), 0, speed_out);
+#else
     IVP_U_Float_Point distances_2d;
     distances_2d.inline_calc_cross_product(point_cs, impulse_in_core);
     rot_out->set_pairwise_mult(&distances_2d, this->get_inv_rot_inertia());
     speed_out->set_multiple(impulse_in_world, this->get_inv_mass());
+#endif
 }
 
 // don't store result of rot push directly in core variables but in temporary variables
@@ -701,9 +842,13 @@ void IVP_Core::rot_push_core_multiple_cs(const IVP_U_Float_Point *normized_core_
 
 void IVP_Core::rot_push_core_cs(const IVP_U_Float_Point *rot_impulse_cs)
 {
-    IVP_U_Float_Point h;
-    h.set_pairwise_mult(rot_impulse_cs, get_inv_rot_inertia());
-    this->rot_speed.add(&h);
+    const IVP_U_Float_Point *inverse=get_inv_rot_inertia();
+    const IVP_FLOAT dy=rot_impulse_cs->k[1]*inverse->k[1];
+    const IVP_FLOAT dz=rot_impulse_cs->k[2]*inverse->k[2];
+    // RVA 0xCB70 retains only the X inertia product through the addition.
+    rot_speed.k[0]=IVP_DOUBLE(rot_impulse_cs->k[0])*inverse->k[0]+rot_speed.k[0];
+    rot_speed.k[1]+=dy;
+    rot_speed.k[2]+=dz;
 }
 
 // #+# too many calls to this function
@@ -879,9 +1024,7 @@ void IVP_Core::synchronize_with_rot_z()
     q_world_f_core_next_psi.set_matrix(&m_world_f_core_last_psi);
     inline_calc_at_position(current_time, &m_world_f_core_last_psi.vv);
 
-#ifdef IVP_FAST_WHEELS_ENABLED
-    if (!this->rot_inertias_are_equal)
-#endif
+    // RVA 0xCFA0 recomputes angular speed for equal-inertia balls too.
     {
         // new quaternion based solution to calculate the rotation speed:
         IVP_DOUBLE f = 2.0f * i_delta_time;
@@ -946,7 +1089,8 @@ void IVP_Core::calc_calc()
                                iri->k[0] - iri->k[1]);
 
     IVP_DOUBLE qdiff = diff_vec.quad_length();
-    IVP_DOUBLE qrlen = iri->quad_length();
+    // Retail RVA 0xD1A0 compares inverse-inertia differences to inertia length.
+    IVP_DOUBLE qrlen = ri.quad_length();
     const IVP_DOUBLE eps = 0.1f;
     if (qdiff < qrlen * (eps * eps))
     {

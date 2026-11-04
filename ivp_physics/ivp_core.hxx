@@ -510,6 +510,10 @@ public:
      *                   regarding all directions.
      ********************************************************************************/
     IVP_DOUBLE calc_virt_mass_worst_case(const IVP_U_Float_Point *core_point) const;
+#if IVP_ENABLE_X87_EMULATION
+    IVP_U_Float80 calc_virt_mass_worst_case_extended(IVP_X87_Arithmetic &fp,
+        const IVP_U_Float_Point *core_point) const;
+#endif
 
     /*******************************************************************************************
      *	section:	Calculate core matrix/quaternion/position at a user defined time between
