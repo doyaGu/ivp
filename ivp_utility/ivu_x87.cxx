@@ -13,6 +13,22 @@
 typedef char IVP_X87_Status_Size_Check[sizeof(softfloat_status_t) <= 16 ? 1 : -1];
 
 static thread_local bool ivp_x87_control_is_explicit = false;
+static thread_local unsigned short ivp_x87_saved_host_control = 0;
+static IVP_X87_Control_Word_Reader ivp_x87_read_host_control = 0;
+static IVP_X87_Control_Word_Writer ivp_x87_write_host_control = 0;
+
+void ivp_set_x87_control_word_callbacks(IVP_X87_Control_Word_Reader reader,
+                                      IVP_X87_Control_Word_Writer writer)
+{
+    const IVP_X87_Control_Word_Reader selected_reader = reader && writer ? reader : 0;
+    const IVP_X87_Control_Word_Writer selected_writer = reader && writer ? writer : 0;
+    if (selected_reader == ivp_x87_read_host_control && selected_writer == ivp_x87_write_host_control)
+        return;
+    ivp_x87_control_is_explicit = false;
+    ivp_x87_read_host_control = selected_reader;
+    ivp_x87_write_host_control = selected_writer;
+}
+
 static thread_local IVP_X87_Control ivp_x87_control =
     {IVP_X87_Arithmetic::PRECISION_64, IVP_X87_Arithmetic::ROUND_NEAREST};
 #if defined(_MSC_VER) && defined(_M_IX86)
@@ -21,6 +37,15 @@ static thread_local unsigned int ivp_x87_saved_native_control = 0;
 
 IVP_X87_Control IVP_X87_Control::current()
 {
+    if (ivp_x87_read_host_control)
+    {
+        const unsigned short word = ivp_x87_read_host_control();
+        const unsigned precision = word & 0x0300;
+        IVP_X87_Control result = {precision == 0 ? IVP_X87_Arithmetic::PRECISION_24 :
+            precision == 0x0200 ? IVP_X87_Arithmetic::PRECISION_53 : IVP_X87_Arithmetic::PRECISION_64,
+            static_cast<IVP_X87_Arithmetic::Rounding>((word >> 10) & 3)};
+        return result;
+    }
     IVP_X87_Control result = ivp_x87_control;
     if (!ivp_x87_control_is_explicit)
     {
@@ -45,6 +70,19 @@ IVP_X87_Control IVP_X87_Control::current()
 
 void IVP_X87_Control::set(const IVP_X87_Control &control)
 {
+    if (ivp_x87_write_host_control)
+    {
+        const unsigned short previous = ivp_x87_read_host_control();
+        if (!ivp_x87_control_is_explicit)
+            ivp_x87_saved_host_control = previous;
+        const unsigned host_precision = control.precision == IVP_X87_Arithmetic::PRECISION_24 ? 0 :
+            control.precision == IVP_X87_Arithmetic::PRECISION_53 ? 0x0200 : 0x0300;
+        ivp_x87_write_host_control(static_cast<unsigned short>(
+            (previous & ~0x0f00) | host_precision | (control.rounding << 10)));
+        ivp_x87_control_is_explicit = true;
+        ivp_x87_control = control;
+        return;
+    }
 #if defined(_MSC_VER) && defined(_M_IX86)
     // Ordinary expressions in the surrounding engine still execute on the
     // native FPU. Keep their precision and rounding in step with the software.
@@ -64,6 +102,13 @@ void IVP_X87_Control::set(const IVP_X87_Control &control)
 
 void IVP_X87_Control::reset()
 {
+    if (ivp_x87_write_host_control)
+    {
+        if (ivp_x87_control_is_explicit)
+            ivp_x87_write_host_control(ivp_x87_saved_host_control);
+        ivp_x87_control_is_explicit = false;
+        return;
+    }
 #if defined(_MSC_VER) && defined(_M_IX86)
     if (ivp_x87_control_is_explicit)
     {

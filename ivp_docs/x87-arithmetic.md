@@ -1,8 +1,7 @@
 # Extended arithmetic
 
-`IVP_ENABLE_X87_EMULATION` selects software arithmetic for the restored x87
-evaluation and write-back sequences. It defaults to `OFF` when building IVP
-directly. A parent project can select the option before adding IVP.
+Enable `IVP_ENABLE_X87_EMULATION` for the original evaluation and write-back
+sequences. The option defaults to `ON`; exact original replay checks use it.
 
 ```sh
 cmake -S . -B build -DIVP_ENABLE_X87_EMULATION=ON
@@ -63,7 +62,6 @@ Release builds enable interprocedural optimization across the numerical backend
 and solver libraries. The numerical backend uses portable integer arithmetic
 and does not depend on host `long double`, native x87 arithmetic or CPU emulation.
 
-With the option disabled, the embedded dependency and arithmetic library are
-excluded. The original subsystem algorithms use their ordinary floating-point
-expressions. Behavioral decisions are implemented directly, independently of
-the arithmetic option.
+When the native host enables VxMath extended emulation, IVP shares its existing
+FPU control-word interface. This keeps software precision and rounding changes
+consistent on processors without native x87 registers as well.

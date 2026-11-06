@@ -28,7 +28,7 @@ endif()
 # Set IVP root directory
 set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(IVP_ENABLE_X87_EMULATION "Reproduce extended precision, rounding and write-back rules" OFF)
+option(IVP_ENABLE_X87_EMULATION "Emulate original extended arithmetic" ON)
 
 # ============================================================================
 # External Dependencies Configuration
