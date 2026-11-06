@@ -288,12 +288,6 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
 
 void IVP_Environment::set_delta_PSI_time(IVP_DOUBLE psi_time)
 {
-    if (!(psi_time >= IVP_MIN_DELTA_PSI_TIME && psi_time <= IVP_MAX_DELTA_PSI_TIME))
-    {
-        IVP_ASSERT(psi_time >= IVP_MIN_DELTA_PSI_TIME);
-        IVP_ASSERT(psi_time <= IVP_MAX_DELTA_PSI_TIME);
-        return;
-    }
     delta_PSI_time = psi_time;
     inv_delta_PSI_time = 1.0f / delta_PSI_time;
 }
