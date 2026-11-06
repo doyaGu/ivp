@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/IVPX87Modes.cmake")
+
 function(ivp_enable_numerical_ipo target)
     if(IVP_X87_IPO_SUPPORTED)
         set_target_properties(${target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
@@ -15,7 +17,17 @@ function(ivp_configure_x87_arithmetic target)
         $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
         $<INSTALL_INTERFACE:include/ivp>)
     target_compile_features(${target} PRIVATE cxx_std_11)
-    target_compile_definitions(${target} PUBLIC IVP_ENABLE_X87_EMULATION=1)
+    if(NOT DEFINED IVP_X87_ARITHMETIC_VALUE)
+        # Standalone use (tests/numerics): resolve the selections here.
+        if(NOT DEFINED IVP_X87_ARITHMETIC OR IVP_X87_ARITHMETIC STREQUAL "")
+            set(IVP_X87_ARITHMETIC SOFT)
+        endif()
+        ivp_resolve_x87_modes()
+    endif()
+    target_compile_definitions(${target} PUBLIC
+        IVP_ENABLE_X87_EMULATION=$<BOOL:${IVP_ENABLE_X87_EMULATION}>
+        IVP_X87_ARITHMETIC=${IVP_X87_ARITHMETIC_VALUE}
+        IVP_X87_ARITHMETIC_TRANSCENDENTAL=${IVP_X87_ARITHMETIC_TRANSCENDENTAL_VALUE})
     set_target_properties(${target} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         CXX_VISIBILITY_PRESET hidden

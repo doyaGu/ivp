@@ -1,0 +1,55 @@
+# Resolves IVP_X87_ARITHMETIC and IVP_X87_ARITHMETIC_TRANSCENDENTAL (OFF, SOFT or HARD; empty values follow
+# IVP_ENABLE_X87_EMULATION and IVP_X87_ARITHMETIC respectively) in the caller's scope into
+#   IVP_X87_ARITHMETIC_VALUE, IVP_X87_ARITHMETIC_TRANSCENDENTAL_VALUE  0 OFF, 1 SOFT, 2 HARD (ivu_x87_config.hxx)
+#   IVP_ENABLE_X87_EMULATION                                            ON unless IVP_X87_ARITHMETIC is OFF
+#   IVP_X87_LIBRARY                                                     ON when either selection needs the arithmetic library
+# HARD needs a 32-bit x86 target.
+include(CheckCXXSourceCompiles)
+
+macro(ivp_resolve_x87_modes)
+    set(_ivp_x87_arithmetic "${IVP_X87_ARITHMETIC}")
+    if(_ivp_x87_arithmetic STREQUAL "")
+        if(IVP_ENABLE_X87_EMULATION)
+            set(_ivp_x87_arithmetic SOFT)
+        else()
+            set(_ivp_x87_arithmetic OFF)
+        endif()
+    endif()
+    set(_ivp_x87_transcendental "${IVP_X87_ARITHMETIC_TRANSCENDENTAL}")
+    if(_ivp_x87_transcendental STREQUAL "")
+        set(_ivp_x87_transcendental "${_ivp_x87_arithmetic}")
+    endif()
+    string(TOUPPER "${_ivp_x87_arithmetic}" _ivp_x87_arithmetic)
+    string(TOUPPER "${_ivp_x87_transcendental}" _ivp_x87_transcendental)
+    foreach(_ivp_x87_mode IN ITEMS "IVP_X87_ARITHMETIC=${_ivp_x87_arithmetic}"
+            "IVP_X87_ARITHMETIC_TRANSCENDENTAL=${_ivp_x87_transcendental}")
+        if(NOT _ivp_x87_mode MATCHES "=(OFF|SOFT|HARD)$")
+            message(FATAL_ERROR "${_ivp_x87_mode}: expected OFF, SOFT or HARD")
+        endif()
+    endforeach()
+    set(_ivp_x87_values_OFF 0)
+    set(_ivp_x87_values_SOFT 1)
+    set(_ivp_x87_values_HARD 2)
+    set(IVP_X87_ARITHMETIC_VALUE ${_ivp_x87_values_${_ivp_x87_arithmetic}})
+    set(IVP_X87_ARITHMETIC_TRANSCENDENTAL_VALUE ${_ivp_x87_values_${_ivp_x87_transcendental}})
+    if(_ivp_x87_arithmetic STREQUAL "HARD" OR _ivp_x87_transcendental STREQUAL "HARD")
+        check_cxx_source_compiles("
+#if !(defined(_M_IX86) || defined(__i386__))
+#error not a 32-bit x86 target
+#endif
+int main() { return 0; }" IVP_X87_TARGET_IS_X86_32)
+        if(NOT IVP_X87_TARGET_IS_X86_32)
+            message(FATAL_ERROR "IVP_X87_ARITHMETIC=${_ivp_x87_arithmetic}, IVP_X87_ARITHMETIC_TRANSCENDENTAL=${_ivp_x87_transcendental}: HARD requires a 32-bit x86 target")
+        endif()
+    endif()
+    if(_ivp_x87_arithmetic STREQUAL "OFF")
+        set(IVP_ENABLE_X87_EMULATION OFF)
+    else()
+        set(IVP_ENABLE_X87_EMULATION ON)
+    endif()
+    if(_ivp_x87_arithmetic STREQUAL "OFF" AND _ivp_x87_transcendental STREQUAL "OFF")
+        set(IVP_X87_LIBRARY OFF)
+    else()
+        set(IVP_X87_LIBRARY ON)
+    endif()
+endmacro()
