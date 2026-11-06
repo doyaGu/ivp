@@ -85,6 +85,7 @@ IVP_Environment::IVP_Environment(IVP_Environment_Manager *manager, IVP_Applicati
     // Zero all pointer and scalar members explicitly instead of P_MEM_CLEAR(this),
     // which would corrupt IVP_U_Vector members and IVP_Statistic_Manager/IVP_Freeze_Manager.
     standard_gravity_controller = NULL;
+    client_data_compare = NULL;
     time_manager = NULL;
     sim_units_manager = NULL;
     cluster_manager = NULL;

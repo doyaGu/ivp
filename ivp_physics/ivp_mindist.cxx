@@ -352,7 +352,7 @@ void IVP_Mindist::init_mindist(IVP_Real_Object *pop0, IVP_Real_Object *pop1, con
     case IVP_BALL:
         if (pop0->get_type() == IVP_BALL)
         {
-            if (pop0->client_data < pop1->client_data)
+            if (pop0->get_environment()->client_data_is_less(pop0->client_data, pop1->client_data))
             {
                 IVP_Synapse_Real *synh;
                 synh = syn0;

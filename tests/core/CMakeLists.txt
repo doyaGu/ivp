@@ -41,6 +41,7 @@ foreach(defect
     sphere_grid
     merged_core
     zero_inertia
+    client_data_order
 )
     add_test(
         NAME ivp_legacy_${defect}

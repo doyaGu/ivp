@@ -324,6 +324,67 @@ static int test_zero_inertia()
     return 0;
 }
 
+struct Stable_Client { int id; };
+static IVP_BOOL compare_clients(const void *a, const void *b)
+{
+    return static_cast<const Stable_Client *>(a)->id < static_cast<const Stable_Client *>(b)->id ? IVP_TRUE : IVP_FALSE;
+}
+
+class Ordered_Contact : public IVP_Listener_Collision
+{
+public:
+    int first = 0, second = 0;
+    Ordered_Contact() : IVP_Listener_Collision(IVP_LISTENER_COLLISION_CALLBACK_PRE_COLLISION) {}
+    void event_pre_collision(IVP_Event_Collision *event) override
+    {
+        if (first) return;
+        first = static_cast<Stable_Client *>(event->contact_situation->objects[0]->client_data)->id;
+        second = static_cast<Stable_Client *>(event->contact_situation->objects[1]->client_data)->id;
+    }
+};
+
+static int test_client_data_order()
+{
+    for (int policy = 0; policy < 2; ++policy)
+    for (int swapped = 0; swapped < 2; ++swapped)
+    {
+        Stable_Client clients[2];
+        clients[swapped].id = 10;
+        clients[1 - swapped].id = 20;
+        IVP_Environment *environment = make_environment("client_data_order");
+        if (policy) environment->set_client_data_compare(compare_clients);
+        IVP_U_Point gravity(0, 0, 0);
+        environment->set_gravity(&gravity);
+        IVP_Material_Simple material(0.4, 0.3);
+        IVP_Real_Object *objects[2];
+        for (int i = 0; i < 2; ++i)
+        {
+            IVP_Template_Ball ball;
+            ball.radius = 0.5f;
+            IVP_Template_Real_Object object;
+            object.material = &material;
+            object.mass = 1;
+            IVP_U_Quat rotation;
+            rotation.init();
+            IVP_U_Point position(i ? 1.0 : -1.0, i ? 0.1 : 0.0, 0);
+            objects[i] = environment->create_ball(&ball, &object, &rotation, &position);
+            objects[i]->client_data = &clients[i ? 1 - swapped : swapped];
+            objects[i]->ensure_in_simulation_now();
+            objects[i]->get_core()->speed.set(i ? -1.0f : 1.0f, 0, 0);
+            objects[i]->enable_collision_detection();
+        }
+        Ordered_Contact contact;
+        environment->add_listener_collision_global(&contact);
+        environment->simulate_dtime(1.0);
+        const int expected = policy ? 20 : clients[1].id;
+        CHECK(contact.first == expected);
+        CHECK(contact.second == 30 - expected);
+        environment->remove_listener_collision_global(&contact);
+        delete environment;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 2)
@@ -339,6 +400,7 @@ int main(int argc, char **argv)
     if (std::strcmp(argv[1], "sphere_grid") == 0) return test_sphere_grid();
     if (std::strcmp(argv[1], "merged_core") == 0) return test_merged_core();
     if (std::strcmp(argv[1], "zero_inertia") == 0) return test_zero_inertia();
+    if (std::strcmp(argv[1], "client_data_order") == 0) return test_client_data_order();
     std::fprintf(stderr, "unknown defect: %s\n", argv[1]);
     return 2;
 }

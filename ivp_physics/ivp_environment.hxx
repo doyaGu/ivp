@@ -398,6 +398,18 @@ public:
     ~IVP_Environment();
 
     int environment_magic_number; // to detect if environment is valid (debug reasons)
+
+    // A host can order opaque identities without depending on heap addresses.
+    // The default preserves the original client_data pointer comparison.
+    typedef IVP_BOOL (*Client_Data_Compare)(const void *, const void *);
+    void set_client_data_compare(Client_Data_Compare compare) { client_data_compare = compare; }
+    IVP_BOOL client_data_is_less(const void *a, const void *b) const
+    {
+        return client_data_compare ? client_data_compare(a, b) : (a < b ? IVP_TRUE : IVP_FALSE);
+    }
+
+private:
+    Client_Data_Compare client_data_compare;
 };
 
 /********************************************************************************
