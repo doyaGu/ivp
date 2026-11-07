@@ -15,6 +15,7 @@ void ivp_set_fpu_control_word(unsigned short word);
 
 // Temporarily select 24, 53 or 64 significand bits. Rounding, exception masks
 // and changes to unrelated fields survive restoration, including nested calls.
+#pragma pack(push, 8)
 class IVP_FPU_Precision_Scope
 {
     unsigned short saved_precision;
@@ -26,5 +27,6 @@ public:
     explicit IVP_FPU_Precision_Scope(unsigned precision);
     ~IVP_FPU_Precision_Scope();
 };
+#pragma pack(pop)
 
 #endif

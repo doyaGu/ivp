@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <ivu_fpu.hxx>
 
+// Keep the library ABI when included by a host with different packing.
+#pragma pack(push, 8)
+
 class IVP_X87_Arithmetic;
 struct IVP_X87_Control;
 
@@ -102,5 +105,7 @@ struct IVP_X87_Control
     static void set(const IVP_X87_Control &control);
     static void reset();
 };
+
+#pragma pack(pop)
 
 #endif

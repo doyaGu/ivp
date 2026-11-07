@@ -26,6 +26,11 @@ cmake --build build --config Release
 the host ABI. Its explicit byte conversion uses the ten-byte little-endian
 extended format; object padding is never serialized.
 
+The numerical and precision-scope headers preserve their normal library ABI
+when included under a host packing directive, and restore the caller's packing
+setting afterwards. The packed-consumer regression compares layouts from
+separate translation units before exercising arithmetic through the library.
+
 An `IVP_X87_Arithmetic` object owns fixed-size precision, rounding and exception
 status. Operations allocate no memory. `load` converts an input exactly;
 `store_float` and `store_double` round at the original memory write boundaries.

@@ -36,6 +36,12 @@ set_target_properties(ivp_arithmetic_test PROPERTIES
     CXX_STANDARD 98 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 add_test(NAME ivp_x87_precision COMMAND ivp_arithmetic_test)
 
+add_executable(ivp_packed_arithmetic_test packed_arithmetic_test.cxx packed_layout_reference.cxx)
+target_link_libraries(ivp_packed_arithmetic_test PRIVATE ivp_x87_arithmetic)
+set_target_properties(ivp_packed_arithmetic_test PROPERTIES
+    CXX_STANDARD 98 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+add_test(NAME ivp_packed_arithmetic COMMAND ivp_packed_arithmetic_test)
+
 add_executable(ivp_softfloat_benchmark softfloat_benchmark.cxx)
 target_link_libraries(ivp_softfloat_benchmark PRIVATE ivp_softfloat)
 target_compile_features(ivp_softfloat_benchmark PRIVATE cxx_std_11)
