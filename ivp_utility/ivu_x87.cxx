@@ -14,14 +14,14 @@ typedef char IVP_X87_Status_Size_Check[sizeof(softfloat_status_t) <= 16 ? 1 : -1
 
 static thread_local bool ivp_x87_control_is_explicit = false;
 static thread_local unsigned short ivp_x87_saved_host_control = 0;
-static IVP_X87_Control_Word_Reader ivp_x87_read_host_control = 0;
-static IVP_X87_Control_Word_Writer ivp_x87_write_host_control = 0;
+static IVP_Control_Word_Reader ivp_x87_read_host_control = 0;
+static IVP_Control_Word_Writer ivp_x87_write_host_control = 0;
 
-void ivp_set_x87_control_word_callbacks(IVP_X87_Control_Word_Reader reader,
-                                      IVP_X87_Control_Word_Writer writer)
+void ivp_set_fpu_control_word_callbacks(IVP_Control_Word_Reader reader,
+                                      IVP_Control_Word_Writer writer)
 {
-    const IVP_X87_Control_Word_Reader selected_reader = reader && writer ? reader : 0;
-    const IVP_X87_Control_Word_Writer selected_writer = reader && writer ? writer : 0;
+    const IVP_Control_Word_Reader selected_reader = reader && writer ? reader : 0;
+    const IVP_Control_Word_Writer selected_writer = reader && writer ? writer : 0;
     if (selected_reader == ivp_x87_read_host_control && selected_writer == ivp_x87_write_host_control)
         return;
     ivp_x87_control_is_explicit = false;

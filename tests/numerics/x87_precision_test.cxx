@@ -7,7 +7,7 @@ static void write_host_control_word(unsigned short word) { host_control_word = w
 
 static int check_host_control_word()
 {
-    ivp_set_x87_control_word_callbacks(read_host_control_word, write_host_control_word);
+    ivp_set_fpu_control_word_callbacks(read_host_control_word, write_host_control_word);
     IVP_X87_Control initial = IVP_X87_Control::current();
     int failures = initial.precision != IVP_X87_Arithmetic::PRECISION_64;
     IVP_X87_Control selected = {IVP_X87_Arithmetic::PRECISION_24, IVP_X87_Arithmetic::ROUND_UP};
@@ -17,7 +17,7 @@ static int check_host_control_word()
     failures += current.precision != selected.precision || current.rounding != selected.rounding;
     IVP_X87_Control::reset();
     failures += host_control_word != 0x037f;
-    ivp_set_x87_control_word_callbacks(0, 0);
+    ivp_set_fpu_control_word_callbacks(0, 0);
     return failures;
 }
 

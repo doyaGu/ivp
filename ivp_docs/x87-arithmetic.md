@@ -62,6 +62,8 @@ Release builds enable interprocedural optimization across the numerical backend
 and solver libraries. The numerical backend uses portable integer arithmetic
 and does not depend on host `long double`, native x87 arithmetic or CPU emulation.
 
-When the native host enables VxMath extended emulation, IVP shares its existing
-FPU control-word interface. This keeps software precision and rounding changes
-consistent on processors without native x87 registers as well.
+Hosts bind their floating-point environment through `ivu_fpu.hxx` and
+`ivp_set_fpu_control_word_callbacks`, without selecting or inspecting IVP's
+numerical backend. The interface is available in both build modes; native
+arithmetic does not need the callbacks. With emulation enabled, this keeps
+precision and rounding consistent with VxMath on all processors.

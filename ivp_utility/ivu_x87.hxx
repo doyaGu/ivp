@@ -2,6 +2,7 @@
 #define IVP_U_X87_INCLUDED
 
 #include <stdint.h>
+#include <ivu_fpu.hxx>
 
 class IVP_X87_Arithmetic;
 struct IVP_X87_Control;
@@ -101,12 +102,5 @@ struct IVP_X87_Control
     static void set(const IVP_X87_Control &control);
     static void reset();
 };
-
-// Install before starting simulation threads. Both callbacks belong to the
-// host; passing a missing pair restores standalone control-word handling.
-typedef unsigned short (*IVP_X87_Control_Word_Reader)();
-typedef void (*IVP_X87_Control_Word_Writer)(unsigned short word);
-void ivp_set_x87_control_word_callbacks(IVP_X87_Control_Word_Reader reader,
-    IVP_X87_Control_Word_Writer writer);
 
 #endif

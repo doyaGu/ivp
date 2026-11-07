@@ -134,6 +134,8 @@ endfunction()
 
 # ivp_utility - Foundation layer (no dependencies)
 set(IVP_UTILITY_SOURCES
+    ${IVP_DIR}/ivp_utility/ivu_fpu.cxx
+    ${IVP_DIR}/ivp_utility/ivu_fpu.hxx
     ${IVP_DIR}/ivp_utility/ivu_active_value.cxx
     ${IVP_DIR}/ivp_utility/ivu_active_value.hxx
     ${IVP_DIR}/ivp_utility/ivu_active_value_hash.hxx
