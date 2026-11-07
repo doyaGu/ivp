@@ -337,12 +337,11 @@ set(IVP_COLLISION_SOURCES
     ${IVP_DIR}/ivp_collision/ivp_ray_solver.cxx
     ${IVP_DIR}/ivp_collision/ivp_sphere_solver.cxx
 )
-# collision and surface_manager contain legacy cross-calls.  Do not model those as
-# target links here: doing so creates a public static-library cycle that CMake expands
-# into duplicate archives on consumers such as physics_RT.  The staged-headers target
-# below provides the shared include surface; complete consumers link the top-level IVP
-# components in dependency order.
-add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision" "" "${IVP_COLLISION_SOURCES}")
+# These static libraries call each other. Model the actual dependencies so CMake
+# repeats the archive group as required by one-pass linkers and exported consumers.
+add_ivp_library(ivp_collision "${IVP_DIR}/ivp_collision"
+    "ivp_physics;ivp_surface_manager" "${IVP_COLLISION_SOURCES}")
+target_link_libraries(ivp_surface_manager PRIVATE ivp_collision)
 
 # ivp_controller - Physics controllers, depends on physics core
 set(IVP_CONTROLLER_SOURCES
