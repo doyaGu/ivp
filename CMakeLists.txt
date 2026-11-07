@@ -135,7 +135,6 @@ endfunction()
 
 # ivp_utility - Foundation layer (no dependencies)
 set(IVP_UTILITY_SOURCES
-    ${IVP_DIR}/ivp_utility/ivu_fpu.cxx
     ${IVP_DIR}/ivp_utility/ivu_fpu.hxx
     ${IVP_DIR}/ivp_utility/ivu_active_value.cxx
     ${IVP_DIR}/ivp_utility/ivu_active_value.hxx
@@ -186,6 +185,8 @@ if(IVP_ENABLE_X87_EMULATION)
     ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
     target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
     ivp_enable_numerical_ipo(ivp_utility)
+else()
+    target_sources(ivp_utility PRIVATE "${IVP_DIR}/ivp_utility/ivu_fpu.cxx")
 endif()
 
 # ivp_surface_manager - Depends on utility

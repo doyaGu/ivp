@@ -9,7 +9,9 @@ function(ivp_configure_x87_arithmetic target)
         add_subdirectory("${IVP_DIR}/third_party/softfloat"
             "${CMAKE_CURRENT_BINARY_DIR}/softfloat")
     endif()
-    add_library(${target} STATIC "${IVP_DIR}/ivp_utility/ivu_x87.cxx")
+    add_library(${target} STATIC
+        "${IVP_DIR}/ivp_utility/ivu_x87.cxx"
+        "${IVP_DIR}/ivp_utility/ivu_fpu.cxx")
     target_link_libraries(${target} PRIVATE ivp_softfloat)
     target_include_directories(${target} PUBLIC
         $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>

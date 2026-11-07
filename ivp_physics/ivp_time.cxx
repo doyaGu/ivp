@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <ivu_min_list.hxx>
+#include <ivu_fpu.hxx>
 
 #ifndef WIN32
 #pragma implementation "ivp_time.hxx"
@@ -14,9 +15,6 @@
 
 #if defined(WIN32) && !defined(_XBOX)
 #include "wtypes.h"
-#if defined(_MSC_VER)
-#include <float.h>
-#endif
 #elif defined(_XBOX)
 #ifndef WINVER
 #define WINVER 0x0500
@@ -177,22 +175,7 @@ void IVP_Event_Manager::simulate_time_events(IVP_Time_Manager *, IVP_Environment
 
 void IVP_Time_Manager::event_loop(IVP_Environment *env, IVP_Time time)
 {
-    /************************************************
-     * FPU mode
-     ************************************************/
-    // doesnt work with threads !!
-#if defined(WIN32) && defined(_MSC_VER)
-    unsigned int oldControl = 0;
-    unsigned int ignoredControl = 0;
-    _controlfp_s(&oldControl, 0, 0);
-    _controlfp_s(&ignoredControl, _PC_64, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    unsigned short tmpflag;
-    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
-
-    unsigned short newFPUflag = tmpflag | 0x0300;
-    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
-#endif
+    IVP_FPU_Precision_Scope precision(64);
 
 #ifdef IVP_ENABLE_PERFORMANCE_COUNTER
     env->get_performancecounter()->start_pcount();
@@ -204,31 +187,11 @@ void IVP_Time_Manager::event_loop(IVP_Environment *env, IVP_Time time)
     env->get_performancecounter()->stop_pcount();
 #endif
 
-#if defined(WIN32) && defined(_MSC_VER)
-    _controlfp_s(&ignoredControl, oldControl, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
-#endif
 }
 
 void IVP_Time_Manager::simulate_variable_time_step(IVP_Environment *env, IVP_FLOAT delta_time)
 {
-    /************************************************
-     * FPU mode
-     ************************************************/
-    // doesnt work with threads !!
-#if defined(WIN32) && defined(_MSC_VER)
-    unsigned int oldControl = 0;
-    unsigned int ignoredControl = 0;
-    _controlfp_s(&oldControl, 0, 0);
-    _controlfp_s(&ignoredControl, _PC_64, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    unsigned short tmpflag;
-    __asm__ __volatile__("fstcw %0" : "=m"(tmpflag));
-
-    unsigned short newFPUflag = tmpflag | 0x0300;
-    __asm__ __volatile__("fldcw %0" : : "m"(newFPUflag));
-#endif
+    IVP_FPU_Precision_Scope precision(64);
     if (delta_time < IVP_MIN_DELTA_PSI_TIME)
     {
         delta_time = IVP_MIN_DELTA_PSI_TIME;
@@ -248,11 +211,6 @@ void IVP_Time_Manager::simulate_variable_time_step(IVP_Environment *env, IVP_FLO
     env->get_performancecounter()->stop_pcount();
 #endif
 
-#if defined(WIN32) && defined(_MSC_VER)
-    _controlfp_s(&ignoredControl, oldControl, _MCW_PC);
-#elif defined(WIN32) && (defined(__i386__) || defined(_M_IX86)) && defined(__GNUC__)
-    __asm__ __volatile__("fldcw %0" : : "m"(tmpflag));
-#endif
 }
 
 void IVP_Time_Manager::env_set_current_time(IVP_Environment *env, IVP_Time time)

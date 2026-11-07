@@ -33,15 +33,24 @@ Keep a register-width intermediate as `IVP_U_Float80` when a later comparison or
 operation uses it. Return it explicitly across internal numerical calls.
 
 `IVP_X87_Control` supplies thread-local precision and rounding. Explicit control
-works on every supported target. On 32-bit MSVC, the native control word remains
+works on every supported target. On 32-bit x86, the native control word remains
 authoritative, including changes made by surrounding callers; other targets
 default to 64-bit significands and nearest-even rounding. Callers that require
 the same arithmetic on multiple targets should
 set the control explicitly. Hull construction selects 64-bit precision and
 leaves that selection active for subsequent operations.
-On 32-bit MSVC, setting explicit control also updates the native precision and
-rounding used by ordinary surrounding expressions. Reset restores the native
-control saved before the first override.
+On 32-bit x86, setting explicit control also updates the native precision and
+rounding used by ordinary surrounding expressions. Reset restores the precision
+and rounding saved before the first override, preserving unrelated fields.
+
+`ivu_fpu.hxx` owns control-word access and temporary precision scopes. Event
+stepping selects 64-bit precision through this interface and restores the prior
+precision on normal return and stack unwinding. A bound host environment is
+used by both stepping and extended arithmetic. Without a host, non-x86-32
+emulation uses a thread-local control word; native builds on those processors
+need no precision override. This avoids unsupported native precision requests
+on x64 and ARM. Precision scopes preserve rounding and unrelated fields, and
+do not change the explicit override/reset state.
 
 The built-in anomaly manager supplies an extended gravity-based penetration
 speed through `get_push_speed_penetration_extended`. Custom managers inherit an
@@ -67,3 +76,13 @@ Hosts bind their floating-point environment through `ivu_fpu.hxx` and
 numerical backend. The interface is available in both build modes; native
 arithmetic does not need the callbacks. With emulation enabled, this keeps
 precision and rounding consistent with VxMath on all processors.
+Bind before starting simulation threads, with no active precision scopes.
+Changing the binding restores an outstanding explicit override on the calling
+thread before replacing the callbacks. Hosts remain unaware of the backend.
+
+The option covers the explicitly implemented kernels; it does not transform
+every native floating-point expression in IVP or any third-party implementation.
+The Win32 `/arch:IA32` consumer requirement remains part of this partial
+coverage's evaluation/return contract. Removing it requires a separate numerical
+migration and is not equivalent to disabling the software backend. The native
+backend is built without `ivu_x87.cxx` or the integer numerical dependency.

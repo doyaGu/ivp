@@ -21,9 +21,41 @@ static int check_host_control_word()
     return failures;
 }
 
+static int check_precision_scope()
+{
+    ivp_set_fpu_control_word_callbacks(read_host_control_word, write_host_control_word);
+    host_control_word = 0x087f;
+    int failures = 0;
+    {
+        IVP_FPU_Precision_Scope outer(64);
+        failures += host_control_word != 0x0b7f;
+        {
+            IVP_FPU_Precision_Scope inner(53);
+            failures += host_control_word != 0x0a7f;
+            host_control_word = 0x067f;
+        }
+        failures += host_control_word != 0x077f;
+    }
+    failures += host_control_word != 0x047f;
+    IVP_X87_Control::reset();
+    failures += host_control_word != 0x047f;
+
+    const IVP_X87_Control selected = {IVP_X87_Arithmetic::PRECISION_53, IVP_X87_Arithmetic::ROUND_NEAREST};
+    IVP_X87_Control::set(selected);
+    host_control_word |= 0x1000;
+    ivp_set_fpu_control_word_callbacks(0, 0);
+    failures += host_control_word != 0x147f;
+    return failures;
+}
+
 int main()
 {
-    const int failures = check_host_control_word() + ivp_check_x87_precision();
+    // The checks share a thread environment and must run in this order.
+    const int host_failures = check_host_control_word();
+    const int scope_failures = check_precision_scope();
+    const int arithmetic_failures = ivp_check_x87_precision();
+    const int failures = host_failures + scope_failures + arithmetic_failures;
+    std::printf("control: %d, scopes: %d, arithmetic: %d\n", host_failures, scope_failures, arithmetic_failures);
     std::printf("extended-value/control/status failures: %d\n", failures);
     return failures ? 1 : 0;
 }
