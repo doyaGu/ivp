@@ -29,6 +29,7 @@ endif()
 set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(IVP_ENABLE_X87_EMULATION "Emulate original extended arithmetic" ON)
+include(cmake/IVPX87.cmake)
 
 # ============================================================================
 # External Dependencies Configuration
@@ -182,7 +183,6 @@ set(IVP_UTILITY_SOURCES
 add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
 
 if(IVP_ENABLE_X87_EMULATION)
-    include(cmake/IVPX87.cmake)
     ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
     target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
     ivp_enable_numerical_ipo(ivp_utility)
@@ -676,6 +676,9 @@ option(IVP_BUILD_TESTS "Build IVP core regression tests" OFF)
 if(IVP_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests/core)
+    if(IVP_ENABLE_X87_EMULATION)
+        add_subdirectory(tests/numerics)
+    endif()
 endif()
 
 option(IVP_BUILD_EXAMPLES "Build SDL3/OpenGL graphical examples" OFF)

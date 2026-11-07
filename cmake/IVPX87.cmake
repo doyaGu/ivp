@@ -1,5 +1,5 @@
 function(ivp_enable_numerical_ipo target)
-    if(IVP_X87_IPO_SUPPORTED)
+    if(IVP_X87_IPO_SUPPORTED AND (NOT DEFINED IVP_ENABLE_X87_EMULATION OR IVP_ENABLE_X87_EMULATION))
         set_target_properties(${target} PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
     endif()
 endfunction()
