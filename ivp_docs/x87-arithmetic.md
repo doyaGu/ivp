@@ -88,6 +88,6 @@ thread before replacing the callbacks. Hosts remain unaware of the backend.
 The option covers the explicitly implemented kernels; it does not transform
 every native floating-point expression in IVP or any third-party implementation.
 The Win32 `/arch:IA32` consumer requirement remains part of this partial
-coverage's evaluation/return contract. Removing it requires a separate numerical
+coverage's x87 intermediate precision and floating-point return values. Removing it requires a separate numerical
 migration and is not equivalent to disabling the software backend. The native
 backend is built without `ivu_x87.cxx` or the integer numerical dependency.
