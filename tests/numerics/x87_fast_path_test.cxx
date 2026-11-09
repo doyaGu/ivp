@@ -1,7 +1,10 @@
 // The inline fast path of IVP_X87_Arithmetic against the SoftFloat operations
 // it short-cuts: results and exception flags must be identical for every
 // operand class, including the cases the fast path declines.
+// rpcndr.h defines this macro in Windows consumers of the public headers.
+#define small char
 #include <ivu_x87.hxx>
+#undef small
 #include <ivp_softfloat.hxx>
 
 #include <cstdio>

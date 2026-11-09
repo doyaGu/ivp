@@ -190,19 +190,19 @@ inline bool ivp_x87_fast_add(const IVP_U_Float80 &a, const IVP_U_Float80 &b, uns
     const int gap = big_exp - small_exp;
     if(!((a_se ^ b_se) & 0x8000))
     {
-        IVP_X87_Fast_U128 small;
+        IVP_X87_Fast_U128 aligned;
         if(gap < 64)
         {
             // Branch-free alignment: (x << 1) << (63 - gap) is x << (64 - gap), and 0 for gap 0.
             const uint64_t lo_in = small_sig << 63, hi_in = small_sig >> 1;
-            small.hi = hi_in >> gap;
-            small.lo = (lo_in >> gap) | ((hi_in << 1) << (63 - gap))
+            aligned.hi = hi_in >> gap;
+            aligned.lo = (lo_in >> gap) | ((hi_in << 1) << (63 - gap))
                 | static_cast<uint64_t>(((lo_in << 1) << (63 - gap)) != 0);
         }
         else
-            small = ivp_x87_fast_shift_right_jam(ivp_x87_fast_u128(small_sig >> 1, small_sig << 63), gap);
-        const uint64_t lo = (big_sig << 63) + small.lo;
-        const uint64_t hi = (big_sig >> 1) + small.hi + static_cast<uint64_t>(lo < (big_sig << 63));
+            aligned = ivp_x87_fast_shift_right_jam(ivp_x87_fast_u128(small_sig >> 1, small_sig << 63), gap);
+        const uint64_t lo = (big_sig << 63) + aligned.lo;
+        const uint64_t hi = (big_sig >> 1) + aligned.hi + static_cast<uint64_t>(lo < (big_sig << 63));
         const uint64_t carry = hi >> 63, keep = carry - 1; // keep: no carry, shift left by one
         const uint64_t significand = (hi & ~keep) | (((hi << 1) | (lo >> 63)) & keep);
         const uint64_t rest = (lo & ~keep) | ((lo << 1) & keep);
@@ -213,16 +213,16 @@ inline bool ivp_x87_fast_add(const IVP_U_Float80 &a, const IVP_U_Float80 &b, uns
         *result = IVP_U_Float80::from_bits(0, 0); // exact cancellation: +0 when rounding to nearest
         return true;
     }
-    IVP_X87_Fast_U128 small;
+    IVP_X87_Fast_U128 aligned;
     if(gap < 64)
     {
-        small.hi = small_sig >> gap;
-        small.lo = (small_sig << 1) << (63 - gap);
+        aligned.hi = small_sig >> gap;
+        aligned.lo = (small_sig << 1) << (63 - gap);
     }
     else
-        small = ivp_x87_fast_shift_right_jam(ivp_x87_fast_u128(small_sig, 0), gap);
-    uint64_t lo = 0 - small.lo;
-    uint64_t hi = big_sig - small.hi - static_cast<uint64_t>(small.lo != 0);
+        aligned = ivp_x87_fast_shift_right_jam(ivp_x87_fast_u128(small_sig, 0), gap);
+    uint64_t lo = 0 - aligned.lo;
+    uint64_t hi = big_sig - aligned.hi - static_cast<uint64_t>(aligned.lo != 0);
     const int shift = hi ? ivp_x87_fast_leading_zeros(hi) : 64 + ivp_x87_fast_leading_zeros(lo);
     if(shift >= 64)
     {
