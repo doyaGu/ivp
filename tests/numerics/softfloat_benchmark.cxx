@@ -1,7 +1,7 @@
 #ifdef IVP_BENCHMARK_ARITHMETIC
 #include <ivu_x87.hxx>
 #else
-#include <ivp_softfloat.hxx>
+#include <x87_softfloat.hxx>
 #endif
 #include <chrono>
 #include <cstdio>

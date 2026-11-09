@@ -26,15 +26,20 @@ cmake --build build --config Release
 
 ## Source ownership
 
-- `ivp_utility/ivu_x87.hxx` and `.cxx` own extended values, arithmetic precision,
-  rounding, exception status, conversions and transcendental operations.
+- The `third_party/libx87` submodule owns extended values, arithmetic precision,
+  rounding, exception status, conversions, fast/native paths and transcendentals.
+- `ivp_utility/ivu_x87.hxx` and `.cxx` adapt IVP constructors and thread control
+  to the shared implementation.
 - `ivu_float.hxx`, `ivu_linear.cxx` and `ivu_quat.cxx` own reciprocal square-root
   refinement, vector/matrix operations and quaternion algorithms respectively.
 - Contact, collision, mass integration, controller and solver algorithms remain
   in their existing subsystem files. Local helpers share repeated calculations
   within those subsystems.
-- `third_party/softfloat` embeds the pinned integer numerical sources and their
-  licenses. The source manifest records the unmodified upstream files.
+- `third_party/libx87/third_party/softfloat` contains the pinned numerical
+  sources, licenses and the manifest of unmodified upstream files.
+
+Initialize dependencies with `git submodule update --init --recursive`.
+Installed IVP packages resolve `libx87::x87` with `find_dependency(libx87 CONFIG)`.
 
 ## Values, rounding and control
 
@@ -55,7 +60,7 @@ operation uses it. Return it explicitly across internal numerical calls.
 
 With 64-bit precision and nearest-even rounding, `load`, `store_float`,
 `store_double`, `add`, `subtract`, `multiply` and `divide` evaluate normal and
-zero operands inline with integer arithmetic (`ivu_x87_fast.hxx`) when the
+zero operands inline with integer arithmetic (`libx87/detail/fast.hxx`) when the
 result is normal or zero. Every other case, precision and rounding uses the
 SoftFloat implementation. Both paths produce the same values and exception
 flags; `tests/numerics/x87_fast_path_test.cxx` compares them.

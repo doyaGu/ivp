@@ -6,7 +6,8 @@
 #include "ivp_mindist.hxx"
 
 class IVP_Cache_Ledge_Point;
-class IVP_U_Float80;
+class X87_Float80;
+typedef X87_Float80 IVP_U_Float80;
 
 class IVP_Mindist_Event_Solver
 {

@@ -10,7 +10,7 @@ endif()
 
 if(IVP_NUMERICS_WASM)
     add_executable(ivp_softfloat_wasm softfloat_wasm.cxx)
-    target_link_libraries(ivp_softfloat_wasm PRIVATE ivp_softfloat ivp_x87_arithmetic)
+    target_link_libraries(ivp_softfloat_wasm PRIVATE libx87::softfloat ivp_x87_arithmetic)
     target_compile_features(ivp_softfloat_wasm PRIVATE cxx_std_11)
     set_target_properties(ivp_softfloat_wasm PROPERTIES
         SUFFIX ".wasm"
@@ -26,7 +26,7 @@ if(IVP_NUMERICS_WASM)
 endif()
 
 add_executable(ivp_softfloat_test softfloat_arithmetic_test.cxx)
-target_link_libraries(ivp_softfloat_test PRIVATE ivp_softfloat)
+target_link_libraries(ivp_softfloat_test PRIVATE libx87::softfloat)
 target_compile_features(ivp_softfloat_test PRIVATE cxx_std_11)
 add_test(NAME ivp_softfloat_arithmetic COMMAND ivp_softfloat_test)
 
@@ -43,7 +43,7 @@ set_target_properties(ivp_runtime_state_test PROPERTIES
 add_test(NAME ivp_x87_runtime_state COMMAND ivp_runtime_state_test)
 
 add_executable(ivp_fast_path_test x87_fast_path_test.cxx)
-target_link_libraries(ivp_fast_path_test PRIVATE ivp_x87_arithmetic ivp_softfloat)
+target_link_libraries(ivp_fast_path_test PRIVATE ivp_x87_arithmetic libx87::softfloat)
 target_compile_features(ivp_fast_path_test PRIVATE cxx_std_11)
 add_test(NAME ivp_x87_fast_path COMMAND ivp_fast_path_test)
 
@@ -54,7 +54,7 @@ set_target_properties(ivp_packed_arithmetic_test PROPERTIES
 add_test(NAME ivp_packed_arithmetic COMMAND ivp_packed_arithmetic_test)
 
 add_executable(ivp_softfloat_benchmark softfloat_benchmark.cxx)
-target_link_libraries(ivp_softfloat_benchmark PRIVATE ivp_softfloat)
+target_link_libraries(ivp_softfloat_benchmark PRIVATE libx87::softfloat)
 target_compile_features(ivp_softfloat_benchmark PRIVATE cxx_std_11)
 
 add_executable(ivp_arithmetic_benchmark softfloat_benchmark.cxx)

@@ -27,7 +27,8 @@ class IVP_U_Hesse;
 class IVP_U_Quat;
 class IVP_U_Point;
 class IVP_U_Float_Quat;
-class IVP_U_Float80;
+class X87_Float80;
+typedef X87_Float80 IVP_U_Float80;
 class IVP_X87_Arithmetic;
 
 template <class T>

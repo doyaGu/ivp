@@ -1,7 +1,7 @@
 #ifndef IVP_NUMERICS_SOFTFLOAT_ARITHMETIC_CASES_INCLUDED
 #define IVP_NUMERICS_SOFTFLOAT_ARITHMETIC_CASES_INCLUDED
 
-#include <ivp_softfloat.hxx>
+#include <x87_softfloat.hxx>
 
 
 static softfloat_status_t make_status(unsigned precision)

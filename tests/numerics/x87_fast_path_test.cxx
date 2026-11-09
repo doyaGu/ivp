@@ -5,7 +5,7 @@
 #define small char
 #include <ivu_x87.hxx>
 #undef small
-#include <ivp_softfloat.hxx>
+#include <x87_softfloat.hxx>
 
 #include <cstdio>
 #include <cstdlib>

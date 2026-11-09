@@ -7,14 +7,14 @@ function(ivp_enable_numerical_ipo target)
 endfunction()
 
 function(ivp_configure_x87_arithmetic target)
-    if(NOT TARGET ivp_softfloat)
-        add_subdirectory("${IVP_DIR}/third_party/softfloat"
-            "${CMAKE_CURRENT_BINARY_DIR}/softfloat")
+    if(NOT TARGET libx87::x87)
+        add_subdirectory("${IVP_DIR}/third_party/libx87"
+            "${CMAKE_CURRENT_BINARY_DIR}/libx87")
     endif()
     add_library(${target} STATIC
         "${IVP_DIR}/ivp_utility/ivu_x87.cxx"
         "${IVP_DIR}/ivp_utility/ivu_fpu.cxx")
-    target_link_libraries(${target} PRIVATE ivp_softfloat)
+    target_link_libraries(${target} PUBLIC libx87::x87)
     target_include_directories(${target} PUBLIC
         $<BUILD_INTERFACE:${IVP_DIR}/ivp_utility>
         $<INSTALL_INTERFACE:include/ivp>)
@@ -39,6 +39,5 @@ function(ivp_configure_x87_arithmetic target)
     check_ipo_supported(RESULT supported LANGUAGES CXX)
     set(IVP_X87_IPO_SUPPORTED "${supported}" CACHE INTERNAL
         "Compiler support for numerical interprocedural optimization")
-    ivp_enable_numerical_ipo(ivp_softfloat)
     ivp_enable_numerical_ipo(${target})
 endfunction()

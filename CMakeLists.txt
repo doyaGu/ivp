@@ -192,7 +192,7 @@ add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}"
 
 if(IVP_X87_LIBRARY)
     ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
-    target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
+    target_link_libraries(ivp_utility PUBLIC ivp_x87_arithmetic)
     ivp_enable_numerical_ipo(ivp_utility)
 else()
     target_sources(ivp_utility PRIVATE "${IVP_DIR}/ivp_utility/ivu_fpu.cxx")
@@ -599,7 +599,7 @@ set(IVP_PUBLIC_PACKAGE_TARGETS
 
 set(IVP_PACKAGE_TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS})
 if(IVP_X87_LIBRARY)
-    list(APPEND IVP_PACKAGE_TARGETS ivp_x87_arithmetic ivp_softfloat)
+    list(APPEND IVP_PACKAGE_TARGETS ivp_x87_arithmetic)
 endif()
 
 set(IVP_PUBLIC_HEADER_DIRS
@@ -720,15 +720,6 @@ if(IVP_INSTALL)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
-    if(IVP_X87_LIBRARY)
-        install(FILES
-            "${IVP_DIR}/third_party/softfloat/BOCHS-COPYING"
-            "${IVP_DIR}/third_party/softfloat/BOCHS-LICENSE"
-            "${IVP_DIR}/third_party/softfloat/cpu/softfloat3e/COPYING.txt"
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/ivp/softfloat
-        )
-    endif()
-
     if(IVP_INCLUDE_QHULL AND IVP_REENTRANT_QHULL)
         install(FILES "${IVP_QHULL_LICENSE_FILE}"
             DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/ivp/qhull
@@ -783,6 +774,12 @@ if(IVP_INSTALL)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ivp
     )
 
+    set(IVP_PKGCONFIG_X87_REQUIRES "")
+    set(IVP_PKGCONFIG_X87_LIBS "")
+    if(IVP_X87_LIBRARY)
+        set(IVP_PKGCONFIG_X87_REQUIRES libx87)
+        set(IVP_PKGCONFIG_X87_LIBS -livp_x87_arithmetic)
+    endif()
     # Generate pkg-config file for easier integration
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ivp.pc.in"
