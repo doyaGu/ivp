@@ -28,8 +28,15 @@ endif()
 # Set IVP root directory
 set(IVP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(IVP_ENABLE_X87_EMULATION "Emulate original extended arithmetic" ON)
+option(IVP_ENABLE_X87_EMULATION "Reproduce extended precision, rounding and write-back rules (IVP_X87_ARITHMETIC SOFT when that is unset)" ON)
+set(IVP_X87_ARITHMETIC "" CACHE STRING
+    "Restored x87 sequences: OFF, SOFT (portable integer arithmetic) or HARD (the host x87, 32-bit x86 only); empty follows IVP_ENABLE_X87_EMULATION")
+set(IVP_X87_ARITHMETIC_TRANSCENDENTAL "" CACHE STRING
+    "IVP_Inline_Math transcendentals: OFF (host libm), SOFT (x87 model) or HARD (the host x87, 32-bit x86 only); empty follows IVP_X87_ARITHMETIC")
+set_property(CACHE IVP_X87_ARITHMETIC PROPERTY STRINGS "" OFF SOFT HARD)
+set_property(CACHE IVP_X87_ARITHMETIC_TRANSCENDENTAL PROPERTY STRINGS "" OFF SOFT HARD)
 include(cmake/IVPX87.cmake)
+ivp_resolve_x87_modes()
 
 # ============================================================================
 # External Dependencies Configuration
@@ -59,16 +66,18 @@ function(add_ivp_library LIBRARY_NAME SOURCE_DIR DEPENDENCIES SOURCES)
     # Create the library
     add_library(${LIBRARY_NAME} STATIC ${SOURCES})
     target_compile_definitions(${LIBRARY_NAME} PUBLIC
-        IVP_ENABLE_X87_EMULATION=$<BOOL:${IVP_ENABLE_X87_EMULATION}>)
-    if(IVP_ENABLE_X87_EMULATION AND MSVC)
+        IVP_ENABLE_X87_EMULATION=$<BOOL:${IVP_ENABLE_X87_EMULATION}>
+        IVP_X87_ARITHMETIC=${IVP_X87_ARITHMETIC_VALUE}
+        IVP_X87_ARITHMETIC_TRANSCENDENTAL=${IVP_X87_ARITHMETIC_TRANSCENDENTAL_VALUE})
+    if(IVP_X87_LIBRARY AND MSVC)
         target_compile_options(${LIBRARY_NAME} PUBLIC /fp:precise)
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             target_compile_options(${LIBRARY_NAME} PUBLIC /arch:IA32)
         endif()
-    elseif(IVP_ENABLE_X87_EMULATION AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    elseif(IVP_X87_LIBRARY AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${LIBRARY_NAME} PRIVATE -ffp-contract=off)
     endif()
-    if(IVP_ENABLE_X87_EMULATION AND COMMAND ivp_enable_numerical_ipo)
+    if(IVP_X87_LIBRARY AND COMMAND ivp_enable_numerical_ipo)
         ivp_enable_numerical_ipo(${LIBRARY_NAME})
     endif()
 
@@ -181,7 +190,7 @@ set(IVP_UTILITY_SOURCES
 )
 add_ivp_library(ivp_utility "${IVP_DIR}/ivp_utility" "" "${IVP_UTILITY_SOURCES}")
 
-if(IVP_ENABLE_X87_EMULATION)
+if(IVP_X87_LIBRARY)
     ivp_configure_x87_arithmetic(ivp_x87_arithmetic)
     target_link_libraries(ivp_utility PRIVATE ivp_x87_arithmetic)
     ivp_enable_numerical_ipo(ivp_utility)
@@ -589,7 +598,7 @@ set(IVP_PUBLIC_PACKAGE_TARGETS
 )
 
 set(IVP_PACKAGE_TARGETS ${IVP_PUBLIC_PACKAGE_TARGETS})
-if(IVP_ENABLE_X87_EMULATION)
+if(IVP_X87_LIBRARY)
     list(APPEND IVP_PACKAGE_TARGETS ivp_x87_arithmetic ivp_softfloat)
 endif()
 
@@ -676,7 +685,7 @@ option(IVP_BUILD_TESTS "Build IVP core regression tests" OFF)
 if(IVP_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests/core)
-    if(IVP_ENABLE_X87_EMULATION)
+    if(IVP_X87_LIBRARY)
         add_subdirectory(tests/numerics)
     endif()
 endif()
@@ -711,7 +720,7 @@ if(IVP_INSTALL)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
-    if(IVP_ENABLE_X87_EMULATION)
+    if(IVP_X87_LIBRARY)
         install(FILES
             "${IVP_DIR}/third_party/softfloat/BOCHS-COPYING"
             "${IVP_DIR}/third_party/softfloat/BOCHS-LICENSE"

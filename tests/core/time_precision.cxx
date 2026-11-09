@@ -2,7 +2,8 @@
 #include <ivp_environment.hxx>
 #include <ivp_time.hxx>
 #include <ivu_fpu.hxx>
-#if IVP_ENABLE_X87_EMULATION
+#include <ivu_x87_config.hxx>
+#if IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF
 #include <ivu_x87.hxx>
 #endif
 
@@ -47,7 +48,7 @@ public:
     void check_precision()
     {
         ++calls;
-#if IVP_ENABLE_X87_EMULATION
+#if IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF
         const IVP_X87_Control control = IVP_X87_Control::current();
         failures += control.precision != IVP_X87_Arithmetic::PRECISION_64;
         failures += control.rounding != IVP_X87_Arithmetic::ROUND_UP;
@@ -97,7 +98,7 @@ int main()
         caught = true;
     }
     failures += !caught || host_control_word != 0x087f;
-#if !IVP_ENABLE_X87_EMULATION
+#if !IVP_ENABLE_X87_EMULATION && IVP_X87_ARITHMETIC_TRANSCENDENTAL == IVP_X87_OFF
     failures += callbacks != 0;
 #endif
     ivp_set_fpu_control_word_callbacks(0, 0);

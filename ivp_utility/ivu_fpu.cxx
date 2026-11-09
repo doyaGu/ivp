@@ -1,8 +1,9 @@
 #include <ivu_fpu.hxx>
+#include <ivu_x87_config.hxx>
 
 #include <assert.h>
 
-#if IVP_ENABLE_X87_EMULATION
+#if (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
 #include <ivu_x87.hxx>
 
 static IVP_Control_Word_Reader ivp_read_host_control = 0;
@@ -14,7 +15,7 @@ static thread_local unsigned short ivp_control_word = 0x037f;
 
 void ivp_set_fpu_control_word_callbacks(IVP_Control_Word_Reader reader, IVP_Control_Word_Writer writer)
 {
-#if IVP_ENABLE_X87_EMULATION
+#if (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
     const IVP_Control_Word_Reader selected_reader = reader && writer ? reader : 0;
     const IVP_Control_Word_Writer selected_writer = reader && writer ? writer : 0;
     if (selected_reader == ivp_read_host_control && selected_writer == ivp_write_host_control)
@@ -30,7 +31,7 @@ void ivp_set_fpu_control_word_callbacks(IVP_Control_Word_Reader reader, IVP_Cont
 
 unsigned short ivp_get_fpu_control_word()
 {
-#if IVP_ENABLE_X87_EMULATION
+#if (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
     if (ivp_read_host_control)
         return ivp_read_host_control();
 #endif
@@ -42,7 +43,7 @@ unsigned short ivp_get_fpu_control_word()
     unsigned short control_word;
     __asm fnstcw control_word
     return control_word;
-#elif IVP_ENABLE_X87_EMULATION
+#elif (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
     return ivp_control_word;
 #else
     return 0x037f;
@@ -51,7 +52,7 @@ unsigned short ivp_get_fpu_control_word()
 
 void ivp_set_fpu_control_word(unsigned short control_word)
 {
-#if IVP_ENABLE_X87_EMULATION
+#if (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
     if (ivp_write_host_control)
     {
         ivp_write_host_control(control_word);
@@ -62,7 +63,7 @@ void ivp_set_fpu_control_word(unsigned short control_word)
     __asm__ __volatile__("fldcw %0" : : "m"(control_word));
 #elif defined(_MSC_VER) && defined(_M_IX86)
     __asm fldcw control_word
-#elif IVP_ENABLE_X87_EMULATION
+#elif (IVP_ENABLE_X87_EMULATION || IVP_X87_ARITHMETIC_TRANSCENDENTAL != IVP_X87_OFF)
     ivp_control_word = control_word;
 #else
     (void)control_word;

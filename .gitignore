@@ -27,6 +27,7 @@ cmake_install.cmake
 Makefile
 *.cmake
 !cmake/IVPQhull.cmake
+!cmake/IVPX87Modes.cmake
 !cmake/*.cmake.in
 !cmake/*.pc.in
 
