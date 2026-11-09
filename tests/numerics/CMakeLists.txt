@@ -36,6 +36,17 @@ set_target_properties(ivp_arithmetic_test PROPERTIES
     CXX_STANDARD 98 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 add_test(NAME ivp_x87_precision COMMAND ivp_arithmetic_test)
 
+add_executable(ivp_runtime_state_test x87_runtime_state_test.cxx)
+target_link_libraries(ivp_runtime_state_test PRIVATE ivp_x87_arithmetic)
+set_target_properties(ivp_runtime_state_test PROPERTIES
+    CXX_STANDARD 98 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+add_test(NAME ivp_x87_runtime_state COMMAND ivp_runtime_state_test)
+
+add_executable(ivp_fast_path_test x87_fast_path_test.cxx)
+target_link_libraries(ivp_fast_path_test PRIVATE ivp_x87_arithmetic ivp_softfloat)
+target_compile_features(ivp_fast_path_test PRIVATE cxx_std_11)
+add_test(NAME ivp_x87_fast_path COMMAND ivp_fast_path_test)
+
 add_executable(ivp_packed_arithmetic_test packed_arithmetic_test.cxx packed_layout_reference.cxx)
 target_link_libraries(ivp_packed_arithmetic_test PRIVATE ivp_x87_arithmetic)
 set_target_properties(ivp_packed_arithmetic_test PROPERTIES
@@ -51,7 +62,7 @@ target_compile_definitions(ivp_arithmetic_benchmark PRIVATE IVP_BENCHMARK_ARITHM
 target_link_libraries(ivp_arithmetic_benchmark PRIVATE ivp_x87_arithmetic)
 target_compile_features(ivp_arithmetic_benchmark PRIVATE cxx_std_11)
 
-foreach(target ivp_softfloat_test ivp_arithmetic_test
+foreach(target ivp_softfloat_test ivp_arithmetic_test ivp_fast_path_test ivp_runtime_state_test
     ivp_softfloat_benchmark ivp_arithmetic_benchmark)
     ivp_enable_numerical_ipo(${target})
 endforeach()
